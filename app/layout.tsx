@@ -4,11 +4,13 @@ import "./globals.css";
 import ConvexClientProvider from "@/components/ConvexClientProvider";
 import { ClerkProvider } from "@clerk/nextjs";
 import Header from "@/components/Header";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+
 const oswald = Oswald({
   variable: "--font-oswald",
   subsets: ["latin"],
 });
-
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -30,10 +32,19 @@ export default function RootLayout({
       >
         <ClerkProvider dynamic>
           <ConvexClientProvider>
-            <main className="min-h-screen">
-              <Header />
-              {children}
-            </main>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <main className="min-h-screen">
+                <Header />
+                <MaxWidthWrapper>
+                  {children}
+                </MaxWidthWrapper>
+              </main>
+            </ThemeProvider>
           </ConvexClientProvider>
         </ClerkProvider>
       </body>
