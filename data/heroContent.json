@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "product": "receipt-tracker",
+    "lastUpdated": "2024-03-29"
+  },
+  "theme": {
+    "primaryColor": "blue",
+    "accentColor": "indigo",
+    "backgroundPattern": "grid"
+  },
+  "announcement": {
+    "badge": "New",
+    "text": "AI-Powered Receipt Management",
+    "link": "/about",
+    "badgeColor": "bg-blue-100 dark:bg-blue-900"
+  },
+  "hero": {
+    "title": "Effortlessly Manage Your Business Documents",
+    "titleHighlight": "Business Documents",
+    "description": {
+      "desktop": "Transform your receipt management with AI. Automatically extract, categorize, and organize your business documents while maintaining compliance and saving hours of manual work.",
+      "mobile": "Smart receipt management powered by AI. Save time and stay organized with automated document processing."
+    },
+    "cta": {
+      "text": "Start Organizing",
+      "link": "/dashboard",
+      "icon": "Rocket"
+    }
+  },
+  "features": [
+    {
+      "id": 1,
+      "title": "Time Savings",
+      "description": "Save 10+ hours monthly on document processing",
+      "icon": "Clock"
+    },
+    {
+      "id": 2,
+      "title": "Smart Organization",
+      "description": "AI-powered categorization and data extraction",
+      "icon": "Brain"
+    },
+    {
+      "id": 3,
+      "title": "Compliance Ready",
+      "description": "Audit-ready documentation management",
+      "icon": "Shield"
+    }
+  ],
+  "layout": {
+    "contentWidth": "wide",
+    "textAlignment": "center",
+    "featureDisplay": "slider"
+  }
+}

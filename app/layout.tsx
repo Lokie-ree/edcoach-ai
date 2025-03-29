@@ -27,9 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${oswald.className} antialiased`}
-      >
+      <body className={`${oswald.className} antialiased`}>
         <ClerkProvider dynamic>
           <ConvexClientProvider>
             <ThemeProvider
@@ -40,9 +38,7 @@ export default function RootLayout({
             >
               <main className="min-h-screen">
                 <Header />
-                <MaxWidthWrapper>
-                  {children}
-                </MaxWidthWrapper>
+                <MaxWidthWrapper>{children}</MaxWidthWrapper>
               </main>
             </ThemeProvider>
           </ConvexClientProvider>

@@ -1,23 +1,28 @@
-"use client"
+"use client";
 
 import Link from "next/link";
 import { School, Receipt, Settings } from "lucide-react";
 import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
-import { ShinyButton } from "./magicui/shiny-button";
-import { AuroraText } from "./magicui/aurora-text";
 import { Button } from "./ui/button";
 import { ModeToggle } from "./ModeToggle";
 import MaxWidthWrapper from "./MaxWidthWrapper";
+import { AnimatedGradientText } from "./magicui/animated-gradient-text";
 
 const Header = () => {
-
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md border-b bg-background/95 supports-[backdrop-filter]:bg-background/60">
       <MaxWidthWrapper>
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <School className="w-5 h-5" />
-            <AuroraText className="text-lg font-bold">Receipt Tracker</AuroraText>
+            <AnimatedGradientText
+              className="text-lg font-bold"
+              colorFrom="#7928CA"
+              colorTo="#38bdf8"
+              speed={2}
+            >
+              Receipt Tracker
+            </AnimatedGradientText>
           </Link>
           <div>
             <div className="flex items-center space-x-2">
@@ -39,9 +44,7 @@ const Header = () => {
               </SignedIn>
               <SignedOut>
                 <SignInButton mode="modal">
-                  <ShinyButton>
-                    Login
-                  </ShinyButton>
+                  <Button>Login</Button>
                 </SignInButton>
               </SignedOut>
             </div>
@@ -49,7 +52,7 @@ const Header = () => {
         </div>
       </MaxWidthWrapper>
     </header>
-  )
-}
+  );
+};
 
 export default Header;
