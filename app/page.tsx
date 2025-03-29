@@ -10,8 +10,8 @@ export default function Home() {
         {/* Hero with Video Dialog */}
         <HeroSection />
         <HeroVideoDialog
-          videoSrc="https://www.youtube.com/embed/your-video-id"
-          thumbnailSrc="/video-thumbnail.jpg"
+          videoSrc="https://www.youtube.com/embed/0pZjy2prNPM?si=m_U9a4iDPpndaZeR"
+          thumbnailSrc="/receipt-thumbnail.png"
         />
         <ProblemStatement />
         {/* Solutions with Content */}
