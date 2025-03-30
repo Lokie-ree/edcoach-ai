@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "section": "problem-statement",
+    "lastUpdated": "2024-03-XX"
+  },
+  "theme": {
+    "spacing": {
+      "desktop": "py-32",
+      "mobile": "py-16"
+    },
+    "maxWidth": "lg"
+  },
+  "heading": {
+    "title": "From Paper Chaos to Digital Clarity",
+    "description": "Stop drowning in paper receipts. Our AI-powered platform makes expense tracking and compliance effortless."
+  },
+  "image": {
+    "src": "/problem-statement-image.jpg",
+    "alt": "Business document organization transformation",
+    "style": {
+      "className": "rounded-(--radius)"
+    }
+  },
+  "features": [
+    {
+      "id": "speed",
+      "icon": "Zap",
+      "title": "Lightning Fast",
+      "description": "Scan and process receipts in seconds, not hours. Get instant data extraction and categorization."
+    },
+    {
+      "id": "power",
+      "icon": "Cpu",
+      "title": "Smart Processing",
+      "description": "Automated categorization and data entry that learns from your business patterns."
+    },
+    {
+      "id": "security",
+      "icon": "Lock",
+      "title": "Bank-Grade Security",
+      "description": "Your sensitive financial documents are protected with enterprise-level encryption."
+    },
+    {
+      "id": "ai",
+      "icon": "Sparkles",
+      "title": "AI Assistant",
+      "description": "Let AI handle the tedious work of organizing, categorizing, and maintaining your documents."
+    }
+  ]
+}

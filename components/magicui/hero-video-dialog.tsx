@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Play, XIcon } from "lucide-react";
-
+import { AnimatedGradientText } from "./animated-gradient-text";
 import { cn } from "@/lib/utils";
 
 type AnimationStyle =
@@ -83,12 +83,18 @@ export default function HeroVideoDialog({
         className="group relative cursor-pointer"
         onClick={() => setIsVideoOpen(true)}
       >
+        <h2 className="mb-8 text-4xl font-semibold text-center md:text-5xl xl:text-5xl xl:[line-height:1.125]">
+          <AnimatedGradientText colorFrom="#7928CA" colorTo="#38bdf8" speed={2}>
+            See How it Works!
+          </AnimatedGradientText>
+        </h2>
+
         <img
           src={thumbnailSrc}
           alt={thumbnailAlt}
           width={1920}
           height={1080}
-          className="w-full rounded-md border shadow-lg transition-all duration-200 ease-out group-hover:brightness-[0.8]"
+          className="w-full sm:w-2/3 mx-auto rounded-md border shadow-lg transition-all duration-200 ease-out group-hover:brightness-[0.8]"
         />
         <div className="absolute inset-0 flex scale-[0.9] items-center justify-center rounded-2xl transition-all duration-200 ease-out group-hover:scale-100">
           <div className="flex size-28 items-center justify-center rounded-full bg-primary/10 backdrop-blur-md">

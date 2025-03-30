@@ -1,7 +1,8 @@
 import HeroSection from "@/components/HeroSection";
 import HeroVideoDialog from "@/components/magicui/hero-video-dialog";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
-import ProblemStatement from "@/components/Problem-Statement";
+import ProblemStatement from "@/components/ProblemStatement";
+import Solution from "@/components/Solution";
 
 export default function Home() {
   return (
@@ -9,12 +10,17 @@ export default function Home() {
       <MaxWidthWrapper>
         {/* Hero with Video Dialog */}
         <HeroSection />
-        <HeroVideoDialog
-          videoSrc="https://www.youtube.com/embed/0pZjy2prNPM?si=m_U9a4iDPpndaZeR"
-          thumbnailSrc="/receipt-thumbnail.png"
-        />
+        <div className="mx-auto max-w-3xl">
+          <HeroVideoDialog
+            videoSrc="https://www.youtube.com/embed/0pZjy2prNPM?si=m_U9a4iDPpndaZeR"
+            thumbnailSrc="/app-thumbnail.png"
+            animationStyle="from-bottom"
+          />
+        </div>
+
+        {/* Problem and Solution Content */}
         <ProblemStatement />
-        {/* Solutions with Content */}
+        <Solution />
         {/* How it Works with Steps */}
         {/* CTA Section*/}
         {/* Features with Cards */}
