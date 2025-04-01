@@ -13,7 +13,10 @@ export default function Home() {
         <div className="mx-auto max-w-3xl">
           <HeroVideoDialog
             videoSrc="https://www.youtube.com/embed/0pZjy2prNPM?si=m_U9a4iDPpndaZeR"
-            thumbnailSrc="/app-thumbnail.png"
+            thumbnailSrc={{
+              dark: "/app-thumbnail-dark.png",
+              light: "/app-thumbnail-light.png",
+            }}
             animationStyle="from-bottom"
           />
         </div>

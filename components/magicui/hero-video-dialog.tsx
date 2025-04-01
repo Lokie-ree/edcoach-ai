@@ -19,7 +19,10 @@ type AnimationStyle =
 interface HeroVideoProps {
   animationStyle?: AnimationStyle;
   videoSrc: string;
-  thumbnailSrc: string;
+  thumbnailSrc: {
+    dark: string;
+    light: string;
+  };
   thumbnailAlt?: string;
   className?: string;
 }
@@ -90,11 +93,18 @@ export default function HeroVideoDialog({
         </h2>
 
         <img
-          src={thumbnailSrc}
+          src={thumbnailSrc.dark}
           alt={thumbnailAlt}
           width={1920}
           height={1080}
-          className="w-full sm:w-2/3 mx-auto rounded-md border shadow-lg transition-all duration-200 ease-out group-hover:brightness-[0.8]"
+          className="hidden w-full sm:w-2/3 mx-auto rounded-md border shadow-lg transition-all duration-200 ease-out group-hover:brightness-[0.8] dark:block"
+        />
+        <img
+          src={thumbnailSrc.light}
+          alt={thumbnailAlt}
+          width={1920}
+          height={1080}
+          className="w-full sm:w-2/3 mx-auto rounded-md border shadow-lg transition-all duration-200 ease-out group-hover:brightness-[0.8] dark:hidden"
         />
         <div className="absolute inset-0 flex scale-[0.9] items-center justify-center rounded-2xl transition-all duration-200 ease-out group-hover:scale-100">
           <div className="flex size-28 items-center justify-center rounded-full bg-primary/10 backdrop-blur-md">
