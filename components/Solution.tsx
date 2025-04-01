@@ -48,7 +48,7 @@ interface SolutionContent {
   features: Feature[];
 }
 
-const IconMap: Record<string, React.ComponentType<any>> = {
+const IconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Zap,
   Cpu,
 };

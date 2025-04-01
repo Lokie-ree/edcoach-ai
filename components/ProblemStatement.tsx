@@ -1,7 +1,7 @@
 import { Cpu, Lock, Sparkles, Zap } from "lucide-react";
 import problemContent from "@/data/problemContent.json";
 import { cn } from "@/lib/utils";
-
+import Image from "next/image";
 interface Feature {
   id: string;
   icon: string;
@@ -36,7 +36,7 @@ interface ProblemContent {
   features: Feature[];
 }
 
-const IconMap: Record<string, React.ComponentType<any>> = {
+const IconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Zap,
   Cpu,
   Lock,
@@ -67,7 +67,7 @@ export default function ProblemStatement() {
         </div>
 
         <div className="w-full sm:w-2/3 mx-auto">
-          <img
+          <Image
             className={content.image.style.className}
             src={content.image.src}
             alt={content.image.alt}

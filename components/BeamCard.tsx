@@ -8,8 +8,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { BorderBeam } from "./magicui/border-beam";
-import { RainbowButton } from "./magicui/rainbow-button";
-import { ShinyButton } from "./magicui/shiny-button";
 import { TypingAnimation } from "./magicui/typing-animation";
 import { AnimatedGradientText } from "./magicui/animated-gradient-text";
 
@@ -33,7 +31,7 @@ export function BeamCard() {
       </CardHeader>
       <CardContent>Content</CardContent>
       <CardFooter className="flex justify-center">
-        <Button variant="outline">Let's Go!!!</Button>
+        <Button variant="outline">Let&apos;s Go!!!</Button>
       </CardFooter>
       <BorderBeam duration={8} size={150} />
     </Card>
