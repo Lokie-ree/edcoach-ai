@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Oswald } from "next/font/google";
 import "./globals.css";
-import ConvexClientProvider from "@/components/ConvexClientProvider";
+import ConvexClientProvider from "@/components/convex-client-provider";
 import { ClerkProvider } from "@clerk/nextjs";
-import Header from "@/components/Header";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+import Header from "@/components/header";
+import { ThemeProvider } from "@/components/theme-provider";
+import MaxWidthWrapper from "@/components/max-width-wrapper";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -27,6 +27,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <title>EdCoach AI - AI-Powered Instructional Coaching</title>
+        <meta
+          name="description"
+          content="EdCoach AI empowers school leaders and coaches with real-time, rubric-aligned feedback suggestions."
+        />
+      </head>
       <body className={`${oswald.className} antialiased`}>
         <ClerkProvider dynamic>
           <ConvexClientProvider>

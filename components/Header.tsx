@@ -4,9 +4,10 @@ import Link from "next/link";
 import { School, Receipt, Settings } from "lucide-react";
 import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
 import { Button } from "./ui/button";
-import { ModeToggle } from "./ModeToggle";
-import MaxWidthWrapper from "./MaxWidthWrapper";
+import { ModeToggle } from "./mode-toggle";
+import MaxWidthWrapper from "./max-width-wrapper";
 import { AnimatedGradientText } from "./magicui/animated-gradient-text";
+import { Logo } from "./logo";
 
 const Header = () => {
   return (
@@ -14,24 +15,24 @@ const Header = () => {
       <MaxWidthWrapper>
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <School className="w-5 h-5" />
+            <Logo />
             <AnimatedGradientText
               className="text-lg font-bold"
               colorFrom="#7928CA"
               colorTo="#38bdf8"
               speed={2}
             >
-              Receipt Tracker
+              EdCoach AI
             </AnimatedGradientText>
           </Link>
           <div>
             <div className="flex items-center space-x-2">
               <ModeToggle />
               <SignedIn>
-                <Link href="/receipts">
+                <Link href="/dashboard">
                   <Button variant="outline">
                     <Receipt className="w-6 h-6 sm:hidden" />
-                    <span className="hidden sm:inline">Receipts</span>
+                    <span className="hidden sm:inline">Dashboard</span>
                   </Button>
                 </Link>
                 <Link href="/manage-plan">
