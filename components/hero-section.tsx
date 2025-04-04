@@ -73,7 +73,7 @@ export default function HeroSection() {
   return (
     <Section 
       variant="full-bleed" 
-      spacing="spacious" 
+      spacing="compact" 
       className="relative" 
       id="hero"
     >
