@@ -5,7 +5,6 @@ import ConvexClientProvider from "@/components/convex-client-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
-import MaxWidthWrapper from "@/components/max-width-wrapper";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -35,7 +34,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${oswald.className} antialiased`}>
-        <ClerkProvider dynamic>
+        <ClerkProvider>
           <ConvexClientProvider>
             <ThemeProvider
               attribute="class"
@@ -43,10 +42,12 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <main className="min-h-screen">
+              <div className="flex min-h-screen flex-col">
                 <Header />
-                <MaxWidthWrapper>{children}</MaxWidthWrapper>
-              </main>
+                <main className="flex-1">
+                  {children}
+                </main>
+              </div>
             </ThemeProvider>
           </ConvexClientProvider>
         </ClerkProvider>

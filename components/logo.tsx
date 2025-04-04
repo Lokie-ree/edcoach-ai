@@ -3,13 +3,13 @@ import Image from "next/image";
 
 export const Logo = ({ className }: { className?: string }) => {
   return (
-    <div className={className}>
+    <div className={className = "rounded-full"}>
       <Image
         src="/logo.png"
         alt="Site Logo"
-        className="w-8 h-8 object-contain hover:scale-105 transition-transform"
-        width={32}
-        height={32}
+        className="object-contain hover:scale-105 transition-transform"
+        width={28}
+        height={28}
       />
     </div>
   );
