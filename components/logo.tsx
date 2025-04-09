@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export const Logo = ({ className }: { className?: string }) => {
   return (
-    <div className={className = "rounded-full"}>
+    <div className={cn("rounded-full", className)}>
       <Image
         src="/logo.png"
         alt="Site Logo"

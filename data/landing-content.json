@@ -10,7 +10,7 @@
       {"label": "Login", "href": "/login"},
       {"label": "Join Waitlist", "href": "#waitlist", "is_primary": true}
     ]
-  },
+  }, 
   "hero": {
     "tagline": "LEADS/LER Ready!",
     "headline": "AI-Powered Coaching That Saves Time & Drives Growth",
@@ -224,9 +224,53 @@
       "form_placeholder": "Enter your email"
     },
     "social_links": [
-      {"platform": "LinkedIn", "href": "#"},
-      {"platform": "Twitter", "href": "#"}
+      {
+        "platform": "GitHub",
+        "icon": "github",
+        "href": "https://github.com/Lokie-ree",
+        "label": "GitHub"
+      },
+      {
+        "platform": "Twitter",
+        "icon": "twitter",
+        "href": "https://twitter.com/webdevlokie",
+        "label": "Twitter"
+      },
+      {
+        "platform": "LinkedIn",
+        "icon": "linkedin",
+        "href": "https://linkedin.com/in/lapointwebdev",
+        "label": "LinkedIn"
+      },
+      {
+        "platform": "Instagram",
+        "icon": "instagram",
+        "href": "https://instagram.com/lapointwebdev25",
+        "label": "Instagram"
+      }
     ],
-    "copyright": "© 2025 EdCoach AI. All rights reserved."
+    "navigation": [
+      {
+        "label": "Home",
+        "href": "/"
+      },
+      {
+        "label": "Features",
+        "href": "/#features"
+      },
+      {
+        "label": "How It Works",
+        "href": "/#how-it-works"
+      },
+      {
+        "label": "Pricing",
+        "href": "/#pricing"
+      },
+      {
+        "label": "FAQ",
+        "href": "/#faq"
+      }
+    ],
+    "copyright": "© 2024 EdCoach AI. All rights reserved."
   }
 }
