@@ -27,6 +27,7 @@ const iconMap: Record<SocialLink['icon'], LucideIcon> = {
 
 export default function Footer() {
   const { footer } = landingContent as { footer: FooterContent };
+  const currentYear = new Date().getFullYear();
 
   return (
     <Section 
@@ -66,7 +67,7 @@ export default function Footer() {
             ))}
           </div>
           <p className="mt-4 text-center text-sm text-muted-foreground md:text-left">
-            {footer.copyright}
+            {footer.copyright.replace("2024", currentYear.toString())}
           </p>
         </div>
       </div>
