@@ -1,9 +1,9 @@
-"use client"
-import React, { useState } from "react"
-import { Section } from "@/components/ui/section"
-import { motion, AnimatePresence } from "framer-motion"
-import landingContent from "@/data/landing-content.json"
-import { ChevronDown } from "lucide-react"
+"use client";
+import React, { useState } from "react";
+import { Section } from "@/components/ui/section";
+import { motion, AnimatePresence } from "framer-motion";
+import landingContent from "@/data/landing-content.json";
+import { ChevronDown } from "lucide-react";
 
 export default function FAQSection() {
   const { faq } = landingContent;
@@ -14,11 +14,7 @@ export default function FAQSection() {
   };
 
   return (
-    <Section 
-      id="faq"
-      spacing="compact"
-      className="relative overflow-hidden"
-    >
+    <Section id="faq" spacing="compact" className="relative overflow-hidden">
       {/* Decorative background elements */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-white via-indigo-50/30 to-purple-50/30 dark:from-zinc-950 dark:via-indigo-950/10 dark:to-purple-950/10"></div>
@@ -27,7 +23,7 @@ export default function FAQSection() {
       </div>
 
       <div className="mx-auto max-w-4xl px-6">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -62,7 +58,7 @@ export default function FAQSection() {
                   }`}
                 />
               </button>
-              
+
               <AnimatePresence>
                 {openIndex === index && (
                   <motion.div
@@ -97,5 +93,5 @@ export default function FAQSection() {
         </motion.div>
       </div>
     </Section>
-  )
-} 
+  );
+}
