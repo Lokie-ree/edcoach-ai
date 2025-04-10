@@ -1,48 +1,48 @@
-"use client"
-import React from "react"
-import { Section } from "@/components/ui/section"
-import { Card } from "@/components/ui/card"
-import { BorderBeam } from "@/components/magicui/border-beam"
-import landingContent from "@/data/landing-content.json"
+"use client";
+import React from "react";
+import { Section } from "@/components/ui/section";
+import { Card } from "@/components/ui/card";
+import { BorderBeam } from "@/components/magicui/border-beam";
+import landingContent from "@/data/landing-content.json";
 import { motion } from "framer-motion";
-import { BotMessageSquare, FileCog, LineChart } from "lucide-react"
+import { BotMessageSquare, FileCog, LineChart } from "lucide-react";
 
 // Map icon strings to components
 const iconMap = {
-  "BotMessageSquare": BotMessageSquare,
-  "FileCog": FileCog,
-  "LineChart": LineChart,
+  BotMessageSquare: BotMessageSquare,
+  FileCog: FileCog,
+  LineChart: LineChart,
   // Add other icon mappings as needed
-}
+};
 
 export default function FeaturesSection() {
   const { features } = landingContent;
-  
+
   // Function to get icon component based on string name
   const getIconComponent = (iconName: string) => {
-    const IconComponent = iconMap[iconName as keyof typeof iconMap]
-    return IconComponent ? <IconComponent className="h-8 w-8" /> : null
-  }
-  
+    const IconComponent = iconMap[iconName as keyof typeof iconMap];
+    return IconComponent ? <IconComponent className="h-8 w-8" /> : null;
+  };
+
   // Generate gradient colors based on index
   const getGradientColors = (index: number) => {
     const gradients = [
       { from: "#6366F1", to: "#8B5CF6" }, // indigo to purple
       { from: "#8B5CF6", to: "#EC4899" }, // purple to pink
       { from: "#3B82F6", to: "#6366F1" }, // blue to indigo
-    ]
-    
-    return gradients[index % gradients.length]
-  }
+    ];
+
+    return gradients[index % gradients.length];
+  };
 
   return (
-    <Section 
+    <Section
       id="features"
       spacing="compact"
       className="relative bg-gradient-to-b from-white to-indigo-50/20 dark:from-zinc-950 dark:to-indigo-950/10"
     >
-      <div className="mx-auto max-w-6xl px-6">
-        <motion.div 
+      <div className="mx-auto max-w-4xl px-6">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -54,10 +54,10 @@ export default function FeaturesSection() {
             </span>
           </h2>
         </motion.div>
-        
+
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {features.cards.map((feature, index) => {
-            const { from, to } = getGradientColors(index)
+            const { from, to } = getGradientColors(index);
             return (
               <motion.div
                 key={index}
@@ -70,11 +70,9 @@ export default function FeaturesSection() {
                     <div className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 w-14 h-14 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                       {getIconComponent(feature.icon)}
                     </div>
-                    
-                    <h3 className="text-xl font-semibold">
-                      {feature.title}
-                    </h3>
-                    
+
+                    <h3 className="text-xl font-semibold">{feature.title}</h3>
+
                     <p className="text-gray-600 dark:text-gray-300 flex-grow">
                       {feature.description}
                     </p>
@@ -94,10 +92,10 @@ export default function FeaturesSection() {
                   />
                 </Card>
               </motion.div>
-            )
+            );
           })}
         </div>
       </div>
     </Section>
-  )
-} 
+  );
+}

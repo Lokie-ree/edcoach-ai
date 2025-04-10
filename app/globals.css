@@ -56,8 +56,14 @@
       background-position: 200%;
     }
   }
-}
 
+  --animate-background-position-spin: background-position-spin 3000ms infinite alternate
+;
+  @keyframes background-position-spin {
+  0% {
+    backgroundPosition: top center;}
+  100% {
+    backgroundPosition: bottom center;}}}
 
 :root  {
   --background: 239 100% 95%;
@@ -103,7 +109,6 @@
   --ring: 239 62% 53%;
   --radius: 0.75rem;
 }
-
 
 @layer base {
   * {

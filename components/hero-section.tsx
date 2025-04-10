@@ -1,16 +1,21 @@
-"use client"
-import React, { useEffect, useRef } from "react"
-import Link from "next/link"
-import { ArrowRight, ClipboardList, MessageSquareText, LineChart, ChevronDown } from "lucide-react"
-import { Button } from "@/components/ui/button"
+"use client";
+import React, { useEffect, useRef } from "react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  ClipboardList,
+  MessageSquareText,
+  LineChart,
+  ChevronDown,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import landingContent from "@/data/landing-content.json";
 import { Logo } from "@/components/logo";
 import { Section } from "@/components/ui/section";
 
-
 export default function HeroSection() {
-  const heroRef = useRef<HTMLDivElement>(null)
+  const heroRef = useRef<HTMLDivElement>(null);
   const { hero } = landingContent;
 
   // Particle animation effect
@@ -22,65 +27,70 @@ export default function HeroSection() {
         y: Math.random() * 100,
         size: Math.random() * 5 + 2,
         speed: Math.random() * 0.5 + 0.1,
-      }))
+      }));
 
-      const canvas = document.getElementById("particle-canvas") as HTMLCanvasElement
-      if (!canvas) return
+      const canvas = document.getElementById(
+        "particle-canvas",
+      ) as HTMLCanvasElement;
+      if (!canvas) return;
 
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
       const resizeCanvas = () => {
         if (heroRef.current) {
-          canvas.width = heroRef.current.offsetWidth
-          canvas.height = heroRef.current.offsetHeight
+          canvas.width = heroRef.current.offsetWidth;
+          canvas.height = heroRef.current.offsetHeight;
         }
-      }
+      };
 
-      resizeCanvas()
-      window.addEventListener("resize", resizeCanvas)
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
 
       const animate = () => {
-        if (!ctx || !canvas) return
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        if (!ctx || !canvas) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         particles.forEach((particle) => {
           // Update position
-          particle.y += particle.speed
-          if (particle.y > 100) particle.y = 0
+          particle.y += particle.speed;
+          if (particle.y > 100) particle.y = 0;
 
           // Draw particle
-          const x = (particle.x / 100) * canvas.width
-          const y = (particle.y / 100) * canvas.height
+          const x = (particle.x / 100) * canvas.width;
+          const y = (particle.y / 100) * canvas.height;
 
-          ctx.beginPath()
-          ctx.arc(x, y, particle.size / 3, 0, Math.PI * 2)
-          ctx.fillStyle = "rgba(99, 102, 241, 0.1)"
-          ctx.fill()
-        })
+          ctx.beginPath();
+          ctx.arc(x, y, particle.size / 3, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(99, 102, 241, 0.1)";
+          ctx.fill();
+        });
 
-        requestAnimationFrame(animate)
-      }
+        requestAnimationFrame(animate);
+      };
 
-      animate()
+      animate();
 
       return () => {
-        window.removeEventListener("resize", resizeCanvas)
-      }
+        window.removeEventListener("resize", resizeCanvas);
+      };
     }
-  }, [])
+  }, []);
 
   return (
-    <Section 
-      variant="full-bleed" 
-      spacing="compact" 
-      className="relative" 
+    <Section
+      variant="full-bleed"
+      spacing="compact"
+      className="relative"
       id="hero"
     >
       <div ref={heroRef} className="relative w-full h-full">
         {/* Animated background */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
-          <canvas id="particle-canvas" className="absolute inset-0 w-full h-full"></canvas>
+          <canvas
+            id="particle-canvas"
+            className="absolute inset-0 w-full h-full"
+          ></canvas>
           <div className="absolute inset-0 bg-gradient-to-br from-white via-indigo-50/30 to-purple-50/30 dark:from-zinc-950 dark:via-indigo-950/10 dark:to-purple-950/10"></div>
           <div className="absolute inset-x-0 top-12 -z-[1] mx-auto h-1/3 w-2/3 rounded-full bg-indigo-300/20 blur-3xl dark:bg-indigo-700/10"></div>
           <div className="absolute inset-0 -top-8 left-1/2 -z-20 h-56 w-full -translate-x-1/2 [background-image:linear-gradient(to_bottom,transparent_98%,theme(colors.gray.200/75%)_98%),linear-gradient(to_right,transparent_94%,_theme(colors.gray.200/75%)_94%)] [background-size:16px_35px] [mask:radial-gradient(black,transparent_95%)] dark:opacity-10"></div>
@@ -100,7 +110,9 @@ export default function HeroSection() {
                   <span className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 rounded-full px-2 py-1 text-xs font-medium">
                     New
                   </span>
-                  <span className="text-xs">Join the waitlist for early access</span>
+                  <span className="text-xs">
+                    Join the waitlist for early access
+                  </span>
                   <span className="block h-4 w-px bg-gray-300 dark:bg-gray-700"></span>
                   <ArrowRight className="size-4 text-indigo-600 dark:text-indigo-400" />
                 </div>
@@ -113,13 +125,11 @@ export default function HeroSection() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="space-y-6"
               >
-                
                 <h1 className="text-4xl font-bold tracking-tight md:text-5xl xl:text-5xl xl:[line-height:1.125]">
                   <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">
                     {hero.headline}
                   </span>{" "}
                   <br className="hidden md:block" />
-
                 </h1>
                 <h2 className="text-xl font-semibold text-indigo-600 dark:text-indigo-400">
                   {hero.tagline}
@@ -178,8 +188,11 @@ export default function HeroSection() {
                   ))}
                 </div>
                 <span>
-                  Trusted by <span className="font-medium text-indigo-600 dark:text-indigo-400">100+</span> school
-                  leaders
+                  Trusted by{" "}
+                  <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                    100+
+                  </span>{" "}
+                  school leaders
                 </span>
               </motion.div>
             </div>
@@ -204,7 +217,9 @@ export default function HeroSection() {
                       </div>
                       <div>
                         <h3 className="font-semibold">EdCoach AI</h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Observation Dashboard</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Observation Dashboard
+                        </p>
                       </div>
                     </div>
                     <div className="flex gap-1">
@@ -228,7 +243,9 @@ export default function HeroSection() {
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-800/30">
                       <MessageSquareText className="h-8 w-8 text-purple-600 dark:text-purple-400" />
                       <div>
-                        <h4 className="font-medium">Generate & Refine Feedback</h4>
+                        <h4 className="font-medium">
+                          Generate & Refine Feedback
+                        </h4>
                         <p className="text-xs text-gray-600 dark:text-gray-300">
                           AI-powered suggestions based on your notes
                         </p>
@@ -249,8 +266,12 @@ export default function HeroSection() {
                   <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
                     <div className="flex justify-between items-center">
                       <div className="text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">Time saved:</span>
-                        <span className="ml-2 font-medium text-indigo-600 dark:text-indigo-400">4.5 hours/week</span>
+                        <span className="text-gray-500 dark:text-gray-400">
+                          Time saved:
+                        </span>
+                        <span className="ml-2 font-medium text-indigo-600 dark:text-indigo-400">
+                          4.5 hours/week
+                        </span>
                       </div>
                       <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-medium px-2.5 py-1 rounded-full">
                         +30% Teacher Growth
@@ -294,7 +315,9 @@ export default function HeroSection() {
               >
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                    <span className="text-sm font-bold text-purple-600 dark:text-purple-400">5x</span>
+                    <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
+                      5x
+                    </span>
                   </div>
                   <span className="text-sm font-medium">Faster Feedback</span>
                 </div>
@@ -309,14 +332,18 @@ export default function HeroSection() {
             transition={{ delay: 1, duration: 0.5 }}
             className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
           >
-            <span className="text-sm text-gray-500 dark:text-gray-400 mb-2">Scroll to explore</span>
-            <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}>
+            <span className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+              Scroll to explore
+            </span>
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
+            >
               <ChevronDown className="h-6 w-6 text-indigo-500 dark:text-indigo-400" />
             </motion.div>
           </motion.div>
         </div>
       </div>
     </Section>
-  )
+  );
 }
-
