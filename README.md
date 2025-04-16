@@ -1,51 +1,91 @@
-# Welcome to your Convex + Next.js + Clerk app
+# EdCoach AI
 
-This is a [Convex](https://convex.dev/) project created with [`npm create convex`](https://www.npmjs.com/package/create-convex).
+EdCoach AI is an instructional support platform designed for school leaders and instructional coaches to streamline classroom observations, provide evidence-based feedback to teachers, and track educational improvements. The platform leverages AI to assist in generating high-quality, rubric-aligned feedback while maintaining the human expertise in the observation process.
 
-After the initial setup (<2 minutes) you'll have a working full-stack app using:
+## Vision
 
-- Convex as your backend (database, server logic)
-- [React](https://react.dev/) as your frontend (web page interactivity)
-- [Next.js](https://nextjs.org/) for optimized web hosting and page routing
-- [Tailwind](https://tailwindcss.com/) for building great looking accessible UI
-- [Clerk](https://clerk.com/) for authentication
+EdCoach AI aims to transform the instructional coaching process by:
+- Reducing the administrative burden of classroom observations
+- Standardizing feedback based on established teaching frameworks (LEADS, LER, etc.)
+- Providing data-driven insights to improve teaching and learning outcomes
+- Creating a continuous improvement loop for educators
 
-## Get started
+## Core Features
 
-If you just cloned this codebase and didn't use `npm create convex`, run:
+- **User Management**: Role-based access for administrators, school leaders, and instructional coaches
+- **Observation System**: Create, conduct, and save classroom observations using customizable rubrics
+- **Evidence Collection**: Record evidence for specific rubric indicators with tagging capabilities
+- **AI-Assisted Feedback**: Generate and edit professional feedback based on observation evidence
+- **Analytics Dashboard**: View observation trends, teacher performance data, and improvement metrics
 
-```
-npm install
-npm run dev
-```
+## Technology Stack
 
-If you're reading this README on GitHub and want to use this template, run:
+- **Frontend**: Next.js 15, Tailwind CSS, ShadCN UI, MagicUI
+- **Backend**: [Convex](https://convex.dev/) for database and server logic
+- **Authentication**: [Clerk](https://clerk.com/) for user management and authentication
+- **Payment Processing**: polar.sh for subscription management
+- **AI**: LLM with support for educational context and narrow context windows
 
-```
-npm create convex@latest -- -t nextjs-clerk
-```
+## Development Status
 
-Then:
+EdCoach AI is currently in active development as a solo developer project with a focus on delivering a high-quality MVP. The development roadmap is divided into three phases:
 
-1. Open your app. There should be a "Claim your application" button from Clerk in the bottom right of your app.
-2. Follow the steps to claim your application and link it to this app.
-3. Follow step 3 in the [Convex Clerk onboarding guide](https://docs.convex.dev/auth/clerk#get-started) to create a Convex JWT template.
-4. Uncomment the Clerk provider in `convex/auth.config.ts`
-5. Paste the Issuer URL as `CLERK_JWT_ISSUER_DOMAIN` to your dev deployment environment variable settings on the Convex dashboard (see [docs](https://docs.convex.dev/auth/clerk#configuring-dev-and-prod-instances))
+1. **Core Infrastructure**: User authentication, database schema, role-based access
+2. **Observation & Feedback System**: Rubric management, observation forms, AI feedback generation
+3. **Analytics & Finalization**: Reporting dashboards, multi-device optimization, final polishing
 
-If you want to sync Clerk user data via webhooks, check out this [example repo](https://github.com/thomasballinger/convex-clerk-users-table/).
+## Planned Features
 
-## Learn more
+After MVP launch, planned features include:
+- Advanced analytics and reporting dashboards
+- Teacher portal for feedback access and self-reflection
+- Integration with school information systems
+- Mobile app development
+- Advanced AI features (resource suggestions, bias detection)
+- Public API for integrations
 
-To learn more about developing your project with Convex, check out:
+## Getting Started
 
-- The [Tour of Convex](https://docs.convex.dev/get-started) for a thorough introduction to Convex principles.
-- The rest of [Convex docs](https://docs.convex.dev/) to learn about all Convex features.
-- [Stack](https://stack.convex.dev/) for in-depth articles on advanced topics.
+### Prerequisites
 
-## Join the community
+- Node.js
+- npm or pnpm
+- Clerk account
+- Convex account
 
-Join thousands of developers building full-stack apps with Convex:
+### Installation
 
-- Join the [Convex Discord community](https://convex.dev/community) to get help in real-time.
-- Follow [Convex on GitHub](https://github.com/get-convex/), star and contribute to the open-source implementation of Convex.
+1. Clone this repository
+   ```
+   git clone https://github.com/yourusername/edcoach-ai.git
+   cd edcoach-ai
+   ```
+
+2. Install dependencies
+   ```
+   npm install
+   ```
+
+3. Set up environment variables
+   - Copy `.env.example` to `.env.local` and fill in required values for Clerk and Convex integration
+
+4. Start the development server
+   ```
+   npm run dev
+   ```
+
+5. Configure Clerk/Convex integration:
+   - Open your app. There should be a "Claim your application" button from Clerk in the bottom right of your app.
+   - Follow the steps to claim your application and link it to this app.
+   - Follow step 3 in the [Convex Clerk onboarding guide](https://docs.convex.dev/auth/clerk#get-started) to create a Convex JWT template.
+   - Paste the Issuer URL as `CLERK_JWT_ISSUER_DOMAIN` to your dev deployment environment variable settings on the Convex dashboard (see [docs](https://docs.convex.dev/auth/clerk#configuring-dev-and-prod-instances))
+
+## Learn More
+
+- [Development Roadmap](development-roadmap.md): Detailed plan for EdCoach AI development
+- [Convex Documentation](https://docs.convex.dev/): Learn about the backend platform
+- [Clerk Documentation](https://clerk.dev/docs): Authentication system details
+
+## Contact
+
+For questions or inquiries about EdCoach AI, please reach out to me.
