@@ -64,7 +64,7 @@ This PRD focuses specifically on the core features required for the initial MVP 
 | F-005      | Performance Trend Tracking (Basic) | Provide basic visualizations (e.g., charts) showing performance against rubric indicators over time for individuals/groups. | Must Have  |
 | F-006      | Role-Based Access Control (RBAC)   | Implement distinct roles (e.g., Coach, Leader, Admin - initial focus on Coach/Leader) with appropriate permissions.      | Must Have  |
 | F-007      | Authentication (Clerk)             | Secure user login, registration, and session management using Clerk.                                                  | Must Have  |
-| F-008      | Tiered Subscription System (Core)  | Implement logic to support different feature access based on subscription tiers (details TBD, billing via Schematic/Stripe). | Must Have  |
+| F-008      | Tiered Subscription System (Core)  | Implement logic to support different feature access based on subscription tiers (details TBD, billing via polar.sh). | Must Have  |
 | F-009      | Device & Platform Optimization     | Ensure the application is fully responsive and functional across major browsers on desktop, tablet, and mobile devices. | Must Have  |
 | F-010      | Gamification Layer (Optional MVP)  | (If included in MVP) Implement basic XP points and badge earning based on observation completion/rubric mastery.       | Should Have|
 
@@ -91,10 +91,11 @@ This PRD focuses specifically on the core features required for the initial MVP 
 
 ### 6.2. AI-Generated Feedback (F-003)
     *   Button/Action trigger post-observation submission ("Generate Feedback").
-    *   Sends observation notes, selected rubric, and indicator ratings/tags to OpenAI API.
+    *   Sends observation notes, selected rubric, and indicator ratings/tags to LLM API.
     *   Receives structured feedback suggestions (e.g., strengths, areas for growth, potential next steps) aligned with rubric language.
     *   Displays suggestions in an editable text area/interface.
     *   User can modify, add to, or delete suggestions before finalizing/saving/sharing (sharing mechanism TBD post-MVP).
+    *   LLM selection will focus on models that support narrow context (e.g., LEADS/LER framework documents) for targeted feedback generation.
 
 ### 6.3. Observation Logs Table (F-004)
     *   Dashboard/dedicated page displaying a table of past observations.
@@ -122,7 +123,7 @@ This PRD focuses specifically on the core features required for the initial MVP 
 ### 6.7. Tiered Subscription System (Core) (F-008)
     *   Backend logic to associate users/organizations with subscription tiers (e.g., Coach, School, District).
     *   Feature flags or checks based on subscription level (e.g., custom rubrics only on School/District).
-    *   Integration points for Schematic (feature gating) and Stripe (payment processing). Actual payment flow might be basic in MVP.
+    *   Integration points for polar.sh payment processing. Actual payment flow might be basic in MVP.
 
 ### 6.8. Device & Platform Optimization (F-009)
     *   Responsive design implementation using Tailwind CSS.
@@ -185,9 +186,9 @@ This PRD focuses specifically on the core features required for the initial MVP 
 *   Final confirmation of branding colors and typography.
 *   Specific logic/algorithm for basic trend tracking visualization.
 *   Detailed mapping requirements for LEADS/LER rubrics.
-*   Specific prompts and fine-tuning strategy for OpenAI feedback generation.
+*   Specific LLM selection that supports narrow context for education rubrics.
 *   Exact feature differentiation between subscription tiers.
-*   Detailed error handling strategy for API calls (OpenAI, Stripe, etc.).
+*   Detailed error handling strategy for API calls (LLM, polar.sh, etc.).
 *   Specific requirements for the (Optional) Gamification layer if included.
 
 ---
