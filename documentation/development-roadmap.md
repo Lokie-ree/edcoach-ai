@@ -13,7 +13,7 @@ This roadmap outlines the development plan for EdCoach AI, an instructional supp
 
 ## Technology Stack
 
-- [x] **Frontend**: Next.js 15, Tailwind CSS, ShadCN UI, MagicUI
+- [x] **Frontend**: Next.js 15, Tailwind CSS, ShadCN UI, MagicUI, Shadcn Form Builder, React Bits animated components
 - [x] **Backend**: Convex for database and backend logic
 - [x] **Authentication**: Clerk
 - [ ] **Payment Processing**: polar.sh
@@ -36,11 +36,12 @@ This roadmap outlines the development plan for EdCoach AI, an instructional supp
   - **Tasks**:
     - [x] Set up Next.js project with Typescript
     - [x] Implement Clerk authentication
-    - [ ] Create registration form with role selection
+    - [ ] Create registration form with role selection using Shadcn Form Builder
     - [ ] Set up database schema for users
   - **Technical Notes**:
     - [x] Configure Convex backend
     - [ ] Implement role-based access control foundations
+    - [ ] Set up and configure Shadcn Form Builder playground
 
 #### Week 2: Basic UI Framework & Navigation
 - **US-002**: As a user, I want a clean, intuitive dashboard so I can navigate the platform easily.
@@ -49,9 +50,13 @@ This roadmap outlines the development plan for EdCoach AI, an instructional supp
     - [ ] Implement navigation structure
     - [ ] Design and build dashboard with placeholders
     - [ ] Create basic user profile management
+    - [ ] Set up Shadcn Form Builder components for all application forms
+    - [ ] Integrate React Bits animated components for enhanced UI interactions
   - **Technical Notes**:
     - [x] Implement Tailwind CSS with custom theme
     - [x] Set up component structure with proper typing
+    - [ ] Create reusable form components using Shadcn Form Builder playground
+    - [ ] Evaluate which React Bits components to use for different sections of the app
 
 #### Week 3: Database Schema & Role-Based Access
 - **US-003**: As an administrator, I want to manage user accounts so I can control platform access.
@@ -59,7 +64,7 @@ This roadmap outlines the development plan for EdCoach AI, an instructional supp
     - [x] Complete database schema design
     - [ ] Implement role-based permissions
     - [ ] Create admin dashboard interface
-    - [x] Set up user management functions
+    - [x] Set up user management functions with Shadcn Form Builder components
   - **Technical Notes**:
     - [x] Configure Convex database indexes
     - [ ] Implement permission checks at API level
@@ -70,7 +75,7 @@ This roadmap outlines the development plan for EdCoach AI, an instructional supp
     - [ ] Integrate with polar.sh for payments
     - [ ] Create subscription tier management
     - [ ] Implement feature access controls
-    - [ ] Build subscription management UI
+    - [ ] Build subscription management UI with Shadcn Form Builder components
   - **Technical Notes**:
     - [ ] Set up webhook handlers for subscription events
     - [ ] Implement feature flags based on subscription tier
@@ -81,7 +86,7 @@ This roadmap outlines the development plan for EdCoach AI, an instructional supp
 - **US-005**: As an administrator, I want to upload and configure custom evaluation rubrics.
   - **Tasks**:
     - [ ] Create rubric data model
-    - [ ] Build rubric upload/configuration UI
+    - [ ] Build rubric upload/configuration UI using Shadcn Form Builder components
     - [ ] Implement standard rubrics (LEADS, LER)
     - [ ] Create rubric version management
   - **Technical Notes**:
@@ -91,13 +96,14 @@ This roadmap outlines the development plan for EdCoach AI, an instructional supp
 #### Week 7-8: Observation Form
 - **US-006**: As an observer, I want to create a new classroom observation.
   - **Tasks**:
-    - [ ] Build observation form interface
-    - [ ] Implement teacher/class selection
+    - [ ] Build observation form interface using Shadcn Form Builder components
+    - [ ] Implement teacher/class selection with Combobox component
     - [ ] Create evidence collection form for rubric indicators
     - [ ] Add draft saving functionality
   - **Technical Notes**:
     - [ ] Use dynamic form generation based on selected rubric
     - [ ] Implement real-time saving with Convex
+    - [ ] Leverage Shadcn Form Builder's advanced input components
 
 - **US-007**: As an observer, I want to record evidence for specific rubric indicators.
   - **Tasks**:
@@ -122,7 +128,7 @@ This roadmap outlines the development plan for EdCoach AI, an instructional supp
 
 - **US-009**: As an observer, I want to edit AI-generated feedback suggestions.
   - **Tasks**:
-    - [ ] Build feedback editing interface
+    - [ ] Build feedback editing interface with Shadcn Form Builder Textarea component
     - [ ] Implement version tracking
     - [ ] Create finalization workflow
     - [ ] Add feedback templates
@@ -160,9 +166,11 @@ This roadmap outlines the development plan for EdCoach AI, an instructional supp
     - [ ] Implement responsive layouts for tablets
     - [ ] Optimize mobile experience
     - [ ] Fix cross-browser compatibility issues
+    - [ ] Ensure React Bits animations perform well across all devices
   - **Technical Notes**:
     - [ ] Use device testing tools
     - [ ] Implement responsive design patterns
+    - [ ] Optimize animation performance for mobile devices
 
 - **US-013**: As a user, I want a stable, error-free experience.
   - **Tasks**:
@@ -179,11 +187,12 @@ This roadmap outlines the development plan for EdCoach AI, an instructional supp
   - **Tasks**:
     - [ ] Design badge system
     - [ ] Implement XP calculation
-    - [ ] Create badge display UI
-    - [ ] Add notifications for achievements
+    - [ ] Create badge display UI using React Bits animations (CountUp, Spotlight Card, Animated List)
+    - [ ] Add notifications for achievements with React Bits animations
   - **Technical Notes**:
     - [ ] Create achievement tracking system
     - [ ] Design extensible badge framework
+    - [ ] Implement React Bits Particle effects for achievement celebrations
 
 - **US-015**: As a user, I want a polished, production-ready platform.
   - **Tasks**:
@@ -191,10 +200,12 @@ This roadmap outlines the development plan for EdCoach AI, an instructional supp
     - [ ] Fix identified bugs and issues
     - [ ] Optimize performance
     - [ ] Create user documentation
+    - [ ] Add polish with React Bits animations throughout the application
   - **Technical Notes**:
     - [ ] Run performance audits
     - [ ] Complete security review
     - [ ] Prepare for production deployment
+    - [ ] Ensure React Bits animations don't impact core functionality
 
 ## Risk Assessment & Mitigation
 

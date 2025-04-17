@@ -71,7 +71,7 @@ This PRD focuses specifically on the core features required for the initial MVP 
 ### 5.2. Non-Functional Requirements
 
 *   **Performance:** Real-time data updates (leveraging Convex) where appropriate (e.g., observation logs). Fast page loads and responsive UI interactions. AI generation should be reasonably fast.
-*   **Usability:** Intuitive navigation, clear information hierarchy. Minimal clicks to complete core tasks (walkthrough, feedback generation). Consistent design language (ShadCN UI, MagicUI).
+*   **Usability:** Intuitive navigation, clear information hierarchy. Minimal clicks to complete core tasks (observation, feedback generation). Consistent design language (ShadCN UI, MagicUI, Shadcn Form Builder, React Bits animated components).
 *   **Security:** Secure authentication and authorization (Clerk). Data encryption at rest and in transit (handled by Convex/Vercel). Protection against common web vulnerabilities. Role-based access enforced.
 *   **Scalability:** Architecture should support adding users and schools/districts (Vercel serverless functions, Convex database scaling).
 *   **Reliability:** High availability, minimal downtime (leveraging Vercel/Convex infrastructure). Graceful error handling.
@@ -83,17 +83,17 @@ This PRD focuses specifically on the core features required for the initial MVP 
 ## 6. Features (Detailed Breakdown - MVP)
 
 ### 6.1. Walkthrough Form & Rubric Mapping (F-001, F-002)
-    *   User selects Teacher, Date, Rubric (Standard or Custom).
-    *   Form displays rubric indicators/domains.
-    *   Input fields (text areas) for capturing observation evidence/notes associated with each indicator.
-    *   Ability to tag/rate indicators based on evidence (e.g., selecting performance levels if defined in rubric).
-    *   Save/Submit functionality.
+    *   User selects Teacher, Date, Rubric (Standard or Custom) using Shadcn Form Builder components.
+    *   Form displays rubric indicators/domains using dynamic components from Shadcn Form Builder.
+    *   Input fields (text areas) from Shadcn Form Builder for capturing observation evidence/notes associated with each indicator.
+    *   Ability to tag/rate indicators based on evidence (e.g., selecting performance levels if defined in rubric) using appropriate form components.
+    *   Save/Submit functionality with proper validation.
 
 ### 6.2. AI-Generated Feedback (F-003)
     *   Button/Action trigger post-observation submission ("Generate Feedback").
     *   Sends observation notes, selected rubric, and indicator ratings/tags to LLM API.
     *   Receives structured feedback suggestions (e.g., strengths, areas for growth, potential next steps) aligned with rubric language.
-    *   Displays suggestions in an editable text area/interface.
+    *   Displays suggestions in an editable text area/interface using Shadcn Form Builder's Textarea component.
     *   User can modify, add to, or delete suggestions before finalizing/saving/sharing (sharing mechanism TBD post-MVP).
     *   LLM selection will focus on models that support narrow context (e.g., LEADS/LER framework documents) for targeted feedback generation.
 
@@ -132,8 +132,10 @@ This PRD focuses specifically on the core features required for the initial MVP 
 
 ### 6.9. Gamification Layer (Optional MVP) (F-010)
     *   Backend logic to award XP for completing observations or achieving certain rubric scores.
-    *   Simple display of user XP/Level.
-    *   Basic badge system for predefined achievements (e.g., "Completed 10 Observations").
+    *   Simple display of user XP/Level using React Bits CountUp component for animated number transitions.
+    *   Basic badge system for predefined achievements (e.g., "Completed 10 Observations") with React Bits animations.
+    *   Visual feedback for achievements using React Bits particle effects or other engaging animations.
+    *   Progress tracking with animated components from the React Bits library to increase engagement.
 
 ---
 
@@ -143,7 +145,7 @@ This PRD focuses specifically on the core features required for the initial MVP 
     *   **Colors:** Primary Blue (`#2952A3`), Accent Coral (`#FF725E`), Soft Slate (`#495057`), Background Gray (`#F5F7FA`), Success Green (`#30B76A`), Warning Gold (`#F6B840`). *(Note: User later specified website colors - `#0f172a`, `#3b82f6`, `#f8fafc`, `#FFFFFF`. **Confirm final palette**)*
     *   **Typography:** Inter Bold/Plus Jakarta Sans (Headlines), Inter Regular/Source Sans Pro (Body), Roboto Mono (Labels). *(Confirm final choices)*
     *   **Logo:** Minimalist vector style reflecting growth & AI insight. *(Use final approved logo)*
-*   **UI Components:** Utilize ShadCN UI and MagicUI libraries for consistency and modern look/feel.
+*   **UI Components:** Utilize ShadCN UI, MagicUI libraries, React Bits (https://www.reactbits.dev) for animated components, and Shadcn Form Builder playground (https://www.shadcn-form.com/playground) for consistency and modern look/feel. The Form Builder will be used to create all forms throughout the application, including observation forms, feedback forms, and user management forms. React Bits will be used to add engaging animations and interactive elements to enhance the user experience.
 *   **User Flow:** Optimize for efficiency in core tasks (observation, feedback generation). Minimize friction.
 *   **Information Architecture:** Clear navigation and logical grouping of features.
 
