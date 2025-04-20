@@ -1,7 +1,7 @@
 # EdCoach AI Testing Plan
 
 ## Overview
-This document outlines a structured approach to testing the current features of EdCoach AI to ensure they're working as expected. Each test includes steps to follow, expected outcomes, and potential issues to watch for.
+This document outlines a structured approach to testing EdCoach AI's MVP features, including detailed requirements for observation templates, draft/finalized status, school-scoped analytics, Convex-based role management, and supportive, growth-focused feedback.
 
 ## 1. Authentication Testing
 
@@ -51,7 +51,7 @@ npx convex run auth:getCurrentUser
 - User can set new password
 - User can log in with new password
 
-## 2. Organization Functionality
+## 2. Organization & School Context
 
 ### 2.1 Organization Creation
 **Steps:**
@@ -84,6 +84,9 @@ npx convex run organizations:getMetadata --clerkOrgId="{clerk_org_id}"
 **Verification Method:**
 - Check React DevTools Components tab
 - Verify context values match expected roles
+
+### 2.3 Verify user and observation records are associated with correct schoolId
+- Confirm all analytics and data access are scoped to user's school
 
 ## 3. Role-Based Access Control
 
@@ -121,141 +124,220 @@ npx convex run users:getUser --userId="{user_id}"
 - Manually test navigation
 - Check for proper redirects on restricted pages
 
-## 4. Database Schema Validation
+### 3.3 Test Convex DB as source of truth for roles/permissions
+- Verify that only users with appropriate roles (coach/AP, principal) can submit observations
+- Confirm teachers can only view their own feedback
 
-### 4.1 Schema Integrity
+## 4. Observation Templates
+
+### 4.1 Formal Observation (LER Rubric)
 **Steps:**
-1. Check all tables defined in schema.ts
-2. Verify required fields and indexes
-3. Test field types and constraints
+1. As a coach/AP or principal, start a new formal observation for a teacher.
+2. For each LER domain and indicator (per rubric-content.json):
+   - Enter a numeric rating (per rubric: e.g., 1, 3, 5)
+   - Enter evidence text supporting the rating
+3. Attempt to finalize the observation with incomplete indicators or missing evidence.
+4. Save as draft, edit, and finalize when all required fields are complete.
 
 **Expected Outcome:**
-- Tables match schema definition
-- Indexes are properly created
-- Data types are enforced
+- All LER domains and indicators are present and required.
+- Cannot finalize unless all indicators have a rating and evidence.
+- Ratings and evidence are validated per rubric.
+- Teachers receive comprehensive, rubric-aligned feedback.
 
 **Verification Method:**
 ```bash
-# Open Convex dashboard to view tables
-npx convex dashboard
+# Check observation completeness and status
+npx convex run observations:listObservations
 ```
 
-### 4.2 Data Relationships
+### 4.2 Informal Walkthrough (Encouragement & Growth Focus)
 **Steps:**
-1. Create related records (user->organization, etc.)
-2. Query related data
-3. Verify integrity constraints
+1. As a coach/AP or principal, start a new informal walkthrough for a teacher.
+2. Select up to 3 LER indicators observed.
+3. For each selected indicator:
+   - Enter area of reinforcement (required)
+   - Enter area of refinement (optional)
+   - Enter specific, encouraging feedback (required)
+4. Enter an overall encouragement/positive note (required).
+5. Attempt to submit with missing required fields or more than 3 indicators.
+6. Attempt to enter numeric ratings or grading language (should not be allowed).
+7. Save as draft, edit, and finalize.
+8. Trigger AI feedback and review output for supportive, non-evaluative tone.
 
 **Expected Outcome:**
-- Foreign key relationships work correctly
-- Queries across relationships return expected data
+- Cannot select more than 3 indicators.
+- Area of reinforcement and specific feedback are required for each indicator.
+- Overall encouragement note is required.
+- No numeric ratings or grading language are present or accepted.
+- All feedback is phrased positively and constructively.
+- AI feedback is always supportive and non-evaluative.
+- UI/UX uses positive, growth-oriented language and helper text (e.g., "What's going well?", "This feedback is for encouragement and professional growth, not evaluation.")
 
 **Verification Method:**
 ```bash
-# Check teacher data with creator relationship
-npx convex run teachers:listTeachers
+# Check observation fields and status
+npx convex run observations:listObservations
+# Review UI for language and helper text
+# Review AI feedback output for tone
 ```
 
-## 5. UI Components and Navigation
+**Acceptance Criteria (Both Forms):**
+- Formal: All indicators/domains must be completed with rating and evidence to finalize.
+- Informal: At least one area of reinforcement and overall encouragement are required; no numeric ratings or grading language; feedback is supportive and growth-focused.
+- Both: Observations can be saved as draft, edited, and finalized; finalized feedback is visible to teacher.
 
-### 5.1 ShadCN Components
+## 5. Observation Status
+
+### 5.1 Test saving, editing, and finalizing observations
 **Steps:**
-1. Navigate through all implemented pages
-2. Test each ShadCN component:
-   - Forms
-   - Buttons
-   - Dialogs
-   - Tables
-   - Cards
+1. Edit and finalize an observation
+2. Save as draft and edit again
+3. Finalize the observation
 
 **Expected Outcome:**
-- Components render correctly
-- Components are functional
-- Components follow design system
-
-### 5.2 Responsive Design
-**Steps:**
-1. Test each page at different viewport sizes:
-   - Desktop (1920px+)
-   - Laptop (1366px)
-   - Tablet (768px)
-   - Mobile (375px)
-2. Test orientation changes on mobile/tablet
-
-**Expected Outcome:**
-- UI adapts to different screen sizes
-- Content remains accessible
-- No layout issues or overflow
-
-### 5.3 Navigation Flow
-**Steps:**
-1. Test main navigation links
-2. Test breadcrumbs if implemented
-3. Verify page transitions
-
-**Expected Outcome:**
-- All links lead to correct destinations
-- Navigation state is preserved
-- User location is clear
-
-## 6. API Functionality
-
-### 6.1 Convex Mutations
-**Steps:**
-1. Test create operations
-2. Test update operations
-3. Test delete operations
-
-**Expected Outcome:**
-- Operations succeed with valid data
-- Operations fail with invalid data
-- Data is persisted correctly
+- Observation status is updated correctly
+- Observation can be saved as draft and edited
+- Observation can be finalized
 
 **Verification Method:**
 ```bash
-# Test user creation
-npx convex run users:createUser --clerkId="test123" --name="Test User" --email="test@example.com" --role="school_leader" --organization="Test School"
-
-# Test user update
-npx convex run users:updateUser --userId="{user_id}" --name="Updated Name"
+# Check observation status
+npx convex run observations:listObservations
 ```
 
-### 6.2 Convex Queries
+### 5.2 Ensure only finalized observations are shared with teachers
 **Steps:**
-1. Test list queries
-2. Test detail queries
-3. Test filtered queries
+1. Submit an observation
+2. Verify it is visible to teachers
+3. Verify it is not visible to unauthorized users
 
 **Expected Outcome:**
-- Queries return expected data
-- Filters work correctly
-- Data is formatted as expected
+- Observation is visible to teachers
+- Observation is not visible to unauthorized users
 
 **Verification Method:**
 ```bash
-# Test user listing
-npx convex run users:listUsers
-
-# Test filtered user listing
-npx convex run users:listUsers --role="school_leader"
+# Check observation visibility
+npx convex run observations:listObservations
 ```
 
-### 6.3 Webhook Handling
-**Steps:**
-1. Test Clerk webhooks
-2. Verify database updates
+## 6. AI Feedback
+
+### 6.1 Formal Observation
+- Test AI feedback generation and editing for rubric-aligned, comprehensive feedback.
+
+### 6.2 Informal Walkthrough
+- Test AI feedback generation and editing for supportive, non-evaluative, growth-focused feedback.
+- Attempt to generate feedback with negative or evaluative prompts; verify output remains positive and growth-oriented.
 
 **Expected Outcome:**
-- Webhooks are processed correctly
-- Database is updated based on webhook events
+- AI feedback for informal walkthrough is always supportive and non-evaluative.
+- AI feedback for formal observation is rubric-aligned and comprehensive.
+
+## 7. Analytics
+
+### 7.1 Test dashboards for all roles
+**Steps:**
+1. Log in as different roles
+2. Verify access to relevant dashboards
+
+**Expected Outcome:**
+- Users can access relevant dashboards
+- Dashboards provide accurate analytics
 
 **Verification Method:**
 ```bash
-# Simulate webhook
-curl -X POST http://localhost:3000/api/clerk-webhook -H "Content-Type: application/json" -d '{"type":"user.created","data":{"id":"test123","email_addresses":[{"email_address":"test@example.com"}],"first_name":"Test","last_name":"User","organization":"Test Org"}}'
+# Check dashboard access
+npx convex run organizations:getMetadata --clerkOrgId="{clerk_org_id}"
 ```
 
-## 7. Issue Tracking
+### 7.2 Confirm all analytics are scoped to user's school
+**Steps:**
+1. Log in as different roles
+2. Verify analytics are scoped to user's school
+
+**Expected Outcome:**
+- Analytics are scoped to user's school
+- Analytics are accurate and relevant
+
+**Verification Method:**
+```bash
+# Check analytics
+npx convex run organizations:getMetadata --clerkOrgId="{clerk_org_id}"
+```
+
+### 7.3 Test filtering and aggregation by template, date, teacher
+**Steps:**
+1. Log in as different roles
+2. Filter and aggregate analytics by template, date, and teacher
+
+**Expected Outcome:**
+- Analytics are filtered and aggregated correctly
+- Analytics are accurate and relevant
+
+**Verification Method:**
+```bash
+# Check analytics
+npx convex run organizations:getMetadata --clerkOrgId="{clerk_org_id}"
+```
+
+## 8. UI Components and Navigation
+
+### 8.1 Informal Walkthrough UI/UX Checks
+- Verify all form labels, helper text, and prompts use positive, growth-oriented language.
+- Confirm presence of helper text: "This feedback is for encouragement and professional growth, not evaluation."
+- Confirm no numeric ratings or grading language are present in the UI.
+
+### 8.2 All Other UI/UX
+- Verify all other UI components and navigation elements are functional and follow design system.
+
+## 9. API Functionality
+
+### 9.1 Test Convex mutations/queries for observation creation, update, status change, and feedback
+**Steps:**
+1. Create a new observation
+2. Update the observation
+3. Change the observation status
+4. Verify feedback is generated
+
+**Expected Outcome:**
+- Observation is created correctly
+- Observation is updated correctly
+- Observation status is changed correctly
+- Feedback is generated correctly
+
+**Verification Method:**
+```bash
+# Test observation creation
+npx convex run observations:createObservation --title="Test Observation" --description="This is a test observation" --template="Formal" --teacherId="{teacher_id}" --schoolId="{school_id}"
+
+# Test observation update
+npx convex run observations:updateObservation --observationId="{observation_id}" --title="Updated Observation Title"
+
+# Test observation status change
+npx convex run observations:updateObservationStatus --observationId="{observation_id}" --status="Finalized"
+
+# Test feedback generation
+npx convex run observations:listObservations
+```
+
+### 9.2 Test Convex queries for analytics, ensuring school scoping
+**Steps:**
+1. Log in as different roles
+2. Verify access to relevant analytics
+
+**Expected Outcome:**
+- Users can access relevant analytics
+- Analytics are scoped to user's school
+
+**Verification Method:**
+```bash
+# Check analytics
+npx convex run organizations:getMetadata --clerkOrgId="{clerk_org_id}"
+```
+
+## 10. Issue Tracking
 
 For each test, record any issues found using the following format:
 
@@ -269,6 +351,8 @@ For each test, record any issues found using the following format:
 - **Priority:** [High/Medium/Low]
 
 ## Conclusion
+
+- All MVP features must pass tests for both observation templates, draft/finalized status, school scoping, Convex-based role management, and supportive, growth-focused feedback.
 
 After completing these tests, update the development roadmap to accurately reflect the status of implemented features. Mark features as:
 

@@ -9,177 +9,170 @@
 
 ## 1. Introduction & Overview
 
-### 1.1. Purpose
-This document outlines the requirements for the Minimum Viable Product (MVP) of EdCoach AI. EdCoach AI is envisioned as a real-time, AI-powered instructional support platform designed to assist school leaders and instructional coaches in delivering actionable, rubric-aligned feedback to foster teacher growth.
-
-### 1.2. Vision
-To be the leading platform for streamlining instructional coaching, leveraging AI to save time, enhance feedback quality, track progress effectively, and ultimately improve teaching practice.
-
-### 1.3. Scope
-This PRD focuses specifically on the core features required for the initial MVP launch. Future enhancements and integrations are outlined in the Future Considerations section.
+EdCoach AI is an AI-powered instructional support platform for school leaders, instructional coaches, and teachers. The MVP focuses on streamlining classroom observations, providing instant, rubric-aligned feedback, and tracking teacher growth at the school level.
 
 ---
 
 ## 2. Goals & Objectives
 
-*   **Automate Feedback:** Streamline the process of conducting walkthroughs and generating LEADS-aligned (or custom rubric-aligned) feedback using AI assistance.
-*   **Track Growth:** Provide tools to monitor and visualize teacher performance trends over time based on observation data.
-*   **Support Customization:** Allow schools/districts to utilize standard rubrics (LEADS, LER) or implement their own specific frameworks.
-*   **Enhance User Experience:** Deliver a modern, intuitive, responsive, and accessible user interface across all common devices (desktop, tablet, mobile).
-*   **(Optional MVP Goal):** Introduce a basic gamification layer to encourage teacher engagement with professional growth.
-*   **Establish Core Infrastructure:** Implement foundational systems for authentication, database management, billing, and deployment.
+- Enable school leaders and coaches to quickly complete observations using the LER rubric
+- Provide teachers with immediate, AI-generated, editable feedback
+- Offer dashboards and analytics scoped to each school
+- Support two observation templates: Formal Observation and Informal Walkthrough
+- Allow observations to be saved as draft or finalized
+- Manage roles and permissions in Convex DB for future scalability
 
 ---
 
 ## 3. Target Audience
 
-*   **School Leaders:** (Principals, Assistant Principals) - Focus on efficiency, consistency, school-wide trends, accountability alignment.
-*   **Instructional Coaches:** Focus on feedback quality, time savings, tracking individual teacher progress, rubric flexibility.
-*   **District Administrators:** Focus on district-wide data, standardization, rubric management, scalability. (Primary users likely in post-MVP phases but system architecture should consider them).
+- **Teachers:** View/download observation results and feedback
+- **Instructional Coaches/Assistant Principals:** Conduct observations, upload notes, receive AI feedback, access assigned teacher data
+- **Principals:** Conduct observations and view all staff data/analytics
 
 ---
 
 ## 4. Assumptions & Principles
 
-*   Users require a significant improvement over manual processes or existing buggy/inflexible tools (like EdLink).
-*   AI-generated feedback should be a starting point, always editable by the user.
-*   Rubric flexibility is crucial for adoption.
-*   Real-time data access and updates enhance the user experience.
-*   A clean, intuitive UI/UX is a key differentiator.
-*   Data security and privacy are paramount.
-*   The platform must be reliable and performant.
+- Only the LER rubric (see data/rubric-content.json) is supported in MVP
+- Observations can be saved as draft or finalized
+- Two observation templates (Formal/Informal) are available
+- Analytics and data access are scoped to the user's school
+- Role/permission logic is managed in Convex DB, not solely via Clerk
 
 ---
 
 ## 5. Requirements
 
-### 5.1. Functional Requirements (MVP Features)
+### 5.1. Functional Requirements
 
-| Feature ID | Feature Name                         | High-Level Description                                                                                                | Priority |
-| :--------- | :----------------------------------- | :-------------------------------------------------------------------------------------------------------------------- | :------- |
-| F-001      | Walkthrough Form & Rubric Mapping    | Allow users to conduct observations using a structured form and map evidence to specific indicators on a selected rubric. | Must Have  |
-| F-002      | Custom Rubric Support              | Allow configuration and use of standard (LEADS, LER) and user-uploaded custom rubrics within the walkthrough form.      | Must Have  |
-| F-003      | AI-Generated Feedback (Editable)   | Generate feedback suggestions based on observation notes and rubric alignment; allow users to edit/approve suggestions. | Must Have  |
-| F-004      | Observation Logs Table             | Display a sortable/filterable table of completed observations with key details (teacher, date, observer, rubric).     | Must Have  |
-| F-005      | Performance Trend Tracking (Basic) | Provide basic visualizations (e.g., charts) showing performance against rubric indicators over time for individuals/groups. | Must Have  |
-| F-006      | Role-Based Access Control (RBAC)   | Implement distinct roles (e.g., Coach, Leader, Admin - initial focus on Coach/Leader) with appropriate permissions.      | Must Have  |
-| F-007      | Authentication (Clerk)             | Secure user login, registration, and session management using Clerk.                                                  | Must Have  |
-| F-008      | Tiered Subscription System (Core)  | Implement logic to support different feature access based on subscription tiers (details TBD, billing via polar.sh). | Must Have  |
-| F-009      | Device & Platform Optimization     | Ensure the application is fully responsive and functional across major browsers on desktop, tablet, and mobile devices. | Must Have  |
-| F-010      | Gamification Layer (Optional MVP)  | (If included in MVP) Implement basic XP points and badge earning based on observation completion/rubric mastery.       | Should Have|
+| Feature ID | Feature Name                         | Description                                                                                  | Priority |
+| :--------- | :----------------------------------- | :------------------------------------------------------------------------------------------- | :------- |
+| F-001      | Observation Form (LER)               | Coaches/APs and principals complete observations using Formal or Informal templates          | Must Have |
+| F-002      | Draft/Finalized Status               | Observations can be saved as draft or finalized before sharing                              | Must Have |
+| F-003      | AI-Generated Feedback (Editable)     | Generate feedback suggestions from observation notes; allow editing before sharing           | Must Have |
+| F-004      | Teacher Feedback Access              | Teachers can view and download observation results and feedback                              | Must Have |
+| F-005      | Analytics Dashboard                  | Dashboards for all roles, scoped to user's school                                            | Must Have |
+| F-006      | Role-Based Dashboards                | Distinct dashboards for teachers, coaches/APs, and principals                               | Must Have |
+| F-007      | Authentication (Clerk)               | Secure login, registration, and session management                                           | Must Have |
+| F-008      | Role/Permission Management           | Roles and permissions managed in Convex DB                                                   | Must Have |
+| F-009      | Device Optimization                  | Responsive design for desktop, tablet, and mobile                                            | Must Have |
 
 ### 5.2. Non-Functional Requirements
 
-*   **Performance:** Real-time data updates (leveraging Convex) where appropriate (e.g., observation logs). Fast page loads and responsive UI interactions. AI generation should be reasonably fast.
-*   **Usability:** Intuitive navigation, clear information hierarchy. Minimal clicks to complete core tasks (observation, feedback generation). Consistent design language (ShadCN UI, MagicUI, Shadcn Form Builder, React Bits animated components).
-*   **Security:** Secure authentication and authorization (Clerk). Data encryption at rest and in transit (handled by Convex/Vercel). Protection against common web vulnerabilities. Role-based access enforced.
-*   **Scalability:** Architecture should support adding users and schools/districts (Vercel serverless functions, Convex database scaling).
-*   **Reliability:** High availability, minimal downtime (leveraging Vercel/Convex infrastructure). Graceful error handling.
-*   **Maintainability:** Clean, well-documented code. Use of modern frameworks (Next.js 15). Type safety (Convex).
-*   **Accessibility:** Adhere to WCAG 2.1 AA guidelines where feasible for core functionality.
+- Performance, usability, security, scalability, reliability, accessibility as previously specified
 
 ---
 
 ## 6. Features (Detailed Breakdown - MVP)
 
-### 6.1. Walkthrough Form & Rubric Mapping (F-001, F-002)
-    *   User selects Teacher, Date, Rubric (Standard or Custom) using Shadcn Form Builder components.
-    *   Form displays rubric indicators/domains using dynamic components from Shadcn Form Builder.
-    *   Input fields (text areas) from Shadcn Form Builder for capturing observation evidence/notes associated with each indicator.
-    *   Ability to tag/rate indicators based on evidence (e.g., selecting performance levels if defined in rubric) using appropriate form components.
-    *   Save/Submit functionality with proper validation.
+### 6.1. Observation Templates
 
-### 6.2. AI-Generated Feedback (F-003)
-    *   Button/Action trigger post-observation submission ("Generate Feedback").
-    *   Sends observation notes, selected rubric, and indicator ratings/tags to LLM API.
-    *   Receives structured feedback suggestions (e.g., strengths, areas for growth, potential next steps) aligned with rubric language.
-    *   Displays suggestions in an editable text area/interface using Shadcn Form Builder's Textarea component.
-    *   User can modify, add to, or delete suggestions before finalizing/saving/sharing (sharing mechanism TBD post-MVP).
-    *   LLM selection will focus on models that support narrow context (e.g., LEADS/LER framework documents) for targeted feedback generation.
+#### Formal Observation
+- **Required:** All LER domains and indicators from rubric-content.json must be addressed.
+- For each indicator:
+  - Observer provides a numeric rating (as defined in the rubric: e.g., 1-Unsatisfactory, 3-Proficient, 5-Exemplary)
+  - Observer provides evidence text supporting the rating
+- All domains and indicators must be completed for the observation to be finalized.
+- Workflow: Save as draft → Edit → Finalize → AI feedback generated → Observer edits feedback → Feedback shared with teacher
+- Acceptance Criteria:
+  - All indicators/domains are present and required
+  - Ratings and evidence are validated per rubric
+  - Teachers receive comprehensive, rubric-aligned feedback
 
-### 6.3. Observation Logs Table (F-004)
-    *   Dashboard/dedicated page displaying a table of past observations.
-    *   Columns: Teacher Name, Observer Name, Observation Date, Rubric Used, Status (e.g., Draft, Complete).
-    *   Basic sorting (by date, teacher).
-    *   Basic filtering (by teacher, date range).
-    *   Link to view observation details/feedback.
+#### Informal Walkthrough
+- **Required:** Observer selects up to 3 LER indicators observed
+- For each selected indicator:
+  - Area of Reinforcement (what the teacher is doing well, required)
+  - Area of Refinement (growth opportunity, optional)
+  - Specific, encouraging feedback (required)
+- Overall Encouragement/Positive Note (required)
+- No numeric ratings or grading language; feedback must be supportive and growth-focused
+- Workflow: Save as draft → Edit → Finalize → AI feedback generated (supportive, non-evaluative) → Observer edits feedback → Feedback shared with teacher
+- Acceptance Criteria:
+  - At least one area of reinforcement and overall encouragement are required
+  - No numeric scores or evaluative language is shown to teacher
+  - All feedback is phrased positively and constructively
 
-### 6.4. Performance Trend Tracking (Basic) (F-005)
-    *   Dashboard section displaying charts.
-    *   Visualize average performance level per rubric indicator over time (for selected teacher or group).
-    *   Visualize frequency of specific indicators being tagged over time.
-    *   Data derived from completed observation logs.
+### 6.2. Analytics Dashboard
 
-### 6.5. Role-Based Access Control (RBAC) (F-006)
-    *   Define roles: Admin (can manage users/settings), Leader (can observe, view school-wide data), Coach (can observe assigned teachers, view their data).
-    *   Restrict access to features/data based on assigned role. (Initial MVP might simplify roles).
+- For Principals/Coaches:
+  - Table: All observations in school (filter by date, teacher, template, status)
+  - Chart: Number of observations per teacher (last 30 days)
+  - Chart: Average indicator scores by domain (last 90 days, formal only)
+- For Teachers:
+  - List: All personal observations (with status, date, observer)
+  - Chart: Personal indicator scores over time (formal only)
 
-### 6.6. Authentication (F-007)
-    *   User registration flow.
-    *   Secure login (email/password, potentially SSO options via Clerk later).
-    *   Password reset functionality.
-    *   Session management.
+### 6.3. Roles & Permissions
 
-### 6.7. Tiered Subscription System (Core) (F-008)
-    *   Backend logic to associate users/organizations with subscription tiers (e.g., Coach, School, District).
-    *   Feature flags or checks based on subscription level (e.g., custom rubrics only on School/District).
-    *   Integration points for polar.sh payment processing. Actual payment flow might be basic in MVP.
+| Role         | Can Submit Observations | Can View All School Data | Can View Own Feedback | Can Edit Feedback | Can Access Analytics |
+|--------------|------------------------|-------------------------|----------------------|-------------------|---------------------|
+| Teacher      | No                     | No                      | Yes                  | No                | Yes (own only)      |
+| Coach/AP     | Yes                    | Assigned teachers only  | Yes                  | Yes               | Yes                 |
+| Principal    | Yes                    | Yes                     | Yes                  | Yes               | Yes                 |
 
-### 6.8. Device & Platform Optimization (F-009)
-    *   Responsive design implementation using Tailwind CSS.
-    *   Testing across Chrome, Firefox, Safari on Desktop.
-    *   Testing on representative iOS (Safari) and Android (Chrome) devices/emulators.
+### 6.4. Data Model
 
-### 6.9. Gamification Layer (Optional MVP) (F-010)
-    *   Backend logic to award XP for completing observations or achieving certain rubric scores.
-    *   Simple display of user XP/Level using React Bits CountUp component for animated number transitions.
-    *   Basic badge system for predefined achievements (e.g., "Completed 10 Observations") with React Bits animations.
-    *   Visual feedback for achievements using React Bits particle effects or other engaging animations.
-    *   Progress tracking with animated components from the React Bits library to increase engagement.
+#### FormalObservation
+- id: string
+- template: 'formal'
+- status: 'draft' | 'finalized'
+- teacherId: string
+- observerId: string
+- schoolId: string
+- date: ISO string
+- indicators: Array<{ domain: string, indicatorCode: string, rating: number, evidence: string }>
+- aiFeedback: string
+- finalizedAt: ISO string | null
+
+#### InformalWalkthroughFeedback
+- id: string
+- observationId: string
+- indicatorCode: string
+- areaOfReinforcement: string
+- areaOfRefinement: string | null
+- specificFeedback: string
+- createdAt: ISO string
+
+#### InformalWalkthroughObservation
+- id: string
+- template: 'informal'
+- status: 'draft' | 'finalized'
+- teacherId: string
+- observerId: string
+- schoolId: string
+- date: ISO string
+- indicators: Array<indicatorCode>
+- feedback: Array<InformalWalkthroughFeedback>
+- overallEncouragement: string
+- aiFeedback: string
+- finalizedAt: ISO string | null
 
 ---
 
 ## 7. Design & UX Considerations
 
-*   **Branding:** Adhere to EdCoach AI branding guidelines:
-    *   **Colors:** Primary Blue (`#2952A3`), Accent Coral (`#FF725E`), Soft Slate (`#495057`), Background Gray (`#F5F7FA`), Success Green (`#30B76A`), Warning Gold (`#F6B840`). *(Note: User later specified website colors - `#0f172a`, `#3b82f6`, `#f8fafc`, `#FFFFFF`. **Confirm final palette**)*
-    *   **Typography:** Inter Bold/Plus Jakarta Sans (Headlines), Inter Regular/Source Sans Pro (Body), Roboto Mono (Labels). *(Confirm final choices)*
-    *   **Logo:** Minimalist vector style reflecting growth & AI insight. *(Use final approved logo)*
-*   **UI Components:** Utilize ShadCN UI, MagicUI libraries, React Bits (https://www.reactbits.dev) for animated components, and Shadcn Form Builder playground (https://www.shadcn-form.com/playground) for consistency and modern look/feel. The Form Builder will be used to create all forms throughout the application, including observation forms, feedback forms, and user management forms. React Bits will be used to add engaging animations and interactive elements to enhance the user experience.
-*   **User Flow:** Optimize for efficiency in core tasks (observation, feedback generation). Minimize friction.
-*   **Information Architecture:** Clear navigation and logical grouping of features.
+- Role-based navigation and access
+- Template-driven observation forms
+- For informal walkthrough, use language like "What's going well?" and "What's a next step for growth?"
+- Add helper text: "This feedback is for encouragement and professional growth, not evaluation."
+- Responsive, accessible UI
 
 ---
 
-## 8. Release Criteria & Success Metrics (MVP)
+## 8. Release Criteria & Success Metrics
 
-### 8.1. Release Criteria
-*   All "Must Have" functional requirements (F-001 to F-009) implemented and tested.
-*   Core non-functional requirements (Performance, Security, Usability, Reliability) met at an acceptable level for initial users.
-*   No critical or blocker bugs outstanding in core workflows.
-*   Basic deployment pipeline operational on Vercel.
-*   Basic user documentation or onboarding available.
-
-### 8.2. Success Metrics (Post-Launch)
-*   Number of waitlist signups converted to active users.
-*   Number of successful observations completed per user/school.
-*   Frequency of AI feedback generation usage.
-*   User feedback scores (e.g., CSAT, qualitative feedback).
-*   System uptime and performance metrics.
+- All MVP features implemented and tested
+- Observations and feedback workflow functional for all school-level roles
+- Analytics dashboards scoped to school
+- Role/permission logic managed in Convex DB
 
 ---
 
-## 9. Future Considerations (Post-MVP)
+## 9. Future Considerations
 
-*   Advanced Analytics & Reporting Dashboards.
-*   Teacher Accounts/Portal for viewing feedback.
-*   Goal Setting & Tracking features.
-*   Direct Feedback Sharing/Workflow features.
-*   Integrations: Google Classroom, Apple School Manager, Clever, SIS platforms.
-*   Advanced AI Features (e.g., resource suggestions, bias detection - potentially using Ingest).
-*   More sophisticated Gamification options.
-*   Public API.
-*   Enhanced Admin/District Management features.
+- Custom rubric support, district admin, advanced analytics, teacher response, gamification, subscription management
 
 ---
 

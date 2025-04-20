@@ -1,48 +1,37 @@
 # EdCoach AI
 
-EdCoach AI is an instructional support platform designed for school leaders and instructional coaches to streamline classroom observations, provide evidence-based feedback to teachers, and track educational improvements. The platform leverages AI to assist in generating high-quality, rubric-aligned feedback while maintaining the human expertise in the observation process.
+EdCoach AI is an instructional support platform for school leaders, instructional coaches, and teachers. The MVP streamlines classroom observations, provides instant, rubric-aligned feedback, and tracks teacher growth at the school level.
 
-## Vision
+## Core MVP Features
 
-EdCoach AI aims to transform the instructional coaching process by:
-- Reducing the administrative burden of classroom observations
-- Standardizing feedback based on established teaching frameworks (LEADS, LER, etc.)
-- Providing data-driven insights to improve teaching and learning outcomes
-- Creating a continuous improvement loop for educators
-
-## Core Features
-
-- **User Management**: Role-based access for administrators, school leaders, and instructional coaches
-- **Observation System**: Create, conduct, and save classroom observations using customizable rubrics
-- **Evidence Collection**: Record evidence for specific rubric indicators with tagging capabilities
-- **AI-Assisted Feedback**: Generate and edit professional feedback based on observation evidence
-- **Analytics Dashboard**: View observation trends, teacher performance data, and improvement metrics
+- **Role-Based Dashboards:** For teachers, instructional coaches/assistant principals, and principals
+- **Observation System:** Two templates (Formal Observation, Informal Walkthrough) using the LER rubric
+- **Draft/Finalized Workflow:** Observations can be saved as draft or finalized before sharing
+- **AI-Assisted Feedback:** Instantly generate and edit professional feedback based on observation evidence
+- **Teacher Feedback Access:** Teachers can view and download observation results and feedback
+- **Analytics Dashboard:** Visualize observation trends and teacher performance, scoped to school
+- **Authentication:** Secure login and registration with Clerk
+- **Role/Permission Management:** Roles and permissions managed in Convex DB for future scalability
+- **Responsive Design:** Works on desktop, tablet, and mobile
 
 ## Technology Stack
 
-- **Frontend**: Next.js 15, Tailwind CSS, ShadCN UI, MagicUI
-- **Backend**: [Convex](https://convex.dev/) for database and server logic
-- **Authentication**: [Clerk](https://clerk.com/) for user management and authentication
-- **Payment Processing**: polar.sh for subscription management
-- **AI**: LLM with support for educational context and narrow context windows
+- **Frontend:** Next.js 15, Tailwind CSS, ShadCN UI, MagicUI
+- **Backend:** Convex for database and server logic
+- **Authentication:** Clerk (Convex DB for roles/permissions)
+- **AI:** LLM for educational context and LER rubric alignment
 
 ## Development Status
 
-EdCoach AI is currently in active development as a solo developer project with a focus on delivering a high-quality MVP. The development roadmap is divided into three phases:
+EdCoach AI is in active MVP development, focusing on the core observation-feedback-analytics loop for school-level users.
 
-1. **Core Infrastructure**: User authentication, database schema, role-based access
-2. **Observation & Feedback System**: Rubric management, observation forms, AI feedback generation
-3. **Analytics & Finalization**: Reporting dashboards, multi-device optimization, final polishing
+## Planned Features (Post-MVP)
 
-## Planned Features
-
-After MVP launch, planned features include:
-- Advanced analytics and reporting dashboards
-- Teacher portal for feedback access and self-reflection
-- Integration with school information systems
-- Mobile app development
-- Advanced AI features (resource suggestions, bias detection)
-- Public API for integrations
+- Custom rubric support
+- District admin features
+- Advanced analytics and reporting
+- Teacher response to feedback
+- Gamification and subscription management
 
 ## Getting Started
 
@@ -82,9 +71,11 @@ After MVP launch, planned features include:
 
 ## Learn More
 
-- [Development Roadmap](development-roadmap.md): Detailed plan for EdCoach AI development
-- [Convex Documentation](https://docs.convex.dev/): Learn about the backend platform
-- [Clerk Documentation](https://clerk.dev/docs): Authentication system details
+- [Product Requirements Document](documentation/prd.md)
+- [Development Roadmap](documentation/development-roadmap.md)
+- [Testing Plan](documentation/testing-plan.md)
+- [Convex Documentation](https://docs.convex.dev/)
+- [Clerk Documentation](https://clerk.dev/docs)
 
 ## Contact
 
