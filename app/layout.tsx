@@ -5,6 +5,7 @@ import ConvexClientProvider from "@/components/convex-client-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -47,6 +48,7 @@ export default function RootLayout({
                 <main className="flex-1">
                   {children}
                 </main>
+                <Toaster />
               </div>
             </ThemeProvider>
           </ConvexClientProvider>

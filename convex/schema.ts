@@ -16,28 +16,34 @@ export default defineSchema({
     email: v.string(),
     // User's role: "admin", "school_leader", "instructional_coach"
     role: v.string(),
+    // Organization the user belongs to
+    organization: v.string(),
     // Optional profile image URL
     imageUrl: v.optional(v.string()),
-    // School or organization the user belongs to
-    organization: v.optional(v.string()),
+    // User preferences and settings
+    preferences: v.optional(v.any()),
     // When the user was created
     createdAt: v.number(),
     // Fields for subscription status
     subscriptionStatus: v.optional(v.string()),
     subscriptionTier: v.optional(v.string()),
-  }).index("by_clerk_id", ["clerkId"]).index("by_role", ["role"]),
+  }).index("by_clerk_id", ["clerkId"]).index("by_role", ["role"]).index("by_organization", ["organization"]),
 
   // Schools/organizations table
   organizations: defineTable({
     // Organization name
     name: v.string(),
+    // Admin user ID who created the organization
+    adminId: v.id("users"),
+    // Clerk organization ID (optional as it might not be available during initial creation)
+    clerkOrgId: v.optional(v.string()),
     // Organization type (e.g., "public", "charter", "private")
     type: v.optional(v.string()),
-    // Admin user ID
-    adminId: v.optional(v.id("users")),
+    // Additional organization information
+    additionalInfo: v.optional(v.string()),
     // Creation date
     createdAt: v.number(),
-  }),
+  }).index("by_admin", ["adminId"]),
 
   // Teachers table - for storing information about teachers being observed
   teachers: defineTable({
@@ -45,8 +51,6 @@ export default defineSchema({
     name: v.string(),
     // Teacher's email (optional)
     email: v.optional(v.string()),
-    // School/organization they belong to
-    organizationId: v.optional(v.id("organizations")),
     // Department or subject area
     department: v.optional(v.string()),
     // Grade level
@@ -55,7 +59,7 @@ export default defineSchema({
     createdBy: v.id("users"),
     // Creation date
     createdAt: v.number(),
-  }).index("by_organization", ["organizationId"]),
+  }).index("by_creator", ["createdBy"]),
 
   // Rubrics table - for storing evaluation frameworks
   rubrics: defineTable({

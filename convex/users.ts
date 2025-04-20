@@ -2,6 +2,80 @@ import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 
+/*
+ * NOTE: This file is simplified to use Clerk's user management.
+ * Most user management should be done through Clerk's API.
+ * This file contains minimal functionality for user data specific to our app.
+ */
+
+// Store additional user metadata
+export const storeMetadata = mutation({
+  args: {
+    role: v.optional(v.string()),
+    preferences: v.optional(v.any()),
+    organization: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Check if user exists in our DB
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (existingUser) {
+      // Update existing user
+      await ctx.db.patch(existingUser._id, {
+        role: args.role,
+        preferences: args.preferences,
+        organization: args.organization,
+      });
+      return { success: true, userId: existingUser._id };
+    } else {
+      // Create new user record
+      const userId = await ctx.db.insert("users", {
+        clerkId: identity.subject,
+        name: identity.name ?? "",
+        email: identity.email ?? "",
+        role: args.role ?? "user",
+        organization: args.organization,
+        preferences: args.preferences ?? {},
+        createdAt: Date.now(),
+      });
+      return { success: true, userId };
+    }
+  },
+});
+
+// Get the current authenticated user
+export const getCurrentUser = query({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return null;
+    }
+
+    return await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+  },
+});
+
+// Get a user by ID
+export const getUser = query({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.userId);
+  },
+});
+
 // Create a new user in the system
 export const createUser = mutation({
   args: {
@@ -9,8 +83,8 @@ export const createUser = mutation({
     name: v.string(),
     email: v.string(),
     role: v.string(),
+    organization: v.string(),
     imageUrl: v.optional(v.string()),
-    organization: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Check if user already exists
@@ -29,8 +103,8 @@ export const createUser = mutation({
       name: args.name,
       email: args.email,
       role: args.role,
-      imageUrl: args.imageUrl,
       organization: args.organization,
+      imageUrl: args.imageUrl,
       createdAt: Date.now(),
     });
 
@@ -49,17 +123,6 @@ export const getUserByClerkId = query({
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
       .unique();
     
-    return user;
-  },
-});
-
-// Get a user by their Convex ID
-export const getUser = query({
-  args: {
-    userId: v.id("users"),
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId);
     return user;
   },
 });
@@ -92,8 +155,8 @@ export const updateUser = mutation({
     name: v.optional(v.string()),
     email: v.optional(v.string()),
     role: v.optional(v.string()),
-    imageUrl: v.optional(v.string()),
     organization: v.optional(v.string()),
+    imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { userId, ...updates } = args;
@@ -134,5 +197,48 @@ export const updateSubscription = mutation({
     });
     
     return { success: true };
+  },
+});
+
+export const updateProfile = mutation({
+  args: {
+    name: v.string(),
+    email: v.string(),
+    role: v.string(),
+    organization: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Check if user exists
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (user) {
+      // Update existing user
+      await ctx.db.patch(user._id, {
+        name: args.name,
+        email: args.email,
+        role: args.role,
+        organization: args.organization,
+      });
+      return { success: true };
+    } else {
+      // Create new user
+      await ctx.db.insert("users", {
+        clerkId: identity.subject,
+        name: args.name,
+        email: args.email,
+        role: args.role,
+        organization: args.organization,
+        createdAt: Date.now(),
+      });
+      return { success: true };
+    }
   },
 }); 

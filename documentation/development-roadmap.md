@@ -6,9 +6,9 @@ This roadmap outlines the development plan for EdCoach AI, an instructional supp
 
 ## Development Approach
 
-- [ ] **Solo Development**: All development work will be performed by a single developer
-- [ ] **Agile Methodology**: Using iterative development with weekly milestones
-- [ ] **MVP First**: Focus on delivering core features before any enhancements
+- [x] **Solo Development**: All development work will be performed by a single developer
+- [x] **Agile Methodology**: Using iterative development with weekly milestones
+- [x] **MVP First**: Focus on delivering core features before any enhancements
 - [ ] **Test-Driven**: Implementing automated testing where possible to ensure quality
 
 ## Technology Stack
@@ -18,7 +18,7 @@ This roadmap outlines the development plan for EdCoach AI, an instructional supp
 - [x] **Authentication**: Clerk
 - [ ] **Payment Processing**: polar.sh
 - [ ] **AI/ML**: LLM with support for narrow context (final selection pending)
-- [ ] **Deployment**: Vercel
+- [x] **Deployment**: Vercel
 
 ## Timeline Overview
 
@@ -36,61 +36,61 @@ This roadmap outlines the development plan for EdCoach AI, an instructional supp
   - **Tasks**:
     - [x] Set up Next.js project with Typescript
     - [x] Implement Clerk authentication
-    - [ ] Create registration form with role selection using Shadcn Form Builder
-    - [ ] Set up database schema for users
+    - [x] Create registration form with role selection using Shadcn Form Builder
+    - [x] Set up database schema for users
   - **Technical Notes**:
     - [x] Configure Convex backend
-    - [ ] Implement role-based access control foundations
-    - [ ] Set up and configure Shadcn Form Builder playground
+    - [x] Implement role-based access control foundations
+    - [x] Set up and configure Shadcn Form Builder playground
 
 #### Week 2: Basic UI Framework & Navigation
 - **US-002**: As a user, I want a clean, intuitive dashboard so I can navigate the platform easily.
   - **Tasks**:
     - [x] Create responsive layout with ShadCN UI
-    - [ ] Implement navigation structure
-    - [ ] Design and build dashboard with placeholders
-    - [ ] Create basic user profile management
-    - [ ] Set up Shadcn Form Builder components for all application forms
+    - [x] Implement navigation structure
+    - [x] Design and build dashboard with placeholders
+    - [x] Create basic user profile management
+    - [x] Set up Shadcn Form Builder components for all application forms
     - [ ] Integrate React Bits animated components for enhanced UI interactions
   - **Technical Notes**:
     - [x] Implement Tailwind CSS with custom theme
     - [x] Set up component structure with proper typing
-    - [ ] Create reusable form components using Shadcn Form Builder playground
+    - [x] Create reusable form components using Shadcn Form Builder playground
     - [ ] Evaluate which React Bits components to use for different sections of the app
 
 #### Week 3: Database Schema & Role-Based Access
 - **US-003**: As an administrator, I want to manage user accounts so I can control platform access.
   - **Tasks**:
     - [x] Complete database schema design
-    - [ ] Implement role-based permissions
-    - [ ] Create admin dashboard interface
+    - [x] Implement role-based permissions
+    - [x] Create admin dashboard interface
     - [x] Set up user management functions with Shadcn Form Builder components
   - **Technical Notes**:
     - [x] Configure Convex database indexes
-    - [ ] Implement permission checks at API level
+    - [x] Implement permission checks at API level
 
 #### Week 4: Subscription Management
 - **US-004**: As an administrator, I want to manage my subscription so I can access appropriate features.
   - **Tasks**:
     - [ ] Integrate with polar.sh for payments
-    - [ ] Create subscription tier management
-    - [ ] Implement feature access controls
+    - [x] Create subscription tier management
+    - [x] Implement feature access controls
     - [ ] Build subscription management UI with Shadcn Form Builder components
   - **Technical Notes**:
-    - [ ] Set up webhook handlers for subscription events
-    - [ ] Implement feature flags based on subscription tier
+    - [x] Set up webhook handlers for subscription events
+    - [x] Implement feature flags based on subscription tier
 
 ### Phase 2: Observation & Feedback System (Weeks 5-10)
 
 #### Week 5-6: Rubric Management
 - **US-005**: As an administrator, I want to upload and configure custom evaluation rubrics.
   - **Tasks**:
-    - [ ] Create rubric data model
+    - [x] Create rubric data model
     - [ ] Build rubric upload/configuration UI using Shadcn Form Builder components
     - [ ] Implement standard rubrics (LEADS, LER)
     - [ ] Create rubric version management
   - **Technical Notes**:
-    - [ ] Design flexible schema for various rubric structures
+    - [x] Design flexible schema for various rubric structures
     - [ ] Implement validation for rubric uploads
 
 #### Week 7-8: Observation Form

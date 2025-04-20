@@ -1,114 +1,74 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
 
-// Create a new organization
-export const createOrganization = mutation({
+/*
+ * NOTE: This file is simplified to use Clerk's organization functionality.
+ * Most organization management should be done through Clerk's API.
+ * This file contains minimal functionality for organization data specific to our app.
+ */
+
+// Store additional metadata about an organization
+export const storeMetadata = mutation({
   args: {
+    clerkOrgId: v.string(),
     name: v.string(),
     type: v.optional(v.string()),
-    adminId: v.optional(v.id("users")),
+    additionalInfo: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const organizationId = await ctx.db.insert("organizations", {
-      name: args.name,
-      type: args.type,
-      adminId: args.adminId,
-      createdAt: Date.now(),
-    });
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
 
-    // If an admin ID was provided, update the user's organization
-    if (args.adminId) {
-      await ctx.db.patch(args.adminId, {
-        organization: args.name,
+    // Get the user's ID
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Check if organization exists in our DB
+    const existingOrg = await ctx.db
+      .query("organizations")
+      .filter((q) => q.eq(q.field("clerkOrgId"), args.clerkOrgId))
+      .unique();
+
+    if (existingOrg) {
+      // Update existing org
+      await ctx.db.patch(existingOrg._id, {
+        name: args.name,
+        type: args.type,
+        additionalInfo: args.additionalInfo,
+      });
+    } else {
+      // Create new org record
+      await ctx.db.insert("organizations", {
+        name: args.name,
+        adminId: user._id,
+        clerkOrgId: args.clerkOrgId,
+        type: args.type,
+        additionalInfo: args.additionalInfo,
+        createdAt: Date.now(),
       });
     }
 
-    return { organizationId };
-  },
-});
-
-// Get an organization by ID
-export const getOrganization = query({
-  args: {
-    organizationId: v.id("organizations"),
-  },
-  handler: async (ctx, args) => {
-    const organization = await ctx.db.get(args.organizationId);
-    return organization;
-  },
-});
-
-// List all organizations
-export const listOrganizations = query({
-  args: {},
-  handler: async (ctx) => {
-    const organizations = await ctx.db.query("organizations").collect();
-    return organizations;
-  },
-});
-
-// Update an organization
-export const updateOrganization = mutation({
-  args: {
-    organizationId: v.id("organizations"),
-    name: v.optional(v.string()),
-    type: v.optional(v.string()),
-    adminId: v.optional(v.id("users")),
-  },
-  handler: async (ctx, args) => {
-    const { organizationId, ...updates } = args;
-
-    // Define the type for the keys we expect in updates
-    type UpdateKeys = keyof Omit<typeof args, 'organizationId'>;
-    
-    // Define the type for the filtered updates object
-    type FilteredUpdates = Partial<{
-      name?: string;
-      type?: string;
-      adminId?: Id<"users">;
-    }>;
-
-    const filteredUpdates: FilteredUpdates = {};
-
-    // Build updates object only with defined values, handling types
-    (Object.keys(updates) as UpdateKeys[]).forEach((key) => {
-      const value = updates[key];
-      if (value !== undefined) {
-        // Explicitly cast the value based on the key
-        if (key === 'name' || key === 'type') {
-          filteredUpdates[key] = value as string;
-        } else if (key === 'adminId') {
-          filteredUpdates[key] = value as Id<"users">;
-        }
-      }
-    });
-
-    // Only update if there are changes
-    if (Object.keys(filteredUpdates).length === 0) {
-      return { success: false, message: "No updates provided" };
-    }
-
-    await ctx.db.patch(organizationId, filteredUpdates);
     return { success: true };
   },
 });
 
-// Delete an organization
-export const deleteOrganization = mutation({
+// Get organization metadata
+export const getMetadata = query({
   args: {
-    organizationId: v.id("organizations"),
+    clerkOrgId: v.string(),
   },
   handler: async (ctx, args) => {
-    // Check if organization exists
-    const organization = await ctx.db.get(args.organizationId);
-    if (!organization) {
-      return { success: false, message: "Organization not found" };
-    }
-
-    // Delete the organization
-    await ctx.db.delete(args.organizationId);
-    
-    return { success: true };
+    return await ctx.db
+      .query("organizations")
+      .filter((q) => q.eq(q.field("clerkOrgId"), args.clerkOrgId))
+      .unique();
   },
 }); 

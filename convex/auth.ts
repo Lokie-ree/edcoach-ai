@@ -10,6 +10,7 @@ export const createOrGetUser = mutation({
     name: v.string(),
     imageUrl: v.optional(v.string()),
     role: v.optional(v.string()), // If not provided, defaults to "school_leader"
+    organization: v.string(),
   },
   handler: async (ctx, args) => {
     // First, check if the user already exists
@@ -33,6 +34,7 @@ export const createOrGetUser = mutation({
       name: args.name,
       imageUrl: args.imageUrl,
       role: args.role || "school_leader", // Default role
+      organization: args.organization,
       createdAt: Date.now(),
     });
 
@@ -64,46 +66,44 @@ export const getCurrentUser = query({
   },
 });
 
-// Handle the Clerk webhook for user creation and updates
+// Webhook handler for Clerk events
 export const handleClerkWebhook = action({
   args: {
     payload: v.any(),
-    type: v.string(),
   },
   handler: async (ctx, args) => {
-    const { payload, type } = args;
+    const { payload } = args;
 
-    switch (type) {
+    // Handle different event types
+    switch (payload.type) {
       case "user.created":
-        // Create a new user when Clerk notifies us
-        await ctx.runMutation(api.auth.createOrGetUser, {
+        // Create a new user in our database
+        await ctx.runMutation(api.users.createUser, {
           clerkId: payload.data.id,
           email: payload.data.email_addresses[0]?.email_address || "",
           name: `${payload.data.first_name || ""} ${payload.data.last_name || ""}`.trim(),
+          role: "school_leader", // Default role
+          organization: payload.data.organization || "default",
           imageUrl: payload.data.image_url,
         });
         break;
-        
+
       case "user.updated":
-        // Find the user and update their info
+        // Update existing user
         const user = await ctx.runQuery(api.users.getUserByClerkId, {
           clerkId: payload.data.id,
         });
-        
+
         if (user) {
           await ctx.runMutation(api.users.updateUser, {
             userId: user._id,
             name: `${payload.data.first_name || ""} ${payload.data.last_name || ""}`.trim(),
             email: payload.data.email_addresses[0]?.email_address || user.email,
+            role: user.role,
+            organization: payload.data.organization || user.organization,
             imageUrl: payload.data.image_url,
           });
         }
-        break;
-        
-      case "user.deleted":
-        // We would handle user deletion here
-        // For now, we'll just log it - in a real app you might want to anonymize data
-        console.log(`User deleted: ${payload.data.id}`);
         break;
     }
   },
