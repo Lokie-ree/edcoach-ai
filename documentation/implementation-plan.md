@@ -17,30 +17,30 @@ The MVP build is organized into 8 progressive phases, starting with infrastructu
 
 | # | Task | Description | Dependencies |
 |---|------|-------------|--------------|
-| 1 | Configure existing Next.js project | Update the existing Next.js project with necessary dependencies. Add TypeScript configurations, Prettier, and ESLint for code quality. | None |
-| 2 | Set up Convex backend | Initialize Convex in the Next.js project. Connect to the Convex dashboard. Scaffold the `convex/` directory structure: `schema.ts`, `auth.ts`, `users.ts`, `organizations.ts`, etc. | Task #1 |
-| 3 | Set up Clerk authentication | Create a Clerk project and configure OAuth providers (Google, etc.). Add Clerk environment variables to the Next.js project. Install Clerk SDK and configure for Next.js. | Task #1 |
-| 4 | Configure Next.js with Convex and Clerk | Set up Convex provider in Next.js app. Configure Clerk middleware for protected routes. Create necessary wrapper components and providers for the Next.js app structure. | Tasks #1, #2, #3 |
+| 1 | ✅ Configure existing Next.js project | Update the existing Next.js project with necessary dependencies. Add TypeScript configurations, Prettier, and ESLint for code quality. | None |
+| 2 | ✅ Set up Convex backend | Initialize Convex in the Next.js project. Connect to the Convex dashboard. Scaffold the `convex/` directory structure: `schema.ts`, `auth.ts`, `users.ts`, `organizations.ts`, etc. | Task #1 |
+| 3 | ✅ Set up Clerk authentication | Create a Clerk project and configure OAuth providers (Google, etc.). Add Clerk environment variables to the Next.js project. Install Clerk SDK and configure for Next.js. | Task #1 |
+| 4 | ✅ Configure Next.js with Convex and Clerk | Set up Convex provider in Next.js app. Configure Clerk middleware for protected routes. Create necessary wrapper components and providers for the Next.js app structure. | Tasks #1, #2, #3 |
 
 ### Phase 2: Authentication & User/Org Management
 
 | # | Task | Description | Dependencies |
 |---|------|-------------|--------------|
-| 5 | Integrate Clerk authentication in Next.js | Implement login, logout, and session management using Clerk Next.js components and middleware. Set up protected routes and layout components. Display user info (name, email, avatar) in the UI after login. | Tasks #3, #4 |
-| 6 | Implement Convex user table and schema | Define the `users` table in `convex/schema.ts` with Clerk ID, name, email, role, organization, etc. Add indexes: `by_clerk_id`, `by_role`, `by_organization`. | Task #2 |
-| 7 | Implement Convex organization table and schema | Define the `organizations` table in `convex/schema.ts` with name, adminId, clerkOrgId, etc. Add index: `by_admin`. | Tasks #2, #6 |
-| 8 | Set up Clerk webhooks for user/org sync | Implement webhook endpoints using Next.js API routes or Convex HTTP endpoints to handle Clerk events (user created, org created, etc.). On new user/org, create corresponding records in Convex. | Tasks #3, #6, #7 |
-| 9 | Implement Convex user management functions | Create `createOrGetUser`, `getCurrentUser`, `getUserByClerkId`, `listUsers`, `updateUser` in `convex/users.ts`. Always resolve user by Clerk ID from JWT. | Tasks #6, #8 |
-| 10 | Enforce authentication and RBAC in Convex | In every Convex function, check for a valid Clerk JWT and resolve the user. Enforce role-based access and organization scoping in all queries/mutations. | Tasks #6, #7, #9 |
+| 5 | ✅ Integrate Clerk authentication in Next.js | Implement login, logout, and session management using Clerk Next.js components and middleware. Set up protected routes and layout components. Display user info (name, email, avatar) in the UI after login. | Tasks #3, #4 |
+| 6 | ✅ Implement Convex user table and schema | Define the `users` table in `convex/schema.ts` with Clerk ID, name, email, role, organization, etc. Add indexes: `by_clerk_id`, `by_role`, `by_organization`. | Task #2 |
+| 7 | ✅ Implement Convex organization table and schema | Define the `organizations` table in `convex/schema.ts` with name, adminId, clerkOrgId, etc. Add index: `by_admin`. | Tasks #2, #6 |
+| 8 | ✅ Set up Clerk webhooks for user/org sync | Implement webhook endpoints using Next.js API routes or Convex HTTP endpoints to handle Clerk events (user created, org created, etc.). On new user/org, create corresponding records in Convex. | Tasks #3, #6, #7 |
+| 9 | ✅ Implement Convex user management functions | Create `createOrGetUser`, `getCurrentUser`, `getUserByClerkId`, `listUsers`, `updateUser` in `convex/users.ts`. Always resolve user by Clerk ID from JWT. | Tasks #6, #8 |
+| 10 | ✅ Enforce authentication and RBAC in Convex | In every Convex function, check for a valid Clerk JWT and resolve the user. Enforce role-based access and organization scoping in all queries/mutations. | Tasks #6, #7, #9 |
 
 ### Phase 3: Teacher, Rubric, and Observation Management
 
 | # | Task | Description | Dependencies |
 |---|------|-------------|--------------|
-| 11 | Implement teacher table and management | Define `teachers` table in `convex/schema.ts` (name, email, department, gradeLevel, createdBy, createdAt). Add index: `by_creator`. Implement create/list functions in `convex/teachers.ts`. | Tasks #6, #7, #10 |
-| 12 | Implement rubric table and management | Define `rubrics` table in `convex/schema.ts` (name, description, version, isStandard, structure, createdBy, organizationId, etc.). Add index: `by_organization`. Implement create/list functions in `convex/rubrics.ts`. | Tasks #6, #7, #10 |
-| 13 | Implement observation table and management | Define `observations` table in `convex/schema.ts` (teacherId, observerId, rubricId, observationDate, status, organizationId, etc.). Add indexes: `by_observer`, `by_teacher`, `by_status`, `by_organization`. Implement create/list/update functions in `convex/observations.ts`. | Tasks #11, #12 |
-| 14 | Implement evidence and feedback tables | Define `evidence` and `feedback` tables in `convex/schema.ts` with appropriate fields and indexes. Implement create/list functions in `convex/evidence.ts` and `convex/feedback.ts`. | Task #13 |
+| 11 | ✅ Implement teacher table and management | Define `teachers` table in `convex/schema.ts` (name, email, department, gradeLevel, createdBy, createdAt). Add index: `by_creator`. Implement create/list functions in `convex/teachers.ts`. | Tasks #6, #7, #10 |
+| 12 | ✅ Implement rubric table and management | Define `rubrics` table in `convex/schema.ts` (name, description, version, isStandard, structure, createdBy, organizationId, etc.). Add index: `by_organization`. Implement create/list functions in `convex/rubrics.ts`. | Tasks #6, #7, #10 |
+| 13 | ✅ Implement observation table and management | Define `observations` table in `convex/schema.ts` (teacherId, observerId, rubricId, observationDate, status, organizationId, etc.). Add indexes: `by_observer`, `by_teacher`, `by_status`, `by_organization`. Implement create/list/update functions in `convex/observations.ts`. | Tasks #11, #12 |
+| 14 | ✅ Implement evidence and feedback tables | Define `evidence` and `feedback` tables in `convex/schema.ts` with appropriate fields and indexes. Implement create/list functions in `convex/evidence.ts` and `convex/feedback.ts`. | Task #13 |
 
 ### Phase 4: AI Feedback Integration
 
@@ -53,8 +53,9 @@ The MVP build is organized into 8 progressive phases, starting with infrastructu
 
 | # | Task | Description | Dependencies |
 |---|------|-------------|--------------|
-| 17 | Build user dashboard and navigation | Create Next.js pages/routes for dashboard. Show user info, role, and organization. Route users to the correct dashboard based on role using Next.js routing and Clerk middleware. | Tasks #5, #9, #10 |
-| 18 | Implement teacher and observation management UI | Create Next.js pages/components to list, create, and view teachers. Implement pages/components to list, create, and view observations (with status, rubric, evidence, etc.). | Tasks #11, #13, #17 |
+| 17 | ✅ Build user dashboard and navigation | Create Next.js pages/routes for dashboard. Show user info, role, and organization. Route users to the correct dashboard based on role using Next.js routing and Clerk middleware. | Tasks #5, #9, #10 |
+| 17a | Revisit dashboard layout | Review and improve the dashboard layout for better organization and user experience. | Task #17 |
+| 18 | Implement teacher and observation management UI | Create Next.js pages/components to list, create, and view teachers. Implement pages/components to list, create, and view observations (with status, rubric, evidence, etc.). | Tasks #11, #13, #17a |
 | 19 | Implement rubric and evidence management UI | Create Next.js pages/components to list and select rubrics for observations. Implement pages/components to add/view evidence for observations. | Tasks #12, #14, #18 |
 | 20 | Implement feedback review and editing UI | Create Next.js pages/components to display AI-generated feedback. Implement pages/components to allow users to edit/finalize feedback as needed. | Tasks #16, #19 |
 
@@ -62,7 +63,7 @@ The MVP build is organized into 8 progressive phases, starting with infrastructu
 
 | # | Task | Description | Dependencies |
 |---|------|-------------|--------------|
-| 21 | Enforce organization-level data isolation | All Convex queries/mutations must filter by organizationId. Test for data leakage across organizations. | Tasks #7, #10, #11, #12, #13, #14 |
+| 21 | ✅ Enforce organization-level data isolation | All Convex queries/mutations must filter by organizationId. Test for data leakage across organizations. | Tasks #7, #10, #11, #12, #13, #14 |
 | 22 | Implement audit logging (optional but recommended) | Add `audit_logs` table in Convex. Log sensitive actions (create/update/delete/view) with user, entity, timestamp, and details. | Tasks #6, #7, #13, #14 |
 | 23 | Review FERPA compliance | Ensure access controls and audit logging meet FERPA guidelines. Document data retention and privacy policies. Implement necessary Next.js middleware for additional security. | Tasks #21, #22 |
 
