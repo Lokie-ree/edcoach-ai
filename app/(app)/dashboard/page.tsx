@@ -78,98 +78,6 @@ const Dashboard = () => {
         </p>
       </motion.div>
 
-      {/* Stats Grid */}
-      <motion.div 
-        className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <TiltedCard>
-          <Card className="h-full bg-gradient-to-br from-white to-indigo-50/30 dark:from-zinc-900 dark:to-indigo-950/10">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Teachers
-              </CardTitle>
-              <div className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 p-2">
-                <Users className="h-4 w-4 md:h-5 md:w-5 text-indigo-600 dark:text-indigo-400" />
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight">{teachers?.length || 0}</div>
-              <p className="text-xs text-muted-foreground mt-2 md:mt-3">
-                Teachers in your organization
-              </p>
-            </CardContent>
-          </Card>
-        </TiltedCard>
-
-        <TiltedCard>
-          <Card className="bg-gradient-to-br from-white to-purple-50/30 dark:from-zinc-900 dark:to-purple-950/10">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Observations
-              </CardTitle>
-              <div className="rounded-full bg-purple-100 dark:bg-purple-900/30 p-2">
-                <BookOpen className="h-4 w-4 md:h-5 md:w-5 text-purple-600 dark:text-purple-400" />
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight">{totalObservations}</div>
-              <div className="flex items-center text-xs text-muted-foreground mt-2 md:mt-3">
-                <span className="flex items-center">
-                  <div className="w-2 h-2 rounded-full bg-green-500 mr-1"></div>
-                  {completedObservations} completed
-                </span>
-                <span className="mx-2">•</span>
-                <span className="flex items-center">
-                  <div className="w-2 h-2 rounded-full bg-yellow-500 mr-1"></div>
-                  {inProgressObservations} in progress
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        </TiltedCard>
-
-        <TiltedCard>
-          <Card className="bg-gradient-to-br from-white to-indigo-50/30 dark:from-zinc-900 dark:to-indigo-950/10">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Completion Rate
-              </CardTitle>
-              <div className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 p-2">
-                <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-indigo-600 dark:text-indigo-400" />
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight">{completionRate.toFixed(1)}%</div>
-              <div className="mt-4 md:mt-6">
-                <Progress value={completionRate} className="h-2 bg-indigo-100 dark:bg-indigo-900/30" />
-              </div>
-            </CardContent>
-          </Card>
-        </TiltedCard>
-
-        <TiltedCard>
-          <Card className="bg-gradient-to-br from-white to-purple-50/30 dark:from-zinc-900 dark:to-purple-950/10">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                School Info
-              </CardTitle>
-              <div className="rounded-full bg-purple-100 dark:bg-purple-900/30 p-2">
-                <School className="h-4 w-4 md:h-5 md:w-5 text-purple-600 dark:text-purple-400" />
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight">1</div>
-              <p className="text-xs text-muted-foreground mt-2 md:mt-3">
-                Schools in your network
-              </p>
-            </CardContent>
-          </Card>
-        </TiltedCard>
-      </motion.div>
-
       {/* Main Content Grid */}
       <motion.div 
         className="grid gap-4 md:grid-cols-3"
@@ -271,6 +179,97 @@ const Dashboard = () => {
                   </motion.div>
                 )}
               </div>
+            </CardContent>
+          </Card>
+        </TiltedCard>
+      </motion.div>
+      {/* Stats Grid */}
+      <motion.div 
+        className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <TiltedCard>
+          <Card className="h-full bg-gradient-to-br from-white to-indigo-50/30 dark:from-zinc-900 dark:to-indigo-950/10">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Teachers
+              </CardTitle>
+              <div className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 p-2">
+                <Users className="h-4 w-4 md:h-5 md:w-5 text-indigo-600 dark:text-indigo-400" />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl md:text-3xl font-bold tracking-tight">{teachers?.length || 0}</div>
+              <p className="text-xs text-muted-foreground mt-2 md:mt-3">
+                Teachers in your organization
+              </p>
+            </CardContent>
+          </Card>
+        </TiltedCard>
+
+        <TiltedCard>
+          <Card className="bg-gradient-to-br from-white to-purple-50/30 dark:from-zinc-900 dark:to-purple-950/10">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Observations
+              </CardTitle>
+              <div className="rounded-full bg-purple-100 dark:bg-purple-900/30 p-2">
+                <BookOpen className="h-4 w-4 md:h-5 md:w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl md:text-3xl font-bold tracking-tight">{totalObservations}</div>
+              <div className="flex items-center text-xs text-muted-foreground mt-2 md:mt-3">
+                <span className="flex items-center">
+                  <div className="w-2 h-2 rounded-full bg-green-500 mr-1"></div>
+                  {completedObservations} completed
+                </span>
+                <span className="mx-2">•</span>
+                <span className="flex items-center">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500 mr-1"></div>
+                  {inProgressObservations} in progress
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </TiltedCard>
+
+        <TiltedCard>
+          <Card className="bg-gradient-to-br from-white to-indigo-50/30 dark:from-zinc-900 dark:to-indigo-950/10">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Completion Rate
+              </CardTitle>
+              <div className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 p-2">
+                <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-indigo-600 dark:text-indigo-400" />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl md:text-3xl font-bold tracking-tight">{completionRate.toFixed(1)}%</div>
+              <div className="mt-4 md:mt-6">
+                <Progress value={completionRate} className="h-2 bg-indigo-100 dark:bg-indigo-900/30" />
+              </div>
+            </CardContent>
+          </Card>
+        </TiltedCard>
+
+        <TiltedCard>
+          <Card className="bg-gradient-to-br from-white to-purple-50/30 dark:from-zinc-900 dark:to-purple-950/10">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                School Info
+              </CardTitle>
+              <div className="rounded-full bg-purple-100 dark:bg-purple-900/30 p-2">
+                <School className="h-4 w-4 md:h-5 md:w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl md:text-3xl font-bold tracking-tight">1</div>
+              <p className="text-xs text-muted-foreground mt-2 md:mt-3">
+                Schools in your network
+              </p>
             </CardContent>
           </Card>
         </TiltedCard>

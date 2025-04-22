@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import landingContent from "@/data/landing-content.json";
 import { Logo } from "@/components/logo";
 import { Section } from "@/components/ui/section";
+import { SignInButton } from "@clerk/nextjs"
 
 export default function HeroSection() {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -146,16 +147,15 @@ export default function HeroSection() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex flex-col sm:flex-row gap-4"
               >
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg group"
-                  asChild
-                >
-                  <Link href={hero.cta_primary.href}>
-                    <span>{hero.cta_primary.label}</span>
+                <SignInButton mode="modal">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg group"
+                  >
+                    <span>Login</span>
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </Button>
+                  </Button>
+                </SignInButton>
                 <Button
                   size="lg"
                   variant="outline"

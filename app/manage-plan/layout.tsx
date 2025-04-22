@@ -1,4 +1,4 @@
-import DashboardLayout from "../dashboard/layout";
+import DashboardLayout from "../(app)/dashboard/layout";
 
 export default function ManagePlanLayout({
   children,
