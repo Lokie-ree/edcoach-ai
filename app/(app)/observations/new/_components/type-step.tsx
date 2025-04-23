@@ -24,18 +24,6 @@ const observationTypes: ObservationType[] = [
     description: "Brief, focused observation of specific teaching practices",
     icon: "🚶",
   },
-  {
-    id: "coaching",
-    title: "Coaching Session",
-    description: "One-on-one coaching and feedback session",
-    icon: "💬",
-  },
-  {
-    id: "peer",
-    title: "Peer Observation",
-    description: "Teacher-to-teacher observation and feedback",
-    icon: "👥",
-  },
 ];
 
 interface TypeStepProps {
