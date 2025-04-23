@@ -1,5 +1,6 @@
 import Header from "@/components/header";
 import { Toaster } from "sonner";
+import MaxWidthWrapper from "@/components/max-width-wrapper";
 
 export default function AppLayout({
   children,
@@ -10,7 +11,9 @@ export default function AppLayout({
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">
-        {children}
+        <MaxWidthWrapper className="py-8">
+          {children}
+        </MaxWidthWrapper>
       </main>
       <Toaster />
     </div>
