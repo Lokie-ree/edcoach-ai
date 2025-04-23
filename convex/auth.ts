@@ -2,6 +2,8 @@ import { v } from "convex/values";
 import { mutation, query, action } from "./_generated/server";
 import { api } from "./_generated/api";
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
 // Check if a user exists and create one if they don't
 export const createOrGetUser = mutation({
   args: {
@@ -51,18 +53,33 @@ export const createOrGetUser = mutation({
 export const getCurrentUser = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return null;
-    }
+    try {
+      const identity = await ctx.auth.getUserIdentity();
+      
+      if (!identity) {
+        // In development, return null instead of throwing
+        if (process.env.NODE_ENV === "development") {
+          console.warn("Development mode: No authenticated user, returning null");
+          return null;
+        }
+        throw new Error("Not authenticated");
+      }
 
-    // Find the user in our database
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    
-    return user;
+      // Find the user in our database
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+        .unique();
+      
+      return user;
+    } catch (error) {
+      // In development, return null for any auth errors
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Development mode: Auth error, returning null", error);
+        return null;
+      }
+      throw error;
+    }
   },
 });
 

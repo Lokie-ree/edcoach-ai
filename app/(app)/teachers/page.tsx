@@ -5,145 +5,242 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { Plus, UserPlus, Users, GraduationCap } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
+const formSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  department: z.string().optional(),
+  gradeLevel: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 export default function TeachersPage() {
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const createTeacher = useMutation(api.teachers.create);
+  const [isAddingTeacher, setIsAddingTeacher] = useState(false);
   const teachers = useQuery(api.teachers.list);
-  const currentUser = useQuery(api.users.getCurrentUser);
+  const createTeacher = useMutation(api.teachers.create);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      department: "",
+      gradeLevel: "",
+    },
+  });
 
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      name: formData.get("name") as string,
-      email: formData.get("email") as string,
-      department: formData.get("department") as string,
-      gradeLevel: formData.get("gradeLevel") as string,
-    };
-
+  const onSubmit = async (values: FormValues) => {
     try {
-      await createTeacher(data);
+      await createTeacher({
+        name: values.name,
+        email: values.email,
+        department: values.department,
+        gradeLevel: values.gradeLevel,
+        status: "pending",
+      });
+      
       toast.success("Teacher added successfully");
-      // Reset form
-      e.currentTarget.reset();
+      form.reset();
+      setIsAddingTeacher(false);
     } catch (error) {
-      toast.error("There was an error adding the teacher. Please try again.");
-    } finally {
-      setIsLoading(false);
+      console.error("Failed to add teacher:", error);
+      toast.error("Failed to add teacher. Please try again.");
     }
   };
 
   return (
-    <div className="container max-w-4xl py-8">
-      <div className="space-y-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Add a Teacher</CardTitle>
-            <CardDescription>
-              Add a new teacher to your organization's roster.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    placeholder="Enter teacher's full name"
-                    required
-                  />
-                </div>
+    <div className="relative">
+      {/* Background gradient effect */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-br from-white to-indigo-50/30 dark:from-zinc-900 dark:to-indigo-950/10" />
+      </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="Enter teacher's email"
-                  />
-                </div>
+      <div className="container max-w-4xl py-8 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Teachers</h1>
+            <p className="text-muted-foreground">Manage your teaching staff and their observations</p>
+          </div>
+          <Button onClick={() => setIsAddingTeacher(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Teacher
+          </Button>
+        </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="department">Department</Label>
-                  <Input
-                    id="department"
-                    name="department"
-                    placeholder="Enter department"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="gradeLevel">Grade Level</Label>
-                  <Input
-                    id="gradeLevel"
-                    name="gradeLevel"
-                    placeholder="Enter grade level"
-                  />
-                </div>
+        {/* Stats */}
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4">
+          <Card className="md:col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Teachers</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">{teachers?.length || 0}</div>
+            </CardContent>
+          </Card>
+          <Card className="md:col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Active Teachers</CardTitle>
+              <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {teachers?.filter((t) => t.status === "active").length || 0}
               </div>
+            </CardContent>
+          </Card>
+          <Card className="md:col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Pending Invites</CardTitle>
+              <UserPlus className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {teachers?.filter((t) => t.status === "pending").length || 0}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Adding..." : "Add Teacher"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+        {/* Add Teacher Form */}
+        {isAddingTeacher && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="space-y-4"
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle>Add New Teacher</CardTitle>
+                <CardDescription>Enter the teacher's details to send them an invitation</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter teacher's name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="Enter teacher's email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="department"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Department (Optional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter department" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="gradeLevel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Grade Level (Optional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter grade level" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex justify-end space-x-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => {
+                          form.reset();
+                          setIsAddingTeacher(false);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={form.formState.isSubmitting}>
+                        {form.formState.isSubmitting ? "Adding..." : "Add Teacher"}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Teacher Roster</CardTitle>
-            <CardDescription>
-              View and manage your organization's teachers.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Grade Level</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {teachers?.map((teacher) => (
-                  <TableRow key={teacher._id}>
-                    <TableCell>{teacher.name}</TableCell>
-                    <TableCell>{teacher.email || "-"}</TableCell>
-                    <TableCell>{teacher.department || "-"}</TableCell>
-                    <TableCell>{teacher.gradeLevel || "-"}</TableCell>
-                  </TableRow>
-                ))}
-                {teachers?.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center">
-                      No teachers added yet.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        {/* Teachers List */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-foreground">All Teachers</h2>
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
+            {teachers?.map((teacher) => (
+              <Card key={teacher._id} className="flex flex-col">
+                <CardContent className="p-4 flex-1">
+                  <div className="flex flex-col h-full justify-between">
+                    <div>
+                      <h3 className="font-medium text-foreground">{teacher.name}</h3>
+                      <p className="text-sm text-muted-foreground">{teacher.email}</p>
+                      {teacher.department && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Department: {teacher.department}
+                        </p>
+                      )}
+                      {teacher.gradeLevel && (
+                        <p className="text-sm text-muted-foreground">
+                          Grade Level: {teacher.gradeLevel}
+                        </p>
+                      )}
+                    </div>
+                    <div className="mt-4">
+                      <span className={`text-sm px-2 py-1 rounded-full ${
+                        teacher.status === "active" 
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
+                          : teacher.status === "pending" 
+                            ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" 
+                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                      }`}>
+                        {(teacher.status || "inactive").charAt(0).toUpperCase() + (teacher.status || "inactive").slice(1)}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

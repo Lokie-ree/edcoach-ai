@@ -2,9 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { CalendarInput } from "@/components/ui/calendar-input";
 import { useForm } from "react-hook-form";
@@ -79,23 +77,6 @@ export function DetailsStep({ onNext, onBack }: DetailsStepProps) {
                 </FormItem>
               )}
             />
-
-            <div className="flex justify-between pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={onBack}
-                className="border-indigo-200/50 dark:border-indigo-800/20 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20"
-              >
-                Back
-              </Button>
-              <Button 
-                type="submit"
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
-              >
-                Next
-              </Button>
-            </div>
           </form>
         </Form>
       </Card>

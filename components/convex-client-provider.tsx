@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useAuth } from "@clerk/nextjs";
@@ -8,8 +8,7 @@ import { SchematicProvider } from "@schematichq/schematic-react";
 import { useUser } from "@clerk/nextjs";
 import { useSchematicEvents } from "@schematichq/schematic-react";
 
-
-const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+const isDevelopment = process.env.NODE_ENV === "development";
 
 const SchematicWrapped = ({children}: {children: ReactNode}) => {
   const { identify } = useSchematicEvents();
@@ -42,9 +41,6 @@ const SchematicWrapped = ({children}: {children: ReactNode}) => {
   }, [user, identify]);
 
   return children;
-  
-  
-  
 }
 
 export default function ConvexClientProvider({
@@ -52,6 +48,8 @@ export default function ConvexClientProvider({
 }: {
   children: ReactNode;
 }) {
+  const [convex] = useState(() => new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!));
+
   return (
     <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
       <SchematicProvider

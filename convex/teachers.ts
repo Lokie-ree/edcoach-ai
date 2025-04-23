@@ -81,6 +81,7 @@ export const seed = mutation({
           email: "john@example.com",
           department: "Mathematics",
           gradeLevel: "9-12",
+          status: "active",
           createdBy: testUserId,
           createdAt: Date.now(),
         },
@@ -89,6 +90,7 @@ export const seed = mutation({
           email: "jane@example.com",
           department: "Science",
           gradeLevel: "6-8",
+          status: "active",
           createdBy: testUserId,
           createdAt: Date.now(),
         },
@@ -97,6 +99,7 @@ export const seed = mutation({
           email: "mike@example.com",
           department: "English",
           gradeLevel: "9-12",
+          status: "active",
           createdBy: testUserId,
           createdAt: Date.now(),
         },
@@ -121,6 +124,7 @@ export const create = mutation({
     email: v.optional(v.string()),
     department: v.optional(v.string()),
     gradeLevel: v.optional(v.string()),
+    status: v.optional(v.string()),
   },
   returns: v.object({
     success: v.boolean(),
@@ -139,6 +143,7 @@ export const create = mutation({
         email: args.email,
         department: args.department,
         gradeLevel: args.gradeLevel,
+        status: args.status || "pending", // Default to pending if not provided
         createdBy: await getUserIdForMutation(ctx, identity),
         createdAt: Date.now(),
       });
@@ -161,6 +166,7 @@ export const list = query({
         email: v.optional(v.string()),
         department: v.optional(v.string()),
         gradeLevel: v.optional(v.string()),
+        status: v.optional(v.string()),
         createdBy: v.id("users"),
         createdAt: v.number(),
       })

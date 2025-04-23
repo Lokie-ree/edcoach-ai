@@ -1,16 +1,16 @@
 "use client";
 
 import React from "react";
-import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { School, Users, BarChart, BookOpen, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { School, Users, BarChart, BookOpen, Clock, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { Doc } from "@/convex/_generated/dataModel";
 import { motion } from "framer-motion";
+import { useAuthQuery } from "@/hooks/use-auth-query";
 
 // Tilted Card Component
 const TiltedCard = ({ children, className }: { children: React.ReactNode; className?: string }) => {
@@ -51,13 +51,26 @@ const GridDistortion = () => {
 };
 
 const Dashboard = () => {
-  const teachers = useQuery(api.teachers.list);
-  const observations = useQuery(api.observations.list);
+  const { isLoading: isLoadingTeachers, data: teachers = [] } = useAuthQuery<Doc<"teachers">[]>(api.teachers.list);
+  const { isLoading: isLoadingObservations, data: observations = [] } = useAuthQuery<Doc<"observations">[]>(api.observations.list);
+  
+  // Show loading state
+  if (isLoadingTeachers || isLoadingObservations) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
+  // Ensure we have arrays to work with
+  const safeTeachers = teachers ?? [];
+  const safeObservations = observations ?? [];
   
   // Calculate observation stats
-  const totalObservations = observations?.length || 0;
-  const completedObservations = observations?.filter((o: Doc<"observations">) => o.status === "completed").length || 0;
-  const inProgressObservations = observations?.filter((o: Doc<"observations">) => o.status === "in_progress").length || 0;
+  const totalObservations = safeObservations.length;
+  const completedObservations = safeObservations.filter((o) => o.status === "completed").length;
+  const inProgressObservations = safeObservations.filter((o) => o.status === "in_progress").length;
   const completionRate = totalObservations > 0 ? (completedObservations / totalObservations) * 100 : 0;
   
   return (
@@ -140,7 +153,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {observations?.slice(0, 3).map((observation: Doc<"observations">) => (
+                {safeObservations.slice(0, 3).map((observation: Doc<"observations">) => (
                   <motion.div 
                     key={observation._id} 
                     className="flex items-start"
@@ -165,7 +178,7 @@ const Dashboard = () => {
                     </div>
                   </motion.div>
                 ))}
-                {(!observations || observations.length === 0) && (
+                {(!safeObservations || safeObservations.length === 0) && (
                   <motion.div 
                     className="flex items-center"
                     whileHover={{ x: 2 }}
@@ -201,7 +214,7 @@ const Dashboard = () => {
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight">{teachers?.length || 0}</div>
+              <div className="text-2xl md:text-3xl font-bold tracking-tight">{safeTeachers.length}</div>
               <p className="text-xs text-muted-foreground mt-2 md:mt-3">
                 Teachers in your organization
               </p>

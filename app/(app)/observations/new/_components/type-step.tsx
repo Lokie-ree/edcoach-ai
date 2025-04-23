@@ -44,8 +44,8 @@ export function TypeStep({ selectedType, onSelectType }: TypeStepProps) {
             className={cn(
               "p-6 cursor-pointer transition-all bg-gradient-to-br from-white to-indigo-50/30 dark:from-zinc-900 dark:to-indigo-950/10",
               selectedType === type.id
-                ? "border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/20"
-                : "border-indigo-200/50 dark:border-indigo-800/20 hover:border-indigo-400 dark:hover:border-indigo-600"
+                ? "border-2 border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/20"
+                : "border border-indigo-200/50 dark:border-indigo-800/20 hover:border-indigo-400 dark:hover:border-indigo-600"
             )}
             onClick={() => onSelectType(type.id)}
           >

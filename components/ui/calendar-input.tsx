@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
@@ -17,8 +18,15 @@ interface CalendarInputProps {
 }
 
 export function CalendarInput({ date, setDate }: CalendarInputProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleDateSelect = (selectedDate: Date | undefined) => {
+    setDate(selectedDate);
+    setIsOpen(false); // Close the popover on selection
+  };
+
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -35,7 +43,7 @@ export function CalendarInput({ date, setDate }: CalendarInputProps) {
         <Calendar
           mode="single"
           selected={date}
-          onSelect={setDate}
+          onSelect={handleDateSelect} // Use the new handler
           initialFocus
           className="rounded-md border"
         />
