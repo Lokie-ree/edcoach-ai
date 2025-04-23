@@ -123,7 +123,7 @@ export default function TeachersPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Add New Teacher</CardTitle>
-                <CardDescription>Enter the teacher's details to send them an invitation</CardDescription>
+                <CardDescription>Enter the teacher&apos;s details to send them an invitation</CardDescription>
               </CardHeader>
               <CardContent>
                 <Form {...form}>
@@ -135,7 +135,7 @@ export default function TeachersPage() {
                         <FormItem>
                           <FormLabel>Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter teacher's name" {...field} />
+                            <Input placeholder="Enter teacher&apos;s name" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -148,7 +148,7 @@ export default function TeachersPage() {
                         <FormItem>
                           <FormLabel>Email</FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="Enter teacher's email" {...field} />
+                            <Input type="email" placeholder="Enter teacher&apos;s email" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

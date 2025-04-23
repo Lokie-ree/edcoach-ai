@@ -2,7 +2,6 @@
 
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { CalendarInput } from "@/components/ui/calendar-input";
 import { useForm } from "react-hook-form";
@@ -17,10 +16,10 @@ const formSchema = z.object({
 
 interface DetailsStepProps {
   onNext: () => void;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
-export function DetailsStep({ onNext, onBack }: DetailsStepProps) {
+export function DetailsStep({ onNext }: DetailsStepProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {

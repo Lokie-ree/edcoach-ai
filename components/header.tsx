@@ -5,9 +5,7 @@ import {
   Users, 
   Settings, 
   School, 
-  ChevronDown, 
   Home, 
-  BarChart,
   MenuIcon,
   X
 } from "lucide-react";
@@ -17,7 +15,6 @@ import { ModeToggle } from "./mode-toggle";
 import MaxWidthWrapper from "./max-width-wrapper";
 import { Logo } from "./logo";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard" },

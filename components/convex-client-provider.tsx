@@ -8,8 +8,6 @@ import { SchematicProvider } from "@schematichq/schematic-react";
 import { useUser } from "@clerk/nextjs";
 import { useSchematicEvents } from "@schematichq/schematic-react";
 
-const isDevelopment = process.env.NODE_ENV === "development";
-
 const SchematicWrapped = ({children}: {children: ReactNode}) => {
   const { identify } = useSchematicEvents();
   const { user } = useUser();

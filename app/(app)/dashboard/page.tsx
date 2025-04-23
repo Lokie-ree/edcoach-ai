@@ -3,7 +3,7 @@
 import React from "react";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { School, Users, BarChart, BookOpen, Clock, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { School, Users, BarChart, BookOpen, CheckCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -87,7 +87,7 @@ const Dashboard = () => {
           Dashboard
         </h1>
         <p className="text-muted-foreground mt-2">
-          Welcome to EdCoach AI. Here's an overview of your organization.
+          Welcome to EdCoach AI. Here&apos;s an overview of your organization.
         </p>
       </motion.div>
 
