@@ -1,6 +1,6 @@
 "use client";
 
-import Wizard from "./wizard";
+import { Wizard } from "./wizard";
 import { motion } from "framer-motion";
 import { useAuth } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
