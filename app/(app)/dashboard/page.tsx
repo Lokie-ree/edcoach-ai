@@ -2,8 +2,21 @@
 
 import React from "react";
 import { api } from "@/convex/_generated/api";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { School, Users, BarChart, BookOpen, CheckCircle, Loader2 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  School,
+  Users,
+  BarChart,
+  BookOpen,
+  CheckCircle,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -13,13 +26,19 @@ import { motion } from "framer-motion";
 import { useAuthQuery } from "@/hooks/use-auth-query";
 
 // Tilted Card Component
-const TiltedCard = ({ children, className }: { children: React.ReactNode; className?: string }) => {
+const TiltedCard = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
   return (
     <motion.div
       className={cn("relative", className)}
-      whileHover={{ 
+      whileHover={{
         scale: 1.02,
-        transition: { duration: 0.2 }
+        transition: { duration: 0.2 },
       }}
       whileTap={{ scale: 0.98 }}
       style={{ zIndex: 1 }}
@@ -38,9 +57,9 @@ const GridDistortion = () => {
           <motion.div
             key={i}
             className="bg-primary/10 rounded-sm"
-            whileHover={{ 
+            whileHover={{
               scale: 1.2,
-              backgroundColor: "rgba(var(--primary), 0.15)"
+              backgroundColor: "rgba(var(--primary), 0.15)",
             }}
             transition={{ duration: 0.2 }}
           />
@@ -51,9 +70,12 @@ const GridDistortion = () => {
 };
 
 const Dashboard = () => {
-  const { isLoading: isLoadingTeachers, data: teachers = [] } = useAuthQuery<Doc<"teachers">[]>(api.teachers.list);
-  const { isLoading: isLoadingObservations, data: observations = [] } = useAuthQuery<Doc<"observations">[]>(api.observations.list);
-  
+  const { isLoading: isLoadingTeachers, data: teachers = [] } = useAuthQuery<
+    Doc<"teachers">[]
+  >(api.teachers.list);
+  const { isLoading: isLoadingObservations, data: observations = [] } =
+    useAuthQuery<Doc<"observations">[]>(api.observations.list);
+
   // Show loading state
   if (isLoadingTeachers || isLoadingObservations) {
     return (
@@ -62,21 +84,28 @@ const Dashboard = () => {
       </div>
     );
   }
-  
+
   // Ensure we have arrays to work with
   const safeTeachers = teachers ?? [];
   const safeObservations = observations ?? [];
-  
+
   // Calculate observation stats
   const totalObservations = safeObservations.length;
-  const completedObservations = safeObservations.filter((o) => o.status === "completed").length;
-  const inProgressObservations = safeObservations.filter((o) => o.status === "in_progress").length;
-  const completionRate = totalObservations > 0 ? (completedObservations / totalObservations) * 100 : 0;
-  
+  const completedObservations = safeObservations.filter(
+    (o) => o.status === "completed",
+  ).length;
+  const inProgressObservations = safeObservations.filter(
+    (o) => o.status === "in_progress",
+  ).length;
+  const completionRate =
+    totalObservations > 0
+      ? (completedObservations / totalObservations) * 100
+      : 0;
+
   return (
     <div className="space-y-6 relative">
       <GridDistortion />
-      
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -92,7 +121,7 @@ const Dashboard = () => {
       </motion.div>
 
       {/* Main Content Grid */}
-      <motion.div 
+      <motion.div
         className="grid gap-4 md:grid-cols-3"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -110,9 +139,12 @@ const Dashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
                 <Link href="/teachers">
-                  <Button variant="outline" className="w-full h-24 flex flex-col items-center justify-center gap-2 border-indigo-200/50 dark:border-indigo-800/20 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20">
+                  <Button
+                    variant="outline"
+                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border-indigo-200/50 dark:border-indigo-800/20 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20"
+                  >
                     <div className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 p-2">
                       <Users className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
                     </div>
@@ -120,15 +152,23 @@ const Dashboard = () => {
                   </Button>
                 </Link>
                 <Link href="/observations/new">
-                  <Button variant="outline" className="w-full h-24 flex flex-col items-center justify-center gap-2 border-purple-200/50 dark:border-purple-800/20 hover:bg-purple-50/30 dark:hover:bg-purple-950/20">
+                  <Button
+                    variant="outline"
+                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border-purple-200/50 dark:border-purple-800/20 hover:bg-purple-50/30 dark:hover:bg-purple-950/20"
+                  >
                     <div className="rounded-full bg-purple-100 dark:bg-purple-900/30 p-2">
                       <BookOpen className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <span className="text-sm font-medium">Start New Observation</span>
+                    <span className="text-sm font-medium">
+                      Start New Observation
+                    </span>
                   </Button>
                 </Link>
                 <Link href="/analytics">
-                  <Button variant="outline" className="w-full h-24 flex flex-col items-center justify-center gap-2 border-indigo-200/50 dark:border-indigo-800/20 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20">
+                  <Button
+                    variant="outline"
+                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border-indigo-200/50 dark:border-indigo-800/20 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20"
+                  >
                     <div className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 p-2">
                       <BarChart className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
                     </div>
@@ -139,66 +179,10 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </TiltedCard>
-
-        {/* Recent Activity */}
-        <TiltedCard>
-          <Card className="h-full bg-gradient-to-br from-white to-purple-50/30 dark:from-zinc-900 dark:to-purple-950/10">
-            <CardHeader>
-              <CardTitle className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">
-                Recent Activity
-              </CardTitle>
-              <CardDescription>
-                Your latest actions and updates
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {safeObservations.slice(0, 3).map((observation: Doc<"observations">) => (
-                  <motion.div 
-                    key={observation._id} 
-                    className="flex items-start"
-                    whileHover={{ x: 2 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className={cn(
-                      "w-2 h-2 rounded-full mt-2 mr-3",
-                      observation.status === "completed" ? "bg-green-500" :
-                      observation.status === "in_progress" ? "bg-yellow-500" :
-                      "bg-indigo-500"
-                    )} />
-                    <div>
-                      <p className="text-sm font-medium">
-                        {observation.status === "completed" ? "Observation completed" :
-                         observation.status === "in_progress" ? "Observation in progress" :
-                         "New observation started"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(observation._creationTime).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
-                {(!safeObservations || safeObservations.length === 0) && (
-                  <motion.div 
-                    className="flex items-center"
-                    whileHover={{ x: 2 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="w-2 h-2 bg-indigo-500 rounded-full mr-3"></div>
-                    <div>
-                      <p className="text-sm font-medium">Setup completed</p>
-                      <p className="text-xs text-muted-foreground">Welcome to EdCoach AI!</p>
-                    </div>
-                  </motion.div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TiltedCard>
       </motion.div>
       {/* Stats Grid */}
-      <motion.div 
-        className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4"
+      <motion.div
+        className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
@@ -214,7 +198,9 @@ const Dashboard = () => {
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight">{safeTeachers.length}</div>
+              <div className="text-2xl md:text-3xl font-bold tracking-tight">
+                {safeTeachers.length}
+              </div>
               <p className="text-xs text-muted-foreground mt-2 md:mt-3">
                 Teachers in your organization
               </p>
@@ -233,7 +219,9 @@ const Dashboard = () => {
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight">{totalObservations}</div>
+              <div className="text-2xl md:text-3xl font-bold tracking-tight">
+                {totalObservations}
+              </div>
               <div className="flex items-center text-xs text-muted-foreground mt-2 md:mt-3">
                 <span className="flex items-center">
                   <div className="w-2 h-2 rounded-full bg-green-500 mr-1"></div>
@@ -260,9 +248,14 @@ const Dashboard = () => {
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight">{completionRate.toFixed(1)}%</div>
+              <div className="text-2xl md:text-3xl font-bold tracking-tight">
+                {completionRate.toFixed(1)}%
+              </div>
               <div className="mt-4 md:mt-6">
-                <Progress value={completionRate} className="h-2 bg-indigo-100 dark:bg-indigo-900/30" />
+                <Progress
+                  value={completionRate}
+                  className="h-2 bg-indigo-100 dark:bg-indigo-900/30"
+                />
               </div>
             </CardContent>
           </Card>
@@ -279,7 +272,9 @@ const Dashboard = () => {
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight">1</div>
+              <div className="text-2xl md:text-3xl font-bold tracking-tight">
+                1
+              </div>
               <p className="text-xs text-muted-foreground mt-2 md:mt-3">
                 Schools in your network
               </p>

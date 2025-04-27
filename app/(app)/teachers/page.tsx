@@ -5,13 +5,27 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Plus, UserPlus, Users, GraduationCap } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { toast } from "sonner";
 
 const formSchema = z.object({
@@ -47,7 +61,7 @@ export default function TeachersPage() {
         gradeLevel: values.gradeLevel,
         status: "pending",
       });
-      
+
       toast.success("Teacher added successfully");
       form.reset();
       setIsAddingTeacher(false);
@@ -68,8 +82,12 @@ export default function TeachersPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Teachers</h1>
-            <p className="text-muted-foreground">Manage your teaching staff and their observations</p>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+              Teachers
+            </h1>
+            <p className="text-muted-foreground">
+              Manage your teaching staff and their observations
+            </p>
           </div>
           <Button onClick={() => setIsAddingTeacher(true)}>
             <Plus className="mr-2 h-4 w-4" />
@@ -78,19 +96,25 @@ export default function TeachersPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-4">
           <Card className="md:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Teachers</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Teachers
+              </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">{teachers?.length || 0}</div>
+              <div className="text-2xl font-bold text-foreground">
+                {teachers?.length || 0}
+              </div>
             </CardContent>
           </Card>
           <Card className="md:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Active Teachers</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Active Teachers
+              </CardTitle>
               <GraduationCap className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -101,7 +125,9 @@ export default function TeachersPage() {
           </Card>
           <Card className="md:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Pending Invites</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Pending Invites
+              </CardTitle>
               <UserPlus className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -123,11 +149,16 @@ export default function TeachersPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Add New Teacher</CardTitle>
-                <CardDescription>Enter the teacher&apos;s details to send them an invitation</CardDescription>
+                <CardDescription>
+                  Enter the teacher&apos;s details to send them an invitation
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4"
+                  >
                     <FormField
                       control={form.control}
                       name="name"
@@ -135,7 +166,10 @@ export default function TeachersPage() {
                         <FormItem>
                           <FormLabel>Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter teacher&apos;s name" {...field} />
+                            <Input
+                              placeholder="Enter teacher's name"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -148,7 +182,11 @@ export default function TeachersPage() {
                         <FormItem>
                           <FormLabel>Email</FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="Enter teacher&apos;s email" {...field} />
+                            <Input
+                              type="email"
+                              placeholder="Enter teacher's email"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -181,9 +219,9 @@ export default function TeachersPage() {
                       )}
                     />
                     <div className="flex justify-end space-x-2">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
+                      <Button
+                        type="button"
+                        variant="outline"
                         onClick={() => {
                           form.reset();
                           setIsAddingTeacher(false);
@@ -191,8 +229,13 @@ export default function TeachersPage() {
                       >
                         Cancel
                       </Button>
-                      <Button type="submit" disabled={form.formState.isSubmitting}>
-                        {form.formState.isSubmitting ? "Adding..." : "Add Teacher"}
+                      <Button
+                        type="submit"
+                        disabled={form.formState.isSubmitting}
+                      >
+                        {form.formState.isSubmitting
+                          ? "Adding..."
+                          : "Add Teacher"}
                       </Button>
                     </div>
                   </form>
@@ -204,15 +247,21 @@ export default function TeachersPage() {
 
         {/* Teachers List */}
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-foreground">All Teachers</h2>
-          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
+          <h2 className="text-xl font-semibold text-foreground">
+            All Teachers
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-4">
             {teachers?.map((teacher) => (
               <Card key={teacher._id} className="flex flex-col">
                 <CardContent className="p-4 flex-1">
                   <div className="flex flex-col h-full justify-between">
                     <div>
-                      <h3 className="font-medium text-foreground">{teacher.name}</h3>
-                      <p className="text-sm text-muted-foreground">{teacher.email}</p>
+                      <h3 className="font-medium text-foreground">
+                        {teacher.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {teacher.email}
+                      </p>
                       {teacher.department && (
                         <p className="text-sm text-muted-foreground mt-1">
                           Department: {teacher.department}
@@ -225,14 +274,19 @@ export default function TeachersPage() {
                       )}
                     </div>
                     <div className="mt-4">
-                      <span className={`text-sm px-2 py-1 rounded-full ${
-                        teacher.status === "active" 
-                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
-                          : teacher.status === "pending" 
-                            ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" 
-                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                      }`}>
-                        {(teacher.status || "inactive").charAt(0).toUpperCase() + (teacher.status || "inactive").slice(1)}
+                      <span
+                        className={`text-sm px-2 py-1 rounded-full ${
+                          teacher.status === "active"
+                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                            : teacher.status === "pending"
+                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                        }`}
+                      >
+                        {(teacher.status || "inactive")
+                          .charAt(0)
+                          .toUpperCase() +
+                          (teacher.status || "inactive").slice(1)}
                       </span>
                     </div>
                   </div>
@@ -244,4 +298,4 @@ export default function TeachersPage() {
       </div>
     </div>
   );
-} 
+}

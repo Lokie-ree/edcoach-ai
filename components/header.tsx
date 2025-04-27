@@ -66,7 +66,7 @@ const Header = () => {
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Logo />
-            <span className="font-semibold hidden md:inline">EdCoach AI</span>
+            <span className="font-semibold ">EdCoach AI</span>
           </Link>
 
           <div className="flex items-center space-x-1 md:space-x-2">
