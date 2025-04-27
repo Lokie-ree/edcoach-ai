@@ -1,14 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { 
-  Users, 
-  Settings, 
-  School, 
-  Home, 
-  MenuIcon,
-  X
-} from "lucide-react";
+import { Users, Settings, School, Home, MenuIcon, X } from "lucide-react";
 import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
 import { Button } from "./ui/button";
 import { ModeToggle } from "./mode-toggle";
@@ -19,11 +12,16 @@ import { useState } from "react";
 const navItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard" },
   { href: "/teachers", icon: Users, label: "Teachers" },
-  { href: "/organizations/select", icon: School, label: "Schools" },
   { href: "/manage-plan", icon: Settings, label: "Settings" },
 ];
 
-const MobileNav = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+const MobileNav = ({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -46,7 +44,11 @@ const DesktopNav = () => (
   <nav className="hidden md:flex items-center space-x-1">
     {navItems.map((item) => (
       <Link key={item.href} href={item.href}>
-        <Button variant="ghost" size="sm" className="flex items-center space-x-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex items-center space-x-1"
+        >
           <item.icon className="w-4 h-4" />
           <span>{item.label}</span>
         </Button>
@@ -66,33 +68,38 @@ const Header = () => {
             <Logo />
             <span className="font-semibold hidden md:inline">EdCoach AI</span>
           </Link>
-          
+
           <div className="flex items-center space-x-1 md:space-x-2">
             <SignedIn>
               <DesktopNav />
-              
+
               <div className="md:hidden relative">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="icon"
                   onClick={() => setMenuOpen(!menuOpen)}
                   className="flex items-center"
                 >
                   {menuOpen ? <X size={18} /> : <MenuIcon size={18} />}
                 </Button>
-                <MobileNav isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
+                <MobileNav
+                  isOpen={menuOpen}
+                  onClose={() => setMenuOpen(false)}
+                />
               </div>
             </SignedIn>
-            
+
             <ModeToggle />
-            
+
             <SignedIn>
               <UserButton afterSignOutUrl="/" />
             </SignedIn>
-            
+
             <SignedOut>
               <Link href="/about">
-                <Button variant="ghost" size="sm">About</Button>
+                <Button variant="ghost" size="sm">
+                  About
+                </Button>
               </Link>
               <SignInButton mode="modal">
                 <Button>Login</Button>
