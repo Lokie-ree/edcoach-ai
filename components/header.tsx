@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users, Settings, School, Home, MenuIcon, X } from "lucide-react";
+import { Users, Settings, Home, MenuIcon, X } from "lucide-react";
 import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
 import { Button } from "./ui/button";
 import { ModeToggle } from "./mode-toggle";
