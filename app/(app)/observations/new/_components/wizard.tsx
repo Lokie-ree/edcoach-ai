@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TypeStep } from "./type-step";
 import { DetailsStep } from "./details-step";
 import { RubricStep } from "./rubric-step";
+import { InformalWalkthroughStep } from "./informal-walkthrough-step";
 import { FormProvider, useForm } from "react-hook-form";
 import { StepperWrapper } from "@/components/reactbits/Components/Stepper/StepperWrapper";
 
@@ -35,37 +36,38 @@ export function Wizard() {
     {
       title: "Type",
       component: (
-        <TypeStep
-          selectedType={selectedType}
-          onSelectType={setSelectedType}
-        />
+        <TypeStep selectedType={selectedType} onSelectType={setSelectedType} />
       ),
     },
-    {
-      title: "Details",
-      component: (
-        <DetailsStep
-          onNext={handleNext}
-          onBack={handleBack}
-        />
-      ),
-    },
-    {
-      title: "Rubric",
-      component: (
-        <RubricStep
-          onNext={handleNext}
-          onBack={handleBack}
-        />
-      ),
-    },
+    ...(selectedType === "walkthrough"
+      ? [
+          {
+            title: "Walkthrough",
+            component: (
+              <InformalWalkthroughStep
+                onNext={handleNext}
+                onBack={handleBack}
+              />
+            ),
+          },
+        ]
+      : [
+          {
+            title: "Details",
+            component: <DetailsStep onNext={handleNext} onBack={handleBack} />,
+          },
+          {
+            title: "Rubric",
+            component: <RubricStep onNext={handleNext} onBack={handleBack} />,
+          },
+        ]),
   ];
 
   return (
     <FormProvider {...methods}>
       <div className="space-y-8">
         <StepperWrapper
-          steps={steps.map(step => ({ label: step.title }))}
+          steps={steps.map((step) => ({ label: step.title }))}
           currentStep={currentStep}
           onStepClick={setCurrentStep}
           className="mb-8"
@@ -75,9 +77,7 @@ export function Wizard() {
           <CardHeader>
             <CardTitle>{steps[currentStep].title}</CardTitle>
           </CardHeader>
-          <CardContent>
-            {steps[currentStep].component}
-          </CardContent>
+          <CardContent>{steps[currentStep].component}</CardContent>
         </Card>
 
         <div className="flex justify-between">
@@ -98,4 +98,4 @@ export function Wizard() {
       </div>
     </FormProvider>
   );
-} 
+}

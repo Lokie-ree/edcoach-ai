@@ -9,7 +9,12 @@ import { useAuthQuery } from "@/hooks/use-auth-query";
 
 export function NewObservationPageClient() {
   const { isLoaded, isSignedIn } = useAuth();
-  const { isLoading, isAuthenticated, data: user, error } = useAuthQuery(api.users.getCurrentUser);
+  const {
+    isLoading,
+    isAuthenticated,
+    data: user,
+    error,
+  } = useAuthQuery(api.users.getCurrentUser);
 
   if (!isLoaded || isLoading) {
     return (
@@ -22,8 +27,12 @@ export function NewObservationPageClient() {
   if (!isSignedIn || !isAuthenticated) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <h2 className="text-2xl font-semibold text-foreground">Authentication Required</h2>
-        <p className="text-muted-foreground">Please sign in to create observations.</p>
+        <h2 className="text-2xl font-semibold text-foreground">
+          Authentication Required
+        </h2>
+        <p className="text-muted-foreground">
+          Please sign in to create observations.
+        </p>
       </div>
     );
   }
@@ -32,7 +41,9 @@ export function NewObservationPageClient() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <h2 className="text-2xl font-semibold text-foreground">Error</h2>
-        <p className="text-muted-foreground">An error occurred while loading your data.</p>
+        <p className="text-muted-foreground">
+          An error occurred while loading your data.
+        </p>
       </div>
     );
   }
@@ -40,8 +51,12 @@ export function NewObservationPageClient() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <h2 className="text-2xl font-semibold text-foreground">Setup Required</h2>
-        <p className="text-muted-foreground">Please complete your profile setup to create observations.</p>
+        <h2 className="text-2xl font-semibold text-foreground">
+          Setup Required
+        </h2>
+        <p className="text-muted-foreground">
+          Please complete your profile setup to create observations.
+        </p>
       </div>
     );
   }
@@ -55,9 +70,6 @@ export function NewObservationPageClient() {
         transition={{ duration: 0.5 }}
         className="space-y-2"
       >
-        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-          New Observation
-        </h1>
         <p className="text-muted-foreground">
           Create a new observation or walkthrough using our step-by-step wizard.
         </p>
@@ -73,4 +85,4 @@ export function NewObservationPageClient() {
       </motion.div>
     </div>
   );
-} 
+}
