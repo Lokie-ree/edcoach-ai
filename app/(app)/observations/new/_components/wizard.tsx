@@ -68,28 +68,37 @@ const prepareObservationPayload = (values: ObservationFormData) => {
         comment: values.refinementComments?.[indicator] || "",
       });
     }
-    // Walkthrough: Include walkthrough fields, set formal fields to undefined
+
     return {
       teacherId: values.teacherId,
       observationDate: values.observationDate.getTime(),
-      walkthroughEntries: walkthroughEntries,
-      reinforcementComment: values.additionalComments, // Remap additionalComments from walkthrough
-      refinementComment: undefined, // Not applicable for walkthrough
-      subject: undefined, // Not applicable for walkthrough
-      gradeLevels: undefined, // Not applicable for walkthrough
-      rubricResponses: undefined, // Not applicable for walkthrough
+      walkthroughEntries,
+      reinforcementComment: values.additionalComments ?? "",
+      refinementComment: "", // Required field, provide empty string
+      subject: "", // Required field, provide empty string
+      gradeLevels: [], // Required field, provide empty array
+      rubricResponses: undefined,
     };
   } else {
-    // Formal: Include formal fields, set walkthrough fields to undefined
+    // Transform rubric responses from Record<string, Record<string, number>> to Record<string, number>
+    const transformedRubricResponses = values.rubricResponses
+      ? Object.entries(values.rubricResponses).reduce((acc, [domain, indicators]) => {
+          Object.entries(indicators).forEach(([indicator, rating]) => {
+            acc[`${domain}.${indicator}`] = rating;
+          });
+          return acc;
+        }, {} as Record<string, number>)
+      : undefined;
+
     return {
       teacherId: values.teacherId,
       observationDate: values.observationDate.getTime(),
-      subject: values.subject,
-      gradeLevels: values.gradeLevels,
-      reinforcementComment: values.reinforcementComment,
-      refinementComment: values.refinementComment,
-      rubricResponses: values.rubricResponses,
-      walkthroughEntries: undefined, // Not applicable for formal
+      subject: values.subject ?? "",
+      gradeLevels: values.gradeLevels ?? [],
+      reinforcementComment: values.reinforcementComment ?? "",
+      refinementComment: values.refinementComment ?? "",
+      rubricResponses: transformedRubricResponses,
+      walkthroughEntries: [], // Required field, provide empty array
     };
   }
 };
@@ -140,7 +149,7 @@ export function Wizard() {
     {
       title: "Type",
       component: (
-        <div className="space-y-4">
+        <div className="space-y-4 px-6">
           <h2 className="text-2xl font-bold">Select Type</h2>
           <TypeStep selectedType={selectedType} onSelectType={setSelectedType} />
         </div>
@@ -151,7 +160,7 @@ export function Wizard() {
           {
             title: "Walkthrough",
             component: (
-              <div className="space-y-4">
+              <div className="space-y-4 px-6">
                 <h2 className="text-2xl font-bold">Informal Walkthrough</h2>
                 <InformalWalkthroughStep
                   onNext={handleNext}
@@ -165,7 +174,7 @@ export function Wizard() {
           {
             title: "Details",
             component: (
-              <div className="space-y-4">
+              <div className="space-y-4 px-6">
                 <h2 className="text-2xl font-bold">Observation Details</h2>
                 <DetailsStep onNext={handleNext} onBack={handleBack} />
               </div>
@@ -174,7 +183,7 @@ export function Wizard() {
           {
             title: "Rubric",
             component: (
-              <div className="space-y-4">
+              <div className="space-y-4 px-6">
                 <h2 className="text-2xl font-bold">Rubric Assessment</h2>
                 <RubricStep onNext={handleNext} onBack={handleBack} />
               </div>
@@ -184,7 +193,7 @@ export function Wizard() {
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4">
+    <div className="w-full max-w-4xl mx-auto">
       <StepperWrapper
         steps={steps.map((step) => ({ 
           label: step.title,

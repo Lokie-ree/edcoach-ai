@@ -11,6 +11,7 @@ import React, {
   ReactNode,
 } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface StepperProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
@@ -91,8 +92,7 @@ export default function Stepper({
       {...rest}
     >
       <div
-        className={`mx-auto w-full max-w-md rounded-4xl shadow-xl ${stepCircleContainerClassName}`}
-        style={{ border: "1px solid #222" }}
+        className={cn("mx-auto w-full max-w-md rounded-lg border bg-card shadow-xl", stepCircleContainerClassName)}
       >
         <div
           className={`${stepContainerClassName} flex w-full items-center p-8`}
@@ -161,7 +161,7 @@ export default function Stepper({
               )}
               <button
                 onClick={isLastStep ? handleComplete : handleNext}
-                className="duration-350 flex items-center justify-center rounded-full bg-green-500 py-1.5 px-3.5 font-medium tracking-tight text-white transition hover:bg-green-600 active:bg-green-700"
+                className={cn("duration-350 flex items-center justify-center rounded-full bg-primary py-1.5 px-3.5 font-medium tracking-tight text-primary-foreground transition hover:bg-primary/90 active:bg-primary/80", nextButtonProps?.className)}
                 {...nextButtonProps}
               >
                 {isLastStep ? "Complete" : nextButtonText}
@@ -306,17 +306,17 @@ function StepIndicator({
     >
       <motion.div
         variants={{
-          inactive: { scale: 1, backgroundColor: "#222", color: "#a3a3a3" },
-          active: { scale: 1, backgroundColor: "#00d8ff", color: "#00d8ff" },
-          complete: { scale: 1, backgroundColor: "#00d8ff", color: "#3b82f6" },
+          inactive: { scale: 1, backgroundColor: "rgb(var(--border))", color: "rgb(var(--muted-foreground))" },
+          active: { scale: 1, backgroundColor: "rgb(var(--color-info))", color: "rgb(var(--primary-foreground))" },
+          complete: { scale: 1, backgroundColor: "rgb(var(--primary))", color: "rgb(var(--primary-foreground))" },
         }}
         transition={{ duration: 0.3 }}
         className="flex h-8 w-8 items-center justify-center rounded-full font-semibold"
       >
         {status === "complete" ? (
-          <CheckIcon className="h-4 w-4 text-black" />
+          <CheckIcon className="h-4 w-4" />
         ) : status === "active" ? (
-          <div className="h-3 w-3 rounded-full bg-[#060606]" />
+          <div className="h-3 w-3 rounded-full bg-primary" />
         ) : (
           <span className="text-sm">{step}</span>
         )}
@@ -332,11 +332,11 @@ interface StepConnectorProps {
 function StepConnector({ isComplete }: StepConnectorProps) {
   const lineVariants: Variants = {
     incomplete: { width: 0, backgroundColor: "transparent" },
-    complete: { width: "100%", backgroundColor: "#00d8ff" },
+    complete: { width: "100%", backgroundColor: "rgb(var(--primary))" },
   };
 
   return (
-    <div className="relative mx-2 h-0.5 flex-1 overflow-hidden rounded bg-neutral-600">
+    <div className="relative mx-2 h-0.5 flex-1 overflow-hidden rounded bg-border">
       <motion.div
         className="absolute left-0 top-0 h-full"
         variants={lineVariants}

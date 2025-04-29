@@ -22,7 +22,7 @@ export default function NewObservationPage() {
     <div className="relative">
       {/* Background gradient effect */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-br from-white to-indigo-50/30 dark:from-zinc-900 dark:to-indigo-950/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-background to-card/30" />
       </div>
 
       {/* Content */}

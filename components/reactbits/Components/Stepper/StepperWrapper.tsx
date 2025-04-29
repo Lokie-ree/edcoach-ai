@@ -1,8 +1,6 @@
 import React from 'react';
 import Stepper, { Step } from './Stepper';
 import { FormProvider, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { observationSchema } from '@/app/(app)/observations/new/validation';
 
 interface StepperWrapperProps {
   steps: Array<{ label: string; component: React.ReactNode }>;
@@ -40,9 +38,7 @@ export function StepperWrapper({
       reinforcementComments: {},
       refinementComments: {},
       additionalComments: "",
-    },
-    resolver: zodResolver(observationSchema),
-    mode: "onBlur" // Validate on blur for better UX
+    }
   });
 
   const handleStepChange = (step: number) => {
@@ -50,9 +46,8 @@ export function StepperWrapper({
   };
 
   const handleSubmit = () => {
-    methods.handleSubmit((values) => {
-      onSubmit?.(values);
-    })();
+    const values = methods.getValues();
+    onSubmit?.(values);
   };
 
   return (
@@ -68,23 +63,10 @@ export function StepperWrapper({
             type: 'button'
           }}
           nextButtonProps={{
-            onClick: () => {
-              const currentValues = methods.getValues();
-              // For the first step, validate the type selection
-              if (currentStep === 0) {
-                if (!currentValues.type) {
-                  methods.setError("type", {
-                    type: "required",
-                    message: "Please select an observation type"
-                  });
-                  return;
-                }
-              }
-              onNext?.();
-            },
+            onClick: onNext,
             type: 'button'
           }}
-          stepCircleContainerClassName="bg-transparent shadow-none border-none"
+          stepCircleContainerClassName="shadow-none"
           contentClassName="p-0"
         >
           {steps.map((step, index) => (

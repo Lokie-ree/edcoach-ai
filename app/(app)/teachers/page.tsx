@@ -26,6 +26,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -72,9 +73,9 @@ export default function TeachersPage() {
 
   return (
     <div className="relative">
-      {/* Background gradient effect */}
+      {/* Background using theme colors */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-br from-white to-indigo-50/30 dark:from-zinc-900 dark:to-indigo-950/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-background to-primary/5" />
       </div>
 
       <div className="container max-w-4xl py-8 space-y-6">
@@ -84,7 +85,7 @@ export default function TeachersPage() {
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
               Teachers
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-foreground">
               Manage your teaching staff and their observations
             </p>
           </div>
@@ -98,10 +99,10 @@ export default function TeachersPage() {
         <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-4">
           <Card className="md:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-foreground">
                 Total Teachers
               </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <Users className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
@@ -111,10 +112,10 @@ export default function TeachersPage() {
           </Card>
           <Card className="md:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-foreground">
                 Active Teachers
               </CardTitle>
-              <GraduationCap className="h-4 w-4 text-muted-foreground" />
+              <GraduationCap className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
@@ -124,10 +125,10 @@ export default function TeachersPage() {
           </Card>
           <Card className="md:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-foreground">
                 Pending Invites
               </CardTitle>
-              <UserPlus className="h-4 w-4 text-muted-foreground" />
+              <UserPlus className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
@@ -148,7 +149,7 @@ export default function TeachersPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Add New Teacher</CardTitle>
-                <CardDescription>
+                <CardDescription className="text-foreground">
                   Enter the teacher&apos;s details to send them an invitation
                 </CardDescription>
               </CardHeader>
@@ -258,29 +259,34 @@ export default function TeachersPage() {
                       <h3 className="font-medium text-foreground">
                         {teacher.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-foreground">
                         {teacher.email}
                       </p>
                       {teacher.department && (
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-sm text-foreground mt-1">
                           Department: {teacher.department}
                         </p>
                       )}
                       {teacher.gradeLevel && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-foreground">
                           Grade Level: {teacher.gradeLevel}
                         </p>
                       )}
                     </div>
                     <div className="mt-4">
                       <span
-                        className={`text-sm px-2 py-1 rounded-full ${
-                          teacher.status === "active"
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                            : teacher.status === "pending"
-                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                        }`}
+                        // Use theme colors for status badges
+                        className={cn(
+                          "text-sm px-2 py-1 rounded-full",
+                          {
+                            // Increase background opacity in light mode
+                            "bg-success/20 text-success dark:bg-success/20 dark:text-success": teacher.status === "active",
+                            // Increase background opacity in light mode
+                            "bg-info/20 text-info dark:bg-info/20 dark:text-info": teacher.status === "pending",
+                            // Increase background opacity in light mode
+                            "bg-destructive/20 text-destructive dark:bg-destructive/20 dark:text-destructive": teacher.status !== "active" && teacher.status !== "pending",
+                          }
+                        )}
                       >
                         {(teacher.status || "inactive")
                           .charAt(0)

@@ -27,12 +27,14 @@ export function NewObservationPageClient() {
   if (!isSignedIn || !isAuthenticated) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <h2 className="text-2xl font-semibold text-foreground">
-          Authentication Required
-        </h2>
-        <p className="text-muted-foreground">
-          Please sign in to create observations.
-        </p>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-semibold">
+            Authentication Required
+          </h2>
+          <p className="text-muted-foreground">
+            Please sign in to create observations.
+          </p>
+        </div>
       </div>
     );
   }
@@ -40,10 +42,12 @@ export function NewObservationPageClient() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <h2 className="text-2xl font-semibold text-foreground">Error</h2>
-        <p className="text-muted-foreground">
-          An error occurred while loading your data.
-        </p>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-semibold">Error</h2>
+          <p className="text-muted-foreground">
+            An error occurred while loading your data.
+          </p>
+        </div>
       </div>
     );
   }
@@ -51,12 +55,14 @@ export function NewObservationPageClient() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <h2 className="text-2xl font-semibold text-foreground">
-          Setup Required
-        </h2>
-        <p className="text-muted-foreground">
-          Please complete your profile setup to create observations.
-        </p>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-semibold">
+            Setup Required
+          </h2>
+          <p className="text-muted-foreground">
+            Please complete your profile setup to create observations.
+          </p>
+        </div>
       </div>
     );
   }
@@ -70,9 +76,7 @@ export function NewObservationPageClient() {
         transition={{ duration: 0.5 }}
         className="space-y-2"
       >
-        <p className="text-muted-foreground">
-          Create a new observation or walkthrough using our step-by-step wizard.
-        </p>
+        
       </motion.div>
 
       {/* Wizard */}

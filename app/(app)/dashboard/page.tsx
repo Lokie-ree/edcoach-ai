@@ -95,7 +95,7 @@ const Dashboard = () => {
     (o) => o.status === "completed",
   ).length;
   const inProgressObservations = safeObservations.filter(
-    (o) => o.status === "in_progress",
+    (o) => o.status === "draft",
   ).length;
   const completionRate =
     totalObservations > 0
@@ -112,10 +112,10 @@ const Dashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           Dashboard
         </h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-foreground mt-2">
           Welcome to EdCoach AI. Here&apos;s an overview of your organization.
         </p>
       </motion.div>
@@ -129,12 +129,12 @@ const Dashboard = () => {
       >
         {/* Quick Actions */}
         <TiltedCard className="md:col-span-2">
-          <Card className="h-full bg-gradient-to-br from-white to-indigo-50/30 dark:from-zinc-900 dark:to-indigo-950/10">
+          <Card className="h-full bg-card">
             <CardHeader>
-              <CardTitle className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">
+              <CardTitle className="text-foreground">
                 Quick Actions
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-foreground">
                 Common tasks you might want to perform
               </CardDescription>
             </CardHeader>
@@ -143,23 +143,23 @@ const Dashboard = () => {
                 <Link href="/teachers">
                   <Button
                     variant="outline"
-                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border-indigo-200/50 dark:border-indigo-800/20 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20"
+                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border hover:bg-muted/50"
                   >
-                    <div className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 p-2">
-                      <Users className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                    <div className="rounded-full bg-primary/10 p-2">
+                      <Users className="h-6 w-6 text-primary" />
                     </div>
-                    <span className="text-sm font-medium">Manage Teachers</span>
+                    <span className="text-sm font-medium text-foreground">Manage Teachers</span>
                   </Button>
                 </Link>
                 <Link href="/observations/new">
                   <Button
                     variant="outline"
-                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border-purple-200/50 dark:border-purple-800/20 hover:bg-purple-50/30 dark:hover:bg-purple-950/20"
+                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border hover:bg-muted/50"
                   >
-                    <div className="rounded-full bg-purple-100 dark:bg-purple-900/30 p-2">
-                      <BookOpen className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                    <div className="rounded-full bg-primary/10 p-2">
+                      <BookOpen className="h-6 w-6 text-primary" />
                     </div>
-                    <span className="text-sm font-medium">
+                    <span className="text-sm font-medium text-foreground">
                       Start New Observation
                     </span>
                   </Button>
@@ -167,12 +167,12 @@ const Dashboard = () => {
                 <Link href="/analytics">
                   <Button
                     variant="outline"
-                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border-indigo-200/50 dark:border-indigo-800/20 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20"
+                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border hover:bg-muted/50"
                   >
-                    <div className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 p-2">
-                      <BarChart className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                    <div className="rounded-full bg-primary/10 p-2">
+                      <BarChart className="h-6 w-6 text-primary" />
                     </div>
-                    <span className="text-sm font-medium">View Analytics</span>
+                    <span className="text-sm font-medium text-foreground">View Analytics</span>
                   </Button>
                 </Link>
               </div>
@@ -188,20 +188,20 @@ const Dashboard = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
       >
         <TiltedCard>
-          <Card className="h-full bg-gradient-to-br from-white to-indigo-50/30 dark:from-zinc-900 dark:to-indigo-950/10">
+          <Card className="h-full bg-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-foreground">
                 Total Teachers
               </CardTitle>
-              <div className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 p-2">
-                <Users className="h-4 w-4 md:h-5 md:w-5 text-indigo-600 dark:text-indigo-400" />
+              <div className="rounded-full bg-primary/10 p-2">
+                <Users className="h-4 w-4 md:h-5 md:w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight">
+              <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                 {safeTeachers.length}
               </div>
-              <p className="text-xs text-muted-foreground mt-2 md:mt-3">
+              <p className="text-xs text-foreground mt-2 md:mt-3">
                 Teachers in your organization
               </p>
             </CardContent>
@@ -209,27 +209,27 @@ const Dashboard = () => {
         </TiltedCard>
 
         <TiltedCard>
-          <Card className="bg-gradient-to-br from-white to-purple-50/30 dark:from-zinc-900 dark:to-purple-950/10">
+          <Card className="bg-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-foreground">
                 Total Observations
               </CardTitle>
-              <div className="rounded-full bg-purple-100 dark:bg-purple-900/30 p-2">
-                <BookOpen className="h-4 w-4 md:h-5 md:w-5 text-purple-600 dark:text-purple-400" />
+              <div className="rounded-full bg-primary/10 p-2">
+                <BookOpen className="h-4 w-4 md:h-5 md:w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight">
+              <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                 {totalObservations}
               </div>
-              <div className="flex items-center text-xs text-muted-foreground mt-2 md:mt-3">
+              <div className="flex items-center text-xs text-foreground mt-2 md:mt-3">
                 <span className="flex items-center">
-                  <div className="w-2 h-2 rounded-full bg-green-500 mr-1"></div>
+                  <div className="w-2 h-2 rounded-full bg-success mr-1"></div>
                   {completedObservations} completed
                 </span>
                 <span className="mx-2">•</span>
                 <span className="flex items-center">
-                  <div className="w-2 h-2 rounded-full bg-yellow-500 mr-1"></div>
+                  <div className="w-2 h-2 rounded-full bg-primary mr-1"></div>
                   {inProgressObservations} in progress
                 </span>
               </div>
@@ -238,23 +238,23 @@ const Dashboard = () => {
         </TiltedCard>
 
         <TiltedCard>
-          <Card className="bg-gradient-to-br from-white to-indigo-50/30 dark:from-zinc-900 dark:to-indigo-950/10">
+          <Card className="bg-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-foreground">
                 Completion Rate
               </CardTitle>
-              <div className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 p-2">
-                <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-indigo-600 dark:text-indigo-400" />
+              <div className="rounded-full bg-primary/10 p-2">
+                <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight">
+              <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                 {completionRate.toFixed(1)}%
               </div>
               <div className="mt-4 md:mt-6">
                 <Progress
                   value={completionRate}
-                  className="h-2 bg-indigo-100 dark:bg-indigo-900/30"
+                  className="h-2 bg-muted"
                 />
               </div>
             </CardContent>
@@ -262,20 +262,20 @@ const Dashboard = () => {
         </TiltedCard>
 
         <TiltedCard>
-          <Card className="bg-gradient-to-br from-white to-purple-50/30 dark:from-zinc-900 dark:to-purple-950/10">
+          <Card className="bg-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-foreground">
                 School Info
               </CardTitle>
-              <div className="rounded-full bg-purple-100 dark:bg-purple-900/30 p-2">
-                <School className="h-4 w-4 md:h-5 md:w-5 text-purple-600 dark:text-purple-400" />
+              <div className="rounded-full bg-primary/10 p-2">
+                <School className="h-4 w-4 md:h-5 md:w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight">
+              <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                 1
               </div>
-              <p className="text-xs text-muted-foreground mt-2 md:mt-3">
+              <p className="text-xs text-foreground mt-2 md:mt-3">
                 Schools in your network
               </p>
             </CardContent>
