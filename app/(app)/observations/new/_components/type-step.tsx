@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFormContext } from "react-hook-form";
 import {
   Select,
@@ -32,22 +30,14 @@ export function TypeStep({
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Observation Type</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">
-              Select the type of observation
-            </label>
-            <Select
-              value={selectedType || undefined}
-              onValueChange={handleTypeChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select observation type" />
-              </SelectTrigger>
+      <div className="space-y-2">
+        <Select
+          value={selectedType || undefined}
+          onValueChange={handleTypeChange}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select observation type" />
+          </SelectTrigger>
               <SelectContent>
                 {TYPE_OPTIONS.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
@@ -57,8 +47,6 @@ export function TypeStep({
               </SelectContent>
             </Select>
           </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

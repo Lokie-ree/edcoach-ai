@@ -1,22 +1,97 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TypeStep } from "./type-step";
 import { DetailsStep } from "./details-step";
 import { RubricStep } from "./rubric-step";
 import { InformalWalkthroughStep } from "./informal-walkthrough-step";
-import { FormProvider, useForm } from "react-hook-form";
 import { StepperWrapper } from "@/components/reactbits/Components/Stepper/StepperWrapper";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useToast } from "@/components/ui/toast";
+import { Id } from "@/convex/_generated/dataModel";
+import { sanitizeObject } from "@/lib/sanitize";
+import { handleError } from "@/lib/error-handler";
 
 type Step = {
   title: string;
   component: React.ReactNode;
+};
+
+// Define interface for form data
+interface ObservationFormData {
+  // Common fields
+  type: "formal" | "walkthrough";
+  teacherId: Id<"teachers">;
+  observationDate: Date;
+
+  // Formal Observation fields
+  subject?: string;
+  gradeLevels?: string[];
+  reinforcementComment?: string; // General comments for formal
+  refinementComment?: string;    // General comments for formal
+  rubricResponses?: Record<string, Record<string, number>>; // Assuming structure { domain: { indicator: score } }
+
+  // Informal Walkthrough fields
+  reinforcementIndicators?: string[]; // Specific indicators
+  refinementIndicators?: string[];    // Specific indicators
+  reinforcementComments?: Record<string, string>; // Comments per indicator
+  refinementComments?: Record<string, string>;    // Comments per indicator
+  additionalComments?: string;
+}
+
+// Helper function to prepare data for mutation
+const prepareObservationPayload = (values: ObservationFormData) => {
+  if (values.type === "walkthrough") {
+    const walkthroughEntries: {
+      indicatorAcronym: string;
+      type: "reinforcement" | "refinement";
+      comment: string;
+    }[] = [];
+
+    const reinforcementIndicators = values.reinforcementIndicators || [];
+    const refinementIndicators = values.refinementIndicators || [];
+
+    for (const indicator of reinforcementIndicators) {
+      walkthroughEntries.push({
+        indicatorAcronym: indicator,
+        type: "reinforcement",
+        comment: values.reinforcementComments?.[indicator] || "",
+      });
+    }
+
+    for (const indicator of refinementIndicators) {
+      walkthroughEntries.push({
+        indicatorAcronym: indicator,
+        type: "refinement",
+        comment: values.refinementComments?.[indicator] || "",
+      });
+    }
+    // Walkthrough: Include walkthrough fields, set formal fields to undefined
+    return {
+      teacherId: values.teacherId,
+      observationDate: values.observationDate.getTime(),
+      walkthroughEntries: walkthroughEntries,
+      reinforcementComment: values.additionalComments, // Remap additionalComments from walkthrough
+      refinementComment: undefined, // Not applicable for walkthrough
+      subject: undefined, // Not applicable for walkthrough
+      gradeLevels: undefined, // Not applicable for walkthrough
+      rubricResponses: undefined, // Not applicable for walkthrough
+    };
+  } else {
+    // Formal: Include formal fields, set walkthrough fields to undefined
+    return {
+      teacherId: values.teacherId,
+      observationDate: values.observationDate.getTime(),
+      subject: values.subject,
+      gradeLevels: values.gradeLevels,
+      reinforcementComment: values.reinforcementComment,
+      refinementComment: values.refinementComment,
+      rubricResponses: values.rubricResponses,
+      walkthroughEntries: undefined, // Not applicable for formal
+    };
+  }
 };
 
 export function Wizard() {
@@ -27,7 +102,6 @@ export function Wizard() {
   const createObservation = useMutation(
     api.observations.createObservationAndResponses,
   );
-  const methods = useForm();
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -41,48 +115,15 @@ export function Wizard() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (values: ObservationFormData) => {
     try {
-      const values = methods.getValues();
-      const walkthroughEntries: {
-        indicatorAcronym: string;
-        type: "reinforcement" | "refinement";
-        comment: string;
-      }[] = [];
+      // Sanitize all input values before processing
+      const sanitizedValues = sanitizeObject(values);
+      
+      // Use the helper function to prepare payload
+      const payload = prepareObservationPayload(sanitizedValues);
 
-      if (selectedType === "walkthrough") {
-        const reinforcementIndicators = values.reinforcementIndicators || [];
-        const refinementIndicators = values.refinementIndicators || [];
-
-        for (const indicator of reinforcementIndicators) {
-          walkthroughEntries.push({
-            indicatorAcronym: indicator,
-            type: "reinforcement",
-            comment: values.reinforcementComments?.[indicator] || "",
-          });
-        }
-
-        for (const indicator of refinementIndicators) {
-          walkthroughEntries.push({
-            indicatorAcronym: indicator,
-            type: "refinement",
-            comment: values.refinementComments?.[indicator] || "",
-          });
-        }
-      }
-
-      await createObservation({
-        teacherId: values.teacherId,
-        subject: values.subject,
-        gradeLevels: values.gradeLevels,
-        observationDate: values.observationDate.getTime(),
-        reinforcementComment: values.reinforcementComment,
-        refinementComment: values.refinementComment,
-        rubricResponses:
-          selectedType === "formal" ? values.rubricResponses : undefined,
-        walkthroughEntries:
-          selectedType === "walkthrough" ? walkthroughEntries : undefined,
-      });
+      await createObservation(payload);
 
       toast({
         title: "Success",
@@ -91,12 +132,7 @@ export function Wizard() {
 
       router.push("/dashboard");
     } catch (error) {
-      toast({
-        title: "Error",
-        description:
-          error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
+      handleError(error, "Failed to create observation. Please try again.");
     }
   };
 
@@ -104,7 +140,10 @@ export function Wizard() {
     {
       title: "Type",
       component: (
-        <TypeStep selectedType={selectedType} onSelectType={setSelectedType} />
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold">Select Type</h2>
+          <TypeStep selectedType={selectedType} onSelectType={setSelectedType} />
+        </div>
       ),
     },
     ...(selectedType === "walkthrough"
@@ -112,57 +151,52 @@ export function Wizard() {
           {
             title: "Walkthrough",
             component: (
-              <InformalWalkthroughStep
-                onNext={handleNext}
-                onBack={handleBack}
-              />
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold">Informal Walkthrough</h2>
+                <InformalWalkthroughStep
+                  onNext={handleNext}
+                  onBack={handleBack}
+                />
+              </div>
             ),
           },
         ]
       : [
           {
             title: "Details",
-            component: <DetailsStep onNext={handleNext} onBack={handleBack} />,
+            component: (
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold">Observation Details</h2>
+                <DetailsStep onNext={handleNext} onBack={handleBack} />
+              </div>
+            ),
           },
           {
             title: "Rubric",
-            component: <RubricStep onNext={handleNext} onBack={handleBack} />,
+            component: (
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold">Rubric Assessment</h2>
+                <RubricStep onNext={handleNext} onBack={handleBack} />
+              </div>
+            ),
           },
         ]),
   ];
 
   return (
-    <FormProvider {...methods}>
-      <div className="space-y-8">
-        <StepperWrapper
-          steps={steps.map((step) => ({ label: step.title }))}
-          currentStep={currentStep}
-          onStepClick={setCurrentStep}
-          className="mb-8"
-        />
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{steps[currentStep].title}</CardTitle>
-          </CardHeader>
-          <CardContent>{steps[currentStep].component}</CardContent>
-        </Card>
-
-        <div className="flex justify-between">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 0}
-          >
-            Back
-          </Button>
-          {currentStep === steps.length - 1 ? (
-            <Button onClick={handleSubmit}>Submit</Button>
-          ) : (
-            <Button onClick={handleNext}>Next</Button>
-          )}
-        </div>
-      </div>
-    </FormProvider>
+    <div className="w-full max-w-4xl mx-auto p-4">
+      <StepperWrapper
+        steps={steps.map((step) => ({ 
+          label: step.title,
+          component: step.component
+        }))}
+        currentStep={currentStep}
+        onStepClick={setCurrentStep}
+        onSubmit={handleSubmit}
+        onNext={handleNext}
+        onBack={handleBack}
+        isLastStep={currentStep === steps.length - 1}
+      />
+    </div>
   );
 }

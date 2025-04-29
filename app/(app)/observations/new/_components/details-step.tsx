@@ -1,13 +1,24 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFormContext } from "react-hook-form";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { DatePicker } from "@/components/ui/date-picker";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Label } from "@/components/ui/label";
+import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
 
 const SUBJECT_OPTIONS = [
   { value: "Math", label: "Math" },
@@ -40,7 +51,7 @@ export function DetailsStep({
   onNext: () => void;
   onBack: () => void;
 }) {
-  const { register, watch, setValue } = useFormContext();
+  const { register, watch, setValue, control } = useFormContext();
   const teachers = useQuery(api.teachers.list);
 
   const teacherOptions =
@@ -51,57 +62,101 @@ export function DetailsStep({
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Observation Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Teacher</label>
-            <Select
-              options={teacherOptions}
-              value={watch("teacherId")}
-              onChange={(value) => setValue("teacherId", value)}
-              placeholder="Select a teacher"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Subject</label>
-            <Select
-              options={SUBJECT_OPTIONS}
-              value={watch("subject")}
-              onChange={(value) => setValue("subject", value)}
-              placeholder="Select a subject"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Grade Levels</label>
-            <MultiSelect
-              options={GRADE_LEVEL_OPTIONS}
-              value={watch("gradeLevels") || []}
-              onChange={(value) => setValue("gradeLevels", value)}
-              placeholder="Select grade levels"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Observation Date</label>
-            <DatePicker
-              value={watch("observationDate")}
-              onChange={(date) => setValue("observationDate", date)}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onBack}>
-          Back
-        </Button>
-        <Button onClick={onNext}>Next</Button>
+      <div className="space-y-2">
+        <Label htmlFor="teacherId">Teacher</Label>
+        <Select
+          value={watch("teacherId")}
+          onValueChange={(value) => setValue("teacherId", value)}
+        >
+          <SelectTrigger id="teacherId">
+            <SelectValue placeholder="Select a teacher" />
+          </SelectTrigger>
+          <SelectContent>
+            {teacherOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="subject">Subject</Label>
+        <Select
+          value={watch("subject")}
+          onValueChange={(value) => setValue("subject", value)}
+        >
+          <SelectTrigger id="subject">
+            <SelectValue placeholder="Select a subject" />
+          </SelectTrigger>
+          <SelectContent>
+            {SUBJECT_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <FormField
+        control={control}
+        name="gradeLevels"
+        render={({ field }) => (
+          <FormItem>
+            <Label>Grade Levels</Label>
+            <FormControl>
+              <MultiSelect
+                options={GRADE_LEVEL_OPTIONS}
+                value={field.value || []}
+                onChange={field.onChange}
+                placeholder="Select grade levels"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name="observationDate"
+        render={({ field }) => (
+          <FormItem className="flex flex-col space-y-2">
+            <Label>Observation Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <FormControl>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full pl-3 text-left font-normal",
+                      !field.value && "text-muted-foreground",
+                    )}
+                  >
+                    {field.value ? (
+                      format(field.value, "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Button>
+                </FormControl>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={field.value}
+                  onSelect={field.onChange}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </div>
   );
 }

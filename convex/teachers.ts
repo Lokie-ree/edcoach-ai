@@ -179,12 +179,22 @@ export const list = query({
         return null;
       }
 
-      const userId = await getUserIdForQuery(ctx, identity);
-      
-      // Use proper index for querying
+      // Get the current user
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+        .unique();
+
+      if (!user) {
+        return null;
+      }
+
+      // Get all teachers from the user's organization
       return await ctx.db
         .query("teachers")
-        .withIndex("by_creator", (q) => q.eq("createdBy", userId))
+        .filter((q) => 
+          q.eq(q.field("createdBy"), user._id)
+        )
         .collect();
     } catch (error) {
       console.error("Error in list function:", error);

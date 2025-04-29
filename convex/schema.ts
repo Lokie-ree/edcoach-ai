@@ -159,4 +159,22 @@ export default defineSchema({
     comment: v.string(),
     createdAt: v.number(),
   }).index("by_observation", ["observationId"]),
+
+  // Audit logs for security and compliance
+  auditLogs: defineTable({
+    userId: v.optional(v.id("users")),
+    action: v.string(),
+    resourceType: v.optional(v.string()),
+    resourceId: v.optional(v.string()),
+    metadata: v.optional(v.any()),
+    ipAddress: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+    severity: v.union(v.literal("info"), v.literal("warning"), v.literal("critical")),
+    timestamp: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_action", ["action"])
+    .index("by_timestamp", ["timestamp"])
+    .index("by_severity", ["severity"])
+    .index("by_resource", ["resourceType", "resourceId"]),
 });

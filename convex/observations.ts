@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { Id } from "./_generated/dataModel";
+import { internal } from "./_generated/api";
 
 export const list = query({
   args: {},
@@ -49,18 +49,125 @@ export const createObservationAndResponses = mutation({
   },
   returns: v.id("observations"),
   handler: async (ctx, args) => {
+    // Authentication check
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
+      // Log access denied event
+      await ctx.runMutation(internal.audit.createAuditLog, {
+        action: "access_denied",
+        resourceType: "observations",
+        metadata: { reason: "Not authenticated" },
+        severity: "warning",
+      });
+      
       throw new Error("Not authenticated");
     }
 
+    // Get user with role information
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
 
     if (!user) {
+      // Log access denied event
+      await ctx.runMutation(internal.audit.createAuditLog, {
+        action: "access_denied",
+        resourceType: "observations",
+        metadata: { reason: "User not found", clerkId: identity.subject },
+        severity: "warning",
+      });
+      
       throw new Error("User not found");
+    }
+
+    // Role-based access control
+    const allowedRoles = ["admin", "school_leader", "instructional_coach"];
+    if (!allowedRoles.includes(user.role)) {
+      // Log access denied event
+      await ctx.runMutation(internal.audit.createAuditLog, {
+        userId: user._id,
+        action: "access_denied",
+        resourceType: "observations",
+        metadata: { reason: "Insufficient permissions", role: user.role },
+        severity: "warning",
+      });
+      
+      throw new Error("You don't have permission to create observations");
+    }
+
+    // Verify user has access to the teacher's organization
+    const teacher = await ctx.db.get(args.teacherId);
+    if (!teacher) {
+      // Log error event
+      await ctx.runMutation(internal.audit.createAuditLog, {
+        userId: user._id,
+        action: "observation_create",
+        resourceType: "observations",
+        metadata: { error: "Teacher not found", teacherId: args.teacherId },
+        severity: "warning",
+      });
+      
+      throw new Error("Teacher not found");
+    }
+
+    // Get the teacher's creator to check their organization
+    const teacherCreator = await ctx.db.get(teacher.createdBy);
+    if (!teacherCreator) {
+      // Log error event
+      await ctx.runMutation(internal.audit.createAuditLog, {
+        userId: user._id,
+        action: "observation_create",
+        resourceType: "observations",
+        metadata: { error: "Teacher's organization could not be determined", teacherId: args.teacherId },
+        severity: "warning",
+      });
+      
+      throw new Error("Teacher's organization could not be determined");
+    }
+
+    // Check if user is in the same organization
+    if (user.organization !== teacherCreator.organization && user.role !== "admin") {
+      // Log access denied event
+      await ctx.runMutation(internal.audit.createAuditLog, {
+        userId: user._id,
+        action: "access_denied",
+        resourceType: "observations",
+        metadata: { 
+          reason: "Cross-organization access attempt", 
+          userOrg: user.organization,
+          teacherOrg: teacherCreator.organization,
+          teacherId: args.teacherId
+        },
+        severity: "critical",
+      });
+      
+      throw new Error("You don't have permission to create observations for this teacher");
+    }
+
+    // Implement rate limiting (simple version)
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    const recentObservations = await ctx.db
+      .query("observations")
+      .withIndex("by_observer", (q) => q.eq("observerId", user._id))
+      .filter((q) => q.gt(q.field("createdAt"), oneHourAgo))
+      .collect();
+
+    // Limit to 10 observations per hour
+    if (recentObservations.length >= 10) {
+      // Log rate limit event
+      await ctx.runMutation(internal.audit.createAuditLog, {
+        userId: user._id,
+        action: "rate_limit_exceeded",
+        resourceType: "observations",
+        metadata: { 
+          recentObservationCount: recentObservations.length,
+          timeWindow: "1 hour"
+        },
+        severity: "warning",
+      });
+      
+      throw new Error("Rate limit exceeded. Please try again later.");
     }
 
     const now = Date.now();
@@ -101,6 +208,21 @@ export const createObservationAndResponses = mutation({
         });
       }
     }
+
+    // Log successful observation creation
+    await ctx.runMutation(internal.audit.createAuditLog, {
+      userId: user._id,
+      action: "observation_create",
+      resourceType: "observations",
+      resourceId: observationId,
+      metadata: { 
+        teacherId: args.teacherId,
+        observationDate: args.observationDate,
+        hasRubricResponses: !!args.rubricResponses,
+        hasWalkthroughEntries: !!args.walkthroughEntries
+      },
+      severity: "info",
+    });
 
     return observationId;
   },

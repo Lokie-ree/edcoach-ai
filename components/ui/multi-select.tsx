@@ -34,6 +34,11 @@ export function MultiSelect({
     onChange(newValues);
   };
 
+  const selectedLabels = value
+    .map((v) => options.find((o) => o.value === v)?.label)
+    .filter(Boolean)
+    .join(", ");
+
   return (
     <SelectPrimitive.Root open={open} onOpenChange={setOpen}>
       <SelectPrimitive.Trigger
@@ -42,7 +47,7 @@ export function MultiSelect({
         )}
       >
         <SelectPrimitive.Value>
-          {value.length > 0 ? `${value.length} selected` : placeholder}
+          {value.length > 0 ? selectedLabels : placeholder}
         </SelectPrimitive.Value>
         <SelectPrimitive.Icon>
           <ChevronDownIcon className="h-4 w-4 opacity-50" />
