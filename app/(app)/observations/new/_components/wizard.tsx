@@ -162,10 +162,7 @@ export function Wizard() {
             component: (
               <div className="space-y-4 px-6">
                 <h2 className="text-2xl font-bold">Informal Walkthrough</h2>
-                <InformalWalkthroughStep
-                  onNext={handleNext}
-                  onBack={handleBack}
-                />
+                <InformalWalkthroughStep />
               </div>
             ),
           },
@@ -176,7 +173,7 @@ export function Wizard() {
             component: (
               <div className="space-y-4 px-6">
                 <h2 className="text-2xl font-bold">Observation Details</h2>
-                <DetailsStep onNext={handleNext} onBack={handleBack} />
+                <DetailsStep />
               </div>
             ),
           },
@@ -185,7 +182,7 @@ export function Wizard() {
             component: (
               <div className="space-y-4 px-6">
                 <h2 className="text-2xl font-bold">Rubric Assessment</h2>
-                <RubricStep onNext={handleNext} onBack={handleBack} />
+                <RubricStep />
               </div>
             ),
           },
@@ -204,7 +201,6 @@ export function Wizard() {
         onSubmit={handleSubmit}
         onNext={handleNext}
         onBack={handleBack}
-        isLastStep={currentStep === steps.length - 1}
       />
     </div>
   );

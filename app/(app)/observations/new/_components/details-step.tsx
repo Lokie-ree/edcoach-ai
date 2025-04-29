@@ -44,14 +44,8 @@ const GRADE_LEVEL_OPTIONS = [
   { value: "12", label: "12th Grade" },
 ];
 
-export function DetailsStep({
-  onNext,
-  onBack,
-}: {
-  onNext: () => void;
-  onBack: () => void;
-}) {
-  const { register, watch, setValue, control } = useFormContext();
+export function DetailsStep() {
+  const { watch, setValue, control } = useFormContext();
   const teachers = useQuery(api.teachers.list);
 
   const teacherOptions =

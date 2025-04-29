@@ -79,21 +79,12 @@ interface RubricContent {
   domains: RubricDomain[];
 }
 
-interface InformalWalkthroughStepProps {
-  onNext: () => void;
-  onBack: () => void;
-}
-
-export function InformalWalkthroughStep({
-  onNext,
-  onBack,
-}: InformalWalkthroughStepProps) {
+export function InformalWalkthroughStep() {
   const teachers = useQuery(api.teachers.list);
-  const { control, register, watch, setValue } = useFormContext();
-
-  const INSTRUCTION_DOMAINS = ["INSTRUCTION", "PLANNING", "ENVIRONMENT"];
+  const { control, register, watch } = useFormContext();
 
   const indicators = useMemo(() => {
+    const INSTRUCTION_DOMAINS = ["INSTRUCTION", "PLANNING", "ENVIRONMENT"];
     return (rubricContent[0] as RubricContent).domains
       .filter((domain) => INSTRUCTION_DOMAINS.includes(domain.name))
       .flatMap((domain) =>

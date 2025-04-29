@@ -1,4 +1,4 @@
-import { toast } from "@/components/ui/toast";
+import { toast as sonnerToast } from "sonner";
 
 // Define error categories
 export enum ErrorCategory {
@@ -76,10 +76,9 @@ export function handleError(error: unknown, customMessage?: string): string {
   const userMessage = customMessage || errorMessages[category];
   
   // Show toast notification
-  toast({
-    title: "Error",
+  sonnerToast("Error", {
     description: userMessage,
-    variant: "destructive",
+    className: "bg-destructive text-destructive-foreground",
   });
   
   return userMessage;

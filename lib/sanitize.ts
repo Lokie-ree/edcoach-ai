@@ -42,11 +42,11 @@ export function sanitizeObject<T>(obj: T): T {
   const result = {} as T;
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
-      (result as any)[key] = sanitizeString(value);
+      (result as Record<string, unknown>)[key] = sanitizeString(value);
     } else if (value !== null && typeof value === 'object') {
-      (result as any)[key] = sanitizeObject(value);
+      (result as Record<string, unknown>)[key] = sanitizeObject(value);
     } else {
-      (result as any)[key] = value;
+      (result as Record<string, unknown>)[key] = value;
     }
   }
 

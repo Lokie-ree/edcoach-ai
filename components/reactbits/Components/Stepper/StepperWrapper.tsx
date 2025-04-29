@@ -1,16 +1,37 @@
 import React from 'react';
 import Stepper, { Step } from './Stepper';
 import { FormProvider, useForm } from 'react-hook-form';
+import { Id } from "@/convex/_generated/dataModel";
+
+interface FormData {
+  // Common fields
+  type: "formal" | "walkthrough";
+  teacherId: Id<"teachers">;
+  observationDate: Date;
+
+  // Formal Observation fields
+  subject?: string;
+  gradeLevels?: string[];
+  reinforcementComment?: string;
+  refinementComment?: string;
+  rubricResponses?: Record<string, Record<string, number>>;
+
+  // Informal Walkthrough fields
+  reinforcementIndicators?: string[];
+  refinementIndicators?: string[];
+  reinforcementComments?: Record<string, string>;
+  refinementComments?: Record<string, string>;
+  additionalComments?: string;
+}
 
 interface StepperWrapperProps {
   steps: Array<{ label: string; component: React.ReactNode }>;
   currentStep: number;
   onStepClick?: (index: number) => void;
   className?: string;
-  onSubmit?: (data: any) => void;
+  onSubmit?: (data: FormData) => void;
   onNext?: () => void;
   onBack?: () => void;
-  isLastStep?: boolean;
 }
 
 export function StepperWrapper({ 
@@ -20,14 +41,13 @@ export function StepperWrapper({
   className,
   onSubmit,
   onNext,
-  onBack,
-  isLastStep
+  onBack
 }: StepperWrapperProps) {
-  const methods = useForm({
+  const methods = useForm<FormData>({
     defaultValues: {
-      type: "",
-      teacherId: "",
-      observationDate: null,
+      type: undefined,
+      teacherId: undefined,
+      observationDate: new Date(),
       subject: "",
       gradeLevels: [],
       reinforcementComment: "",

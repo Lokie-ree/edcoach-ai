@@ -16,12 +16,7 @@ import rubricContent from "@/data/rubric-content.json";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-interface RubricStepProps {
-  onNext: () => void;
-  onBack: () => void;
-}
-
-export function RubricStep({ onNext, onBack }: RubricStepProps) {
+export function RubricStep() {
   const { control, watch } = useFormContext();
   const [expandedDomains, setExpandedDomains] = useState<string[]>([]);
   const rubricData = (rubricContent as RubricContent[])[0];
