@@ -4,6 +4,7 @@ import "./globals.css";
 import ConvexClientProvider from "@/components/convex-client-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -12,7 +13,8 @@ const oswald = Oswald({
 
 export const metadata: Metadata = {
   title: "EdCoach AI - AI-Powered Instructional Coaching",
-  description: "EdCoach AI empowers school leaders and coaches with real-time, rubric-aligned feedback suggestions.",
+  description:
+    "EdCoach AI empowers school leaders and coaches with real-time, rubric-aligned feedback suggestions.",
   icons: {
     icon: "/convex.svg",
   },
@@ -38,6 +40,7 @@ export default function RootLayout({
             </ThemeProvider>
           </ConvexClientProvider>
         </ClerkProvider>
+        <Toaster />
       </body>
     </html>
   );

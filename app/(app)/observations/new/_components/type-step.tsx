@@ -1,68 +1,64 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFormContext } from "react-hook-form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-type ObservationType = {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-};
-
-const observationTypes: ObservationType[] = [
-  {
-    id: "classroom",
-    title: "Classroom Observation",
-    description: "Observe teaching and learning in a classroom setting",
-    icon: "🏫",
-  },
-  {
-    id: "walkthrough",
-    title: "Walkthrough",
-    description: "Brief, focused observation of specific teaching practices",
-    icon: "🚶",
-  },
+const TYPE_OPTIONS = [
+  { value: "formal", label: "Formal Observation" },
+  { value: "walkthrough", label: "Informal Walkthrough" },
 ];
 
-interface TypeStepProps {
+export function TypeStep({
+  selectedType,
+  onSelectType,
+}: {
   selectedType: string | null;
   onSelectType: (type: string) => void;
-}
+}) {
+  const { setValue } = useFormContext();
 
-export function TypeStep({ selectedType, onSelectType }: TypeStepProps) {
+  const handleTypeChange = (value: string) => {
+    setValue("type", value);
+    onSelectType(value);
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {observationTypes.map((type) => (
-        <motion.div
-          key={type.id}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <Card
-            className={cn(
-              "p-6 cursor-pointer transition-all bg-gradient-to-br from-white to-indigo-50/30 dark:from-zinc-900 dark:to-indigo-950/10",
-              selectedType === type.id
-                ? "border-2 border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/20"
-                : "border border-indigo-200/50 dark:border-indigo-800/20 hover:border-indigo-400 dark:hover:border-indigo-600"
-            )}
-            onClick={() => onSelectType(type.id)}
-          >
-            <div className="flex items-start gap-4">
-              <div className="text-4xl">{type.icon}</div>
-              <div>
-                <h3 className="font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">
-                  {type.title}
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {type.description}
-                </p>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-      ))}
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Observation Type</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Select the type of observation
+            </label>
+            <Select
+              value={selectedType || undefined}
+              onValueChange={handleTypeChange}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select observation type" />
+              </SelectTrigger>
+              <SelectContent>
+                {TYPE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
-} 
+}

@@ -1,84 +1,107 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { motion } from "framer-motion";
-import { CalendarInput } from "@/components/ui/calendar-input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFormContext } from "react-hook-form";
+import { Select } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { DatePicker } from "@/components/ui/date-picker";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
-const formSchema = z.object({
-  teacher: z.string().min(1, "Please select a teacher"),
-  date: z.date(),
-});
+const SUBJECT_OPTIONS = [
+  { value: "Math", label: "Math" },
+  { value: "Science", label: "Science" },
+  { value: "Social Studies", label: "Social Studies" },
+  { value: "ELA", label: "ELA" },
+  { value: "Elective", label: "Elective" },
+];
 
-interface DetailsStepProps {
+const GRADE_LEVEL_OPTIONS = [
+  { value: "K", label: "Kindergarten" },
+  { value: "1", label: "1st Grade" },
+  { value: "2", label: "2nd Grade" },
+  { value: "3", label: "3rd Grade" },
+  { value: "4", label: "4th Grade" },
+  { value: "5", label: "5th Grade" },
+  { value: "6", label: "6th Grade" },
+  { value: "7", label: "7th Grade" },
+  { value: "8", label: "8th Grade" },
+  { value: "9", label: "9th Grade" },
+  { value: "10", label: "10th Grade" },
+  { value: "11", label: "11th Grade" },
+  { value: "12", label: "12th Grade" },
+];
+
+export function DetailsStep({
+  onNext,
+  onBack,
+}: {
   onNext: () => void;
-  onBack?: () => void;
-}
+  onBack: () => void;
+}) {
+  const { register, watch, setValue } = useFormContext();
+  const teachers = useQuery(api.teachers.list);
 
-export function DetailsStep({ onNext }: DetailsStepProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      teacher: "",
-      date: new Date(),
-    },
-  });
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    onNext();
-  }
+  const teacherOptions =
+    teachers?.map((teacher) => ({
+      value: teacher._id,
+      label: teacher.name,
+    })) || [];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Card className="p-6 bg-gradient-to-br from-white to-indigo-50/30 dark:from-zinc-900 dark:to-indigo-950/10">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="teacher"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-muted-foreground">Teacher</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="bg-white dark:bg-zinc-900 border-indigo-200/50 dark:border-indigo-800/20 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20">
-                        <SelectValue placeholder="Select a teacher" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="bg-white dark:bg-zinc-900">
-                      <SelectItem value="john-doe">John Doe</SelectItem>
-                      <SelectItem value="jane-smith">Jane Smith</SelectItem>
-                      <SelectItem value="mike-johnson">Mike Johnson</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Observation Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Teacher</label>
+            <Select
+              options={teacherOptions}
+              value={watch("teacherId")}
+              onChange={(value) => setValue("teacherId", value)}
+              placeholder="Select a teacher"
             />
+          </div>
 
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel className="text-muted-foreground">Observation Date</FormLabel>
-                  <CalendarInput date={field.value} setDate={field.onChange} />
-                  <FormMessage />
-                </FormItem>
-              )}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Subject</label>
+            <Select
+              options={SUBJECT_OPTIONS}
+              value={watch("subject")}
+              onChange={(value) => setValue("subject", value)}
+              placeholder="Select a subject"
             />
-          </form>
-        </Form>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Grade Levels</label>
+            <MultiSelect
+              options={GRADE_LEVEL_OPTIONS}
+              value={watch("gradeLevels") || []}
+              onChange={(value) => setValue("gradeLevels", value)}
+              placeholder="Select grade levels"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Observation Date</label>
+            <DatePicker
+              value={watch("observationDate")}
+              onChange={(date) => setValue("observationDate", date)}
+            />
+          </div>
+        </CardContent>
       </Card>
-    </motion.div>
+
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={onBack}>
+          Back
+        </Button>
+        <Button onClick={onNext}>Next</Button>
+      </div>
+    </div>
   );
-} 
+}

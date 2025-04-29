@@ -27,7 +27,10 @@ export default defineSchema({
     // Fields for subscription status
     subscriptionStatus: v.optional(v.string()),
     subscriptionTier: v.optional(v.string()),
-  }).index("by_clerk_id", ["clerkId"]).index("by_role", ["role"]).index("by_organization", ["organization"]),
+  })
+    .index("by_clerk_id", ["clerkId"])
+    .index("by_role", ["role"])
+    .index("by_organization", ["organization"]),
 
   // Schools/organizations table
   organizations: defineTable({
@@ -85,29 +88,24 @@ export default defineSchema({
 
   // Observations table - for recording classroom observations
   observations: defineTable({
-    // The teacher being observed
     teacherId: v.id("teachers"),
-    // The observer (school leader/coach)
     observerId: v.id("users"),
-    // The rubric being used
-    rubricId: v.id("rubrics"),
-    // Date of observation
+    subject: v.string(),
+    gradeLevels: v.array(v.string()),
     observationDate: v.number(),
-    // Class or subject observed
-    classSubject: v.optional(v.string()),
-    // Status of the observation ("draft", "completed", "feedback_generated")
-    status: v.string(),
-    // Creation date
+    status: v.union(
+      v.literal("draft"),
+      v.literal("completed"),
+      v.literal("feedback_generated"),
+    ),
+    reinforcementComment: v.optional(v.string()),
+    refinementComment: v.optional(v.string()),
     createdAt: v.number(),
-    // Last updated timestamp
     updatedAt: v.number(),
-    // Organization context
-    organizationId: v.optional(v.id("organizations")),
   })
     .index("by_observer", ["observerId"])
     .index("by_teacher", ["teacherId"])
-    .index("by_status", ["status"])
-    .index("by_organization", ["organizationId"]),
+    .index("by_status", ["status"]),
 
   // Evidence table - for storing specific evidence tied to rubric indicators
   evidence: defineTable({
@@ -143,5 +141,22 @@ export default defineSchema({
     createdAt: v.number(),
     // Last updated timestamp
     updatedAt: v.number(),
-  }).index("by_observation", ["observationId"]).index("by_observation_and_version", ["observationId", "version"]),
+  })
+    .index("by_observation", ["observationId"])
+    .index("by_observation_and_version", ["observationId", "version"]),
+
+  rubricRatings: defineTable({
+    observationId: v.id("observations"),
+    indicatorAcronym: v.string(),
+    rating: v.number(),
+    createdAt: v.number(),
+  }).index("by_observation", ["observationId"]),
+
+  walkthroughEntries: defineTable({
+    observationId: v.id("observations"),
+    indicatorAcronym: v.string(),
+    type: v.union(v.literal("reinforcement"), v.literal("refinement")),
+    comment: v.string(),
+    createdAt: v.number(),
+  }).index("by_observation", ["observationId"]),
 });
