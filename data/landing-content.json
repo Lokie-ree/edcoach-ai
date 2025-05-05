@@ -13,28 +13,38 @@
   }, 
   "hero": {
     "tagline": "LEADS/LER Ready!",
-    "headline": "AI-Powered Coaching That Saves Time & Drives Growth",
-    "sub_headline": "Stop spending hours on observation paperwork. EdCoach AI delivers instant, rubric-aligned feedback suggestions, tracks progress effortlessly, and helps you build a culture of continuous improvement across your school or district.",
+    "headline": "AI-Powered Coaching for Frequent, Actionable Feedback Between Formal Evaluations",
+    "sub_headline": "Designed for K-12 leaders and coaches to streamline informal walkthroughs, generate rubric-aligned feedback, and foster continuous teacher growth—without replacing your formal evaluation system.",
     "cta_primary": {"label": "Join the Early Access Waitlist", "href": "#waitlist"},
     "image_description": "Illustration: Coach using EdCoach AI on a tablet, providing feedback to a teacher, with subtle background elements suggesting growth charts and student success pathways."
   },
   "features": {
-    "headline": "Key Features to Elevate Your Coaching",
+    "headline": "Key Features for Continuous Teacher Growth",
     "cards": [
       {
+        "icon": "ClipboardList",
+        "title": "Quick Informal Walkthroughs",
+        "description": "Select a teacher, choose focus indicators, and capture evidence in under 10 minutes—optimized for mobile and classroom use."
+      },
+      {
         "icon": "BotMessageSquare",
-        "title": "Instant, AI-Powered Feedback",
-        "description": "Generate relevant, editable feedback suggestions aligned to LEADS, LER, or your custom rubrics in seconds. Turn observation notes into actionable coaching points effortlessly."
+        "title": "AI Feedback for Walkthroughs",
+        "description": "Generate concise, actionable feedback suggestions aligned to LER/LEADS or your custom rubric. Edit and finalize before sharing."
       },
       {
         "icon": "FileCog",
-        "title": "Flexible Rubric Engine",
-        "description": "Easily implement state frameworks like LEADS or upload and map your district's unique instructional rubrics. Ensure consistency and relevance in every observation."
+        "title": "Draft & Finalize Observations",
+        "description": "Save walkthroughs as drafts, finalize when ready, and ensure feedback is always accurate and actionable."
+      },
+      {
+        "icon": "UserCheck",
+        "title": "Teacher Feedback Portal",
+        "description": "Teachers access all their feedback—informal and formal—in a secure, easy-to-read feed."
       },
       {
         "icon": "LineChart",
-        "title": "Actionable Growth Tracking",
-        "description": "Visualize teacher progress and identify school-wide trends with intuitive dashboards. Use data to inform targeted support, celebrate wins, and demonstrate impact."
+        "title": "Role-Based Dashboards",
+        "description": "Principals and coaches see trends, frequency, and focus areas to inform school-wide PD and support."
       }
     ]
   },
@@ -44,20 +54,20 @@
       {
         "id": 1,
         "icon": "ClipboardList",
-        "title": "Observe & Align",
-        "description": "Capture evidence during walkthroughs using our simple form on any device, tagging notes directly to your chosen rubric indicators."
+        "title": "Quick Informal Walkthroughs",
+        "description": "Select a teacher, choose 1-3 focus indicators, and jot down evidence—all in under 10 minutes. Save as draft and finalize when ready."
       },
       {
         "id": 2,
         "icon": "Sparkles",
-        "title": "Generate & Refine",
-        "description": "Instantly get AI-suggested feedback based on your notes. Review, personalize, and finalize coaching points in minutes, not hours."
+        "title": "AI Feedback in Seconds",
+        "description": "Instantly get AI-suggested feedback based on your notes and rubric. Edit and finalize before sharing with teachers."
       },
       {
         "id": 3,
         "icon": "TrendingUp",
-        "title": "Track & Support",
-        "description": "Monitor progress with real-time dashboards. Leverage insights from observation logs and trend data for effective follow-up and support."
+        "title": "Review & Grow",
+        "description": "Teachers access all feedback in a secure portal. Leaders and coaches track trends and growth over time with role-based dashboards."
       }
     ]
   },
@@ -68,7 +78,7 @@
       {
         "name": "Coach",
         "price": "$19/mo",
-        "price_description": "Per user, billed annually",
+        "price_description": "Per user, billed annually. For individual leaders/coaches supporting up to 5 teachers.",
         "features": [
           "Supports up to 5 Teachers",
           "Standard Rubrics (LEADS, LER)",
@@ -83,7 +93,7 @@
       {
         "name": "School",
         "price": "$499/mo",
-        "price_description": "Per school, billed annually",
+        "price_description": "Per school, billed annually. For schools needing unlimited users, advanced analytics, and custom rubrics.",
         "features": [
           "Unlimited Users & Teachers",
           "Standard & Custom Rubrics",
@@ -99,7 +109,7 @@
       {
         "name": "District",
         "price": "Custom",
-        "price_description": "Tailored for multiple schools",
+        "price_description": "Coming soon: Tailored for multiple schools with cross-school analytics and dedicated support.",
         "features": [
           "All School Features",
           "District Analytics Dashboard",
@@ -109,12 +119,13 @@
           "Customization Options"
         ],
         "cta": {"label": "Request District Demo", "href": "/contact-sales"},
-        "highlight": false
+        "highlight": false,
+        "coming_soon": true
       }
     ]
   },
   "testimonials": {
-    "headline": "What Educational Leaders Are Saying",
+    "headline": "What Educational Leaders & Teachers Are Saying",
     "quotes": [
       {
         "quote": "The AI feedback suggestions are remarkably relevant and save our coaches hours each week. It allows for more frequent and meaningful interactions.",
@@ -127,9 +138,14 @@
         "title": "Instructional Coach Mentor"
       },
       {
-        "quote": "As developers with education backgrounds, we built EdCoach AI to solve the feedback bottleneck we experienced firsthand. It's intuitive and impactful.",
-        "author": "Alex Johnson",
-        "title": "Lead Developer & Former Educator"
+        "quote": "As a teacher, I love being able to access all my feedback in one place. The regular, actionable insights help me grow between formal observations.",
+        "author": "Sarah Williams",
+        "title": "Classroom Teacher"
+      },
+      {
+        "quote": "The platform is clean, responsive, and easy to use on my tablet during walkthroughs – a huge improvement over our previous system.",
+        "author": "Jessica Nguyen",
+        "title": "Instructional Coach"
       },
       {
         "quote": "EdCoach AI streamlines the observation process required by LEADS, but more importantly, it helps us turn evaluation into genuine professional growth.",
@@ -152,9 +168,9 @@
         "title": "Director of Curriculum & Instruction"
       },
       {
-        "quote": "The platform is clean, responsive, and easy to use on my tablet during walkthroughs – a huge improvement over our previous system.",
-        "author": "Jessica Nguyen",
-        "title": "Instructional Coach"
+        "quote": "The dashboard makes it easy for me as a principal to spot trends and plan PD that actually meets our teachers' needs.",
+        "author": "Maria Lopez",
+        "title": "Principal"
       }
     ]
   },
@@ -162,12 +178,20 @@
     "headline": "Got Questions? We've Got Answers.",
     "questions": [
       {
-        "question": "How accurate is the AI feedback?",
-        "answer": "Our AI provides strong, rubric-aligned starting points based on your notes. It's designed to be reviewed and personalized by the coach for maximum relevance and impact."
+        "question": "Does EdCoach AI replace our formal evaluation system?",
+        "answer": "No, EdCoach AI is designed to supplement—not replace—your formal evaluation process. It streamlines informal feedback and growth between formal observations."
       },
       {
-        "question": "Can we use our district's specific rubric?",
-        "answer": "Yes! Our School and District plans feature a flexible engine allowing you to easily upload and map your unique instructional frameworks alongside standards like LEADS."
+        "question": "How do teachers access their feedback?",
+        "answer": "Teachers have a secure portal to view all feedback interactions, both informal and formal, in a clear, organized feed."
+      },
+      {
+        "question": "Can I save and finalize walkthroughs later?",
+        "answer": "Yes! You can save walkthroughs and observations as drafts and finalize them when you're ready to share feedback."
+      },
+      {
+        "question": "Is EdCoach AI mobile-friendly and does it work offline?",
+        "answer": "Absolutely. EdCoach AI is designed for mobile use in classrooms and supports offline completion with automatic sync when reconnected."
       },
       {
         "question": "How secure is our school's data?",
@@ -180,6 +204,10 @@
       {
         "question": "Is there a free trial or pilot program?",
         "answer": "We plan to offer trials and pilot programs. Join the waitlist to be the first to know about availability and receive early access opportunities!"
+      },
+      {
+        "question": "How does role-based access work?",
+        "answer": "Principals, coaches, and teachers each have access to the features and data relevant to their role, ensuring privacy and clarity for everyone."
       }
     ],
     "support_link": {"label": "See All FAQs", "href": "/support"}

@@ -27,57 +27,12 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import rubricContent from "@/data/rubric-content.json";
+import louisianaEducatorRubric from "@/data/louisiana-educator-rubric.json";
 import { cn } from "@/lib/utils";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { useMemo } from "react";
 import { Label } from "@/components/ui/label";
-
-interface RubricIndicator {
-  name: string;
-  acronym: string;
-  rubric: {
-    "Level 5 Exemplary": string[];
-    "Level 3 Proficient": string[];
-    "Level 1 Unsatisfactory": string[];
-    footnote?: string;
-  };
-}
-
-interface RubricDomain {
-  name: string;
-  performance_level_descriptions: {
-    "Level 5 Exemplary": string;
-    "Level 3 Proficient": string;
-    "Level 1 Unsatisfactory": string;
-  };
-  indicators: RubricIndicator[];
-}
-
-interface RubricContent {
-  document_title: string;
-  release_date: string;
-  issuing_organization: string;
-  partnership: string;
-  contact_info: {
-    website: string;
-    address: string;
-    city: string;
-    state: string;
-    zip: string;
-  };
-  overview: {
-    purpose: string;
-    grounding: string;
-    focus_domains: string[];
-    performance_levels: {
-      defined: number[];
-      observer_judgment: number[];
-      notes: string;
-    };
-  };
-  domains: RubricDomain[];
-}
+import { Rubric, RubricDomain, RubricIndicator } from "@/types/louisianaEducatorRubric";
 
 export function InformalWalkthroughStep() {
   const teachers = useQuery(api.teachers.list);
@@ -85,12 +40,12 @@ export function InformalWalkthroughStep() {
 
   const indicators = useMemo(() => {
     const INSTRUCTION_DOMAINS = ["INSTRUCTION", "PLANNING", "ENVIRONMENT"];
-    return (rubricContent[0] as RubricContent).domains
-      .filter((domain) => INSTRUCTION_DOMAINS.includes(domain.name))
-      .flatMap((domain) =>
-        domain.indicators.map((indicator) => ({
-          value: indicator.acronym,
-          label: `${indicator.name} (${indicator.acronym})`,
+    return (louisianaEducatorRubric as Rubric).domains
+      .filter((domain: RubricDomain) => INSTRUCTION_DOMAINS.includes(domain.domain_name))
+      .flatMap((domain: RubricDomain) =>
+        domain.indicators.map((indicator: RubricIndicator) => ({
+          value: indicator.indicator_code,
+          label: `${indicator.indicator_name} (${indicator.indicator_code})`,
         })),
       );
   }, []);

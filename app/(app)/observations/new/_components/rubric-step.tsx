@@ -2,24 +2,18 @@
 
 import { useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
-import { ChevronDown, ChevronUp, Info } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
-import { RubricContent } from "@/app/types/rubric";
-import rubricContent from "@/data/rubric-content.json";
+import { Rubric, RubricDomain, RubricIndicator } from "@/types/louisianaEducatorRubric";
+import louisianaEducatorRubric from "@/data/louisiana-educator-rubric.json";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export function RubricStep() {
   const { control, watch } = useFormContext();
   const [expandedDomains, setExpandedDomains] = useState<string[]>([]);
-  const rubricData = (rubricContent as RubricContent[])[0];
+  const rubricData = louisianaEducatorRubric as Rubric;
 
   const toggleDomain = (domainName: string) => {
     setExpandedDomains((prev) =>
@@ -29,18 +23,18 @@ export function RubricStep() {
     );
   };
 
-  const completedIndicators = rubricData.domains.reduce((count, domain) => {
+  const completedIndicators = rubricData.domains.reduce((count: number, domain: RubricDomain) => {
     return (
       count +
-      domain.indicators.filter((indicator) => {
-        const value = watch(`rubric.${domain.name}.${indicator.name}`);
+      domain.indicators.filter((indicator: RubricIndicator) => {
+        const value = watch(`rubric.${domain.domain_name}.${indicator.indicator_name}`);
         return value !== undefined && value !== null;
       }).length
     );
   }, 0);
 
   const totalIndicators = rubricData.domains.reduce(
-    (count, domain) => count + domain.indicators.length,
+    (count: number, domain: RubricDomain) => count + domain.indicators.length,
     0,
   );
 
@@ -60,13 +54,13 @@ export function RubricStep() {
 
       <ScrollArea className="h-[270px] rounded-md border">
         <div className="p-4 space-y-6">
-          {rubricData.domains.map((domain) => {
-            const isExpanded = expandedDomains.includes(domain.name);
+          {rubricData.domains.map((domain: RubricDomain) => {
+            const isExpanded = expandedDomains.includes(domain.domain_name);
             return (
-              <div key={domain.name} className="space-y-4">
+              <div key={domain.domain_name} className="space-y-4">
                 <div
                   className="flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-muted/50"
-                  onClick={() => toggleDomain(domain.name)}
+                  onClick={() => toggleDomain(domain.domain_name)}
                 >
                   <div className="flex items-center gap-2">
                     {isExpanded ? (
@@ -74,58 +68,21 @@ export function RubricStep() {
                     ) : (
                       <ChevronDown className="h-4 w-4" />
                     )}
-                    <h3 className="font-medium">{domain.name}</h3>
+                    <h3 className="font-medium">{domain.domain_name}</h3>
                   </div>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <div className="max-w-sm space-y-2">
-                          <p className="font-medium">Level 5 - Exemplary</p>
-                          <p className="text-sm">
-                            {
-                              domain.performance_level_descriptions[
-                                "Level 5 Exemplary"
-                              ]
-                            }
-                          </p>
-                          <p className="font-medium">Level 3 - Proficient</p>
-                          <p className="text-sm">
-                            {
-                              domain.performance_level_descriptions[
-                                "Level 3 Proficient"
-                              ]
-                            }
-                          </p>
-                          <p className="font-medium">
-                            Level 1 - Unsatisfactory
-                          </p>
-                          <p className="text-sm">
-                            {
-                              domain.performance_level_descriptions[
-                                "Level 1 Unsatisfactory"
-                              ]
-                            }
-                          </p>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
                 </div>
 
                 {isExpanded && (
                   <div className="space-y-4 pl-6">
-                    {domain.indicators.map((indicator) => (
-                      <div key={indicator.name} className="space-y-2">
+                    {domain.indicators.map((indicator: RubricIndicator) => (
+                      <div key={indicator.indicator_name} className="space-y-2">
                         <Label className="text-sm font-medium">
-                          {indicator.name}
-                          {indicator.acronym && ` (${indicator.acronym})`}
+                          {indicator.indicator_name}
+                          {indicator.indicator_code && ` (${indicator.indicator_code})`}
                         </Label>
 
                         <Controller
-                          name={`rubric.${domain.name}.${indicator.name}`}
+                          name={`rubric.${domain.domain_name}.${indicator.indicator_name}`}
                           control={control}
                           render={({ field }) => (
                             <RadioGroup
@@ -135,8 +92,8 @@ export function RubricStep() {
                             >
                               {[1, 2, 3, 4, 5].map((rating) => (
                                 <div key={rating} className="flex items-center space-x-2">
-                                  <RadioGroupItem value={(rating * 20).toString()} id={`rubric.${domain.name}.${indicator.name}.${rating}`} />
-                                  <Label htmlFor={`rubric.${domain.name}.${indicator.name}.${rating}`}>{rating}</Label>
+                                  <RadioGroupItem value={(rating * 20).toString()} id={`rubric.${domain.domain_name}.${indicator.indicator_name}.${rating}`} />
+                                  <Label htmlFor={`rubric.${domain.domain_name}.${indicator.indicator_name}.${rating}`}>{rating}</Label>
                                 </div>
                               ))}
                             </RadioGroup>

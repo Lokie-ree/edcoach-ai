@@ -5,13 +5,15 @@ import { Card } from "@/components/ui/card";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import landingContent from "@/data/landing-content.json";
 import { motion } from "framer-motion";
-import { BotMessageSquare, FileCog, LineChart } from "lucide-react";
+import { BotMessageSquare, FileCog, LineChart, ClipboardList, UserCheck } from "lucide-react";
 
 // Map icon strings to components
 const iconMap = {
   BotMessageSquare: BotMessageSquare,
   FileCog: FileCog,
   LineChart: LineChart,
+  ClipboardList: ClipboardList,
+  UserCheck: UserCheck,
   // Add other icon mappings as needed
 };
 
