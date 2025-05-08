@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   description:
     "EdCoach AI empowers school leaders and coaches with real-time, rubric-aligned feedback suggestions.",
   icons: {
-    icon: "/convex.svg",
+    icon: "/logo.png",
   },
 };
 

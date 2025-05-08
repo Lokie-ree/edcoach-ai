@@ -54,69 +54,6 @@ async function getUserIdForMutation(ctx: MutationCtx, identity: any) {
   }
 }
 
-// Seed function to create test data
-export const seed = mutation({
-  args: {},
-  returns: v.object({
-    success: v.boolean(),
-    message: v.string(),
-  }),
-  handler: async (ctx) => {
-    try {
-      // Create a test user
-      const testUserId = await ctx.db.insert("users", {
-        clerkId: "test_user_1",
-        name: "Test User",
-        email: "test@example.com",
-        role: "school_leader",
-        organization: "test_school",
-        createdAt: Date.now(),
-      });
-
-      // Create some test teachers
-      const teachers = [
-        {
-          name: "John Smith",
-          email: "john@example.com",
-          department: "Mathematics",
-          gradeLevel: "9-12",
-          status: "active",
-          createdBy: testUserId,
-          createdAt: Date.now(),
-        },
-        {
-          name: "Jane Doe",
-          email: "jane@example.com",
-          department: "Science",
-          gradeLevel: "6-8",
-          status: "active",
-          createdBy: testUserId,
-          createdAt: Date.now(),
-        },
-        {
-          name: "Mike Johnson",
-          email: "mike@example.com",
-          department: "English",
-          gradeLevel: "9-12",
-          status: "active",
-          createdBy: testUserId,
-          createdAt: Date.now(),
-        },
-      ];
-
-      // Insert all test teachers
-      for (const teacher of teachers) {
-        await ctx.db.insert("teachers", teacher);
-      }
-
-      return { success: true, message: "Test data created successfully" };
-    } catch (error) {
-      console.error("Error in seed function:", error);
-      throw new Error("Failed to create test data");
-    }
-  },
-});
-
 export const create = mutation({
   args: {
     name: v.string(),
@@ -137,14 +74,24 @@ export const create = mutation({
       }
 
       // Create the teacher using proper database operation
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+        .unique();
+
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+
       const teacherId = await ctx.db.insert("teachers", {
         name: args.name,
         email: args.email,
         department: args.department,
         gradeLevel: args.gradeLevel,
         status: args.status || "pending", // Default to pending if not provided
-        createdBy: await getUserIdForMutation(ctx, identity),
+        createdBy: user._id,
         createdAt: Date.now(),
+        organization: user.organization, // Set organization from user
       });
       return { success: true, teacherId };
     } catch (error) {
@@ -168,6 +115,7 @@ export const list = query({
         status: v.optional(v.string()),
         createdBy: v.id("users"),
         createdAt: v.number(),
+        organization: v.optional(v.string()),
       })
     ),
     v.null()
@@ -176,7 +124,7 @@ export const list = query({
     try {
       const identity = await ctx.auth.getUserIdentity();
       if (!identity) {
-        return null;
+        return [];
       }
 
       // Get the current user
@@ -186,7 +134,7 @@ export const list = query({
         .unique();
 
       if (!user) {
-        return null;
+        return [];
       }
 
       // Get all teachers from the user's organization
@@ -198,7 +146,7 @@ export const list = query({
         .collect();
     } catch (error) {
       console.error("Error in list function:", error);
-      return null;
+      return [];
     }
   },
 }); 

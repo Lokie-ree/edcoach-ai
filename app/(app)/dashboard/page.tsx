@@ -24,6 +24,8 @@ import { cn } from "@/lib/utils";
 import { Doc } from "@/convex/_generated/dataModel";
 import { motion } from "framer-motion";
 import { useAuthQuery } from "@/hooks/use-auth-query";
+import { useUser, useOrganization } from "@clerk/nextjs";
+import { useMutation } from "convex/react";
 
 // Tilted Card Component
 const TiltedCard = ({
@@ -75,6 +77,19 @@ const Dashboard = () => {
   >(api.teachers.list);
   const { isLoading: isLoadingObservations, data: observations = [] } =
     useAuthQuery<Doc<"observations">[]>(api.observations.list);
+  const { user } = useUser();
+  const { organization } = useOrganization();
+  const upsertUser = useMutation(api.users.storeMetadata);
+
+  React.useEffect(() => {
+    if (user && organization) {
+      upsertUser({
+        role: typeof user.publicMetadata?.role === "string" ? user.publicMetadata.role : "user",
+        preferences: user.publicMetadata?.preferences || {},
+        organization: organization.id,
+      });
+    }
+  }, [user, organization, upsertUser]);
 
   // Show loading state
   if (isLoadingTeachers || isLoadingObservations) {
@@ -105,6 +120,15 @@ const Dashboard = () => {
   return (
     <div className="space-y-6 relative">
       <GridDistortion />
+
+      {/* Debug: Organization Info */}
+      {organization && (
+        <div className="p-4 mb-4 rounded bg-yellow-100 text-yellow-900 border border-yellow-300">
+          <strong>Organization Debug Info:</strong><br />
+          <span><b>ID:</b> {organization.id}</span><br />
+          <span><b>Name:</b> {organization.name}</span>
+        </div>
+      )}
 
       {/* Header */}
       <motion.div

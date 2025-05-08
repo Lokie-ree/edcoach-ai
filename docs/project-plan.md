@@ -117,9 +117,11 @@ EdCoach AI uses a dual-system approach:
   gradeLevel: v.optional(v.string()),
   createdBy: v.id("users"),
   createdAt: v.number(),
+  status: v.optional(v.string()),
+  organization: v.optional(v.string()),
 }
 ```
-**Indexes:** `by_creator`
+**Indexes:** `by_creator`, `by_organization`
 
 #### rubrics
 ```typescript
@@ -141,17 +143,21 @@ EdCoach AI uses a dual-system approach:
 {
   teacherId: v.id("teachers"),
   observerId: v.id("users"),
-  rubricId: v.id("rubrics"),
+  subject: v.string(),
+  gradeLevels: v.array(v.string()),
   observationDate: v.number(),
-  classSubject: v.optional(v.string()),
-  status: v.string(),
-  observationType: v.string(), // 'informal' or 'formal'
+  status: v.union(
+    v.literal("draft"),
+    v.literal("completed"),
+    v.literal("feedback_generated"),
+  ),
+  reinforcementComment: v.optional(v.string()),
+  refinementComment: v.optional(v.string()),
   createdAt: v.number(),
   updatedAt: v.number(),
-  organizationId: v.optional(v.id("organizations")),
 }
 ```
-**Indexes:** `by_observer`, `by_teacher`, `by_status`, `by_organization`, `by_type`
+**Indexes:** `by_observer`, `by_teacher`, `by_status`
 
 #### evidence
 ```typescript
@@ -180,6 +186,45 @@ EdCoach AI uses a dual-system approach:
 }
 ```
 **Indexes:** `by_observation`, `by_observation_and_version`
+
+#### rubricRatings
+```typescript
+{
+  observationId: v.id("observations"),
+  indicatorAcronym: v.string(),
+  rating: v.number(),
+  createdAt: v.number(),
+}
+```
+**Indexes:** `by_observation`
+
+#### walkthroughEntries
+```typescript
+{
+  observationId: v.id("observations"),
+  indicatorAcronym: v.string(),
+  type: v.union(v.literal("reinforcement"), v.literal("refinement")),
+  comment: v.string(),
+  createdAt: v.number(),
+}
+```
+**Indexes:** `by_observation`
+
+#### auditLogs
+```typescript
+{
+  userId: v.optional(v.id("users")),
+  action: v.string(),
+  resourceType: v.optional(v.string()),
+  resourceId: v.optional(v.string()),
+  metadata: v.optional(v.any()),
+  ipAddress: v.optional(v.string()),
+  userAgent: v.optional(v.string()),
+  severity: v.union(v.literal("info"), v.literal("warning"), v.literal("critical")),
+  timestamp: v.number(),
+}
+```
+**Indexes:** `by_user`, `by_action`, `by_timestamp`, `by_severity`, `by_resource`
 
 ### 3.3 Authentication Flow
 

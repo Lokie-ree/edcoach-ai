@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users, Settings, Home, MenuIcon, X } from "lucide-react";
+import { Users, ChartSpline, Home, MenuIcon, X } from "lucide-react";
 import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
 import { Button } from "./ui/button";
 import { ModeToggle } from "./mode-toggle";
@@ -12,7 +12,7 @@ import { useState } from "react";
 const navItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard" },
   { href: "/teachers", icon: Users, label: "Teachers" },
-  { href: "/manage-plan", icon: Settings, label: "Settings" },
+  { href: "/analytics", icon: ChartSpline, label: "Analytics" },
 ];
 
 const MobileNav = ({

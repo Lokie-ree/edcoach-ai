@@ -64,7 +64,11 @@ export default defineSchema({
     createdAt: v.number(),
     // Teacher's status (active, pending, inactive)
     status: v.optional(v.string()),
-  }).index("by_creator", ["createdBy"]),
+    // Organization the teacher belongs to
+    organization: v.optional(v.string()),
+  })
+    .index("by_creator", ["createdBy"])
+    .index("by_organization", ["organization"]),
 
   // Rubrics table - for storing evaluation frameworks
   rubrics: defineTable({

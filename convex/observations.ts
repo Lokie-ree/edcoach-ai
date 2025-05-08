@@ -7,7 +7,7 @@ export const list = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Not authenticated");
+      return [];
     }
 
     // Get the current user to filter by organization
@@ -17,7 +17,7 @@ export const list = query({
       .unique();
 
     if (!user) {
-      throw new Error("User not found");
+      return [];
     }
 
     // Get observations for the user
