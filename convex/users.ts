@@ -10,7 +10,6 @@ import { query, mutation } from "./_generated/server";
 // Store additional user metadata
 export const storeMetadata = mutation({
   args: {
-    role: v.optional(v.string()),
     preferences: v.optional(v.any()),
     organization: v.string(),
   },
@@ -29,7 +28,6 @@ export const storeMetadata = mutation({
     if (existingUser) {
       // Update existing user
       await ctx.db.patch(existingUser._id, {
-        role: args.role,
         preferences: args.preferences,
         organization: args.organization,
       });
@@ -40,7 +38,6 @@ export const storeMetadata = mutation({
         clerkId: identity.subject,
         name: identity.name ?? "",
         email: identity.email ?? "",
-        role: args.role ?? "user",
         organization: args.organization,
         preferences: args.preferences ?? {},
         createdAt: Date.now(),
@@ -81,7 +78,6 @@ export const createUser = mutation({
     clerkId: v.string(),
     name: v.string(),
     email: v.string(),
-    role: v.string(),
     organization: v.string(),
     imageUrl: v.optional(v.string()),
   },
@@ -101,7 +97,6 @@ export const createUser = mutation({
       clerkId: args.clerkId,
       name: args.name,
       email: args.email,
-      role: args.role,
       organization: args.organization,
       imageUrl: args.imageUrl,
       createdAt: Date.now(),
@@ -126,34 +121,12 @@ export const getUserByClerkId = query({
   },
 });
 
-// List users with optional filtering by role
-export const listUsers = query({
-  args: {
-    role: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    let users;
-    if (args.role) {
-      // Query with index if role is provided
-      users = await ctx.db
-        .query("users")
-        .withIndex("by_role", (q) => q.eq("role", args.role!))
-        .collect();
-    } else {
-      // Query all users if no role is specified
-      users = await ctx.db.query("users").collect();
-    }
-    return users;
-  },
-});
-
 // Update a user
 export const updateUser = mutation({
   args: {
     userId: v.id("users"),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
-    role: v.optional(v.string()),
     organization: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
   },
@@ -203,7 +176,6 @@ export const updateProfile = mutation({
   args: {
     name: v.string(),
     email: v.string(),
-    role: v.string(),
     organization: v.string(),
   },
   handler: async (ctx, args) => {
@@ -223,7 +195,6 @@ export const updateProfile = mutation({
       await ctx.db.patch(user._id, {
         name: args.name,
         email: args.email,
-        role: args.role,
         organization: args.organization,
       });
       return { success: true };
@@ -233,11 +204,11 @@ export const updateProfile = mutation({
         clerkId: identity.subject,
         name: args.name,
         email: args.email,
-        role: args.role,
         organization: args.organization,
         createdAt: Date.now(),
       });
       return { success: true };
     }
   },
-}); 
+});
+

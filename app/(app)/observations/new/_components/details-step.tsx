@@ -8,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MultiSelect } from "@/components/ui/multi-select";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Label } from "@/components/ui/label";
@@ -19,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const SUBJECT_OPTIONS = [
   { value: "Math", label: "Math" },
@@ -43,6 +43,53 @@ const GRADE_LEVEL_OPTIONS = [
   { value: "11", label: "11th Grade" },
   { value: "12", label: "12th Grade" },
 ];
+
+function GradeLevelsMultiSelect() {
+  const { control } = useFormContext();
+  return (
+    <FormField
+      control={control}
+      name="gradeLevels"
+      render={({ field }) => (
+        <FormItem>
+          <Label>Grade Levels</Label>
+          <FormControl>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  {field.value && field.value.length > 0
+                    ? field.value.map(
+                        (v: string) => GRADE_LEVEL_OPTIONS.find((o) => o.value === v)?.label
+                      ).join(", ")
+                    : "Select grade levels"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64">
+                {GRADE_LEVEL_OPTIONS.map((option) => (
+                  <div key={option.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={field.value?.includes(option.value)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          field.onChange([...(field.value || []), option.value]);
+                        } else {
+                          field.onChange((field.value || []).filter((v: string) => v !== option.value));
+                        }
+                      }}
+                      id={option.value}
+                    />
+                    <Label htmlFor={option.value}>{option.label}</Label>
+                  </div>
+                ))}
+              </PopoverContent>
+            </Popover>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
 
 export function DetailsStep() {
   const { watch, setValue, control } = useFormContext();
@@ -94,24 +141,7 @@ export function DetailsStep() {
         </Select>
       </div>
 
-      <FormField
-        control={control}
-        name="gradeLevels"
-        render={({ field }) => (
-          <FormItem>
-            <Label>Grade Levels</Label>
-            <FormControl>
-              <MultiSelect
-                options={GRADE_LEVEL_OPTIONS}
-                value={field.value || []}
-                onChange={field.onChange}
-                placeholder="Select grade levels"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <GradeLevelsMultiSelect />
 
       <FormField
         control={control}

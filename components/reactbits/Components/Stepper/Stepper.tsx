@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 interface StepperProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
-  initialStep?: number;
+  currentStep: number;
   onStepChange?: (step: number) => void;
   onFinalStepCompleted?: () => void;
   stepCircleContainerClassName?: string;
@@ -36,7 +36,7 @@ interface StepperProps extends HTMLAttributes<HTMLDivElement> {
 
 export default function Stepper({
   children,
-  initialStep = 1,
+  currentStep,
   onStepChange = () => {},
   onFinalStepCompleted = () => {},
   stepCircleContainerClassName = "",
@@ -51,40 +51,11 @@ export default function Stepper({
   renderStepIndicator,
   ...rest
 }: StepperProps) {
-  const [currentStep, setCurrentStep] = useState<number>(initialStep);
   const [direction, setDirection] = useState<number>(0);
   const stepsArray = Children.toArray(children);
   const totalSteps = stepsArray.length;
   const isCompleted = currentStep > totalSteps;
   const isLastStep = currentStep === totalSteps;
-
-  const updateStep = (newStep: number) => {
-    setCurrentStep(newStep);
-    if (newStep > totalSteps) {
-      onFinalStepCompleted();
-    } else {
-      onStepChange(newStep);
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setDirection(-1);
-      updateStep(currentStep - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (!isLastStep) {
-      setDirection(1);
-      updateStep(currentStep + 1);
-    }
-  };
-
-  const handleComplete = () => {
-    setDirection(1);
-    updateStep(totalSteps + 1);
-  };
 
   return (
     <div
@@ -107,8 +78,10 @@ export default function Stepper({
                     step: stepNumber,
                     currentStep,
                     onStepClick: (clicked) => {
-                      setDirection(clicked > currentStep ? 1 : -1);
-                      updateStep(clicked);
+                      if (clicked !== currentStep) {
+                        setDirection(clicked > currentStep ? 1 : -1);
+                      }
+                      onStepChange(clicked);
                     },
                   })
                 ) : (
@@ -117,8 +90,10 @@ export default function Stepper({
                     disableStepIndicators={disableStepIndicators}
                     currentStep={currentStep}
                     onClickStep={(clicked) => {
-                      setDirection(clicked > currentStep ? 1 : -1);
-                      updateStep(clicked);
+                      if (clicked !== currentStep) {
+                        setDirection(clicked > currentStep ? 1 : -1);
+                      }
+                      onStepChange(clicked);
                     }}
                   />
                 )}
@@ -148,21 +123,25 @@ export default function Stepper({
             >
               {currentStep !== 1 && (
                 <button
-                  onClick={handleBack}
+                  onClick={backButtonProps?.onClick}
+                  type="button"
+                  disabled={currentStep === 1 || backButtonProps?.disabled}
                   className={`duration-350 rounded px-2 py-1 transition ${
                     currentStep === 1
                       ? "pointer-events-none opacity-50 text-neutral-400"
                       : "text-neutral-400 hover:text-neutral-700"
-                  }`}
-                  {...backButtonProps}
+                  } ${backButtonProps?.className || ''}`}
+                  {...{...backButtonProps, onClick: backButtonProps?.onClick}}
                 >
                   {backButtonText}
                 </button>
               )}
               <button
-                onClick={isLastStep ? handleComplete : handleNext}
+                onClick={isLastStep ? onFinalStepCompleted : nextButtonProps?.onClick}
+                type="button"
+                disabled={nextButtonProps?.disabled}
                 className={cn("duration-350 flex items-center justify-center rounded-full bg-primary py-1.5 px-3.5 font-medium tracking-tight text-primary-foreground transition hover:bg-primary/90 active:bg-primary/80", nextButtonProps?.className)}
-                {...nextButtonProps}
+                {...{...nextButtonProps, onClick: isLastStep ? onFinalStepCompleted : nextButtonProps?.onClick}}
               >
                 {isLastStep ? "Complete" : nextButtonText}
               </button>

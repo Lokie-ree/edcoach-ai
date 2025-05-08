@@ -40,7 +40,6 @@ async function getUserIdForMutation(ctx: MutationCtx, identity: any) {
       clerkId: identity.subject,
       name: identity.name ?? "",
       email: identity.email ?? "",
-      role: "user", // Default role
       organization: "default", // Default organization
       createdAt: Date.now(),
     };

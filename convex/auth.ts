@@ -11,7 +11,6 @@ export const createOrGetUser = mutation({
     email: v.string(),
     name: v.string(),
     imageUrl: v.optional(v.string()),
-    role: v.optional(v.string()), // If not provided, defaults to "school_leader"
     organization: v.string(),
   },
   handler: async (ctx, args) => {
@@ -35,7 +34,6 @@ export const createOrGetUser = mutation({
       email: args.email,
       name: args.name,
       imageUrl: args.imageUrl,
-      role: args.role || "school_leader", // Default role
       organization: args.organization,
       createdAt: Date.now(),
     });
@@ -94,15 +92,19 @@ export const handleClerkWebhook = action({
     // Handle different event types
     switch (payload.type) {
       case "user.created":
-        // Create a new user in our database
-        await ctx.runMutation(api.users.createUser, {
+        // Only create user if not already present
+        const existingUser = await ctx.runQuery(api.users.getUserByClerkId, {
           clerkId: payload.data.id,
-          email: payload.data.email_addresses[0]?.email_address || "",
-          name: `${payload.data.first_name || ""} ${payload.data.last_name || ""}`.trim(),
-          role: "school_leader", // Default role
-          organization: payload.data.organization || "default",
-          imageUrl: payload.data.image_url,
         });
+        if (!existingUser) {
+          await ctx.runMutation(api.users.createUser, {
+            clerkId: payload.data.id,
+            email: payload.data.email_addresses[0]?.email_address || "",
+            name: `${payload.data.first_name || ""} ${payload.data.last_name || ""}`.trim(),
+            organization: payload.data.organization || "default",
+            imageUrl: payload.data.image_url,
+          });
+        }
         break;
 
       case "user.updated":
@@ -116,7 +118,6 @@ export const handleClerkWebhook = action({
             userId: user._id,
             name: `${payload.data.first_name || ""} ${payload.data.last_name || ""}`.trim(),
             email: payload.data.email_addresses[0]?.email_address || user.email,
-            role: user.role,
             organization: payload.data.organization || user.organization,
             imageUrl: payload.data.image_url,
           });

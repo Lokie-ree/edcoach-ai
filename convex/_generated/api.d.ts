@@ -21,6 +21,7 @@ import type * as observations from "../observations.js";
 import type * as organizations from "../organizations.js";
 import type * as teachers from "../teachers.js";
 import type * as users from "../users.js";
+import type * as walkthroughs from "../walkthroughs.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   organizations: typeof organizations;
   teachers: typeof teachers;
   users: typeof users;
+  walkthroughs: typeof walkthroughs;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

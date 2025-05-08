@@ -29,7 +29,7 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import louisianaEducatorRubric from "@/data/louisiana-educator-rubric.json";
 import { cn } from "@/lib/utils";
-import { MultiSelect } from "@/components/ui/multi-select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useMemo } from "react";
 import { Label } from "@/components/ui/label";
 import { Rubric, RubricDomain, RubricIndicator } from "@/types/louisianaEducatorRubric";
@@ -126,13 +126,43 @@ export function InformalWalkthroughStep() {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <MultiSelect
-                  options={indicators}
-                  value={field.value || []}
-                  onChange={field.onChange}
-                  placeholder="Select up to 3 indicators to reinforce"
-                  maxSelected={3}
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-between">
+                      {field.value && field.value.length > 0
+                        ? field.value
+                            .map((v: string) => indicators.find((o) => o.value === v)?.label)
+                            .join(", ")
+                        : "Select up to 3 indicators to reinforce"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64">
+                    {indicators.map((option) => (
+                      <div key={option.value} className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={field.value?.includes(option.value)}
+                          disabled={
+                            !field.value?.includes(option.value) &&
+                            field.value?.length >= 3
+                          }
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              if ((field.value || []).length < 3) {
+                                field.onChange([...(field.value || []), option.value]);
+                              }
+                            } else {
+                              field.onChange(
+                                (field.value || []).filter((v: string) => v !== option.value)
+                              );
+                            }
+                          }}
+                          id={option.value}
+                        />
+                        <Label htmlFor={option.value}>{option.label}</Label>
+                      </div>
+                    ))}
+                  </PopoverContent>
+                </Popover>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -159,13 +189,43 @@ export function InformalWalkthroughStep() {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <MultiSelect
-                  options={indicators}
-                  value={field.value || []}
-                  onChange={field.onChange}
-                  placeholder="Select up to 3 indicators to refine"
-                  maxSelected={3}
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-between">
+                      {field.value && field.value.length > 0
+                        ? field.value
+                            .map((v: string) => indicators.find((o) => o.value === v)?.label)
+                            .join(", ")
+                        : "Select up to 3 indicators to refine"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64">
+                    {indicators.map((option) => (
+                      <div key={option.value} className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={field.value?.includes(option.value)}
+                          disabled={
+                            !field.value?.includes(option.value) &&
+                            field.value?.length >= 3
+                          }
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              if ((field.value || []).length < 3) {
+                                field.onChange([...(field.value || []), option.value]);
+                              }
+                            } else {
+                              field.onChange(
+                                (field.value || []).filter((v: string) => v !== option.value)
+                              );
+                            }
+                          }}
+                          id={option.value}
+                        />
+                        <Label htmlFor={option.value}>{option.label}</Label>
+                      </div>
+                    ))}
+                  </PopoverContent>
+                </Popover>
               </FormControl>
               <FormMessage />
             </FormItem>

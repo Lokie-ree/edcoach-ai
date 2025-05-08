@@ -14,8 +14,6 @@ export default defineSchema({
     name: v.string(),
     // User's email
     email: v.string(),
-    // User's role: "admin", "school_leader", "instructional_coach"
-    role: v.string(),
     // Organization the user belongs to
     organization: v.string(),
     // Optional profile image URL
@@ -29,7 +27,6 @@ export default defineSchema({
     subscriptionTier: v.optional(v.string()),
   })
     .index("by_clerk_id", ["clerkId"])
-    .index("by_role", ["role"])
     .index("by_organization", ["organization"]),
 
   // Schools/organizations table
@@ -156,13 +153,32 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_observation", ["observationId"]),
 
+  walkthroughs: defineTable({
+    teacherId: v.id("teachers"),
+    observerId: v.id("users"),
+    walkthroughDate: v.number(),
+    status: v.union(v.literal("draft"), v.literal("completed")),
+    reinforcementIndicators: v.array(v.string()),
+    refinementIndicators: v.array(v.string()),
+    reinforcementComments: v.array(v.object({ indicator: v.string(), comment: v.string() })),
+    refinementComments: v.array(v.object({ indicator: v.string(), comment: v.string() })),
+    additionalComments: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    organization: v.string(),
+  })
+    .index("by_observer", ["observerId"])
+    .index("by_teacher", ["teacherId"])
+    .index("by_organization", ["organization"])
+    .index("by_status", ["status"]),
+
   walkthroughEntries: defineTable({
-    observationId: v.id("observations"),
+    walkthroughId: v.id("walkthroughs"),
     indicatorAcronym: v.string(),
     type: v.union(v.literal("reinforcement"), v.literal("refinement")),
     comment: v.string(),
     createdAt: v.number(),
-  }).index("by_observation", ["observationId"]),
+  }).index("by_walkthrough", ["walkthroughId"]),
 
   // Audit logs for security and compliance
   auditLogs: defineTable({

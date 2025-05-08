@@ -1,22 +1,16 @@
 import React from 'react';
 import Stepper, { Step } from './Stepper';
-import { FormProvider, useForm } from 'react-hook-form';
-import { Id } from "@/convex/_generated/dataModel";
+import { useFormContext } from 'react-hook-form';
 
 interface FormData {
-  // Common fields
-  type: "formal" | "walkthrough";
-  teacherId: Id<"teachers">;
-  observationDate: Date;
-
-  // Formal Observation fields
+  type?: "formal" | "walkthrough";
+  teacherId?: string;
+  observationDate?: Date;
   subject?: string;
   gradeLevels?: string[];
   reinforcementComment?: string;
   refinementComment?: string;
-  rubricResponses?: Record<string, Record<string, number>>;
-
-  // Informal Walkthrough fields
+  rubricResponses?: Record<string, number>;
   reinforcementIndicators?: string[];
   refinementIndicators?: string[];
   reinforcementComments?: Record<string, string>;
@@ -29,73 +23,60 @@ interface StepperWrapperProps {
   currentStep: number;
   onStepClick?: (index: number) => void;
   className?: string;
-  onSubmit?: (data: FormData) => void;
-  onNext?: () => void;
+  onSubmit?: (data: any) => void | Promise<void>;
+  onNext?: () => void | Promise<void>;
   onBack?: () => void;
 }
 
 export function StepperWrapper({ 
   steps, 
-  currentStep, 
+  currentStep,
   onStepClick, 
   className,
   onSubmit,
   onNext,
   onBack
 }: StepperWrapperProps) {
-  const methods = useForm<FormData>({
-    defaultValues: {
-      type: undefined,
-      teacherId: undefined,
-      observationDate: new Date(),
-      subject: "",
-      gradeLevels: [],
-      reinforcementComment: "",
-      refinementComment: "",
-      rubricResponses: {},
-      reinforcementIndicators: [],
-      refinementIndicators: [],
-      reinforcementComments: {},
-      refinementComments: {},
-      additionalComments: "",
-    }
-  });
+  const methods = useFormContext<FormData>();
 
   const handleStepChange = (step: number) => {
     onStepClick?.(step - 1);
   };
 
   const handleSubmit = () => {
-    const values = methods.getValues();
-    onSubmit?.(values);
+    if (onSubmit && methods) {
+      const values = methods.getValues();
+      onSubmit(values as any);
+    } else if (onSubmit) {
+      console.warn("StepperWrapper: onSubmit called but form context not available. Submitting empty data.");
+      onSubmit({} as any);
+    }
   };
 
   return (
-    <FormProvider {...methods}>
-      <div className="w-full">
-        <Stepper
-          initialStep={currentStep + 1}
-          onStepChange={handleStepChange}
-          className={className}
-          onFinalStepCompleted={handleSubmit}
-          backButtonProps={{
-            onClick: onBack,
-            type: 'button'
-          }}
-          nextButtonProps={{
-            onClick: onNext,
-            type: 'button'
-          }}
-          stepCircleContainerClassName="shadow-none"
-          contentClassName="p-0"
-        >
-          {steps.map((step, index) => (
-            <Step key={index}>
-              {step.component}
-            </Step>
-          ))}
-        </Stepper>
-      </div>
-    </FormProvider>
+    <div className="w-full">
+      <Stepper
+        currentStep={currentStep + 1}
+        onStepChange={handleStepChange}
+        className={className}
+        onFinalStepCompleted={handleSubmit}
+        backButtonProps={{
+          onClick: onBack,
+          type: 'button'
+        }}
+        nextButtonProps={{
+          onClick: onNext,
+          type: 'button'
+        }}
+        stepCircleContainerClassName="shadow-none"
+        contentClassName="p-0"
+      >
+        {steps.map((step, index) => (
+          <Step key={index}>
+            {step.component}
+          </Step>
+        ))}
+      </Stepper>
+    </div>
   );
 } 

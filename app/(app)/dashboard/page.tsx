@@ -84,7 +84,6 @@ const Dashboard = () => {
   React.useEffect(() => {
     if (user && organization) {
       upsertUser({
-        role: typeof user.publicMetadata?.role === "string" ? user.publicMetadata.role : "user",
         preferences: user.publicMetadata?.preferences || {},
         organization: organization.id,
       });

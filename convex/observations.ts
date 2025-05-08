@@ -82,14 +82,15 @@ export const createObservationAndResponses = mutation({
     }
 
     // Role-based access control
+    const role = (identity as any).role || (identity as any).token?.role;
     const allowedRoles = ["admin", "school_leader", "instructional_coach"];
-    if (!allowedRoles.includes(user.role)) {
+    if (!allowedRoles.includes(role)) {
       // Log access denied event
       await ctx.runMutation(internal.audit.createAuditLog, {
         userId: user._id,
         action: "access_denied",
         resourceType: "observations",
-        metadata: { reason: "Insufficient permissions", role: user.role },
+        metadata: { reason: "Insufficient permissions", role },
         severity: "warning",
       });
       
@@ -127,7 +128,7 @@ export const createObservationAndResponses = mutation({
     }
 
     // Check if user is in the same organization
-    if (user.organization !== teacherCreator.organization && user.role !== "admin") {
+    if (user.organization !== teacherCreator.organization && role !== "admin") {
       // Log access denied event
       await ctx.runMutation(internal.audit.createAuditLog, {
         userId: user._id,
@@ -185,6 +186,7 @@ export const createObservationAndResponses = mutation({
     });
 
     if (args.rubricResponses) {
+      console.log("rubricResponses received:", args.rubricResponses);
       for (const [indicatorAcronym, rating] of Object.entries(
         args.rubricResponses,
       )) {
@@ -198,15 +200,7 @@ export const createObservationAndResponses = mutation({
     }
 
     if (args.walkthroughEntries) {
-      for (const entry of args.walkthroughEntries) {
-        await ctx.db.insert("walkthroughEntries", {
-          observationId,
-          indicatorAcronym: entry.indicatorAcronym,
-          type: entry.type,
-          comment: entry.comment,
-          createdAt: now,
-        });
-      }
+      // Removed: walkthroughEntries are now handled in walkthroughs.ts, not observations.ts
     }
 
     // Log successful observation creation
