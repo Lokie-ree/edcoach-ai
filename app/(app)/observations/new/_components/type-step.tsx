@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
+import { ObservationType } from "./wizard";
 import {
   Select,
   SelectContent,
@@ -18,14 +19,14 @@ export function TypeStep({
   selectedType,
   onSelectType,
 }: {
-  selectedType: string | null;
-  onSelectType: (type: string) => void;
+  selectedType: ObservationType | null;
+  onSelectType: (type: ObservationType) => void;
 }) {
   const { setValue } = useFormContext();
 
   const handleTypeChange = (value: string) => {
     setValue("type", value);
-    onSelectType(value);
+    onSelectType(value as ObservationType);
   };
 
   return (

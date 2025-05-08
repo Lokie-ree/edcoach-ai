@@ -13,7 +13,7 @@ import { useToast } from "@/components/ui/toast";
 import { Id } from "@/convex/_generated/dataModel";
 import { sanitizeObject } from "@/lib/sanitize";
 import { handleError } from "@/lib/error-handler";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, FieldValues } from "react-hook-form";
 import { z } from "zod";
 import {
   typeStepSchema,
@@ -23,10 +23,13 @@ import {
   observationSchema
 } from "../validation";
 
+// Add type alias for observation type
+export type ObservationType = "formal" | "walkthrough";
 
 // Type for the form data, inferred from the main Zod schema
-type ObservationFormData = Omit<z.infer<typeof observationSchema>, 'observationDate'> & {
-  observationDate: number;
+type ObservationFormData = Omit<z.infer<typeof observationSchema>, 'observationDate' | 'teacherId'> & FieldValues & {
+  teacherId?: string | Id<'teachers'>;
+  observationDate?: number | string | Date;
   reinforcementIndicators?: string[];
   refinementIndicators?: string[];
   reinforcementComments?: Record<string, string>;
@@ -38,6 +41,22 @@ type ObservationFormData = Omit<z.infer<typeof observationSchema>, 'observationD
   reinforcementComment?: string;
   refinementComment?: string;
   rubric?: Record<string, Record<string, string | number>>;
+};
+
+// Add type for createObservationAndResponses mutation args
+export type CreateObservationArgs = {
+  teacherId: Id<"teachers">;
+  subject: string;
+  gradeLevels: string[];
+  observationDate: number;
+  reinforcementComment?: string;
+  refinementComment?: string;
+  rubricResponses?: Record<string, number>;
+  walkthroughEntries?: {
+    indicatorAcronym: string;
+    type: "reinforcement" | "refinement";
+    comment: string;
+  }[];
 };
 
 type Step = {
@@ -128,7 +147,7 @@ export function Wizard({ organization }: { organization?: string }) {
   const { setError, clearErrors, trigger, getValues } = methods;
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedType, setSelectedType] = useState<ObservationFormData["type"] | null>(null);
+  const [selectedType, setSelectedType] = useState<ObservationType | null>(null);
   const router = useRouter();
   const { toast } = useToast();
   const createObservation = useMutation(
@@ -298,7 +317,7 @@ export function Wizard({ organization }: { organization?: string }) {
       };
       const payload = prepareObservationPayload(payloadInput);
       console.log("Submitting payload:", payload);
-      await createObservation(payload as any);
+      await createObservation(payload as CreateObservationArgs);
       toast({
         title: "Success",
         description: "Observation created successfully",
@@ -315,7 +334,7 @@ export function Wizard({ organization }: { organization?: string }) {
       component: (
         <div className="space-y-4 px-6">
           <h2 className="text-2xl font-bold">Select Type</h2>
-          <TypeStep selectedType={selectedType} onSelectType={(type) => setSelectedType(type as ObservationFormData["type"])} />
+          <TypeStep selectedType={selectedType} onSelectType={(type: ObservationType) => setSelectedType(type)} />
         </div>
       ),
     },
@@ -356,7 +375,7 @@ export function Wizard({ organization }: { organization?: string }) {
   return (
     <FormProvider {...methods}>
       <div className="w-full max-w-4xl mx-auto">
-        <StepperWrapper
+        <StepperWrapper<ObservationFormData>
           steps={steps.map((step) => ({ 
             label: step.title,
             component: step.component
