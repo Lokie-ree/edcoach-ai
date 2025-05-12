@@ -36,9 +36,7 @@ import { Rubric, RubricDomain, RubricIndicator } from "@/types/louisianaEducator
 
 export function InformalWalkthroughStep() {
   const teachers = useQuery(api.teachers.list);
-  const { control, setValue, watch } = useFormContext();
-
-  const walkthroughId = watch("walkthroughId");
+  const { control } = useFormContext();
 
   const indicators = useMemo(() => {
     const INSTRUCTION_DOMAINS = ["INSTRUCTION", "PLANNING", "ENVIRONMENT"];
