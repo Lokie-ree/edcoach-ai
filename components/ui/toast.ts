@@ -1,6 +1,6 @@
 import { toast as sonnerToast } from "sonner";
 
-type ToastType = "default" | "destructive";
+type ToastType = "default" | "destructive" | "success";
 
 interface ToastProps {
   title?: string;
@@ -16,6 +16,8 @@ export function useToast() {
         className:
           variant === "destructive"
             ? "bg-destructive text-destructive-foreground"
+            : variant === "success"
+            ? "bg-success text-success-foreground"
             : undefined,
       });
     },

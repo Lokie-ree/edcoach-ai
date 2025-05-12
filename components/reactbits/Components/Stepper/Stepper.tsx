@@ -38,6 +38,7 @@ export default function Stepper({
   children,
   currentStep,
   onStepChange = () => {},
+  onFinalStepCompleted,
   stepCircleContainerClassName = "",
   stepContainerClassName = "",
   contentClassName = "",
@@ -49,12 +50,21 @@ export default function Stepper({
   disableStepIndicators = false,
   renderStepIndicator,
   ...rest
-}: StepperProps) {
+}: Omit<StepperProps, 'onFinalStepCompleted'> & { onFinalStepCompleted?: () => void }) {
   const [direction, setDirection] = useState<number>(0);
   const stepsArray = Children.toArray(children);
   const totalSteps = stepsArray.length;
   const isCompleted = currentStep > totalSteps;
   const isLastStep = currentStep === totalSteps;
+
+  const handleNextClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (isLastStep) {
+      onFinalStepCompleted?.();
+    } else {
+      onStepChange(currentStep + 1);
+    }
+    nextButtonProps?.onClick?.(e);
+  };
 
   return (
     <div
@@ -138,7 +148,7 @@ export default function Stepper({
                 type="button"
                 disabled={nextButtonProps?.disabled}
                 className={cn("duration-350 flex items-center justify-center rounded-full bg-primary py-1.5 px-3.5 font-medium tracking-tight text-primary-foreground transition hover:bg-primary/90 active:bg-primary/80", nextButtonProps?.className)}
-                {...nextButtonProps}
+                onClick={handleNextClick}
               >
                 {isLastStep ? "Complete" : nextButtonText}
               </button>

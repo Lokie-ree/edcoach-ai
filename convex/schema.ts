@@ -99,8 +99,6 @@ export default defineSchema({
       v.literal("completed"),
       v.literal("feedback_generated"),
     ),
-    reinforcementComment: v.optional(v.string()),
-    refinementComment: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -160,8 +158,7 @@ export default defineSchema({
     status: v.union(v.literal("draft"), v.literal("completed")),
     reinforcementIndicators: v.array(v.string()),
     refinementIndicators: v.array(v.string()),
-    reinforcementComments: v.array(v.object({ indicator: v.string(), comment: v.string() })),
-    refinementComments: v.array(v.object({ indicator: v.string(), comment: v.string() })),
+    evidenceSummary: v.string(),
     additionalComments: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),

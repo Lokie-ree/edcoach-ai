@@ -36,7 +36,9 @@ import { Rubric, RubricDomain, RubricIndicator } from "@/types/louisianaEducator
 
 export function InformalWalkthroughStep() {
   const teachers = useQuery(api.teachers.list);
-  const { control, register, watch } = useFormContext();
+  const { control, setValue, watch } = useFormContext();
+
+  const walkthroughId = watch("walkthroughId");
 
   const indicators = useMemo(() => {
     const INSTRUCTION_DOMAINS = ["INSTRUCTION", "PLANNING", "ENVIRONMENT"];
@@ -50,11 +52,9 @@ export function InformalWalkthroughStep() {
       );
   }, []);
 
-  const reinforcementIndicators = watch("reinforcementIndicators") || [];
-  const refinementIndicators = watch("refinementIndicators") || [];
-
   return (
     <div className="space-y-8">
+      {/* Teacher selection */}
       <FormField
         control={control}
         name="teacherId"
@@ -79,6 +79,7 @@ export function InformalWalkthroughStep() {
           </FormItem>
         )}
       />
+      {/* Observation date */}
       <FormField
         control={control}
         name="observationDate"
@@ -118,6 +119,7 @@ export function InformalWalkthroughStep() {
         )}
       />
 
+      {/* Reinforcement Indicators (multi-select with popover) */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Reinforcement Indicators</h3>
         <FormField
@@ -168,19 +170,9 @@ export function InformalWalkthroughStep() {
             </FormItem>
           )}
         />
-        {reinforcementIndicators.map((indicator: string) => (
-          <div key={indicator} className="space-y-2">
-            <Label className="text-sm font-medium">
-              Keep doing this for {indicator}
-            </Label>
-            <Textarea
-              {...register(`reinforcementComments.${indicator}`)}
-              placeholder="What specific practices should be continued?"
-            />
-          </div>
-        ))}
       </div>
 
+      {/* Refinement Indicators (multi-select with popover) */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Refinement Indicators</h3>
         <FormField
@@ -231,19 +223,29 @@ export function InformalWalkthroughStep() {
             </FormItem>
           )}
         />
-        {refinementIndicators.map((indicator: string) => (
-          <div key={indicator} className="space-y-2">
-            <Label className="text-sm font-medium">
-              What about this for {indicator}
-            </Label>
-            <Textarea
-              {...register(`refinementComments.${indicator}`)}
-              placeholder="What specific practices could be refined?"
-            />
-          </div>
-        ))}
       </div>
 
+      {/* Evidence Summary (required) */}
+      <FormField
+        control={control}
+        name="evidenceSummary"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Evidence Summary</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="Enter your overall notes and observations for this walkthrough..."
+                className="resize-none"
+                required
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Additional Comments (optional) */}
       <FormField
         control={control}
         name="additionalComments"

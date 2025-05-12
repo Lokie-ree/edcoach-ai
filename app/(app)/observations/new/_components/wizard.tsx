@@ -20,7 +20,8 @@ import {
   formalDetailsStepSchema,
   formalRubricStepSchema,
   informalWalkthroughStepSchema,
-  observationSchema
+  observationSchema,
+  walkthroughSchema
 } from "../validation";
 
 // Add type alias for observation type
@@ -32,15 +33,14 @@ type ObservationFormData = Omit<z.infer<typeof observationSchema>, 'observationD
   observationDate?: number | string | Date;
   reinforcementIndicators?: string[];
   refinementIndicators?: string[];
-  reinforcementComments?: Record<string, string>;
-  refinementComments?: Record<string, string>;
   additionalComments?: string;
   rubricResponses?: Record<string, Record<string, number>> | Record<string, never>;
   subject?: string;
   gradeLevels?: string[];
-  reinforcementComment?: string;
-  refinementComment?: string;
   rubric?: Record<string, Record<string, string | number>>;
+  reinforcementComments?: Record<string, string>;
+  refinementComments?: Record<string, string>;
+  evidenceSummary?: string;
 };
 
 // Add type for createObservationAndResponses mutation args
@@ -49,8 +49,6 @@ export type CreateObservationArgs = {
   subject: string;
   gradeLevels: string[];
   observationDate: number;
-  reinforcementComment?: string;
-  refinementComment?: string;
   rubricResponses?: Record<string, number>;
   walkthroughEntries?: {
     indicatorAcronym: string;
@@ -64,7 +62,7 @@ type Step = {
   component: React.ReactNode;
 };
 
-// Helper function to prepare data for mutation (expects timestamp for date)
+// Helper function to prepare data for mutation
 const prepareObservationPayload = (values: ObservationFormData) => {
   if (values.type === "walkthrough") {
     const walkthroughEntries: {
@@ -80,7 +78,7 @@ const prepareObservationPayload = (values: ObservationFormData) => {
       walkthroughEntries.push({
         indicatorAcronym: indicator,
         type: "reinforcement",
-        comment: values.reinforcementComments?.[indicator] || "",
+        comment: "",
       });
     }
 
@@ -88,7 +86,7 @@ const prepareObservationPayload = (values: ObservationFormData) => {
       walkthroughEntries.push({
         indicatorAcronym: indicator,
         type: "refinement",
-        comment: values.refinementComments?.[indicator] || "",
+        comment: "",
       });
     }
 
@@ -96,8 +94,6 @@ const prepareObservationPayload = (values: ObservationFormData) => {
       teacherId: values.teacherId as Id<"teachers">,
       observationDate: values.observationDate,
       walkthroughEntries,
-      reinforcementComment: values.additionalComments ?? "",
-      refinementComment: "",
       subject: "",
       gradeLevels: [],
       rubricResponses: undefined,
@@ -118,8 +114,6 @@ const prepareObservationPayload = (values: ObservationFormData) => {
       observationDate: Number(values.observationDate),
       subject: values.subject ?? "",
       gradeLevels: Array.isArray(values?.gradeLevels) ? values.gradeLevels : [],
-      reinforcementComment: values?.reinforcementComment ?? "",
-      refinementComment: values?.refinementComment ?? "",
       rubricResponses: transformedRubricResponses,
       walkthroughEntries: [],
     };
@@ -134,13 +128,9 @@ export function Wizard({ organization }: { organization?: string }) {
       observationDate: Date.now(),
       subject: undefined,
       gradeLevels: [],
-      reinforcementComment: undefined,
-      refinementComment: undefined,
       rubricResponses: undefined,
       reinforcementIndicators: [],
       refinementIndicators: [],
-      reinforcementComments: undefined,
-      refinementComments: undefined,
       additionalComments: undefined,
     },
   });
@@ -171,14 +161,17 @@ export function Wizard({ organization }: { organization?: string }) {
       if (currentStep === 1) {
         fieldsToValidate = [
           "teacherId", "observationDate", "reinforcementIndicators", 
-          "refinementIndicators", "reinforcementComments", "refinementComments", "additionalComments"
+          "refinementIndicators", "evidenceSummary"
         ];
         const currentValues = getValues();
         const result = informalWalkthroughStepSchema.safeParse(currentValues);
         isValid = result.success;
         if (!isValid) {
           result.error?.errors.forEach((err: z.ZodIssue) => {
-            setError(err.path.join(".") as keyof ObservationFormData, { type: "manual", message: err.message });
+            const path: string = (Array.isArray(err.path) && err.path.length > 0 && typeof err.path.join(".") === "string" && err.path.join(".").length > 0)
+              ? err.path.join(".")
+              : "root";
+            setError(path, { type: "manual", message: err.message });
           });
         }
       }
@@ -190,7 +183,10 @@ export function Wizard({ organization }: { organization?: string }) {
         isValid = result.success;
         if (!isValid) {
           result.error?.errors.forEach((err: z.ZodIssue) => {
-            setError(err.path.join(".") as keyof ObservationFormData, { type: "manual", message: err.message });
+            const path: string = (Array.isArray(err.path) && err.path.length > 0 && typeof err.path.join(".") === "string" && err.path.join(".").length > 0)
+              ? err.path.join(".")
+              : "root";
+            setError(path, { type: "manual", message: err.message });
           });
         }
       } else if (currentStep === 2) {
@@ -200,7 +196,10 @@ export function Wizard({ organization }: { organization?: string }) {
         isValid = result.success;
         if (!isValid) {
           result.error?.errors.forEach((err: z.ZodIssue) => {
-            setError(err.path.join(".") as keyof ObservationFormData, { type: "manual", message: err.message });
+            const path: string = (Array.isArray(err.path) && err.path.length > 0 && typeof err.path.join(".") === "string" && err.path.join(".").length > 0)
+              ? err.path.join(".")
+              : "root";
+            setError(path, { type: "manual", message: err.message });
           });
         }
       }
@@ -216,11 +215,14 @@ export function Wizard({ organization }: { organization?: string }) {
         setCurrentStep(currentStep + 1);
       }
     } else {
-      toast({
-        title: "Validation Error",
-        description: "Please complete all required fields correctly.",
-        variant: "destructive",
-      });
+      // Only show the toast if not submitting (i.e., not on the last step)
+      if (currentStep < steps.length - 1) {
+        toast({
+          title: "Validation Error",
+          description: "Please complete all required fields correctly.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -246,7 +248,7 @@ export function Wizard({ organization }: { organization?: string }) {
         observationDateValue = Number(values.observationDate);
       }
       const isWalkthrough = values.type === "walkthrough";
-      // 2. Sanitize other values (exclude date or handle its sanitized form if needed)
+      // 2. Sanitize other values
       const valuesToSanitize = { ...values };
       // Map rubric field to rubricResponses
       if (values.rubric) {
@@ -262,49 +264,71 @@ export function Wizard({ organization }: { organization?: string }) {
       }
       const sanitizedValues = sanitizeObject(valuesToSanitize);
       if (isWalkthrough) {
-        // Type guard: treat sanitizedValues as ObservationFormData with walkthrough type
-        const walkthroughSanitized = sanitizedValues as ObservationFormData & { type: "walkthrough" };
-        const reinforcementCommentsArr = Object.entries(walkthroughSanitized.reinforcementComments || {}).map(
-          ([indicator, comment]) => ({ indicator, comment: String(comment) })
-        );
-        const refinementCommentsArr = Object.entries(walkthroughSanitized.refinementComments || {}).map(
-          ([indicator, comment]) => ({ indicator, comment: String(comment) })
-        );
+        // --- FULL ZOD VALIDATION FOR WALKTHROUGH ---
+        // Prepare the object for validation
+        const walkthroughValidationObj = {
+          type: "walkthrough",
+          teacherId: sanitizedValues.teacherId || "",
+          observationDate: new Date(observationDateValue),
+          reinforcementIndicators: sanitizedValues.reinforcementIndicators || [],
+          refinementIndicators: sanitizedValues.refinementIndicators || [],
+          evidenceSummary: sanitizedValues.evidenceSummary || "",
+          additionalComments: sanitizedValues.additionalComments || undefined,
+        };
+        console.log("walkthroughValidationObj", walkthroughValidationObj);
+        const validationResult = walkthroughSchema.safeParse(walkthroughValidationObj);
+        if (!validationResult.success) {
+          console.error("walkthroughSchema validation errors", validationResult.error.errors);
+          // Show all errors to the user
+          validationResult.error.errors.forEach((err) => {
+            const path: string = (Array.isArray(err.path) && err.path.length > 0 && typeof err.path.join(".") === "string" && err.path.join(".").length > 0)
+              ? err.path.join(".")
+              : "root";
+            setError(path, { type: "manual", message: err.message });
+          });
+          toast({
+            title: "Validation Error",
+            description: "Please complete all required fields correctly.",
+            variant: "destructive",
+          });
+          return;
+        }
+        // --- END FULL ZOD VALIDATION ---
         const walkthroughEntries: {
           indicatorAcronym: string;
           type: "reinforcement" | "refinement";
           comment: string;
         }[] = [];
-        for (const indicator of walkthroughSanitized.reinforcementIndicators || []) {
+        for (const indicator of sanitizedValues.reinforcementIndicators || []) {
           walkthroughEntries.push({
             indicatorAcronym: indicator,
             type: "reinforcement",
-            comment: walkthroughSanitized.reinforcementComments?.[indicator] || "",
+            comment: sanitizedValues.reinforcementComments?.[indicator] || "",
           });
         }
-        for (const indicator of walkthroughSanitized.refinementIndicators || []) {
+        for (const indicator of sanitizedValues.refinementIndicators || []) {
           walkthroughEntries.push({
             indicatorAcronym: indicator,
             type: "refinement",
-            comment: walkthroughSanitized.refinementComments?.[indicator] || "",
+            comment: sanitizedValues.refinementComments?.[indicator] || "",
           });
         }
         const org = organization || "";
         await createWalkthrough({
-          teacherId: walkthroughSanitized.teacherId as Id<"teachers">,
+          teacherId: sanitizedValues.teacherId as Id<"teachers">,
           walkthroughDate: observationDateValue,
           status: "completed",
-          reinforcementIndicators: walkthroughSanitized.reinforcementIndicators || [],
-          refinementIndicators: walkthroughSanitized.refinementIndicators || [],
-          reinforcementComments: reinforcementCommentsArr,
-          refinementComments: refinementCommentsArr,
-          additionalComments: walkthroughSanitized.additionalComments || undefined,
+          reinforcementIndicators: sanitizedValues.reinforcementIndicators || [],
+          refinementIndicators: sanitizedValues.refinementIndicators || [],
+          evidenceSummary: sanitizedValues.evidenceSummary || "",
+          additionalComments: sanitizedValues.additionalComments || undefined,
           organization: org,
           walkthroughEntries,
         });
         toast({
           title: "Success",
           description: "Walkthrough created successfully",
+          variant: "success",
         });
         router.push("/dashboard");
         return;
@@ -313,7 +337,7 @@ export function Wizard({ organization }: { organization?: string }) {
       const payloadInput = {
         ...values,
         teacherId: values.teacherId as Id<'teachers'>,
-        observationDate: observationDateValue, // Pass as number
+        observationDate: observationDateValue,
       };
       const payload = prepareObservationPayload(payloadInput);
       console.log("Submitting payload:", payload);
@@ -321,6 +345,7 @@ export function Wizard({ organization }: { organization?: string }) {
       toast({
         title: "Success",
         description: "Observation created successfully",
+        variant: "success",
       });
       router.push("/dashboard");
     } catch (error) {

@@ -34,8 +34,6 @@ export const createObservationAndResponses = mutation({
     subject: v.string(),
     gradeLevels: v.array(v.string()),
     observationDate: v.number(),
-    reinforcementComment: v.optional(v.string()),
-    refinementComment: v.optional(v.string()),
     rubricResponses: v.optional(v.record(v.string(), v.number())),
     walkthroughEntries: v.optional(
       v.array(
@@ -179,8 +177,6 @@ export const createObservationAndResponses = mutation({
       gradeLevels: args.gradeLevels,
       observationDate: args.observationDate,
       status: "completed",
-      reinforcementComment: args.reinforcementComment,
-      refinementComment: args.refinementComment,
       createdAt: now,
       updatedAt: now,
     });
@@ -221,3 +217,5 @@ export const createObservationAndResponses = mutation({
     return observationId;
   },
 });
+
+

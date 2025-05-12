@@ -1,8 +1,8 @@
-# EdCoach AI: Comprehensive Project Plan
+# EdCoach AI: Project Plan (MVP Focused on Informal Walkthroughs)
 
 ## 1. Project Overview
 
-EdCoach AI is an AI-powered instructional coaching and feedback platform designed to supplement formal teacher evaluations in K-12 schools. The system enhances the ongoing coaching workflow between school leaders, instructional coaches, and teachers by providing tools for frequent, informal classroom walkthroughs, generating timely, rubric-aligned feedback snippets, and tracking developmental trends at the school level.
+EdCoach AI is an AI-powered instructional coaching and feedback platform designed to supplement formal teacher evaluations in K-12 schools. The MVP focuses exclusively on enabling frequent, informal classroom walkthroughs, generating timely, rubric-aligned feedback snippets, and tracking developmental trends at the school level.
 
 ### 1.1 Project Goals
 
@@ -26,7 +26,6 @@ EdCoach AI is an AI-powered instructional coaching and feedback platform designe
 - **Primary Platform:** [Convex](https://convex.dev/)
   - Real-time database and function hosting
   - Schema-based data modeling
-  - File storage for document uploads
   - Function types: queries, mutations, actions
   - Scheduled tasks (crons)
 
@@ -63,7 +62,7 @@ EdCoach AI is an AI-powered instructional coaching and feedback platform designe
 ┌───────────────┐     ┌───────────────┐     ┌───────────────┐
 │               │     │               │     │               │
 │  Clerk Auth   │     │  Convex       │     │  OpenAI       │
-│  User Mgmt    │     │  Storage      │     │  GPT-4        │
+│  User Mgmt    │     │  Functions    │     │  GPT-4        │
 │               │     │               │     │               │
 └───────────────┘     └───────────────┘     └───────────────┘
 ```
@@ -253,16 +252,14 @@ EdCoach AI uses a dual-system approach:
 - **School Setup (Principal Only):** Enter school information and configuration
 
 #### Dashboards
-- **Principal Dashboard:** Overview of all school walkthroughs/observations with prominent "Start Informal Walkthrough" button
-- **AP/Coach Dashboard:** Overview of personal walkthroughs/observations with prominent "Start Informal Walkthrough" button
-- **Teacher Dashboard:** Feed of all feedback interactions, including frequent informal points and less frequent formal observations
+- **Principal Dashboard:** Overview of all school walkthroughs with prominent "Start Informal Walkthrough" button
+- **AP/Coach Dashboard:** Overview of personal walkthroughs with prominent "Start Informal Walkthrough" button
+- **Teacher Dashboard:** Feed of all feedback interactions from informal walkthroughs
 
-#### Observation Workflow
-- **Teacher/Template Selection:** Select teacher and observation template (informal walkthrough or formal observation)
-- **Observation Form:**
-  - Informal Walkthrough (Primary): Quickly choose 1-3 focus indicators from the LER, jot down brief evidence notes
-  - Formal Observation (Secondary): Complete rubric with all domains/indicators
-- **Draft Management:** Manage saved walkthrough/observation drafts
+#### Informal Walkthrough Workflow (MVP Only)
+- **Teacher Selection:** Select teacher for walkthrough
+- **Walkthrough Form:** Quickly choose 1-3 focus indicators from the LER, jot down brief evidence notes
+- **Draft Management:** Manage saved walkthrough drafts
 - **AI Feedback Generation:** Generate concise, targeted feedback suggestions aligned with evidence and selected indicators
 - **Finalization & Submission:** Quickly review and finalize feedback before sharing
 
@@ -270,127 +267,47 @@ EdCoach AI uses a dual-system approach:
 
 #### Principal Journey
 ```
-Login → Onboarding → School Setup → Dashboard → 
-[Create Informal Walkthrough, Create Formal Observation, View Analytics, Manage Users, View All Feedback]
+Login → Onboarding → School Setup → Dashboard → [Create Informal Walkthrough, View Analytics, Manage Users, View All Feedback]
 ```
 
 #### AP/Coach Journey
 ```
-Login → Onboarding → Dashboard → 
-[Create Informal Walkthrough, Create Formal Observation, Manage Drafts, View Assigned Teacher Analytics]
+Login → Onboarding → Dashboard → [Create Informal Walkthrough, Manage Drafts, View Assigned Teacher Analytics]
 ```
 
 #### Teacher Journey
 ```
-Login → Onboarding → Dashboard → 
-[View Feedback Feed, Access Growth Analytics, Download Reports]
+Login → Onboarding → Dashboard → [View Feedback Feed, Access Growth Analytics, Download Reports]
 ```
 
-#### Informal Walkthrough Journey (Primary)
+#### Informal Walkthrough Journey (MVP)
 ```
-Dashboard → Start Informal Walkthrough → Teacher Selection → 
-Select 1-3 Focus Indicators → Record Brief Evidence → 
-AI Feedback Generation → Quick Review/Edit → Finalize → Submit → Return to Dashboard
-(Target completion time: < 10 minutes)
-```
-
-#### Formal Observation Journey (Secondary)
-```
-Dashboard → New Observation → Teacher Selection → Template Selection → 
-Complete Full Rubric → Save Draft/Continue → AI Feedback Generation → 
-Review/Edit Feedback → Finalize → Submit → Return to Dashboard
+Dashboard → Start Informal Walkthrough → Teacher Selection → Select 1-3 Focus Indicators → Record Brief Evidence → AI Feedback Generation → Quick Review/Edit → Finalize → Submit → Return to Dashboard (Target completion time: < 10 minutes)
 ```
 
 ## 5. Implementation Plan
 
 ### 5.1 Implementation Phases
 
-#### Phase 1: Project Setup & Core Infrastructure
-- [x] Configure existing Next.js project
-- [x] Set up Convex backend
-- [x] Set up Clerk authentication
-- [x] Configure Next.js with Convex and Clerk
-
-#### Phase 2: Authentication & User/Org Management
-- [x] Integrate Clerk authentication in Next.js
-- [x] Implement Convex user table and schema
-- [x] Implement Convex organization table and schema
-- [x] Set up Clerk webhooks for user/org sync
-- [x] Implement Convex user management functions
-- [x] Enforce authentication and RBAC in Convex
-
-#### Phase 3: Teacher, Rubric, and Observation Management
-- [x] Implement teacher table and management
-- [x] Implement rubric table and management
-- [x] Implement observation table and management
-- [x] Implement evidence and feedback tables
-
-#### Phase 4: Informal Walkthrough & Mobile Optimization
-- [ ] Design and implement Informal Walkthrough template (CRITICAL priority)
-- [ ] Optimize mobile experience for quick classroom capture
-- [ ] Implement offline functionality for walkthroughs
-- [ ] Test and optimize for sub-10-minute workflow completion
-
-#### Phase 5: AI Feedback Integration
-- [ ] Integrate OpenAI API in Convex
-- [ ] Design prompts optimized for concise feedback from brief evidence
-- [ ] Implement feedback generation specifically for informal walkthroughs
-- [ ] Store and display AI-generated feedback
-
-#### Phase 6: Frontend Flows & UI
-- [x] Build user dashboard and navigation
-- [x] Revisit dashboard layout to prominently feature "Start Informal Walkthrough"
-- [ ] Implement teacher and observation management UI
-- [ ] Implement simplified rubric and evidence UI for informal walkthroughs
-- [ ] Implement feedback review and editing UI optimized for quick turnaround
-
-#### Phase 7: Formal Observation Workflow (Secondary Feature)
-- [ ] Design and implement Formal Observation template (Medium priority)
-- [ ] Adapt AI prompts for comprehensive formal observation feedback
-- [ ] Implement integration between formal and informal feedback data
-
-#### Phase 8: Analytics & Reports
-- [ ] Implement walkthrough frequency tracking by teacher
-- [ ] Build visualizations for frequency and focus areas of informal feedback
-- [ ] Create trend analysis for teacher growth between formal evaluations
-- [ ] Implement basic filtering and sorting of walkthrough data
-
-#### Phase 9: Security, Compliance, and Audit
-- [x] Enforce organization-level data isolation
-- [ ] Implement audit logging (optional but recommended)
-- [ ] Review FERPA compliance
-
-#### Phase 10: Testing, Polish, and Launch Prep
-- [ ] Write unit and integration tests
-- [ ] Polish UI/UX and error handling
-- [ ] Optimize for mobile performance
-- [ ] Prepare documentation and onboarding
-- [ ] Launch MVP and collect feedback
-
-### 5.2 Current Progress & Priorities
-
-#### Completed
 - Project setup and infrastructure
 - Authentication and user management
 - Database schema implementation
 - Basic UI components and layout
 - Core backend functions
-
-#### In Progress
-- Form validation & submission
-- Basic observation workflow UI
-- Teacher management UI
-
-#### Next Steps (Revised Priorities)
 - Informal Walkthrough template design and implementation (CRITICAL)
 - Mobile optimization for classroom use (HIGH)
 - AI feedback integration for brief, actionable feedback (HIGH)
 - Analytics focused on walkthrough frequency and developmental trends (MEDIUM)
-- Formal Observation workflow as secondary feature (MEDIUM)
+- Testing, polish, and launch prep
+
+### 5.2 Current Progress & Priorities
+
+- Informal Walkthrough Implementation (CRITICAL)
+- Mobile Optimization (HIGH)
+- AI Integration for Concise Feedback (HIGH)
+- Walkthrough Analytics (MEDIUM)
 
 ## 6. MVP Tasks & Priorities
-
-### 6.1 Remaining MVP Tasks
 
 - [ ] **Informal Walkthrough Implementation (CRITICAL)**
   - Design streamlined UI for selecting 1-3 focus indicators
@@ -422,75 +339,9 @@ Review/Edit Feedback → Finalize → Submit → Return to Dashboard
   - Design dashboard showing walkthrough coverage
   - Add filtering by date, teacher, and indicator
 
-- [ ] **Formal Observation Support (MEDIUM)**
-  - Implement complete rubric template as secondary feature
-  - Design comprehensive evidence collection interface
-  - Create connection between formal and informal data
-  - Build formal observation analytics views
-
-### 6.2 Timeline
-
-- **Phase 1-3:** Completed
-- **Phase 4 (Informal Walkthrough):** 1-2 weeks (HIGHEST PRIORITY)
-- **Phase 5 (AI Feedback):** 1-2 weeks
-- **Phase 6 (Frontend Flows):** 1-2 weeks
-- **Phase 7 (Formal Observations):** 1 week
-- **Phase 8 (Analytics):** 1 week
-- **Phase 9-10 (Security & Launch):** 1-2 weeks
-
-**Total remaining time:** 5-10 weeks
-**Current progress:** ~50% complete
-
-## 7. Future Enhancements (Post-MVP)
-
-1. **Advanced Analytics & Reporting**
-   - Complex data visualizations connecting informal and formal feedback
-   - Advanced export functionality
-   - Custom report generation for teacher growth
-   - Scheduled walkthrough summary reports
-
-2. **Advanced Mobile Features**
-   - Camera integration for classroom evidence
-   - Voice-to-text for faster evidence capture
-   - Advanced offline synchronization
-   - Push notifications for feedback delivery
-
-3. **Advanced AI Features**
-   - Personalized feedback styles by teacher
-   - Suggested next focus areas based on previous walkthroughs
-   - Trend identification across multiple walkthroughs
-   - Automated PD recommendations based on feedback patterns
-
-4. **Expanded Collaboration Tools**
-   - Teacher self-reflection additions to feedback
-   - Peer observation capabilities
-   - Coaching conversation tracking
-   - Goal-setting and progress monitoring
-
-5. **Integration with Formal Evaluation Systems**
-   - Data export to state evaluation systems
-   - Alignment with district observation protocols
-   - Evidence aggregation for formal reviews
-   - Integration with other school data systems
-
-## 8. Implementation Risks & Mitigations
-
-| Risk | Mitigation |
-|------|------------|
-| Mobile performance issues affecting walkthrough speed | Implement aggressive performance optimizations and offline capabilities. Test extensively on various devices. |
-| AI feedback quality for brief evidence notes | Develop specialized prompts for concise, actionable feedback. Implement human review and editing capabilities. |
-| User adoption - resistance to frequent walkthroughs | Design for minimal time investment. Emphasize coaching rather than evaluation. Create excellent onboarding. |
-| Clerk-Convex-Next.js integration complexity | Follow established patterns and official documentation. Test early and often. |
-| OpenAI API cost/rate limits | Implement rate limiting, caching, and fallback mechanisms. Monitor usage and costs. |
-| Data isolation failures | Add extensive testing for cross-organization data access. Implement schema-level constraints. |
-| Complex UI states and error handling | Design with error states in mind. Add comprehensive error boundaries and user feedback. |
-| FERPA compliance | Follow established guidelines. Consult with compliance experts if needed. |
-| Next.js version compatibility | Ensure all libraries are compatible with the Next.js version. Consider using stable router implementation. |
-
-## 9. Success Criteria
+## 7. Success Criteria
 
 The MVP will be considered successful when:
-
 - Users can sign up/login with Clerk and are synced to Convex
 - School leaders can complete informal walkthroughs in less than 10 minutes
 - AI generates concise, actionable feedback from brief evidence notes
@@ -501,9 +352,9 @@ The MVP will be considered successful when:
 - Teacher satisfaction with frequency, timeliness, and actionability of feedback (survey score > 4/5)
 - The app is robust, user-friendly, and ready for early adopters 
 
-## 10. UI/UX Implementation Details
+## 8. UI/UX Implementation Details
 
-### 10.1 Design System Guidelines
+### 8.1 Design System Guidelines
 - **Typography:**
   - Primary font: Oswald (Google Fonts)
   - Type scale: text-xs to text-4xl for various UI elements
@@ -529,13 +380,13 @@ The MVP will be considered successful when:
   - Semantic structure and ARIA attributes
   - Minimum touch target size: 44x44px for mobile optimization
 
-### 10.2 Filter & Sort Capabilities
+### 8.2 Filter & Sort Capabilities
 - **Walkthrough/Observation Filters:** Teacher, Observer, Date Range, Observation Type (Informal/Formal), Focus Indicators, Status
 - **Analytics Filters:** Teacher(s), Observer(s), Date Range, Indicators, Walkthrough Frequency
 - **Sort Options:** Date, Teacher, Observer, Frequency, Completion
 - **Implementation:** All list and analytics views should include filter/sort controls, with state persisted in the UI.
 
-### 10.3 Mobile Considerations (HIGH PRIORITY)
+### 8.3 Mobile Considerations (HIGH PRIORITY)
 - Responsive layouts with collapsible navigation
 - Simplified walkthrough forms optimized for mobile
 - Large touch targets and minimal typing requirements
@@ -543,7 +394,7 @@ The MVP will be considered successful when:
 - Visual indicators for offline/online status
 - Performance optimizations for slower connections
 
-### 10.4 Notification System
+### 8.4 Notification System
 - **In-App:**
   - Teachers: New feedback notifications
   - Observers: Walkthrough completion confirmations
@@ -553,9 +404,9 @@ The MVP will be considered successful when:
   - Walkthrough completion notifications
 - **Implementation:** Use Convex for notification data, UI for in-app display, and email service for outbound notifications.
 
-## 11. Expanded Database & Authentication Details
+## 9. Expanded Database & Authentication Details
 
-### 11.1 Audit Logging
+### 9.1 Audit Logging
 - **audit_logs table:**
   ```typescript
   {
@@ -571,7 +422,7 @@ The MVP will be considered successful when:
   - Indexes: by_user, by_entity, by_organization, by_timestamp
   - Log all sensitive actions (create/update/delete/view)
 
-### 11.2 Data Relationships
+### 9.2 Data Relationships
 - **User → Organization:** Users belong to a single organization
 - **Organization → Admin:** Organizations have an admin user
 - **Teacher → User:** Teachers are created by users
@@ -579,7 +430,7 @@ The MVP will be considered successful when:
 - **Evidence/Feedback → Observation:** Evidence and feedback belong to an observation
 - **All Entities → Organization:** All entities are scoped to an organization
 
-### 11.3 Key Files & Core Functions
+### 9.3 Key Files & Core Functions
 - `convex/schema.ts`: Database schema
 - `convex/auth.ts`: Auth logic, Clerk webhook handling
 - `convex/users.ts`: User management (createOrGetUser, getCurrentUser, getUserByClerkId, listUsers, updateUser)
@@ -590,20 +441,20 @@ The MVP will be considered successful when:
 - `convex/walkthroughs.ts`: New file specifically for informal walkthrough functions
 - **Patterns:** Always check authentication, enforce RBAC, and scope queries by organizationId
 
-## 12. Development Workflow & CI/CD
+## 10. Development Workflow & CI/CD
 
-### 12.1 Environment Setup
+### 10.1 Environment Setup
 - Use npm/yarn for package management
 - Configure TypeScript, ESLint, Prettier
 - Use Vite or Next.js dev server
 - Store secrets in environment variables
 
-### 12.2 Code Quality Standards
+### 10.2 Code Quality Standards
 - Linting and formatting enforced via pre-commit hooks
 - PR reviews required for all merges
 - Use strict TypeScript settings
 
-### 12.3 Testing Methodologies
+### 10.3 Testing Methodologies
 - **Unit tests:** Core business logic (Convex functions)
 - **Component tests:** UI components
 - **Integration tests:** API contracts
@@ -611,27 +462,27 @@ The MVP will be considered successful when:
 - **Mobile tests:** Test on actual mobile devices
 - **Performance tests:** Verify sub-10-minute walkthrough completion
 
-### 12.4 Deployment Pipeline
+### 10.4 Deployment Pipeline
 - GitHub Actions for CI
 - Build, lint, and test on every PR
 - Deploy to Vercel (frontend) and Convex Cloud (backend)
 - Manual promotion to production after staging verification
 
-## 13. Documentation & Maintenance
+## 11. Documentation & Maintenance
 
-### 13.1 API & Component Documentation
+### 11.1 API & Component Documentation
 - Use JSDoc/TSDoc for backend and frontend code
 - Storybook for UI component documentation
 - Maintain up-to-date schema and function docs
 - Create specific documentation for the informal walkthrough flow
 
-### 13.2 Monitoring & Alerting
+### 11.2 Monitoring & Alerting
 - Sentry for error tracking (frontend and backend)
 - Vercel Analytics for performance
 - Health checks for API endpoints
 - Track walkthrough completion times
 
-### 13.3 Maintenance Schedule
+### 11.3 Maintenance Schedule
 - Weekly dependency updates
 - Bi-weekly feature releases
 - Quarterly major version reviews

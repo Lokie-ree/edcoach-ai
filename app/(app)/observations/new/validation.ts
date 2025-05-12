@@ -58,6 +58,7 @@ export const informalWalkthroughStepSchema = baseObservationSchema.extend({
   })).refine(val => Object.keys(val).length > 0, { // Ensure comments for selected indicators
     message: "Comments are required for all selected refinement indicators."
   }),
+  evidenceSummary: z.string().min(1, { message: "Evidence summary is required" }),
   additionalComments: z.string().max(2000, {
     message: "Additional comments cannot exceed 2000 characters",
   }).optional(),
@@ -93,13 +94,7 @@ export const walkthroughSchema = baseObservationSchema.extend({
   }).max(3, {
     message: "Maximum of 3 refinement indicators allowed",
   }),
-  // For final submission, comments might be structured differently or validated as a whole
-  reinforcementComments: z.record(z.string(), z.string().max(1000, {
-    message: "Comment cannot exceed 1000 characters",
-  })),
-  refinementComments: z.record(z.string(), z.string().max(1000, {
-    message: "Comment cannot exceed 1000 characters",
-  })),
+  evidenceSummary: z.string().min(1, { message: "Evidence summary is required" }),
   additionalComments: z.string().max(2000, {
     message: "Additional comments cannot exceed 2000 characters",
   }).optional(),
