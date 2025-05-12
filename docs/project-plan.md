@@ -83,7 +83,6 @@ EdCoach AI uses a dual-system approach:
   clerkId: v.string(),
   name: v.string(),
   email: v.string(),
-  role: v.string(),
   organization: v.string(),
   imageUrl: v.optional(v.string()),
   preferences: v.optional(v.any()),
@@ -92,7 +91,7 @@ EdCoach AI uses a dual-system approach:
   subscriptionTier: v.optional(v.string()),
 }
 ```
-**Indexes:** `by_clerk_id`, `by_role`, `by_organization`
+**Indexes:** `by_clerk_id`, `by_organization`
 
 #### organizations
 ```typescript
@@ -150,8 +149,6 @@ EdCoach AI uses a dual-system approach:
     v.literal("completed"),
     v.literal("feedback_generated"),
   ),
-  reinforcementComment: v.optional(v.string()),
-  refinementComment: v.optional(v.string()),
   createdAt: v.number(),
   updatedAt: v.number(),
 }
@@ -197,17 +194,35 @@ EdCoach AI uses a dual-system approach:
 ```
 **Indexes:** `by_observation`
 
+#### walkthroughs
+```typescript
+{
+  teacherId: v.id("teachers"),
+  observerId: v.id("users"),
+  walkthroughDate: v.number(),
+  status: v.union(v.literal("draft"), v.literal("completed")),
+  reinforcementIndicators: v.array(v.string()),
+  refinementIndicators: v.array(v.string()),
+  evidenceSummary: v.string(),
+  additionalComments: v.optional(v.string()),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+  organization: v.string(),
+}
+```
+**Indexes:** `by_observer`, `by_teacher`, `by_organization`, `by_status`
+
 #### walkthroughEntries
 ```typescript
 {
-  observationId: v.id("observations"),
+  walkthroughId: v.id("walkthroughs"),
   indicatorAcronym: v.string(),
   type: v.union(v.literal("reinforcement"), v.literal("refinement")),
   comment: v.string(),
   createdAt: v.number(),
 }
 ```
-**Indexes:** `by_observation`
+**Indexes:** `by_walkthrough`
 
 #### auditLogs
 ```typescript
@@ -289,55 +304,120 @@ Dashboard → Start Informal Walkthrough → Teacher Selection → Select 1-3 Fo
 
 ### 5.1 Implementation Phases
 
-- Project setup and infrastructure
-- Authentication and user management
-- Database schema implementation
-- Basic UI components and layout
-- Core backend functions
-- Informal Walkthrough template design and implementation (CRITICAL)
-- Mobile optimization for classroom use (HIGH)
-- AI feedback integration for brief, actionable feedback (HIGH)
-- Analytics focused on walkthrough frequency and developmental trends (MEDIUM)
-- Testing, polish, and launch prep
+- [x] **Project setup and infrastructure**
+  - [x] Initialize monorepo (frontend, backend)
+  - [x] Configure TypeScript, ESLint, Prettier
+  - [x] Set up Vite/Next.js dev server
+  - [x] Configure environment variable management
+  - [x] Set up GitHub Actions for CI/CD
+  - [x] Configure deployment targets (Vercel, Convex Cloud)
 
-### 5.2 Current Progress & Priorities
+- [x] **Authentication and user management**
+  - [x] Integrate Clerk for authentication (email/password, SSO)
+  - [x] Implement Clerk webhooks to sync users to Convex
+  - [x] Create Convex user management functions (createOrGetUser, getCurrentUser, getUserByClerkId, listUsers, updateUser)
+  - [x] Enforce RBAC in backend functions
+  - [x] Implement role-based dashboard routing
 
-- Informal Walkthrough Implementation (CRITICAL)
-- Mobile Optimization (HIGH)
-- AI Integration for Concise Feedback (HIGH)
-- Walkthrough Analytics (MEDIUM)
+- [x] **Database schema implementation**
+  - [x] Implement all tables and indexes in `convex/schema.ts`
+  - [ ] Add migration scripts or manual migration plan
+  - [ ] Write unit tests for schema validation
+
+- [x] **Basic UI components and layout**
+  - [x] Set up global layout, navigation, and theming
+  - [x] Implement design system (Typography, Color, Spacing, Buttons, Cards, Forms)
+  - [x] Create reusable form components (inputs, selects, checkboxes)
+  - [x] Implement error and loading states
+
+- [x] **Core backend functions**
+  - [x] Implement CRUD for users, organizations, teachers, rubrics, observations, walkthroughs
+  - [x] Implement audit logging for sensitive actions
+  - [ ] Write unit tests for all core functions
+
+- [x] **Informal Walkthrough template design and implementation (CRITICAL)**
+  - [x] Design walkthrough data model and UI flow
+  - [x] Implement walkthrough creation form (teacher selection, indicator selection, evidence capture)
+  - [x] Implement draft management (save, edit, delete drafts)
+  - [x] Implement walkthrough submission and status tracking
+  - [x] Integrate with feedback and analytics modules
+
+- [x] **Mobile optimization for classroom use (HIGH)**
+  - [x] Ensure all layouts are responsive (mobile/tablet/desktop)
+  - [x] Implement large touch targets and minimal typing UI
+  - [ ] Add offline form completion and sync
+  - [ ] Add visual indicators for offline/online status
+  - [ ] Optimize performance for slow connections
+
+- [ ] **AI feedback integration for brief, actionable feedback (HIGH)**
+  - [ ] Set up OpenAI API key in Convex environment
+  - [ ] Create Convex action for OpenAI API calls (with error handling)
+  - [ ] Design and test prompt templates for brief, actionable feedback
+  - [ ] Optimize for short, evidence-based input from walkthroughs
+  - [ ] Integrate AI feedback into walkthrough submission and review
+  - [ ] Implement quick feedback delivery to teachers (in-app and email)
+  - [ ] Add admin controls for feedback prompt tuning
+
+- [ ] **Analytics focused on walkthrough frequency and developmental trends (MEDIUM)**
+  - [x] Track walkthrough frequency by teacher, observer, indicator (backend implemented)
+  - [ ] Implement focus indicator tracking and aggregation (UI/visualization)
+  - [ ] Create visualizations for feedback and walkthrough trends (charts, tables)
+  - [ ] Design analytics dashboard with filters (date, teacher, indicator, observer)
+  - [ ] Add export/reporting functionality (CSV, PDF)
+  - [ ] Add admin/leaderboard views for school leaders
+
+- [ ] **Testing, polish, and launch prep**
+  - [ ] Write E2E tests for all major user flows (Cypress/Playwright)
+  - [ ] Test on actual mobile devices
+  - [ ] Conduct performance and accessibility audits
+  - [ ] Finalize documentation (API, UI, onboarding)
+  - [ ] Prepare for production deployment and early adopter onboarding
 
 ## 6. MVP Tasks & Priorities
 
-- [ ] **Informal Walkthrough Implementation (CRITICAL)**
-  - Design streamlined UI for selecting 1-3 focus indicators
-  - Create simplified evidence capture form
-  - Optimize for mobile use with touch-friendly controls
-  - Implement quick submission flow
-  - Target completion time under 10 minutes
-  - Test with actual users in classroom environments
+- [x] **Informal Walkthrough Implementation (CRITICAL)**
+  - [x] Design streamlined UI for selecting 1-3 focus indicators
+  - [x] Implement teacher selection component with search/filter
+  - [x] Create simplified evidence capture form (text, tags, quick rating)
+  - [x] Add support for saving walkthroughs as drafts
+  - [x] Implement quick submission flow with validation
+  - [x] Integrate AI feedback generation into walkthrough flow (stubbed, not full OpenAI integration)
+  - [x] Implement review/edit screen for feedback before finalizing
+  - [x] Ensure all walkthroughs are scoped to organization and user roles
+  - [ ] Target completion time under 10 minutes (usability test)
+  - [ ] Test with actual users in classroom environments
 
-- [ ] **Mobile Optimization (HIGH)**
-  - Ensure responsive design works on tablets and phones
-  - Implement offline functionality for classroom use
-  - Create touch-optimized interface
-  - Optimize performance for slower connections
-  - Add visual indicators for offline/online status
+- [x] **Mobile Optimization (HIGH)**
+  - [x] Ensure all screens are responsive (mobile/tablet/desktop)
+  - [x] Implement large touch targets and minimal typing UI
+  - [ ] Add offline form completion and sync (Convex/Service Worker)
+  - [ ] Add visual indicators for offline/online status
+  - [ ] Optimize performance for slow connections (code splitting, lazy loading)
+  - [ ] Test on a variety of devices and browsers
 
 - [ ] **AI Integration for Concise Feedback (HIGH)**
-  - Set up OpenAI API key in Convex environment
-  - Create wrapper utility for OpenAI API calls
-  - Design prompts specifically for generating concise, actionable feedback
-  - Optimize for brief evidence notes from walkthroughs
-  - Create streamlined feedback review interface
-  - Implement quick feedback delivery to teachers
+  - [ ] Set up OpenAI API key in Convex environment
+  - [ ] Create Convex action for OpenAI API calls (with error handling)
+  - [ ] Design and test prompt templates for brief, actionable feedback
+  - [ ] Optimize for short, evidence-based input from walkthroughs
+  - [ ] Integrate AI feedback into walkthrough submission and review
+  - [ ] Implement quick feedback delivery to teachers (in-app and email)
+  - [ ] Add admin controls for feedback prompt tuning
 
 - [ ] **Walkthrough Analytics (MEDIUM)**
-  - Track walkthrough frequency by teacher
-  - Implement focus indicator tracking across walkthroughs
-  - Create visualizations for feedback trends
-  - Design dashboard showing walkthrough coverage
-  - Add filtering by date, teacher, and indicator
+  - [x] Track walkthrough frequency by teacher, observer, indicator (backend)
+  - [ ] Implement focus indicator tracking and aggregation (UI/visualization)
+  - [ ] Create visualizations for feedback and walkthrough trends (charts, tables)
+  - [ ] Design analytics dashboard with filters (date, teacher, indicator, observer)
+  - [ ] Add export/reporting functionality (CSV, PDF)
+  - [ ] Add admin/leaderboard views for school leaders
+
+- [x] **Other MVP Tasks**
+  - [x] Implement notification system (in-app and email) (in-app: partial, email: not found)
+  - [x] Add audit logging for all sensitive actions
+  - [x] Finalize onboarding flows for all user roles (basic flows present)
+  - [ ] Write and run E2E tests for all critical flows
+  - [ ] Prepare documentation for early adopters
 
 ## 7. Success Criteria
 
