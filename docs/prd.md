@@ -71,6 +71,9 @@ The platform specifically addresses the need for continuous support and growth i
   - Generate concise, actionable feedback from both detailed formal notes and brief informal walkthrough evidence
   - Allow observers to quickly edit AI suggestions before finalizing
   
+  **AI Model Selection Rationale:**
+  For all AI-generated feedback, EdCoach AI uses OpenAI's GPT-4.1 Mini model. This model was selected for its optimal balance of cost, speed, and high-quality instruction following. GPT-4.1 Mini provides a 1M token context window (sufficient for large rubrics and evidence), strong alignment with rubric-based feedback, and reliable, actionable outputs. It is significantly more cost-effective than full GPT-4.1 or GPT-4o, and outperforms smaller models (e.g., Nano) in reasoning and factuality—making it ideal for user-facing, rubric-aligned feedback in K-12 education.
+  
 - **Teacher Feedback Access** (Priority: High)
   - Secure portal for teachers to view all their feedback interactions
   - Feed-style interface showing both informal and formal feedback
@@ -152,6 +155,8 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
 - Convex for database and backend functionality
 - OpenAI or equivalent LLM for concise feedback generation
 - Export functionality to PDF and common spreadsheet formats
+
+- OpenAI GPT-4.1 Mini is the designated LLM for all feedback generation, chosen for its balance of cost, quality, and context window size.
 
 ### 8.2. Data storage & privacy
 - Role-based access controls for all observation data

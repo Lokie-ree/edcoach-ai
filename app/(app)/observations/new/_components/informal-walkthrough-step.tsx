@@ -117,48 +117,33 @@ export function InformalWalkthroughStep() {
         )}
       />
 
-      {/* Reinforcement Indicators (multi-select with popover) */}
+      {/* Reinforcement Indicator (single select with radio) */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">Reinforcement Indicators</h3>
+        <h3 className="text-lg font-medium">Reinforcement Indicator</h3>
         <FormField
           control={control}
-          name="reinforcementIndicators"
+          name="reinforcementIndicator"
           render={({ field }) => (
             <FormItem>
               <FormControl>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-between">
-                      {field.value && field.value.length > 0
-                        ? field.value
-                            .map((v: string) => indicators.find((o) => o.value === v)?.label)
-                            .join(", ")
-                        : "Select up to 3 indicators to reinforce"}
+                      {field.value
+                        ? indicators.find((o) => o.value === field.value)?.label
+                        : "Select one indicator to reinforce"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-64">
                     {indicators.map((option) => (
                       <div key={option.value} className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={field.value?.includes(option.value)}
-                          disabled={
-                            !field.value?.includes(option.value) &&
-                            field.value?.length >= 3
-                          }
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              if ((field.value || []).length < 3) {
-                                field.onChange([...(field.value || []), option.value]);
-                              }
-                            } else {
-                              field.onChange(
-                                (field.value || []).filter((v: string) => v !== option.value)
-                              );
-                            }
-                          }}
-                          id={option.value}
+                        <input
+                          type="radio"
+                          checked={field.value === option.value}
+                          onChange={() => field.onChange(option.value)}
+                          id={option.value + "-reinforcement"}
                         />
-                        <Label htmlFor={option.value}>{option.label}</Label>
+                        <Label htmlFor={option.value + "-reinforcement"}>{option.label}</Label>
                       </div>
                     ))}
                   </PopoverContent>
@@ -170,48 +155,33 @@ export function InformalWalkthroughStep() {
         />
       </div>
 
-      {/* Refinement Indicators (multi-select with popover) */}
+      {/* Refinement Indicator (single select with radio) */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">Refinement Indicators</h3>
+        <h3 className="text-lg font-medium">Refinement Indicator</h3>
         <FormField
           control={control}
-          name="refinementIndicators"
+          name="refinementIndicator"
           render={({ field }) => (
             <FormItem>
               <FormControl>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-between">
-                      {field.value && field.value.length > 0
-                        ? field.value
-                            .map((v: string) => indicators.find((o) => o.value === v)?.label)
-                            .join(", ")
-                        : "Select up to 3 indicators to refine"}
+                      {field.value
+                        ? indicators.find((o) => o.value === field.value)?.label
+                        : "Select one indicator to refine"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-64">
                     {indicators.map((option) => (
                       <div key={option.value} className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={field.value?.includes(option.value)}
-                          disabled={
-                            !field.value?.includes(option.value) &&
-                            field.value?.length >= 3
-                          }
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              if ((field.value || []).length < 3) {
-                                field.onChange([...(field.value || []), option.value]);
-                              }
-                            } else {
-                              field.onChange(
-                                (field.value || []).filter((v: string) => v !== option.value)
-                              );
-                            }
-                          }}
-                          id={option.value}
+                        <input
+                          type="radio"
+                          checked={field.value === option.value}
+                          onChange={() => field.onChange(option.value)}
+                          id={option.value + "-refinement"}
                         />
-                        <Label htmlFor={option.value}>{option.label}</Label>
+                        <Label htmlFor={option.value + "-refinement"}>{option.label}</Label>
                       </div>
                     ))}
                   </PopoverContent>

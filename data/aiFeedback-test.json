@@ -1,0 +1,508 @@
+[
+  {
+    "evidence": "The teacher masterfully ensured all students understood the learning objectives and their connection to state standards. Students could articulate what they were learning, why it was important, and how their work aligned with mastery criteria. Objectives were consistently referenced and used by students to guide their learning.",
+    "indicator": {
+      "_id": "kn720dg70ezwsxvss0rd9e2rzs7fttwx",
+      "indicator_name": "Standards and Objectives",
+      "indicator_code": "SO",
+      "overview": "Foundation for all other indicators. Teacher and students must understand the rigor of the standard and what students should know/do. Requires planning standards-aligned lessons with clear objectives.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "While objectives were displayed, their connection to the rigor of the state standards and the 'why' behind the learning was not consistently clear to all students. Opportunities for students to deconstruct objectives or set personal goals based on them could be enhanced.",
+    "indicator": {
+      "_id": "kn720dg70ezwsxvss0rd9e2rzs7fttwx",
+      "indicator_name": "Standards and Objectives",
+      "indicator_code": "SO",
+      "overview": "Foundation for all other indicators. Teacher and students must understand the rigor of the standard and what students should know/do. Requires planning standards-aligned lessons with clear objectives.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "The teacher skillfully organized content to be highly relevant and intellectually engaging. Students were visibly motivated, actively explored materials, asked insightful questions, and demonstrated perseverance in their tasks, clearly showing ownership of their learning.",
+    "indicator": {
+      "_id": "kn7b0fhv7hv5rjw7kf81r3gqks7fv2ce",
+      "indicator_name": "Motivating Students",
+      "indicator_code": "MS",
+      "overview": "Focuses on teacher's ability to organize and present content to motivate students. Requires in-depth knowledge of students and content/HQIM. Blending knowledge of content/curriculum with student learning needs creates rigorous, motivating experiences.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "The lesson content was presented, but some students did not appear fully engaged or motivated. Exploring more ways to connect the material to students' personal interests or to foster inquiry and curiosity could increase student initiative.",
+    "indicator": {
+      "_id": "kn7b0fhv7hv5rjw7kf81r3gqks7fv2ce",
+      "indicator_name": "Motivating Students",
+      "indicator_code": "MS",
+      "overview": "Focuses on teacher's ability to organize and present content to motivate students. Requires in-depth knowledge of students and content/HQIM. Blending knowledge of content/curriculum with student learning needs creates rigorous, motivating experiences.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "Instructional content was presented with exceptional clarity, utilizing effective visuals, examples, and modeling. Communication was concise, logically sequenced, and focused on essential information, ensuring all students could access and understand the material.",
+    "indicator": {
+      "_id": "kn72nj1w4n23gcqnzgsjtrmf4h7fv7b0",
+      "indicator_name": "Presenting Instructional Content",
+      "indicator_code": "PIC",
+      "overview": "Connects to method(s) of teaching content. Addresses visuals, concise communication, logical sequencing. Visuals (examples, illustrations, analogies, labels) essential for new/rigorous concepts. Use effectively and appropriately.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "The teacher presented the content, but the use of visuals or varied examples to clarify new concepts could be more consistent. Ensuring all communication is concise and logically segmented would further support student understanding.",
+    "indicator": {
+      "_id": "kn72nj1w4n23gcqnzgsjtrmf4h7fv7b0",
+      "indicator_name": "Presenting Instructional Content",
+      "indicator_code": "PIC",
+      "overview": "Connects to method(s) of teaching content. Addresses visuals, concise communication, logical sequencing. Visuals (examples, illustrations, analogies, labels) essential for new/rigorous concepts. Use effectively and appropriately.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "The lesson was expertly structured with a prompt start, coherent segments, and brisk, appropriate pacing that catered to diverse learning rates. Routines were efficient, maximizing instructional time and allowing for student reflection.",
+    "indicator": {
+      "_id": "kn74wvh0eb9hxwd354m4c9t7a17ftqpk",
+      "indicator_name": "Lesson Structure and Pacing",
+      "indicator_code": "LS",
+      "overview": "Blends time and form. Addresses effective segmentation for sufficient time allocation. Connects to 'logical sequencing and segmenting' under PIC. Requires thoughtful structure/pacing for motivation and engagement.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "The lesson had a clear structure, but pacing sometimes felt rushed for some students or too slow for others. More explicit attention to adjusting pace for individual needs and ensuring smooth transitions could optimize learning time.",
+    "indicator": {
+      "_id": "kn74wvh0eb9hxwd354m4c9t7a17ftqpk",
+      "indicator_name": "Lesson Structure and Pacing",
+      "indicator_code": "LS",
+      "overview": "Blends time and form. Addresses effective segmentation for sufficient time allocation. Connects to 'logical sequencing and segmenting' under PIC. Requires thoughtful structure/pacing for motivation and engagement.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "Activities and materials were exceptionally well-chosen, supporting objectives, challenging students, eliciting varied thinking, and sustaining attention. Students were actively engaged, interacted meaningfully, and had appropriate choices aligned with learning goals.",
+    "indicator": {
+      "_id": "kn7fwcyagxtgc41f9eddqy2kh97ft1rc",
+      "indicator_name": "Activities and Materials",
+      "indicator_code": "ACT",
+      "overview": "Addresses variety and appropriateness of activities/materials. Requires positive/supportive environment (Environment domain). After establishing expectations, leverage curriculum-driven activities/materials. Purposeful activities/materials support objectives and challenge students.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "Activities supported the lesson objective, but opportunities to elicit a wider variety of thinking or provide more student choice could be explored. Ensuring all materials are consistently challenging and relevant to all students' lives would enhance engagement.",
+    "indicator": {
+      "_id": "kn7fwcyagxtgc41f9eddqy2kh97ft1rc",
+      "indicator_name": "Activities and Materials",
+      "indicator_code": "ACT",
+      "overview": "Addresses variety and appropriateness of activities/materials. Requires positive/supportive environment (Environment domain). After establishing expectations, leverage curriculum-driven activities/materials. Purposeful activities/materials support objectives and challenge students.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "The teacher employed a masterful variety of high-quality, purposeful questions, sequenced effectively to deepen understanding and promote critical thinking. Ample wait time was provided, and all students actively responded and engaged in discussions, with students even generating their own inquiry questions.",
+    "indicator": {
+      "_id": "kn76pxyfpegac3wy66yz5vz4557fttdy",
+      "indicator_name": "Questioning",
+      "indicator_code": "QU",
+      "overview": "Skill to deepen understanding/ownership. Rubric provides framework for question types and response leading. Align questions to standards/HQIM, increase rigor/ownership. Content-related (purposeful alignment) and procedural-related (engagement processes) descriptors.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "Questions were used to check for understanding, but increasing the variety of question types (e.g., more application/analysis or creation/evaluation) and ensuring consistent wait time could further engage students in deeper thinking.",
+    "indicator": {
+      "_id": "kn76pxyfpegac3wy66yz5vz4557fttdy",
+      "indicator_name": "Questioning",
+      "indicator_code": "QU",
+      "overview": "Skill to deepen understanding/ownership. Rubric provides framework for question types and response leading. Align questions to standards/HQIM, increase rigor/ownership. Content-related (purposeful alignment) and procedural-related (engagement processes) descriptors.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "Academic feedback was consistently focused, frequent, and of high quality, prompting student thinking and guiding them towards mastery. The teacher circulated effectively, and students actively used feedback (from teacher and peers) to improve their work.",
+    "indicator": {
+      "_id": "kn7106n8f8pmkdggnw17ffa9p57fv7ew",
+      "indicator_name": "Academic Feedback",
+      "indicator_code": "FEED",
+      "overview": "How teachers respond to student comments/questions. Addresses quality of feedback supporting learning (not just accuracy). Deepest learning when meaning constructed by learner. Effective feedback prompts thinking.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "Feedback was provided to students, but ensuring it is consistently specific, actionable, and prompts further thinking rather than just correcting errors would be beneficial. Opportunities for structured peer feedback could also be increased.",
+    "indicator": {
+      "_id": "kn7106n8f8pmkdggnw17ffa9p57fv7ew",
+      "indicator_name": "Academic Feedback",
+      "indicator_code": "FEED",
+      "overview": "How teachers respond to student comments/questions. Addresses quality of feedback supporting learning (not just accuracy). Deepest learning when meaning constructed by learner. Effective feedback prompts thinking.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "Instructional grouping arrangements were strategically varied and consistently maximized student understanding and learning efficiency. Clear expectations were set, students took responsibility for their roles, and collaborated productively, with evidence of goal-setting and reflection within groups.",
+    "indicator": {
+      "_id": "kn72f4sns1cxcdvfbrwhc1z1f57fvm3c",
+      "indicator_name": "Grouping Students",
+      "indicator_code": "GRP",
+      "overview": "Addresses instructional arrangements. Focuses on how students grouped and held accountable.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "Students were grouped for activities, but ensuring clear expectations for each student's role and accountability within the group could improve collaboration. Varying group composition more intentionally based on lesson goals might also enhance learning.",
+    "indicator": {
+      "_id": "kn72f4sns1cxcdvfbrwhc1z1f57fvm3c",
+      "indicator_name": "Grouping Students",
+      "indicator_code": "GRP",
+      "overview": "Addresses instructional arrangements. Focuses on how students grouped and held accountable.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "The teacher demonstrated extensive content knowledge, seamlessly connecting concepts to state standards, HQIM, and other powerful ideas. A variety of subject-specific instructional strategies were implemented effectively, enhancing student understanding.",
+    "indicator": {
+      "_id": "kn71806b8gw4tg63d5p81w87v57ft1w1",
+      "indicator_name": "Teacher Content Knowledge",
+      "indicator_code": "TCK",
+      "overview": "Teacher's knowledge of content/HQIM and ability to implement appropriate strategies. Ability to connect content to other ideas/concepts.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "The teacher showed accurate content knowledge. To further enhance instruction, exploring additional subject-specific strategies or explicitly highlighting connections between key concepts and broader themes could deepen student learning.",
+    "indicator": {
+      "_id": "kn71806b8gw4tg63d5p81w87v57ft1w1",
+      "indicator_name": "Teacher Content Knowledge",
+      "indicator_code": "TCK",
+      "overview": "Teacher's knowledge of content/HQIM and ability to implement appropriate strategies. Ability to connect content to other ideas/concepts.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "The teacher's practices consistently displayed a deep understanding of each student's learning abilities, needs, interests, and backgrounds. Differentiated supports and strategies were seamlessly integrated, ensuring all students could master grade-level standards.",
+    "indicator": {
+      "_id": "kn7aw64d5yabqvqwkacswhpmsx7fvas1",
+      "indicator_name": "Teacher Knowledge of Students",
+      "indicator_code": "TKS",
+      "overview": "How well teacher knows students, learning styles, interests. Connects to Motivating Students. Know how students best motivated, support progress. Ability to organize content motivating/connecting to interests/contexts essential. Plan meaningful learning aligned to background/interests, use knowledge to scaffold.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "The teacher demonstrated an understanding of student needs. More consistent incorporation of student interests and backgrounds into lesson design, along with a wider range of differentiated strategies, could further support individual learners.",
+    "indicator": {
+      "_id": "kn7aw64d5yabqvqwkacswhpmsx7fvas1",
+      "indicator_name": "Teacher Knowledge of Students",
+      "indicator_code": "TKS",
+      "overview": "How well teacher knows students, learning styles, interests. Connects to Motivating Students. Know how students best motivated, support progress. Ability to organize content motivating/connecting to interests/contexts essential. Plan meaningful learning aligned to background/interests, use knowledge to scaffold.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "Students were consistently engaged in multiple types of thinking (analytical, practical, creative, research-based). The teacher and students modeled metacognitive strategies, and students actively analyzed problems from multiple perspectives and monitored their own learning.",
+    "indicator": {
+      "_id": "kn73bay5r7z941fbzafp198r6x7ft283",
+      "indicator_name": "Thinking",
+      "indicator_code": "TH",
+      "overview": "Developing multiple thinking/problem-solving skills enriches ability to manage complex tasks/higher learning. Thinking is process, problem-solving is product. Teacher empowers students by providing practice opportunities. Requires teaching the thinking/problem-solving types.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "Students engaged in analytical thinking. Providing more explicit opportunities and modeling for practical, creative, or research-based thinking, as well as metacognitive strategies, would further develop their cognitive skills.",
+    "indicator": {
+      "_id": "kn73bay5r7z941fbzafp198r6x7ft283",
+      "indicator_name": "Thinking",
+      "indicator_code": "TH",
+      "overview": "Developing multiple thinking/problem-solving skills enriches ability to manage complex tasks/higher learning. Thinking is process, problem-solving is product. Teacher empowers students by providing practice opportunities. Requires teaching the thinking/problem-solving types.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "Students actively engaged in a variety of complex problem-solving activities, applying different thinking types to generate solutions, draw conclusions, and justify their reasoning. They demonstrated perseverance and creativity in tackling challenging tasks.",
+    "indicator": {
+      "_id": "kn7b50v85azxspt731b4asfzbn7ftbn9",
+      "indicator_name": "Problem-Solving",
+      "indicator_code": "PS",
+      "overview": "Developing multiple problem-solving skills enriches ability to manage complex tasks/higher learning. Empowers students with life skill. Requires teaching the problem-solving types.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "Students were presented with problems to solve. Intentionally designing activities that require a broader range of problem-solving types (e.g., abstraction, improving solutions, creating and designing) could enhance their skills.",
+    "indicator": {
+      "_id": "kn7b50v85azxspt731b4asfzbn7ftbn9",
+      "indicator_name": "Problem-Solving",
+      "indicator_code": "PS",
+      "overview": "Developing multiple problem-solving skills enriches ability to manage complex tasks/higher learning. Empowers students with life skill. Requires teaching the problem-solving types.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "Instructional plans showed deep internalization of HQIM, with measurable objectives, aligned activities, materials, and assessments. Plans were appropriate for all learners, accommodated individual needs, and included strategies for student autonomy and ownership.",
+    "indicator": {
+      "_id": "kn791mkgsqaex8sgqncvjycgvd7ft7dv",
+      "indicator_name": "Instructional Plans",
+      "indicator_code": "IP",
+      "overview": "Contribute to effective/efficient learning, engaged classrooms. Based on standards, HQIM, assessment analysis. Incorporate standards, curriculum, assessments in daily/weekly/unit planning. Tightly connected across domains. Plan with end in mind (objective), then how students demonstrate mastery (Student Work/Assessment), then activities/materials.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "Plans aligned with objectives and standards. To strengthen them, ensure more consistent evidence of internalizing HQIM, such as annotations for differentiation or anticipating student misconceptions, and explicitly plan for student autonomy.",
+    "indicator": {
+      "_id": "kn791mkgsqaex8sgqncvjycgvd7ft7dv",
+      "indicator_name": "Instructional Plans",
+      "indicator_code": "IP",
+      "overview": "Contribute to effective/efficient learning, engaged classrooms. Based on standards, HQIM, assessment analysis. Incorporate standards, curriculum, assessments in daily/weekly/unit planning. Tightly connected across domains. Plan with end in mind (objective), then how students demonstrate mastery (Student Work/Assessment), then activities/materials.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "Assignments were consistently aligned to the rigor of standards and objectives, requiring students to organize, analyze, synthesize, and evaluate information. Students produced extended writing supporting arguments and connected learning to their lives.",
+    "indicator": {
+      "_id": "kn71r8cn15ec81jrzv9vvesnz97ft1xq",
+      "indicator_name": "Student Work",
+      "indicator_code": "SW",
+      "overview": "Effective planning requires considering content-specific work/assignments. Ensure challenge/rigor, align to standards, use HQIM, have clear success criteria. Work should allow multiple problem-solving/thinking types. Analyze work against criteria for future decisions.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "Student assignments were aligned to objectives. Focusing on designing tasks that more consistently require students to move beyond reproduction to higher-order thinking (e.g., synthesis, evaluation, extended argumentation) would be beneficial.",
+    "indicator": {
+      "_id": "kn71r8cn15ec81jrzv9vvesnz97ft1xq",
+      "indicator_name": "Student Work",
+      "indicator_code": "SW",
+      "overview": "Effective planning requires considering content-specific work/assignments. Ensure challenge/rigor, align to standards, use HQIM, have clear success criteria. Work should allow multiple problem-solving/thinking types. Analyze work against criteria for future decisions.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "Assessments were varied, aligned to standards' depth and rigor, and provided clear feedback on progress. They measured performance in multiple ways, included extended written tasks, and results were used by both teacher and students to inform future learning.",
+    "indicator": {
+      "_id": "kn77bg4e7grqw0v8xsqz3qytcs7fvf61",
+      "indicator_name": "Assessment",
+      "indicator_code": "AS",
+      "overview": "Fundamental part of instruction/learning. Effective plan answers: What do I want students to do? How do I know they learned? Regular asking/answering allows planning, diagnosing, intervening.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "Assessments were aligned to objectives. Expanding the variety of assessment formats and ensuring they consistently measure higher-order thinking and problem-solving would provide a more comprehensive view of student learning. Clearly outlining how results inform next steps for students is also key.",
+    "indicator": {
+      "_id": "kn77bg4e7grqw0v8xsqz3qytcs7fvf61",
+      "indicator_name": "Assessment",
+      "indicator_code": "AS",
+      "overview": "Fundamental part of instruction/learning. Effective plan answers: What do I want students to do? How do I know they learned? Regular asking/answering allows planning, diagnosing, intervening.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "Clear and rigorous academic expectations were established and understood by students, who actively used them to self-monitor and take initiative. The teacher ensured all students experienced success through differentiated, high-quality materials and optimized instructional time.",
+    "indicator": {
+      "_id": "kn7cqq5df85qz8gkmk4v14qr1h7fvxn2",
+      "indicator_name": "Expectations",
+      "indicator_code": "ES",
+      "overview": "Directly connects to Instruction domain. Fully exceed requires deep knowledge of students and standards/HQIM for clear/rigorous expectations. Students take active role leveraging expectations. Differentiated methods (rigorous, appropriate, success opportunities) require developed/utilized student knowledge.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "Academic expectations were communicated. To enhance this, ensure expectations are consistently rigorous and that students are actively involved in understanding and using success criteria to guide their learning and learn from mistakes.",
+    "indicator": {
+      "_id": "kn7cqq5df85qz8gkmk4v14qr1h7fvxn2",
+      "indicator_name": "Expectations",
+      "indicator_code": "ES",
+      "overview": "Directly connects to Instruction domain. Fully exceed requires deep knowledge of students and standards/HQIM for clear/rigorous expectations. Students take active role leveraging expectations. Differentiated methods (rigorous, appropriate, success opportunities) require developed/utilized student knowledge.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "Students were consistently engaged in behaviors optimizing learning, with commitments for learning and behavior co-established. The teacher skillfully used various techniques to maintain engagement and a positive environment, addressing disruptions minimally and effectively.",
+    "indicator": {
+      "_id": "kn750wh7dh8z7x1ba7wdfhsvk97fvajw",
+      "indicator_name": "Engaging Students and Managing Behavior",
+      "indicator_code": "ESMB",
+      "overview": "Timely/effective management critical for instruction/learning. Connects to Instruction domain. Fully exceed requires environment where students understand own actions' impact. Self-aware, spend time completing assignments, engaged independently/collaboratively. Teacher establishes clear learning/behavior expectations, models.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "The teacher managed student behavior effectively. Involving students more in establishing commitments for learning and behavior, and consistently reinforcing positive behaviors with a variety of techniques, could further optimize the learning environment.",
+    "indicator": {
+      "_id": "kn750wh7dh8z7x1ba7wdfhsvk97fvajw",
+      "indicator_name": "Engaging Students and Managing Behavior",
+      "indicator_code": "ESMB",
+      "overview": "Timely/effective management critical for instruction/learning. Connects to Instruction domain. Fully exceed requires environment where students understand own actions' impact. Self-aware, spend time completing assignments, engaged independently/collaboratively. Teacher establishes clear learning/behavior expectations, models.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "The classroom was a welcoming, safe, and exceptionally well-organized space, designed with students to promote learning for all. Supplies were accessible, current student work was displayed positively, and the arrangement maximized individual and group learning.",
+    "indicator": {
+      "_id": "kn7bxcq4es54pd1z2t58mera7h7fvcst",
+      "indicator_name": "Environment",
+      "indicator_code": "ENV",
+      "overview": "Key factor affecting learning. Connected to Instruction, Expectations, ESMB, RC. Fully exceed requires optimizing environment, including students in creation for community/inclusivity/empowerment. Positive/supportive for optimal learning. Students feel belong, welcome, trust, encouraged. Promotes intellectual risk taking.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "The classroom was organized and welcoming. To further enhance the environment, consider involving students more in its design and organization, ensuring resources are easily accessible to all, and consistently displaying current student work that promotes positivity.",
+    "indicator": {
+      "_id": "kn7bxcq4es54pd1z2t58mera7h7fvcst",
+      "indicator_name": "Environment",
+      "indicator_code": "ENV",
+      "overview": "Key factor affecting learning. Connected to Instruction, Expectations, ESMB, RC. Fully exceed requires optimizing environment, including students in creation for community/inclusivity/empowerment. Positive/supportive for optimal learning. Students feel belong, welcome, trust, encouraged. Promotes intellectual risk taking.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "Teacher-student and student-student interactions consistently demonstrated caring, kindness, and respect, celebrating all backgrounds. The teacher actively sought and was receptive to student interests and opinions, fostering a classroom characterized by positive relationships and interdependence.",
+    "indicator": {
+      "_id": "kn76t898pfszrtya3awsy424x17ftw88",
+      "indicator_name": "Respectful Conditions",
+      "indicator_code": "RC",
+      "overview": "Respectful environment facilitates learning, connects to Instruction. Sustainable positive environment begins with respectful conditions. Fully exceed requires atmosphere beyond teacher-student interaction to mutual respect among students. More learning when feel safe/motivated/respected.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "Teacher-student interactions were generally positive. Actively fostering more student-to-student interactions that demonstrate mutual respect and seeking out student interests and opinions more consistently could further build a sense of community and interdependence.",
+    "indicator": {
+      "_id": "kn76t898pfszrtya3awsy424x17ftw88",
+      "indicator_name": "Respectful Conditions",
+      "indicator_code": "RC",
+      "overview": "Respectful environment facilitates learning, connects to Instruction. Sustainable positive environment begins with respectful conditions. Fully exceed requires atmosphere beyond teacher-student interaction to mutual respect among students. More learning when feel safe/motivated/respected.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "The educator consistently demonstrated initiative in professional growth by being prompt and prepared for collaborative meetings, actively implementing new learning, developing robust growth plans based on feedback and school goals, and engaging in deep self-reflection to enhance practice.",
+    "indicator": {
+      "_id": "kn75hhez5g9a0g1r44bcbptbj97ftf73",
+      "indicator_name": "Growing and Developing Professionally",
+      "indicator_code": "GDP",
+      "overview": "Focuses on the educator's commitment to continuous professional learning, implementation of new strategies, and self-improvement based on reflection and feedback.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "The educator participates in professional learning. To further develop, consistently bringing student artifacts to collaborative meetings, actively attempting to implement new strategies post-PL, and engaging in more specific self-reflection tied to student outcomes would be beneficial.",
+    "indicator": {
+      "_id": "kn75hhez5g9a0g1r44bcbptbj97ftf73",
+      "indicator_name": "Growing and Developing Professionally",
+      "indicator_code": "GDP",
+      "overview": "Focuses on the educator's commitment to continuous professional learning, implementation of new strategies, and self-improvement based on reflection and feedback.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "The educator consistently made thoughtful and highly accurate assessments of lesson effectiveness in self-reflections, offering specific, actionable, and insightful steps for improvement that demonstrated a deep understanding of student learning.",
+    "indicator": {
+      "_id": "kn79gk6x73y0dhnnj95m8gehan7ftd4v",
+      "indicator_name": "Reflecting on Teaching",
+      "indicator_code": "RT",
+      "overview": "Concerns the educator's ability to accurately assess lesson effectiveness and identify specific actions for instructional improvement through self-reflection.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "The educator reflects on lessons. Ensuring self-reflections consistently offer specific, actionable steps for improvement, rather than general observations, would enhance their impact on teaching practice.",
+    "indicator": {
+      "_id": "kn79gk6x73y0dhnnj95m8gehan7ftd4v",
+      "indicator_name": "Reflecting on Teaching",
+      "indicator_code": "RT",
+      "overview": "Concerns the educator's ability to accurately assess lesson effectiveness and identify specific actions for instructional improvement through self-reflection.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "The educator consistently accepted responsibilities contributing to school improvement, actively utilized student achievement data to guide instructional decisions and address student needs, and enthusiastically supported a wide range of school activities and events.",
+    "indicator": {
+      "_id": "kn748w00jt7b0bdcmdnz1kjqr57ftywf",
+      "indicator_name": "School Involvement",
+      "indicator_code": "SI",
+      "overview": "Relates to the educator's active contribution to school improvement efforts, use of data to inform instruction, and support for school-wide activities and events.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "The educator supports school events. More consistent involvement in responsibilities that directly contribute to school improvement initiatives and regular use of student achievement data to inform and adapt instruction would be valuable.",
+    "indicator": {
+      "_id": "kn748w00jt7b0bdcmdnz1kjqr57ftywf",
+      "indicator_name": "School Involvement",
+      "indicator_code": "SI",
+      "overview": "Relates to the educator's active contribution to school improvement efforts, use of data to inform instruction, and support for school-wide activities and events.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  },
+  {
+    "evidence": "The educator consistently accepted responsibility for and assisted peers in maintaining a safe and orderly school environment, meticulously adhered to all system and school policies, and kept exceptionally timely, professional, and accurate records.",
+    "indicator": {
+      "_id": "kn7efq87py7ah8e74by5wytj657fvm3m",
+      "indicator_name": "School Responsibilities",
+      "indicator_code": "SR",
+      "overview": "Pertains to the educator's adherence to school policies, maintenance of professional records, and contributions to a safe and orderly school environment.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "reinforcement"
+  },
+  {
+    "evidence": "The educator adheres to school policies. Ensuring consistent and proactive contributions to a safe school environment, beyond basic adherence, and maintaining all records with utmost timeliness and professionalism would strengthen this area.",
+    "indicator": {
+      "_id": "kn7efq87py7ah8e74by5wytj657fvm3m",
+      "indicator_name": "School Responsibilities",
+      "indicator_code": "SR",
+      "overview": "Pertains to the educator's adherence to school policies, maintenance of professional records, and contributions to a safe and orderly school environment.",
+      "createdAt": 1747139622898
+    },
+    "promptType": "refinement"
+  }
+]

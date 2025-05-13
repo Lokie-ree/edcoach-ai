@@ -16,6 +16,8 @@ This timeline separates essential MVP tasks from those that can be deferred to p
 - [ ] Add visual indicators for offline/online status (4 hours)
 - [ ] Optimize performance for slow connections (8 hours)
 
+**Note:** The MVP will use OpenAI's GPT-4.1 Mini model for all feedback generation. This model is selected for its strong performance on instruction following, low latency, and cost-effectiveness, ensuring high-quality, actionable feedback for teachers and coaches.
+
 ### 2. Testing & Launch (Weeks 3-4)
 - [ ] Write E2E tests for critical user flows (16 hours)
 - [ ] Test on actual mobile devices (8 hours)
@@ -69,6 +71,7 @@ This timeline separates essential MVP tasks from those that can be deferred to p
 - This split allows for a much faster MVP launch, focusing on the features that deliver the most value to early users.
 - Post-MVP tasks can be prioritized based on user feedback and adoption.
 - The MVP should be robust, usable, and demonstrate the core value proposition: fast, AI-powered feedback for informal walkthroughs, on mobile, with basic offline support.
+- All AI feedback generation tasks are scoped to use GPT-4.1 Mini, ensuring consistent, high-quality outputs and predictable costs.
 
 ## Dependencies & Critical Path
 

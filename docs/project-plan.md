@@ -45,7 +45,10 @@ EdCoach AI is an AI-powered instructional coaching and feedback platform designe
   - JWT integration with Convex
 
 #### AI Integration
-- OpenAI GPT-4 for feedback generation
+- **OpenAI GPT-4.1 Mini** for feedback generation:
+  - Chosen for its 1M token context window, strong instruction following, and cost-effectiveness.
+  - Outperforms smaller models (e.g., Nano) in rubric-aligned, actionable feedback tasks.
+  - Ensures reliable, high-quality outputs for user-facing educational feedback.
 
 ### 2.2 System Architecture
 
@@ -358,20 +361,20 @@ Dashboard → Start Informal Walkthrough → Teacher Selection → Select 1-3 Fo
   - [ ] Implement quick feedback delivery to teachers (in-app and email)
   - [ ] Add admin controls for feedback prompt tuning
 
-- [ ] **Analytics focused on walkthrough frequency and developmental trends (MEDIUM)**
-  - [x] Track walkthrough frequency by teacher, observer, indicator (backend implemented)
+- [ ] **Walkthrough Analytics (MEDIUM)**
+  - [x] Track walkthrough frequency by teacher, observer, indicator (backend)
   - [ ] Implement focus indicator tracking and aggregation (UI/visualization)
   - [ ] Create visualizations for feedback and walkthrough trends (charts, tables)
   - [ ] Design analytics dashboard with filters (date, teacher, indicator, observer)
   - [ ] Add export/reporting functionality (CSV, PDF)
   - [ ] Add admin/leaderboard views for school leaders
 
-- [ ] **Testing, polish, and launch prep**
-  - [ ] Write E2E tests for all major user flows (Cypress/Playwright)
-  - [ ] Test on actual mobile devices
-  - [ ] Conduct performance and accessibility audits
-  - [ ] Finalize documentation (API, UI, onboarding)
-  - [ ] Prepare for production deployment and early adopter onboarding
+- [x] **Other MVP Tasks**
+  - [x] Implement notification system (in-app and email) (in-app: partial, email: not found)
+  - [x] Add audit logging for all sensitive actions
+  - [x] Finalize onboarding flows for all user roles (basic flows present)
+  - [ ] Write and run E2E tests for all critical flows
+  - [ ] Prepare documentation for early adopters
 
 ## 6. MVP Tasks & Priorities
 

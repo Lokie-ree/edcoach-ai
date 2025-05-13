@@ -8,6 +8,7 @@ const publicRoutes = [
   "/api(.*)",
   "/sign-in(.*)",
   "/sign-up(.*)",
+  "/dev",
 ];
 
 // Create a route matcher for public routes

@@ -67,25 +67,37 @@ export default defineSchema({
     .index("by_creator", ["createdBy"])
     .index("by_organization", ["organization"]),
 
-  // Rubrics table - for storing evaluation frameworks
+  // Rubrics table - for storing evaluation frameworks (metadata and full structure)
   rubrics: defineTable({
-    // Rubric name (e.g., "LEADS", "LER")
     name: v.string(),
-    // Description of the rubric
     description: v.optional(v.string()),
-    // Version of the rubric
     version: v.optional(v.string()),
-    // Whether this is a standard or custom rubric
     isStandard: v.boolean(),
-    // The structure of the rubric (categories, indicators, rating scales)
-    structure: v.any(),
-    // Creator of the rubric (for custom rubrics)
+    structure: v.any(), // The full rubric as an array of indicator objects
     createdBy: v.optional(v.id("users")),
-    // Creation date
     createdAt: v.number(),
-    // Organization this rubric belongs to (for custom rubrics)
     organizationId: v.optional(v.id("organizations")),
   }).index("by_organization", ["organizationId"]),
+
+  // RubricIndicators table - for granular access to each indicator
+  rubricIndicators: defineTable({
+    domain: v.string(),
+    domain_weight: v.number(),
+    indicator_code: v.string(),
+    indicator_name: v.string(),
+    overview: v.optional(v.string()),
+    content_connections: v.optional(v.string()),
+    student_centered_evidence: v.optional(v.array(v.string())),
+    key_terms: v.optional(v.any()),
+    performance_levels: v.array(v.any()),
+    suggested_coaching_questions: v.optional(v.array(v.string())),
+    rubricName: v.optional(v.string()),
+    version: v.optional(v.string()),
+    createdAt: v.number(),
+    organizationId: v.optional(v.id("organizations")),
+  })
+    .index("by_indicator_code", ["indicator_code"])
+    .index("by_domain", ["domain"]),
 
   // Observations table - for recording classroom observations
   observations: defineTable({
