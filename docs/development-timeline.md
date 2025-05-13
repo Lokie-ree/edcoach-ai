@@ -8,10 +8,10 @@ This timeline separates essential MVP tasks from those that can be deferred to p
 ## MVP Essential Tasks (Target: ~120 hours)
 
 ### 1. Core AI & Mobile (Weeks 1-2)
-- [ ] Set up OpenAI API key in Convex environment (4 hours)
-- [ ] Create basic Convex action for OpenAI API calls (8 hours)
-- [ ] Design and test simple prompt templates for brief, actionable feedback (8 hours)
-- [ ] Integrate basic AI feedback into walkthrough submission and review (12 hours)
+- [x] Set up OpenAI API key in Convex environment (4 hours)
+- [x] Create basic Convex action for OpenAI API calls (8 hours)
+- [x] Design and test simple prompt templates for brief, actionable feedback (8 hours)
+- [x] Integrate basic AI feedback into walkthrough submission and review (12 hours)
 - [ ] Add basic offline form completion and sync (Convex/Service Worker) (16 hours)
 - [ ] Add visual indicators for offline/online status (4 hours)
 - [ ] Optimize performance for slow connections (8 hours)
@@ -34,9 +34,9 @@ This timeline separates essential MVP tasks from those that can be deferred to p
 ## Post-MVP (Deferred) Tasks
 
 ### Advanced AI & Admin
-- [ ] Implement advanced error handling, retries, and rate limiting for OpenAI API
+- [x] Implement advanced error handling, retries, and rate limiting for OpenAI API
 - [ ] Add admin controls for feedback prompt tuning
-- [ ] Create advanced prompt templates and feedback scenarios
+- [x] Create advanced prompt templates and feedback scenarios
 - [ ] Implement quick feedback delivery to teachers via email
 - [ ] Add version control for prompts
 

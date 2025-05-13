@@ -352,12 +352,12 @@ Dashboard → Start Informal Walkthrough → Teacher Selection → Select 1-3 Fo
   - [ ] Add visual indicators for offline/online status
   - [ ] Optimize performance for slow connections
 
-- [ ] **AI feedback integration for brief, actionable feedback (HIGH)**
-  - [ ] Set up OpenAI API key in Convex environment
-  - [ ] Create Convex action for OpenAI API calls (with error handling)
-  - [ ] Design and test prompt templates for brief, actionable feedback
-  - [ ] Optimize for short, evidence-based input from walkthroughs
-  - [ ] Integrate AI feedback into walkthrough submission and review
+- [x] **AI feedback integration for brief, actionable feedback (HIGH)**
+  - [x] Set up OpenAI API key in Convex environment
+  - [x] Create Convex action for OpenAI API calls (with error handling)
+  - [x] Design and test prompt templates for brief, actionable feedback
+  - [x] Optimize for short, evidence-based input from walkthroughs
+  - [x] Integrate AI feedback into walkthrough submission and review
   - [ ] Implement quick feedback delivery to teachers (in-app and email)
   - [ ] Add admin controls for feedback prompt tuning
 
@@ -398,12 +398,12 @@ Dashboard → Start Informal Walkthrough → Teacher Selection → Select 1-3 Fo
   - [ ] Optimize performance for slow connections (code splitting, lazy loading)
   - [ ] Test on a variety of devices and browsers
 
-- [ ] **AI Integration for Concise Feedback (HIGH)**
-  - [ ] Set up OpenAI API key in Convex environment
-  - [ ] Create Convex action for OpenAI API calls (with error handling)
-  - [ ] Design and test prompt templates for brief, actionable feedback
-  - [ ] Optimize for short, evidence-based input from walkthroughs
-  - [ ] Integrate AI feedback into walkthrough submission and review
+- [x] **AI Integration for Concise Feedback (HIGH)**
+  - [x] Set up OpenAI API key in Convex environment
+  - [x] Create Convex action for OpenAI API calls (with error handling)
+  - [x] Design and test prompt templates for brief, actionable feedback
+  - [x] Optimize for short, evidence-based input from walkthroughs
+  - [x] Integrate AI feedback into walkthrough submission and review
   - [ ] Implement quick feedback delivery to teachers (in-app and email)
   - [ ] Add admin controls for feedback prompt tuning
 
