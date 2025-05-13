@@ -29,7 +29,6 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import louisianaEducatorRubric from "@/data/louisiana-educator-rubric.json";
 import { cn } from "@/lib/utils";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useMemo } from "react";
 import { Label } from "@/components/ui/label";
 import { Rubric, RubricDomain, RubricIndicator } from "@/types/louisianaEducatorRubric";
