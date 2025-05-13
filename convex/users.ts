@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalQuery } from "./_generated/server";
 
 /*
  * NOTE: This file is simplified to use Clerk's user management.
@@ -209,6 +209,16 @@ export const updateProfile = mutation({
       });
       return { success: true };
     }
+  },
+});
+
+export const internalGetUserByClerkId = internalQuery({
+  args: { clerkId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
   },
 });
 

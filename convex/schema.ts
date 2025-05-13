@@ -206,4 +206,31 @@ export default defineSchema({
     .index("by_timestamp", ["timestamp"])
     .index("by_severity", ["severity"])
     .index("by_resource", ["resourceType", "resourceId"]),
+
+  // AI Usage Logs - for tracking OpenAI token usage and cost
+  aiUsageLogs: defineTable({
+    userId: v.id("users"),
+    action: v.string(), // e.g., "generateFeedback"
+    model: v.string(), // e.g., "gpt-4.1-mini-2025-04-14"
+    promptTokens: v.number(),
+    completionTokens: v.number(),
+    totalTokens: v.number(),
+    cost: v.number(), // in USD
+    timestamp: v.number(),
+    isCached: v.boolean(), // Track if input was cached
+    metadata: v.optional(v.any()), // for additional context
+  })
+    .index("by_user", ["userId"])
+    .index("by_timestamp", ["timestamp"])
+    .index("by_user_and_timestamp", ["userId", "timestamp"]),
+
+  // AI Usage Alerts - for cost alerting
+  aiUsageAlerts: defineTable({
+    userId: v.id("users"),
+    threshold: v.number(), // Cost threshold in USD
+    period: v.string(), // e.g., "daily", "weekly", "monthly"
+    lastTriggered: v.optional(v.number()),
+    isActive: v.boolean(),
+  })
+    .index("by_user", ["userId"]),
 });
