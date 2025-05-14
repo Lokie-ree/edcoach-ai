@@ -56,7 +56,7 @@ The platform specifically addresses the need for continuous support and growth i
 ## 4. Functional requirements
 - **Observation Templates (LER-Based)** (Priority: High)
   - **Informal Walkthrough Template** (Priority: Critical)
-    - Streamlined interface for selecting 1-3 focus indicators
+    - Streamlined interface for selecting exactly one focus indicator for reinforcement and one for refinement
     - Simplified evidence capture optimized for quick completion
     - Target completion time under 10 minutes
   - **Formal Observation Template** (Priority: Medium)
@@ -100,11 +100,11 @@ The platform specifically addresses the need for continuous support and growth i
 - Prominent "Start Informal Walkthrough" button for coaches and administrators
 
 ### 5.2. Core experience
-- **Conducting an Informal Walkthrough:** Observers select a teacher, quickly choose 1-3 focus indicators from the LER, jot down brief evidence notes, and optionally add reinforcement/refinement comments. The process is designed for completion in minutes.
+- **Conducting an Informal Walkthrough:** Observers select a teacher, quickly choose a focus indicator for reinforcement/refinement from the Louisiana Educator Rubric, jot down brief evidence notes, and generate feedback. The process is designed for completion in minutes.
   - Streamlined, mobile-optimized interface with minimal typing requirements
   - Progress indicators show completion status
   
-- **Generating feedback:** After completing walkthrough notes, AI generates concise, targeted feedback suggestions aligned with the evidence and selected indicators. Observers quickly review/edit before sharing. The system also supports generating comprehensive feedback for optional formal observations.
+- **Generating feedback:** After completing walkthrough notes, AI generates concise, targeted feedback suggestions aligned with the evidence and selected indicators. Observers quickly review/edit before sharing. 
   - Quick review interface optimized for rapid approval/editing
   - System ensures feedback is actionable and growth-oriented
   
@@ -203,94 +203,46 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
 ## 10. User stories
 ### 10.1. Principal registration and setup
 - **ID:** US-001
-- **Description:** As a school principal, I want to register and set up my school in the system so that my team can begin using the platform for frequent walkthroughs and feedback.
+- **Description:** As a school principal, I want to register and set up my school in the system so that my team can begin using the platform for frequent informal walkthroughs and rapid feedback.
 - **Acceptance criteria:**
   - Principal can register with school email and basic school information
   - Principal can invite assistant principals and instructional coaches
   - Principal can verify school details and instructional focus areas
   - System provisions appropriate role-based access for the principal
 
-### 10.2. Conducting a formal observation
+### 10.2. Conducting an informal walkthrough
 - **ID:** US-002
-- **Description:** As an instructional coach, I want to complete a formal observation using the LER rubric so that I can provide comprehensive feedback to a teacher.
-- **Note:** This is a secondary workflow, available for users who wish to consolidate all observation types, but not the core focus of the platform.
+- **Description:** As an instructional coach or school leader, I want to complete a quick informal walkthrough so that I can provide immediate, differentiated, actionable feedback to teachers.
 - **Acceptance criteria:**
-  - Coach can select a teacher and initiate a formal observation
-  - All LER domains and indicators are available for rating
-  - Each indicator has fields for numeric rating and evidence
-  - Observation can be saved as draft and resumed later
-  - System validates that all required fields are completed before finalization
-
-### 10.3. Conducting an informal walkthrough
-- **ID:** US-003
-- **Description:** As an assistant principal, I want to complete a quick informal walkthrough so that I can provide timely, focused feedback without a full evaluation.
-- **Note:** This is the primary, most critical user flow for observers.
-- **Acceptance criteria:**
-  - AP can select a teacher and initiate an informal walkthrough
-  - AP can quickly select 1-3 LER indicators observed during the walkthrough
-  - System provides simplified fields for brief evidence notes
-  - The entire process can be completed in under 10 minutes
-  - No numeric ratings are required for informal walkthroughs
-  - Walkthrough can be completed on mobile devices in classroom settings
+  - Observer can select a teacher and initiate an informal walkthrough
+  - Observer can quickly select one LER indicator for reinforcement and one for refinement
+  - System provides a single field for brief evidence notes (no per-indicator comments)
+  - The entire process can be completed in under 10 minutes on a mobile device
   - Walkthrough can be saved as draft and resumed later
+  - AI feedback is generated and can be reviewed/edited before finalizing
 
-### 10.4. Generating AI feedback
-- **ID:** US-004
-- **Description:** As an observer, I want the system to generate AI feedback based on my observation notes so that I can save time while providing quality feedback.
+### 10.3. Receiving and reviewing feedback
+- **ID:** US-003
+- **Description:** As a teacher, I want to receive and review all my informal walkthrough feedback so that I can understand my strengths and areas for growth.
 - **Acceptance criteria:**
-  - System generates concise, actionable feedback from brief evidence notes typical of informal walkthroughs
-  - System also supports generating comprehensive feedback for formal observations
-  - AI feedback is aligned with the LER rubric standards
-  - Feedback distinguishes between areas of strength and growth
-  - Observer can quickly edit or replace any AI-generated content
-  - Generation occurs within 30 seconds of request
-
-### 10.5. Reviewing personal feedback
-- **ID:** US-005
-- **Description:** As a teacher, I want to access and review all my feedback interactions so that I can understand my strengths and areas for growth.
-- **Acceptance criteria:**
-  - Teacher can see a feed of all completed walkthroughs and observations
-  - Feed shows both informal feedback snippets and formal observations
-  - Teacher can view full details of each feedback interaction
-  - Feedback is presented in a clear, organized format
+  - Teacher can see a feed of all completed informal walkthroughs
+  - Feedback is presented in a clear, organized, and actionable format
   - Teacher can download feedback reports as PDF
   - System notifies teacher when new feedback is available
 
-### 10.6. Viewing school-wide analytics
-- **ID:** US-006
-- **Description:** As a principal, I want to access analytics about walkthrough patterns and feedback across my school so that I can identify trends and plan professional development.
+### 10.4. Analytics for walkthroughs
+- **ID:** US-004
+- **Description:** As a school leader, I want to view analytics about informal walkthroughs so that I can identify trends and plan professional development.
 - **Acceptance criteria:**
   - Principal can view dashboard showing walkthrough frequency by teacher
   - Dashboard highlights which indicators are receiving the most feedback
-  - Principal can track developmental trends between formal evaluations
-  - Dashboard includes filters for date ranges and observation types
+  - Principal can track developmental trends over time
+  - Dashboard includes filters for date ranges and indicators
   - Data visualizations clearly highlight trends and patterns
-  - Principal can export reports for external use
 
-### 10.7. Managing draft walkthroughs and observations
-- **ID:** US-007
-- **Description:** As an observer, I want to manage my draft walkthroughs and observations so that I can complete them when I have time.
-- **Acceptance criteria:**
-  - Observer can see a list of all draft walkthroughs and observations
-  - System shows the completion status of each draft
-  - Observer can resume editing any draft
-  - System automatically saves changes while editing
-  - Observer can delete drafts if needed
-
-### 10.8. Secure authentication
-- **ID:** US-008
-- **Description:** As a user, I want secure authentication so that observation data remains private and secure.
-- **Acceptance criteria:**
-  - Users can login with email/password or SSO options
-  - Password requirements follow security best practices
-  - System enforces role-based access controls
-  - Session timeouts occur after period of inactivity
-  - Failed login attempts are limited to prevent brute force attacks
-
-### 10.9. Mobile walkthrough completion
-- **ID:** US-009
+### 10.5. Mobile-first completion
+- **ID:** US-005
 - **Description:** As an observer, I want to complete informal walkthroughs on my mobile device while in the classroom so that I can capture real-time notes and provide immediate feedback.
-- **Note:** This feature is critical for the primary use case of frequent, on-the-go informal walkthroughs.
 - **Acceptance criteria:**
   - Walkthrough forms are fully functional on mobile devices
   - Touch interfaces are optimized with large targets for in-classroom use
@@ -299,8 +251,8 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
   - Offline mode allows completion when internet connection is unstable
   - Data syncs automatically when connection is restored
 
-### 10.10. Comparing teacher growth over time
-- **ID:** US-010
+### 10.6. Comparing teacher growth over time
+- **ID:** US-006
 - **Description:** As an instructional coach, I want to compare a teacher's growth trends over time so that I can track their professional development.
 - **Acceptance criteria:**
   - Coach can select a specific teacher to view longitudinal data
@@ -308,3 +260,5 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
   - Visualization highlights changes in specific domains and indicators
   - Coach can filter by observation type or date range
   - Growth patterns are clearly identified and highlighted
+
+### 10.7. All rubric data is loaded from the database (Convex), not from local files

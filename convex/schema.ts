@@ -168,24 +168,21 @@ export default defineSchema({
     observerId: v.id("users"),
     walkthroughDate: v.number(),
     status: v.union(v.literal("draft"), v.literal("completed")),
-    reinforcementIndicators: v.array(v.string()),
-    refinementIndicators: v.array(v.string()),
     evidenceSummary: v.string(),
-    additionalComments: v.optional(v.string()),
+    reinforcementIndicator: v.string(),
+    refinementIndicator: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
-    organization: v.string(),
   })
     .index("by_observer", ["observerId"])
     .index("by_teacher", ["teacherId"])
-    .index("by_organization", ["organization"])
     .index("by_status", ["status"]),
 
   walkthroughEntries: defineTable({
     walkthroughId: v.id("walkthroughs"),
     indicatorAcronym: v.string(),
     type: v.union(v.literal("reinforcement"), v.literal("refinement")),
-    comment: v.string(),
+    aiFeedback: v.optional(v.string()),
     createdAt: v.number(),
   }).index("by_walkthrough", ["walkthroughId"]),
 

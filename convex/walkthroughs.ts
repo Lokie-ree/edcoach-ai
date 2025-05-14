@@ -6,19 +6,15 @@ export const createWalkthroughAndEntries = mutation({
     teacherId: v.id("teachers"),
     walkthroughDate: v.number(),
     status: v.union(v.literal("draft"), v.literal("completed")),
-    reinforcementIndicators: v.array(v.string()),
-    refinementIndicators: v.array(v.string()),
     evidenceSummary: v.string(),
-    additionalComments: v.optional(v.string()),
-    organization: v.string(),
-    walkthroughEntries: v.optional(
-      v.array(
-        v.object({
-          indicatorAcronym: v.string(),
-          type: v.union(v.literal("reinforcement"), v.literal("refinement")),
-          comment: v.string(),
-        })
-      )
+    reinforcementIndicator: v.string(),
+    refinementIndicator: v.string(),
+    walkthroughEntries: v.array(
+      v.object({
+        indicatorAcronym: v.string(),
+        type: v.union(v.literal("reinforcement"), v.literal("refinement")),
+        aiFeedback: v.optional(v.string()),
+      })
     ),
   },
   returns: v.id("walkthroughs"),
@@ -54,25 +50,21 @@ export const createWalkthroughAndEntries = mutation({
       observerId: user._id,
       walkthroughDate: args.walkthroughDate,
       status: args.status,
-      reinforcementIndicators: args.reinforcementIndicators,
-      refinementIndicators: args.refinementIndicators,
       evidenceSummary: args.evidenceSummary,
-      additionalComments: args.additionalComments,
+      reinforcementIndicator: args.reinforcementIndicator,
+      refinementIndicator: args.refinementIndicator,
       createdAt: now,
       updatedAt: now,
-      organization: user.organization,
     });
 
-    if (args.walkthroughEntries) {
-      for (const entry of args.walkthroughEntries) {
-        await ctx.db.insert("walkthroughEntries", {
-          walkthroughId,
-          indicatorAcronym: entry.indicatorAcronym,
-          type: entry.type,
-          comment: entry.comment,
-          createdAt: now,
-        });
-      }
+    for (const entry of args.walkthroughEntries) {
+      await ctx.db.insert("walkthroughEntries", {
+        walkthroughId,
+        indicatorAcronym: entry.indicatorAcronym,
+        type: entry.type,
+        aiFeedback: entry.aiFeedback,
+        createdAt: now,
+      });
     }
 
     return walkthroughId;

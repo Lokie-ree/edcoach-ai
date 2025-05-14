@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,27 +27,23 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import louisianaEducatorRubric from "@/data/louisiana-educator-rubric.json";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
-import { Label } from "@/components/ui/label";
-import { Rubric, RubricDomain, RubricIndicator } from "@/types/louisianaEducatorRubric";
 
-export function InformalWalkthroughStep() {
+// Explicitly type the prop
+interface InformalWalkthroughStepProps {
+  onSubmit?: (payload: any) => Promise<void>;
+}
+
+export function InformalWalkthroughStep({ onSubmit: parentOnSubmit }: InformalWalkthroughStepProps) {
   const teachers = useQuery(api.teachers.list);
-  const { control } = useFormContext();
+  const createWalkthrough = useMutation(api.walkthroughs.createWalkthroughAndEntries);
+  const generateFeedback = useAction(api.aiFeedback.generateWalkthroughFeedback);
+  const { control, setValue, watch, getValues } = useFormContext();
 
-  const indicators = useMemo(() => {
-    const INSTRUCTION_DOMAINS = ["INSTRUCTION", "PLANNING", "ENVIRONMENT"];
-    return (louisianaEducatorRubric as Rubric).domains
-      .filter((domain: RubricDomain) => INSTRUCTION_DOMAINS.includes(domain.domain_name))
-      .flatMap((domain: RubricDomain) =>
-        domain.indicators.map((indicator: RubricIndicator) => ({
-          value: indicator.indicator_code,
-          label: `${indicator.indicator_name} (${indicator.indicator_code})`,
-        })),
-      );
-  }, []);
+  const rubricData = useQuery(api.rubrics.listRubricWithIndicators);
+  const rubricDomains = rubricData ? rubricData.domains : [];
+  const allIndicators = rubricDomains.flatMap((domain: any) => domain.indicators);
 
   return (
     <div className="space-y-8">
@@ -116,81 +112,57 @@ export function InformalWalkthroughStep() {
         )}
       />
 
-      {/* Reinforcement Indicator (single select with radio) */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Reinforcement Indicator</h3>
-        <FormField
-          control={control}
-          name="reinforcementIndicator"
-          render={({ field }) => (
-            <FormItem>
+      {/* Reinforcement Indicator (single select dropdown) */}
+      <FormField
+        control={control}
+        name="reinforcementIndicator"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Reinforcement Indicator</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-between">
-                      {field.value
-                        ? indicators.find((o) => o.value === field.value)?.label
-                        : "Select one indicator to reinforce"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64">
-                    {indicators.map((option) => (
-                      <div key={option.value} className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          checked={field.value === option.value}
-                          onChange={() => field.onChange(option.value)}
-                          id={option.value + "-reinforcement"}
-                        />
-                        <Label htmlFor={option.value + "-reinforcement"}>{option.label}</Label>
-                      </div>
-                    ))}
-                  </PopoverContent>
-                </Popover>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an indicator to reinforce" />
+                </SelectTrigger>
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+              <SelectContent>
+                {allIndicators.map((indicator) => (
+                  <SelectItem key={indicator.indicator_code} value={indicator.indicator_code}>
+                    {indicator.indicator_name} ({indicator.indicator_code})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-      {/* Refinement Indicator (single select with radio) */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Refinement Indicator</h3>
-        <FormField
-          control={control}
-          name="refinementIndicator"
-          render={({ field }) => (
-            <FormItem>
+      {/* Refinement Indicator (single select dropdown) */}
+      <FormField
+        control={control}
+        name="refinementIndicator"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Refinement Indicator</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-between">
-                      {field.value
-                        ? indicators.find((o) => o.value === field.value)?.label
-                        : "Select one indicator to refine"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64">
-                    {indicators.map((option) => (
-                      <div key={option.value} className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          checked={field.value === option.value}
-                          onChange={() => field.onChange(option.value)}
-                          id={option.value + "-refinement"}
-                        />
-                        <Label htmlFor={option.value + "-refinement"}>{option.label}</Label>
-                      </div>
-                    ))}
-                  </PopoverContent>
-                </Popover>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an indicator to refine" />
+                </SelectTrigger>
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+              <SelectContent>
+                {allIndicators.map((indicator) => (
+                  <SelectItem key={indicator.indicator_code} value={indicator.indicator_code}>
+                    {indicator.indicator_name} ({indicator.indicator_code})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       {/* Evidence Summary (required) */}
       <FormField
@@ -204,25 +176,6 @@ export function InformalWalkthroughStep() {
                 placeholder="Enter your overall notes and observations for this walkthrough..."
                 className="resize-none"
                 required
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      {/* Additional Comments (optional) */}
-      <FormField
-        control={control}
-        name="additionalComments"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Additional Comments (Optional)</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="Share any additional feedback..."
-                className="resize-none"
                 {...field}
               />
             </FormControl>

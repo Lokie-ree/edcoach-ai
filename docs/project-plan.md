@@ -32,8 +32,8 @@ EdCoach AI is an AI-powered instructional coaching and feedback platform designe
 #### Frontend
 - **Framework:** Next.js with React and TypeScript
 - **UI Component Libraries:**
-  - React-bits UI (primary design system)
-  - ShadCn components (supplementary)
+  - **shadcn** (primary design system)
+  - **React-bits** (supplementary components)
 - **Styling:** Tailwind CSS
 - **Animation:** Framer Motion
 
@@ -204,16 +204,14 @@ EdCoach AI uses a dual-system approach:
   observerId: v.id("users"),
   walkthroughDate: v.number(),
   status: v.union(v.literal("draft"), v.literal("completed")),
-  reinforcementIndicators: v.array(v.string()),
-  refinementIndicators: v.array(v.string()),
+  reinforcementIndicator: v.string(),
+  refinementIndicator: v.string(),
   evidenceSummary: v.string(),
-  additionalComments: v.optional(v.string()),
   createdAt: v.number(),
   updatedAt: v.number(),
-  organization: v.string(),
 }
 ```
-**Indexes:** `by_observer`, `by_teacher`, `by_organization`, `by_status`
+**Indexes:** `by_observer`, `by_teacher`, `by_status`
 
 #### walkthroughEntries
 ```typescript
@@ -221,7 +219,7 @@ EdCoach AI uses a dual-system approach:
   walkthroughId: v.id("walkthroughs"),
   indicatorAcronym: v.string(),
   type: v.union(v.literal("reinforcement"), v.literal("refinement")),
-  comment: v.string(),
+  aiFeedback: v.optional(v.string()),
   createdAt: v.number(),
 }
 ```
@@ -276,7 +274,7 @@ EdCoach AI uses a dual-system approach:
 
 #### Informal Walkthrough Workflow (MVP Only)
 - **Teacher Selection:** Select teacher for walkthrough
-- **Walkthrough Form:** Quickly choose 1-3 focus indicators from the LER, jot down brief evidence notes
+- **Walkthrough Form:** Select exactly one focus indicator for reinforcement and one for refinement from the LER, jot down brief evidence notes (no per-indicator comments)
 - **Draft Management:** Manage saved walkthrough drafts
 - **AI Feedback Generation:** Generate concise, targeted feedback suggestions aligned with evidence and selected indicators
 - **Finalization & Submission:** Quickly review and finalize feedback before sharing

@@ -4,7 +4,7 @@ import { z } from "zod";
 const baseObservationSchema = z.object({
   teacherId: z.string({
     required_error: "Teacher selection is required",
-  }).min(1, "Teacher selection is required"), // Ensure not empty string
+  }).min(1, "Teacher selection is required"),
   observationDate: z.date({
     required_error: "Observation date is required",
   }),
@@ -37,31 +37,12 @@ export const formalRubricStepSchema = z.object({
 });
 
 // Schema for the main Informal Walkthrough step
-export const informalWalkthroughStepSchema = baseObservationSchema.extend({
-  reinforcementIndicators: z.array(z.string()).min(1, {
-    message: "At least one reinforcement indicator must be selected",
-  }).max(3, {
-    message: "Maximum of 3 reinforcement indicators allowed",
-  }),
-  refinementIndicators: z.array(z.string()).min(1, {
-    message: "At least one refinement indicator must be selected",
-  }).max(3, {
-    message: "Maximum of 3 refinement indicators allowed",
-  }),
-  reinforcementComments: z.record(z.string(), z.string().min(1, "Comment is required for selected indicator.").max(1000, {
-    message: "Comment cannot exceed 1000 characters",
-  })).refine(val => Object.keys(val).length > 0, { // Ensure comments for selected indicators
-    message: "Comments are required for all selected reinforcement indicators."
-  }),
-  refinementComments: z.record(z.string(), z.string().min(1, "Comment is required for selected indicator.").max(1000, {
-    message: "Comment cannot exceed 1000 characters",
-  })).refine(val => Object.keys(val).length > 0, { // Ensure comments for selected indicators
-    message: "Comments are required for all selected refinement indicators."
-  }),
+export const informalWalkthroughStepSchema = z.object({
+  teacherId: z.string().min(1, "Teacher selection is required"),
+  observationDate: z.union([z.number(), z.string(), z.date()]),
+  reinforcementIndicator: z.string().min(1, "Reinforcement indicator is required"),
+  refinementIndicator: z.string().min(1, "Refinement indicator is required"),
   evidenceSummary: z.string().min(1, { message: "Evidence summary is required" }),
-  additionalComments: z.string().max(2000, {
-    message: "Additional comments cannot exceed 2000 characters",
-  }).optional(),
 });
 
 
@@ -81,23 +62,23 @@ export const formalObservationSchema = baseObservationSchema.extend({
   rubricResponses: z.record(z.string(), z.number()), 
 });
 
+// Walkthrough entry schema (updated, no comment field)
 // Schema specific to walkthroughs (for final submission)
-export const walkthroughSchema = baseObservationSchema.extend({
+export const walkthroughSchema = z.object({
   type: z.literal("walkthrough"),
-  reinforcementIndicators: z.array(z.string()).min(1, {
-    message: "At least one reinforcement indicator must be selected",
-  }).max(3, {
-    message: "Maximum of 3 reinforcement indicators allowed",
-  }),
-  refinementIndicators: z.array(z.string()).min(1, {
-    message: "At least one refinement indicator must be selected",
-  }).max(3, {
-    message: "Maximum of 3 refinement indicators allowed",
-  }),
+  teacherId: z.string().min(1, "Teacher selection is required"),
+  walkthroughDate: z.union([z.number(), z.string(), z.date()]),
+  status: z.enum(["draft", "completed"]),
   evidenceSummary: z.string().min(1, { message: "Evidence summary is required" }),
-  additionalComments: z.string().max(2000, {
-    message: "Additional comments cannot exceed 2000 characters",
-  }).optional(),
+  reinforcementIndicator: z.string().min(1, "Reinforcement indicator is required"),
+  refinementIndicator: z.string().min(1, "Refinement indicator is required"),
+  walkthroughEntries: z.array(
+    z.object({
+      indicatorAcronym: z.string(),
+      type: z.enum(["reinforcement", "refinement"]),
+      aiFeedback: z.string().optional(),
+    })
+  ).length(2, "You must provide both a reinforcement and a refinement entry"),
 });
 
 // Union type to discriminate between the two types (for final submission)

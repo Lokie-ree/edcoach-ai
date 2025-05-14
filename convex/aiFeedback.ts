@@ -109,3 +109,76 @@ Instructions:
   },
 });
 
+export const generateWalkthroughFeedback = action({
+  args: {
+    reinforcementIndicator: v.object({
+      indicatorAcronym: v.string(),
+      indicatorName: v.string(),
+      overview: v.optional(v.string()),
+    }),
+    refinementIndicator: v.object({
+      indicatorAcronym: v.string(),
+      indicatorName: v.string(),
+      overview: v.optional(v.string()),
+    }),
+    evidenceSummary: v.string(),
+  },
+  returns: v.string(),
+  handler: async (ctx, args) => {
+    const prompt = `You are an instructional coach. Based on the following context, generate a single, high-quality feedback summary for the teacher. Reference both the reinforcement and refinement indicators and the evidence summary.\n\nReinforcement Indicator: ${args.reinforcementIndicator.indicatorName} (${args.reinforcementIndicator.indicatorAcronym}) - ${args.reinforcementIndicator.overview ?? ""}\nRefinement Indicator: ${args.refinementIndicator.indicatorName} (${args.refinementIndicator.indicatorAcronym}) - ${args.refinementIndicator.overview ?? ""}\nEvidence Summary: ${args.evidenceSummary}\n\nInstructions:\n- Write a concise, professional summary that highlights what the teacher did well (reinforcement) and one area for growth (refinement).\n- Reference the indicator language.\n- Use supportive, actionable language.\n- Limit to 3-5 sentences.`;
+
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1-mini-2025-04-14",
+      messages: [{ role: "system", content: prompt }],
+      max_tokens: 400,
+      temperature: 0.2,
+      top_p: 1.0,
+    });
+
+    // Get userId from Clerk identity
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, { clerkId: identity.subject });
+    if (!user) throw new Error("User not found");
+    const userId = user._id;
+
+    // Token/cost tracking (same as before)
+    const promptTokens = response.usage?.prompt_tokens ?? 0;
+    const completionTokens = response.usage?.completion_tokens ?? 0;
+    const totalTokens = response.usage?.total_tokens ?? 0;
+    const PROMPT_COST_PER_1K = 0.00040;
+    const CACHED_PROMPT_COST_PER_1K = 0.00010;
+    const COMPLETION_COST_PER_1K = 0.00160;
+    const isCached = false; // No caching for this action
+    const promptCost = isCached ? (promptTokens * CACHED_PROMPT_COST_PER_1K / 1000) : (promptTokens * PROMPT_COST_PER_1K / 1000);
+    const completionCost = completionTokens * COMPLETION_COST_PER_1K / 1000;
+    const totalCost = promptCost + completionCost;
+
+    // Log usage
+    await ctx.runMutation(internal.aiFeedbackMutations.logTokenUsage, {
+      userId,
+      action: "generateWalkthroughFeedback",
+      model: "gpt-4.1-mini-2025-04-14",
+      promptTokens,
+      completionTokens,
+      totalTokens,
+      cost: totalCost,
+      isCached,
+      timestamp: Date.now(),
+      metadata: {
+        reinforcementIndicator: args.reinforcementIndicator.indicatorAcronym,
+        refinementIndicator: args.refinementIndicator.indicatorAcronym,
+      },
+    });
+
+    // Check for cost alerts
+    await ctx.runMutation(internal.aiFeedbackMutations.checkCostAlerts, {
+      userId,
+      cost: totalCost,
+    });
+
+    return response.choices[0].message.content ?? "";
+  },
+});
+

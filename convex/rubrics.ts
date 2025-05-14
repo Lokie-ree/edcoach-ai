@@ -1,5 +1,6 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { query } from "./_generated/server";
 
 export const insert = mutation({
   args: {
@@ -14,5 +15,40 @@ export const insert = mutation({
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("rubrics", args);
+  },
+});
+
+export const listRubricWithIndicators = query({
+  args: {},
+  handler: async (ctx) => {
+    // Get the first rubric (or implement logic for active/default rubric)
+    const rubric = await ctx.db.query("rubrics").first();
+    if (!rubric) return null;
+    // Fetch all indicators for this rubric (by rubricName)
+    const indicators = await ctx.db
+      .query("rubricIndicators")
+      .filter((q) => q.eq(q.field("rubricName"), rubric.name))
+      .collect();
+    // Group indicators by domain
+    const domainsMap: Record<string, any> = {};
+    for (const indicator of indicators) {
+      if (!domainsMap[indicator.domain]) {
+        domainsMap[indicator.domain] = {
+          domain_name: indicator.domain,
+          indicators: [],
+        };
+      }
+      domainsMap[indicator.domain].indicators.push(indicator);
+    }
+    const domains = Object.values(domainsMap);
+    return {
+      rubric: {
+        name: rubric.name,
+        description: rubric.description,
+        version: rubric.version,
+        isStandard: rubric.isStandard,
+      },
+      domains,
+    };
   },
 });

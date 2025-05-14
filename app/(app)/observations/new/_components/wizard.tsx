@@ -5,6 +5,7 @@ import { TypeStep } from "./type-step";
 import { DetailsStep } from "./details-step";
 import { RubricStep } from "./rubric-step";
 import { InformalWalkthroughStep } from "./informal-walkthrough-step";
+import { AIFeedbackReviewStep } from "./ai-feedback-review-step";
 import { StepperWrapper } from "@/components/reactbits/Components/Stepper/StepperWrapper";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
@@ -31,8 +32,8 @@ export type ObservationType = "formal" | "walkthrough";
 type ObservationFormData = Omit<z.infer<typeof observationSchema>, 'observationDate' | 'teacherId'> & FieldValues & {
   teacherId?: string | Id<'teachers'>;
   observationDate?: number | string | Date;
-  reinforcementIndicators?: string[];
-  refinementIndicators?: string[];
+  reinforcementIndicator: string;
+  refinementIndicator?: string;
   additionalComments?: string;
   rubricResponses?: Record<string, Record<string, number>> | Record<string, never>;
   subject?: string;
@@ -44,18 +45,18 @@ type ObservationFormData = Omit<z.infer<typeof observationSchema>, 'observationD
 };
 
 // Add type for createObservationAndResponses mutation args
-export type CreateObservationArgs = {
-  teacherId: Id<"teachers">;
-  subject: string;
-  gradeLevels: string[];
-  observationDate: number;
-  rubricResponses?: Record<string, number>;
-  walkthroughEntries?: {
-    indicatorAcronym: string;
-    type: "reinforcement" | "refinement";
-    comment: string;
-  }[];
-};
+// export type CreateObservationArgs = {
+//   teacherId: Id<"teachers">;
+//   subject: string;
+//   gradeLevels: string[];
+//   observationDate: number;
+//   rubricResponses?: Record<string, number>;
+//   walkthroughEntries?: {
+//     indicatorAcronym: string;
+//     type: "reinforcement" | "refinement";
+//     comment: string;
+//   }[];
+// };
 
 type Step = {
   title: string;
@@ -63,62 +64,45 @@ type Step = {
 };
 
 // Helper function to prepare data for mutation
-const prepareObservationPayload = (values: ObservationFormData) => {
-  if (values.type === "walkthrough") {
-    const walkthroughEntries: {
-      indicatorAcronym: string;
-      type: "reinforcement" | "refinement";
-      comment: string;
-    }[] = [];
-
-    const reinforcementIndicators = values.reinforcementIndicators || [];
-    const refinementIndicators = values.refinementIndicators || [];
-
-    for (const indicator of reinforcementIndicators) {
-      walkthroughEntries.push({
-        indicatorAcronym: indicator,
-        type: "reinforcement",
-        comment: "",
-      });
-    }
-
-    for (const indicator of refinementIndicators) {
-      walkthroughEntries.push({
-        indicatorAcronym: indicator,
-        type: "refinement",
-        comment: "",
-      });
-    }
-
-    return {
-      teacherId: values.teacherId as Id<"teachers">,
-      observationDate: values.observationDate,
-      walkthroughEntries,
-      subject: "",
-      gradeLevels: [],
-      rubricResponses: undefined,
-    };
-  } else {
-    // Transform rubric responses from Record<string, Record<string, number>> to Record<string, number>
-    const transformedRubricResponses = values.rubricResponses
-      ? Object.entries(values.rubricResponses as Record<string, Record<string, number>>).reduce((acc, [domain, indicators]) => {
-          Object.entries(indicators).forEach(([indicator, rating]) => {
-            acc[`${domain}.${indicator}`] = rating;
-          });
-          return acc;
-        }, {} as Record<string, number>)
-      : undefined;
-
-    return {
-      teacherId: String(values.teacherId),
-      observationDate: Number(values.observationDate),
-      subject: values.subject ?? "",
-      gradeLevels: Array.isArray(values?.gradeLevels) ? values.gradeLevels : [],
-      rubricResponses: transformedRubricResponses,
-      walkthroughEntries: [],
-    };
-  }
-};
+// const prepareObservationPayload = (values: ObservationFormData) => {
+//   if (values.type === "walkthrough") {
+//     const walkthroughEntries: {
+//       indicatorAcronym: string;
+//       type: "reinforcement" | "refinement";
+//       aiFeedback?: string;
+//     }[] = [];
+//
+//     if (values.reinforcementIndicator) {
+//       walkthroughEntries.push({
+//         indicatorAcronym: values.reinforcementIndicator,
+//         type: "reinforcement",
+//       });
+//     }
+//     if (values.refinementIndicator) {
+//       walkthroughEntries.push({
+//         indicatorAcronym: values.refinementIndicator,
+//         type: "refinement",
+//       });
+//     }
+//
+//     // Ensure walkthroughDate is a number
+//     const rawWalkthroughDate = values.observationDate;
+//     const walkthroughDate = typeof rawWalkthroughDate === "object" && rawWalkthroughDate !== null && typeof rawWalkthroughDate.getTime === "function"
+//       ? rawWalkthroughDate.getTime()
+//       : Number(rawWalkthroughDate);
+//
+//     return {
+//       teacherId: values.teacherId as Id<"teachers">,
+//       walkthroughDate,
+//       walkthroughEntries,
+//       reinforcementIndicator: values.reinforcementIndicator || "",
+//       refinementIndicator: values.refinementIndicator || "",
+//       evidenceSummary: values.evidenceSummary || "",
+//       status: "completed" as const,
+//     };
+//   }
+//   // ... (optionally comment out or remove formal observation logic for MVP)
+// };
 
 export function Wizard({ organization }: { organization?: string }) {
   const methods = useForm<ObservationFormData>({
@@ -129,9 +113,8 @@ export function Wizard({ organization }: { organization?: string }) {
       subject: undefined,
       gradeLevels: [],
       rubricResponses: undefined,
-      reinforcementIndicators: [],
-      refinementIndicators: [],
-      additionalComments: undefined,
+      reinforcementIndicator: "",
+      refinementIndicator: "",
     },
   });
   const { setError, clearErrors, trigger, getValues } = methods;
@@ -160,8 +143,8 @@ export function Wizard({ organization }: { organization?: string }) {
     } else if (selectedType === "walkthrough") {
       if (currentStep === 1) {
         fieldsToValidate = [
-          "teacherId", "observationDate", "reinforcementIndicators", 
-          "refinementIndicators", "evidenceSummary"
+          "teacherId", "observationDate", "reinforcementIndicator", 
+          "refinementIndicator", "evidenceSummary"
         ];
         const currentValues = getValues();
         const result = informalWalkthroughStepSchema.safeParse(currentValues);
@@ -265,15 +248,29 @@ export function Wizard({ organization }: { organization?: string }) {
       const sanitizedValues = sanitizeObject(valuesToSanitize);
       if (isWalkthrough) {
         // --- FULL ZOD VALIDATION FOR WALKTHROUGH ---
+        // Build walkthroughEntries array for validation
+        const walkthroughEntries = [
+          {
+            indicatorAcronym: sanitizedValues.reinforcementIndicator as string,
+            type: "reinforcement" as const,
+            aiFeedback: sanitizedValues.aiFeedbackSummary || "",
+          },
+          {
+            indicatorAcronym: sanitizedValues.refinementIndicator as string,
+            type: "refinement" as const,
+            aiFeedback: sanitizedValues.aiFeedbackSummary || "",
+          },
+        ];
         // Prepare the object for validation
         const walkthroughValidationObj = {
           type: "walkthrough",
           teacherId: sanitizedValues.teacherId || "",
-          observationDate: new Date(observationDateValue),
-          reinforcementIndicators: sanitizedValues.reinforcementIndicators || [],
-          refinementIndicators: sanitizedValues.refinementIndicators || [],
+          walkthroughDate: observationDateValue,
+          status: "completed",
           evidenceSummary: sanitizedValues.evidenceSummary || "",
-          additionalComments: sanitizedValues.additionalComments || undefined,
+          reinforcementIndicator: sanitizedValues.reinforcementIndicator || "",
+          refinementIndicator: sanitizedValues.refinementIndicator || "",
+          walkthroughEntries,
         };
         console.log("walkthroughValidationObj", walkthroughValidationObj);
         const validationResult = walkthroughSchema.safeParse(walkthroughValidationObj);
@@ -294,35 +291,13 @@ export function Wizard({ organization }: { organization?: string }) {
           return;
         }
         // --- END FULL ZOD VALIDATION ---
-        const walkthroughEntries: {
-          indicatorAcronym: string;
-          type: "reinforcement" | "refinement";
-          comment: string;
-        }[] = [];
-        for (const indicator of sanitizedValues.reinforcementIndicators || []) {
-          walkthroughEntries.push({
-            indicatorAcronym: indicator,
-            type: "reinforcement",
-            comment: sanitizedValues.reinforcementComments?.[indicator] || "",
-          });
-        }
-        for (const indicator of sanitizedValues.refinementIndicators || []) {
-          walkthroughEntries.push({
-            indicatorAcronym: indicator,
-            type: "refinement",
-            comment: sanitizedValues.refinementComments?.[indicator] || "",
-          });
-        }
-        const org = organization || "";
         await createWalkthrough({
           teacherId: sanitizedValues.teacherId as Id<"teachers">,
           walkthroughDate: observationDateValue,
           status: "completed",
-          reinforcementIndicators: sanitizedValues.reinforcementIndicators || [],
-          refinementIndicators: sanitizedValues.refinementIndicators || [],
+          reinforcementIndicator: sanitizedValues.reinforcementIndicator || "",
+          refinementIndicator: sanitizedValues.refinementIndicator || "",
           evidenceSummary: sanitizedValues.evidenceSummary || "",
-          additionalComments: sanitizedValues.additionalComments || undefined,
-          organization: org,
           walkthroughEntries,
         });
         toast({
@@ -334,20 +309,30 @@ export function Wizard({ organization }: { organization?: string }) {
         return;
       }
       // 3. Formal observation: Prepare payload using timestamp
-      const payloadInput = {
-        ...values,
-        teacherId: values.teacherId as Id<'teachers'>,
-        observationDate: observationDateValue,
-      };
-      const payload = prepareObservationPayload(payloadInput);
-      console.log("Submitting payload:", payload);
-      await createObservation(payload as CreateObservationArgs);
-      toast({
-        title: "Success",
-        description: "Observation created successfully",
-        variant: "success",
-      });
-      router.push("/dashboard");
+      // if (!isWalkthrough) {
+      //   const payloadInput = {
+      //     ...values,
+      //     teacherId: values.teacherId as Id<'teachers'>,
+      //     observationDate: observationDateValue,
+      //   };
+      //   const payload = prepareObservationPayload(payloadInput);
+      //   if (!payload) {
+      //     toast({
+      //       title: "Validation Error",
+      //       description: "Could not build a valid observation payload.",
+      //       variant: "destructive",
+      //     });
+      //     return;
+      //   }
+      //   console.log("Submitting payload:", payload);
+      //   await createObservation(payload);
+      //   toast({
+      //     title: "Success",
+      //     description: "Observation created successfully",
+      //     variant: "success",
+      //   });
+      //   router.push("/dashboard");
+      // }
     } catch (error) {
       handleError(error, "Failed to create observation/walkthrough. Please try again.");
     }
@@ -371,6 +356,15 @@ export function Wizard({ organization }: { organization?: string }) {
               <div className="space-y-4 px-6">
                 <h2 className="text-2xl font-bold">Informal Walkthrough</h2>
                 <InformalWalkthroughStep />
+              </div>
+            ),
+          },
+          {
+            title: "AI Feedback Review",
+            component: (
+              <div className="space-y-4 px-6">
+                <h2 className="text-2xl font-bold">AI Feedback Review</h2>
+                <AIFeedbackReviewStep />
               </div>
             ),
           },
