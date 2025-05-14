@@ -104,7 +104,7 @@ type Step = {
 //   // ... (optionally comment out or remove formal observation logic for MVP)
 // };
 
-export function Wizard({ organization }: { organization?: string }) {
+export function Wizard() {
   const methods = useForm<ObservationFormData>({
     defaultValues: {
       type: undefined,
@@ -123,9 +123,6 @@ export function Wizard({ organization }: { organization?: string }) {
   const [selectedType, setSelectedType] = useState<ObservationType | null>(null);
   const router = useRouter();
   const { toast } = useToast();
-  const createObservation = useMutation(
-    api.observations.createObservationAndResponses,
-  );
   const createWalkthrough = useMutation(
     api.walkthroughs.createWalkthroughAndEntries,
   );

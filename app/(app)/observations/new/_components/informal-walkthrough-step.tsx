@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { useQuery, useMutation, useAction } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,22 +28,17 @@ import { Calendar } from "@/components/ui/calendar";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { useMemo } from "react";
 
-// Explicitly type the prop
-interface InformalWalkthroughStepProps {
-  onSubmit?: (payload: any) => Promise<void>;
-}
+type RubricDomain = { domain_name: string; indicators: RubricIndicator[] };
+type RubricIndicator = { indicator_code: string; indicator_name: string; [key: string]: unknown };
 
-export function InformalWalkthroughStep({ onSubmit: parentOnSubmit }: InformalWalkthroughStepProps) {
+export function InformalWalkthroughStep() {
   const teachers = useQuery(api.teachers.list);
-  const createWalkthrough = useMutation(api.walkthroughs.createWalkthroughAndEntries);
-  const generateFeedback = useAction(api.aiFeedback.generateWalkthroughFeedback);
-  const { control, setValue, watch, getValues } = useFormContext();
+  const { control } = useFormContext();
 
   const rubricData = useQuery(api.rubrics.listRubricWithIndicators);
-  const rubricDomains = rubricData ? rubricData.domains : [];
-  const allIndicators = rubricDomains.flatMap((domain: any) => domain.indicators);
+  const rubricDomains: RubricDomain[] = rubricData ? rubricData.domains : [];
+  const allIndicators: RubricIndicator[] = rubricDomains.flatMap((domain: RubricDomain) => domain.indicators);
 
   return (
     <div className="space-y-8">

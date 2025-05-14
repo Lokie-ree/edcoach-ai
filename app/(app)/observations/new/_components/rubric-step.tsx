@@ -10,6 +10,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
+type RubricDomain = { domain_name: string; indicators: RubricIndicator[] };
+type RubricIndicator = { indicator_code: string; indicator_name: string; [key: string]: unknown };
+
 export function RubricStep() {
   const { control, watch } = useFormContext();
   const [expandedDomains, setExpandedDomains] = useState<string[]>([]);
@@ -25,10 +28,10 @@ export function RubricStep() {
     );
   };
 
-  const completedIndicators = rubricData.domains.reduce((count: number, domain: any) => {
+  const completedIndicators = rubricData.domains.reduce((count: number, domain: RubricDomain) => {
     return (
       count +
-      domain.indicators.filter((indicator: any) => {
+      domain.indicators.filter((indicator: RubricIndicator) => {
         const value = watch(`rubric.${domain.domain_name}.${indicator.indicator_name}`);
         return value !== undefined && value !== null;
       }).length
@@ -36,7 +39,7 @@ export function RubricStep() {
   }, 0);
 
   const totalIndicators = rubricData.domains.reduce(
-    (count: number, domain: any) => count + domain.indicators.length,
+    (count: number, domain: RubricDomain) => count + domain.indicators.length,
     0,
   );
 
@@ -56,7 +59,7 @@ export function RubricStep() {
 
       <ScrollArea className="h-[270px] rounded-md border">
         <div className="p-4 space-y-6">
-          {rubricData.domains.map((domain: any) => {
+          {rubricData.domains.map((domain: RubricDomain) => {
             const isExpanded = expandedDomains.includes(domain.domain_name);
             return (
               <div key={domain.domain_name} className="space-y-4">
@@ -76,7 +79,7 @@ export function RubricStep() {
 
                 {isExpanded && (
                   <div className="space-y-4 pl-6">
-                    {domain.indicators.map((indicator: any) => (
+                    {domain.indicators.map((indicator: RubricIndicator) => (
                       <div key={indicator.indicator_name} className="space-y-2">
                         <Label className="text-sm font-medium">
                           {indicator.indicator_name}

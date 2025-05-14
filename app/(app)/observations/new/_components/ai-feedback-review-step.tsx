@@ -6,7 +6,6 @@ import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 export function AIFeedbackReviewStep() {
@@ -56,7 +55,7 @@ export function AIFeedbackReviewStep() {
             setValue("aiFeedbackSummary", result); // Store in form context for submission
           }
         }
-      } catch (e) {
+      } catch {
         setError("Failed to generate feedback. Please try again.");
       } finally {
         if (!cancelled) setLoading(false);
@@ -70,9 +69,9 @@ export function AIFeedbackReviewStep() {
   }, [reinforcementIndicator, refinementIndicator, evidenceSummary]);
 
   // Update form context on edit
-  function handleEdit(value: string) {
-    setFeedback(value);
-    setValue("aiFeedbackSummary", value);
+  const handleEdit = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setFeedback(event.target.value);
+    setValue("aiFeedbackSummary", event.target.value);
   }
 
   if (!reinforcementIndicator || !refinementIndicator) {
@@ -95,7 +94,7 @@ export function AIFeedbackReviewStep() {
             <Textarea
               className="min-h-[120px]"
               value={feedback}
-              onChange={(e) => handleEdit(e.target.value)}
+              onChange={handleEdit}
               placeholder="AI-generated feedback will appear here. You can edit before submitting."
             />
           )}
