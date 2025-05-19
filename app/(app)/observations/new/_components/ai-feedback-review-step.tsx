@@ -8,32 +8,63 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
+type IndicatorContext = {
+  indicator_code: string;
+  indicator_name: string;
+  overview?: string;
+  key_terms?: string | string[];
+  effective_practice?: string;
+  development_evidence?: string;
+  student_centered_evidence?: string | string[];
+};
+
 export function AIFeedbackReviewStep() {
   const { watch, setValue } = useFormContext();
   const evidenceSummary: string = watch("evidenceSummary");
   const reinforcementIndicator: string = watch("reinforcementIndicator") || "";
   const refinementIndicator: string = watch("refinementIndicator") || "";
-  const [feedback, setFeedback] = useState<string>("");
+  const [reinforcementFeedback, setReinforcementFeedback] = useState<string>("");
+  const [refinementFeedback, setRefinementFeedback] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const generateWalkthroughFeedback = useAction(api.aiFeedback.generateWalkthroughFeedback);
+  const generateSplitWalkthroughFeedback = useAction(api.aiFeedback.generateSplitWalkthroughFeedback);
   const rubricData = useQuery(api.rubrics.listRubricWithIndicators);
 
   // Fetch indicator details from Convex rubric query
-  function getIndicatorDetails(code: string): { indicatorAcronym: string; indicatorName: string; overview: string } {
-    if (!rubricData) return { indicatorAcronym: code, indicatorName: code, overview: "" };
+  function getIndicatorDetails(code: string): IndicatorContext {
+    if (!rubricData) return {
+      indicator_code: code,
+      indicator_name: code,
+      overview: "",
+      key_terms: "",
+      effective_practice: "",
+      development_evidence: "",
+      student_centered_evidence: "",
+    };
     for (const domain of rubricData.domains) {
       for (const indicator of domain.indicators) {
         if (indicator.indicator_code === code) {
           return {
-            indicatorAcronym: indicator.indicator_code,
-            indicatorName: indicator.indicator_name,
+            indicator_code: indicator.indicator_code,
+            indicator_name: indicator.indicator_name,
             overview: indicator.overview || "",
+            key_terms: indicator.key_terms || "",
+            effective_practice: indicator.effective_practice || "",
+            development_evidence: indicator.development_evidence || "",
+            student_centered_evidence: indicator.student_centered_evidence || "",
           };
         }
       }
     }
-    return { indicatorAcronym: code, indicatorName: code, overview: "" };
+    return {
+      indicator_code: code,
+      indicator_name: code,
+      overview: "",
+      key_terms: "",
+      effective_practice: "",
+      development_evidence: "",
+      student_centered_evidence: "",
+    };
   }
 
   useEffect(() => {
@@ -45,14 +76,17 @@ export function AIFeedbackReviewStep() {
         if (reinforcementIndicator && refinementIndicator && evidenceSummary) {
           const reinforcement = getIndicatorDetails(reinforcementIndicator);
           const refinement = getIndicatorDetails(refinementIndicator);
-          const result = await generateWalkthroughFeedback({
+          const result = await generateSplitWalkthroughFeedback({
             reinforcementIndicator: reinforcement,
             refinementIndicator: refinement,
             evidenceSummary,
           });
           if (!cancelled) {
-            setFeedback(result);
-            setValue("aiFeedbackSummary", result); // Store in form context for submission
+            setReinforcementFeedback(result.reinforcement);
+            setRefinementFeedback(result.refinement);
+            setValue("aiFeedbackReinforcement", result.reinforcement);
+            setValue("aiFeedbackRefinement", result.refinement);
+            setValue("aiFeedbackSummary", result.reinforcement + "\n\n" + result.refinement); // For backward compatibility
           }
         }
       } catch {
@@ -69,10 +103,14 @@ export function AIFeedbackReviewStep() {
   }, [reinforcementIndicator, refinementIndicator, evidenceSummary]);
 
   // Update form context on edit
-  const handleEdit = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setFeedback(event.target.value);
-    setValue("aiFeedbackSummary", event.target.value);
-  }
+  const handleReinforcementEdit = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setReinforcementFeedback(event.target.value);
+    setValue("aiFeedbackReinforcement", event.target.value);
+  };
+  const handleRefinementEdit = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setRefinementFeedback(event.target.value);
+    setValue("aiFeedbackRefinement", event.target.value);
+  };
 
   if (!reinforcementIndicator || !refinementIndicator) {
     return <div className="text-center text-muted-foreground py-8">Please select both a reinforcement and a refinement indicator.</div>;
@@ -82,20 +120,40 @@ export function AIFeedbackReviewStep() {
     <div className="space-y-6">
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>AI Feedback Summary</CardTitle>
+          <CardTitle>AI Feedback: Reinforcement</CardTitle>
         </CardHeader>
         <CardContent>
-          {loading && !feedback ? (
+          {loading && !reinforcementFeedback ? (
             <div className="flex items-center space-x-2 text-muted-foreground">
               <Loader2 className="animate-spin h-5 w-5" />
               <span>Generating feedback...</span>
             </div>
           ) : (
             <Textarea
-              className="min-h-[120px]"
-              value={feedback}
-              onChange={handleEdit}
-              placeholder="AI-generated feedback will appear here. You can edit before submitting."
+              className="min-h-[80px]"
+              value={reinforcementFeedback}
+              onChange={handleReinforcementEdit}
+              placeholder="AI-generated reinforcement feedback will appear here. You can edit before submitting."
+            />
+          )}
+        </CardContent>
+      </Card>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>AI Feedback: Refinement</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading && !refinementFeedback ? (
+            <div className="flex items-center space-x-2 text-muted-foreground">
+              <Loader2 className="animate-spin h-5 w-5" />
+              <span>Generating feedback...</span>
+            </div>
+          ) : (
+            <Textarea
+              className="min-h-[80px]"
+              value={refinementFeedback}
+              onChange={handleRefinementEdit}
+              placeholder="AI-generated refinement feedback will appear here. You can edit before submitting."
             />
           )}
         </CardContent>

@@ -2,7 +2,7 @@
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 import OpenAI from "openai";
-import { internal } from "./_generated/api";
+import { internal, api } from "./_generated/api";
 
 // Helper stub for caching logic (replace with real implementation)
 async function checkIfCached(prompt: string): Promise<boolean> {
@@ -13,7 +13,15 @@ async function checkIfCached(prompt: string): Promise<boolean> {
 export const generateFeedback = action({
   args: {
     evidence: v.string(),
-    indicator: v.any(),
+    indicator: v.object({
+      indicator_name: v.string(),
+      indicator_code: v.string(),
+      overview: v.optional(v.string()),
+      key_terms: v.optional(v.string()),
+      effective_practice: v.optional(v.string()),
+      development_evidence: v.optional(v.string()),
+      student_centered_evidence: v.optional(v.string()),
+    }),
     promptType: v.union(v.literal("reinforcement"), v.literal("refinement")),
   },
   returns: v.string(),
@@ -24,33 +32,45 @@ export const generateFeedback = action({
     const prompt =
       args.promptType === "reinforcement"
         ? `
-You are an instructional coach. Based on the classroom evidence and the rubric indicator below, generate a concise, positive reinforcement statement for the teacher. Reference the indicator language and be specific.
+You are an expert instructional coaching assistant. Your mission is to generate concise, actionable, and rubric-aligned feedback for K-12 teachers in Louisiana. The feedback must be deeply rooted in the provided Louisiana Educator Rubric (LER) indicator, its detailed explanation, key terms, evidence of student-centered learning, and the observer's notes. Maintain a supportive, encouraging, and growth-oriented coaching tone.
 
-Rubric Indicator:
-"${indicator.indicator_name}" (${indicator.indicator_code}): ${indicator.overview}
+Rubric Indicator Details:
+- Name/Code: "${indicator.indicator_name}" (${indicator.indicator_code})
+- Full Description: "${indicator.overview || ''}"
+- Key Terms: "${indicator.key_terms || ''}"
+- Explanation/Possible Evidence of Effective Practice: "${indicator.effective_practice || ''}"
+- Evidence of Student-Centered Learning: "${indicator.student_centered_evidence || ''}"
 
-Classroom Evidence:
+Observer's Notes:
 "${args.evidence}"
 
 Instructions:
-- Focus on what the teacher did well related to this indicator.
-- Use positive, professional language.
-- Limit to 1-2 sentences.
+- Acknowledge the teacher's strength related to this LER indicator
+- Subtly weave in key terms and concepts from the explanation and student-centered evidence
+- Directly connect to specific positive evidence from the observer's notes
+- Use professional, supportive language
+- Limit to 1-2 sentences
 `
         : `
-You are an instructional coach. Based on the classroom evidence and the rubric indicator below, generate a concise, actionable suggestion for the teacher's growth. Reference the indicator language and be specific.
+You are an expert instructional coaching assistant. Your mission is to generate concise, actionable, and rubric-aligned feedback for K-12 teachers in Louisiana. The feedback must be deeply rooted in the provided Louisiana Educator Rubric (LER) indicator, its detailed explanation, key terms, evidence of student-centered learning, and the observer's notes. Maintain a supportive, encouraging, and growth-oriented coaching tone.
 
-Rubric Indicator:
-"${indicator.indicator_name}" (${indicator.indicator_code}): ${indicator.overview}
+Rubric Indicator Details:
+- Name/Code: "${indicator.indicator_name}" (${indicator.indicator_code})
+- Full Description: "${indicator.overview || ''}"
+- Key Terms: "${indicator.key_terms || ''}"
+- Explanation/Possible Evidence for Development: "${indicator.development_evidence || ''}"
+- Evidence of Student-Centered Learning: "${indicator.student_centered_evidence || ''}"
 
-Classroom Evidence:
+Observer's Notes:
 "${args.evidence}"
 
 Instructions:
-- Focus on a specific area for growth related to this indicator.
-- Suggest one concrete next step.
-- Use supportive, professional language.
-- Limit to 1-2 sentences.
+- Identify an area for growth related to this LER indicator
+- Subtly weave in key terms and concepts from the development evidence and student-centered learning
+- Suggest one specific, observable, and practical strategy the teacher could implement
+- Ensure the strategy aligns with promoting student-centered learning
+- Use supportive, professional language
+- Limit to 1-2 sentences
 `;
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -115,17 +135,58 @@ export const generateWalkthroughFeedback = action({
       indicatorAcronym: v.string(),
       indicatorName: v.string(),
       overview: v.optional(v.string()),
+      keyTerms: v.optional(v.string()),
+      effectivePractice: v.optional(v.string()),
+      studentCenteredEvidence: v.optional(v.string()),
     }),
     refinementIndicator: v.object({
       indicatorAcronym: v.string(),
       indicatorName: v.string(),
       overview: v.optional(v.string()),
+      keyTerms: v.optional(v.string()),
+      developmentEvidence: v.optional(v.string()),
+      studentCenteredEvidence: v.optional(v.string()),
     }),
     evidenceSummary: v.string(),
   },
   returns: v.string(),
   handler: async (ctx, args) => {
-    const prompt = `You are an instructional coach. Based on the following context, generate a single, high-quality feedback summary for the teacher. Reference both the reinforcement and refinement indicators and the evidence summary.\n\nReinforcement Indicator: ${args.reinforcementIndicator.indicatorName} (${args.reinforcementIndicator.indicatorAcronym}) - ${args.reinforcementIndicator.overview ?? ""}\nRefinement Indicator: ${args.refinementIndicator.indicatorName} (${args.refinementIndicator.indicatorAcronym}) - ${args.refinementIndicator.overview ?? ""}\nEvidence Summary: ${args.evidenceSummary}\n\nInstructions:\n- Write a concise, professional summary that highlights what the teacher did well (reinforcement) and one area for growth (refinement).\n- Reference the indicator language.\n- Use supportive, actionable language.\n- Limit to 3-5 sentences.`;
+    const prompt = `You are EdCoach AI, an expert instructional coaching assistant. Your mission is to generate concise, actionable, and rubric-aligned feedback for K-12 teachers in Louisiana. The feedback must be deeply rooted in the provided Louisiana Educator Rubric (LER) indicators, their detailed explanations, key terms, evidence of student-centered learning, and the observer's notes. Maintain a supportive, encouraging, and growth-oriented coaching tone.
+
+Reinforcement Indicator Details:
+- Name/Code: "${args.reinforcementIndicator.indicatorName}" (${args.reinforcementIndicator.indicatorAcronym})
+- Full Description: "${args.reinforcementIndicator.overview || ''}"
+- Key Terms: "${args.reinforcementIndicator.keyTerms || ''}"
+- Explanation/Possible Evidence of Effective Practice: "${args.reinforcementIndicator.effectivePractice || ''}"
+- Evidence of Student-Centered Learning: "${args.reinforcementIndicator.studentCenteredEvidence || ''}"
+
+Refinement Indicator Details:
+- Name/Code: "${args.refinementIndicator.indicatorName}" (${args.refinementIndicator.indicatorAcronym})
+- Full Description: "${args.refinementIndicator.overview || ''}"
+- Key Terms: "${args.refinementIndicator.keyTerms || ''}"
+- Explanation/Possible Evidence for Development: "${args.refinementIndicator.developmentEvidence || ''}"
+- Evidence of Student-Centered Learning: "${args.refinementIndicator.studentCenteredEvidence || ''}"
+
+Observer's Notes:
+"${args.evidenceSummary}"
+
+Instructions:
+1. Reinforcement (1-2 sentences):
+   - Acknowledge the teacher's strength related to the reinforcement indicator
+   - Subtly weave in key terms and concepts from the effective practice and student-centered evidence
+   - Directly connect to specific positive evidence from the observer's notes
+
+2. Refinement (1-2 sentences):
+   - Identify an area for growth related to the refinement indicator
+   - Subtly weave in key terms and concepts from the development evidence and student-centered learning
+   - Suggest one specific, observable, and practical strategy the teacher could implement
+   - Ensure the strategy aligns with promoting student-centered learning
+
+Output Expectations:
+- Concise (3-4 sentences total)
+- Professional, supportive, and growth-oriented tone
+- Explicitly (but naturally) incorporates language and concepts from the LER indicators
+- Highly actionable suggestions`;
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const response = await openai.chat.completions.create({
@@ -179,6 +240,49 @@ export const generateWalkthroughFeedback = action({
     });
 
     return response.choices[0].message.content ?? "";
+  },
+});
+
+export const generateSplitWalkthroughFeedback = action({
+  args: {
+    reinforcementIndicator: v.object({
+      indicator_name: v.string(),
+      indicator_code: v.string(),
+      overview: v.optional(v.string()),
+      key_terms: v.optional(v.string()),
+      effective_practice: v.optional(v.string()),
+      development_evidence: v.optional(v.string()),
+      student_centered_evidence: v.optional(v.string()),
+    }),
+    refinementIndicator: v.object({
+      indicator_name: v.string(),
+      indicator_code: v.string(),
+      overview: v.optional(v.string()),
+      key_terms: v.optional(v.string()),
+      effective_practice: v.optional(v.string()),
+      development_evidence: v.optional(v.string()),
+      student_centered_evidence: v.optional(v.string()),
+    }),
+    evidenceSummary: v.string(),
+  },
+  returns: v.object({
+    reinforcement: v.string(),
+    refinement: v.string(),
+  }),
+  handler: async (ctx, args): Promise<{ reinforcement: string; refinement: string }> => {
+    // Call generateFeedback for reinforcement
+    const reinforcement: string = await ctx.runAction(api.aiFeedback.generateFeedback, {
+      evidence: args.evidenceSummary,
+      indicator: args.reinforcementIndicator,
+      promptType: "reinforcement",
+    });
+    // Call generateFeedback for refinement
+    const refinement: string = await ctx.runAction(api.aiFeedback.generateFeedback, {
+      evidence: args.evidenceSummary,
+      indicator: args.refinementIndicator,
+      promptType: "refinement",
+    });
+    return { reinforcement, refinement };
   },
 });
 
