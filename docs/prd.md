@@ -79,10 +79,6 @@ The platform specifically addresses the need for continuous support and growth i
   - Feed-style interface showing both informal and formal feedback
   - Ability to download feedback reports
   
-- **Analytics Dashboard** (Priority: Medium)
-  - Role-based dashboards emphasizing visualizations related to the frequency and focus areas of informal feedback
-  - Track developmental trends between formal evaluations
-  
 - **Authentication and Role Management** (Priority: High)
   - Secure login, registration, and session management via Clerk
   - Role and permission management in Convex DB
@@ -125,6 +121,15 @@ The platform specifically addresses the need for continuous support and growth i
 - Offline mode indicators and sync status visualizations
 - Feed-style interface for reviewing all feedback interactions
 - Accessible design supporting screen readers and keyboard navigation
+- **Design System Implementation:**
+  - Typography and color palette from shadcn
+  - Consistent spacing and UI patterns
+  - Accessibility-first approach
+  - Mobile-first responsive design
+- **Filter & Sort Capabilities:**
+  - Walkthrough/observation filters
+  - Analytics filters with state persistence
+  - Sort options for feedback review
 
 ## 6. Narrative
 Principal Maria feels the pressure of the state's formal evaluation system (LEADS), which requires comprehensive observations but only happens a few times a year. She worries that teachers aren't getting enough timely support to make meaningful adjustments between these high-stakes events. Discovering EdCoach AI, she sees it not as a replacement for LEADS, but as the perfect complement. Now, Maria and her AP use their tablets during daily classroom pop-ins (5-10 minutes) to capture quick notes using EdCoach AI's Informal Walkthrough template, focusing on just one or two skills. The AI helps draft brief, targeted feedback ("Great job checking for understanding with thumbs-up/down today!" or "Consider trying strategy X for smoother transitions next time"). Teachers receive these small, actionable insights almost immediately via the platform. While they still prepare for formal LEADS observations, the frequent, low-stakes feedback from EdCoach AI fosters a culture of continuous improvement and makes the formal evaluations less daunting. Maria uses the dashboard to see which skills are being coached most frequently across the school, informing her broader PD planning.
@@ -155,8 +160,12 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
 - Convex for database and backend functionality
 - OpenAI or equivalent LLM for concise feedback generation
 - Export functionality to PDF and common spreadsheet formats
-
 - OpenAI GPT-4.1 Mini is the designated LLM for all feedback generation, chosen for its balance of cost, quality, and context window size.
+- **Frontend Stack:**
+  - Next.js with React and TypeScript
+  - shadcn as primary design system
+  - Tailwind CSS for styling
+  - Framer Motion for animations
 
 ### 8.2. Data storage & privacy
 - Role-based access controls for all observation data
@@ -164,6 +173,12 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
 - Encrypted storage of all observation content
 - Compliance with FERPA and education data privacy requirements
 - Data retention policies aligned with educational record requirements
+- **Core Data Entities:**
+  - Users, Organizations, Teachers, Rubrics
+  - Observations, Evidence, Feedback
+  - Walkthroughs, WalkthroughEntries
+  - AuditLogs for sensitive actions
+  [Reference: See project plan Section 9.1 for detailed schema]
 
 ### 8.3. Scalability & performance
 - Mobile-optimized database queries and UI rendering
@@ -230,17 +245,7 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
   - Teacher can download feedback reports as PDF
   - System notifies teacher when new feedback is available
 
-### 10.4. Analytics for walkthroughs
-- **ID:** US-004
-- **Description:** As a school leader, I want to view analytics about informal walkthroughs so that I can identify trends and plan professional development.
-- **Acceptance criteria:**
-  - Principal can view dashboard showing walkthrough frequency by teacher
-  - Dashboard highlights which indicators are receiving the most feedback
-  - Principal can track developmental trends over time
-  - Dashboard includes filters for date ranges and indicators
-  - Data visualizations clearly highlight trends and patterns
-
-### 10.5. Mobile-first completion
+### 10.4. Mobile-first completion
 - **ID:** US-005
 - **Description:** As an observer, I want to complete informal walkthroughs on my mobile device while in the classroom so that I can capture real-time notes and provide immediate feedback.
 - **Acceptance criteria:**
@@ -262,3 +267,19 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
   - Growth patterns are clearly identified and highlighted
 
 ### 10.7. All rubric data is loaded from the database (Convex), not from local files
+
+## Post-MVP Features (Deferred)
+- Analytics dashboards and visualizations
+  - Role-based dashboards showing walkthrough frequency and trends
+  - Visualizations for feedback and walkthrough trends
+  - Growth analytics and indicator tracking
+  - Filters, exports, and advanced reporting
+
+## Document References
+- PRD: [Link to PRD]
+- Project Plan: [Link to Project Plan]
+- Last Synchronized: 2024-06-09
+
+## Version History
+- v1.1 (May 5, 2025): Initial synchronization
+- v1.2 (2024-06-09): Updated to align PRD and project plan

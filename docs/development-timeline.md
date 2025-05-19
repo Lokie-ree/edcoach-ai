@@ -76,17 +76,18 @@ This timeline separates essential MVP tasks from those that can be deferred to p
 - Post-MVP tasks can be prioritized based on user feedback and adoption.
 - The MVP should be robust, usable, and demonstrate the core value proposition: fast, AI-powered feedback for informal walkthroughs, on mobile, with basic offline support.
 - All AI feedback generation tasks are scoped to use GPT-4.1 Mini, ensuring consistent, high-quality outputs and predictable costs.
+- **Analytics dashboards and visualizations are deferred to post-MVP.**
 
 ## Dependencies & Critical Path
 
 1. **Critical Path:**
    - Mobile optimization → Offline capabilities → Testing with users
    - AI integration → Feedback generation → Teacher notification system
-   - Core functionality → Analytics → Dashboard visualization
+   - Core functionality → (Analytics and dashboard visualization are post-MVP)
 
 2. **Integration Points:**
    - AI feedback generation must integrate with the walkthrough submission workflow
-   - Analytics requires completed walkthrough data structure
+   - Analytics requires completed walkthrough data structure (post-MVP)
    - Email notifications depend on AI feedback generation
 
 ## Total Time Estimates
@@ -110,12 +111,10 @@ This timeline separates essential MVP tasks from those that can be deferred to p
 
 ### Frontend Focus Areas
 - Mobile optimization
-- Analytics visualization components
 - Feedback display components
 - Offline capability implementation
 
 ### Backend Focus Areas
 - OpenAI integration
-- Data aggregation for analytics
 - Notification system
 - Testing and performance optimization 
