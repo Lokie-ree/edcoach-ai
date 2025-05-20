@@ -31,7 +31,7 @@ export function CalendarInput({ date, setDate }: CalendarInputProps) {
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-start text-left font-normal bg-white dark:bg-zinc-900",
+            "w-full justify-start text-left font-normal bg-white",
             !date && "text-muted-foreground"
           )}
         >

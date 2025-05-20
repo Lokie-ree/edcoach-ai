@@ -174,7 +174,7 @@ const Dashboard = () => {
                     <span className="text-sm font-medium text-foreground">Manage Teachers</span>
                   </Button>
                 </Link>
-                <Link href="/observations/new">
+                <Link href="/walkthrough/new">
                   <Button
                     variant="outline"
                     className="w-full h-24 flex flex-col items-center justify-center gap-2 border hover:bg-muted/50"
@@ -183,7 +183,7 @@ const Dashboard = () => {
                       <BookOpen className="h-6 w-6 text-primary" />
                     </div>
                     <span className="text-sm font-medium text-foreground">
-                      Start New Observation
+                      Start New Walkthrough
                     </span>
                   </Button>
                 </Link>
