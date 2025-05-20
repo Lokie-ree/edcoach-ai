@@ -1,19 +1,18 @@
 import { Metadata } from "next";
-import { NewObservationPageClient } from "./_components/page-client";
-
+import { WalkthroughForm } from "@/components/walkthrough-form";
 export const metadata: Metadata = {
   title: "New Observation | EdCoach AI",
-  description: "Create a new observation or walkthrough using our step-by-step wizard",
+  description: "Create a new observation or walkthrough using our simplified form",
   keywords: ["observation", "walkthrough", "education", "teaching", "feedback"],
   openGraph: {
     title: "New Observation | EdCoach AI",
-    description: "Create a new observation or walkthrough using our step-by-step wizard",
+    description: "Create a new observation or walkthrough using our simplified form",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "New Observation | EdCoach AI",
-    description: "Create a new observation or walkthrough using our step-by-step wizard",
+    description: "Create a new observation or walkthrough using our simplified form",
   },
 };
 
@@ -27,7 +26,7 @@ export default function NewObservationPage() {
 
       {/* Content */}
       <div className="container max-w-4xl py-8 relative">
-        <NewObservationPageClient />
+        <WalkthroughForm />
       </div>
     </div>
   );
