@@ -97,11 +97,16 @@ See **Section 9: Expanded Database & Authentication Details** for the full schem
   - Convex action handles OpenAI API calls with error handling.
   - Prompt templates are optimized for short, evidence-based input.
   - AI feedback is integrated into the walkthrough submission and review flow.
+- **Analytics/Dashboard Views:**
+  - Role-based dashboards for teachers, coaches, and principals showing feedback frequency, trends, and growth analytics
+  - Visualizations for feedback and walkthrough trends
+  - Filters for date, teacher, indicator, observer
+  - Admin/leaderboard views for school leaders
+- **Minimal 'Save as Draft':**
+  - Walkthroughs/observations can be saved as draft for later completion (minimal implementation in MVP)
 - **Mobile Optimization:**
   - Responsive layouts, large touch targets, minimal typing UI
-  - Offline form completion and sync (planned)
-  - Visual indicators for offline/online status (planned)
-  - Performance optimizations for slow connections
+  - Minimal 'Save as Draft' capability for in-classroom use
 - **Notification System:**
   - In-app notifications for new feedback, walkthrough completions, and metrics
   - Email notifications for feedback digests and summaries (planned)
@@ -127,21 +132,18 @@ See **Section 9: Expanded Database & Authentication Details** for the full schem
 
 ### 5.1 Implementation Phases & MVP Checklist
 
-- **Phase 1:** Core authentication, Informal Walkthrough template
+- **Phase 1:** Core authentication, Informal Walkthrough template, minimal 'Save as Draft'
   - Implements PRD US-001 (Principal registration and setup)
   - Implements PRD US-002 (Conducting informal walkthrough)
-  - Key deliverables: User registration, role management, mobile-optimized walkthrough form
-- **Phase 2:** AI feedback generation
+  - Key deliverables: User registration, role management, mobile-optimized walkthrough form, minimal 'Save as Draft'
+- **Phase 2:** AI feedback generation, analytics/dashboard views
   - Implements PRD US-003 (Receiving and reviewing feedback)
-  - Key deliverables: LLM integration for concise feedback, quick editing workflow, teacher access portal
+  - Key deliverables: LLM integration for concise feedback, quick editing workflow, teacher access portal, analytics/dashboard views
 
 ### Post-MVP Features (Deferred)
 
-- Analytics dashboards and visualizations (US-004, US-006)
-  - Role-based dashboards showing walkthrough frequency and trends
-  - Visualizations for feedback and walkthrough trends
-  - Growth analytics and indicator tracking
-  - Filters, exports, and advanced reporting
+- Advanced offline form completion and sync
+- Exports and advanced reporting
 
 ## 6. UI/UX Implementation Details
 
@@ -157,10 +159,10 @@ See **Section 9: Expanded Database & Authentication Details** for the full schem
 - School leaders can complete informal walkthroughs in less than 10 minutes
   [Maps to PRD Section 7.1: Average time target]
 - AI generates concise, actionable feedback from brief evidence notes
-- Teachers receive timely feedback between formal evaluations
+- Teachers and coaches can access dashboards/analytics to track feedback and growth
 - Each teacher receives at least 2 informal feedback interactions per month
   [Maps to PRD Section 7.1: Feedback frequency target]
-- The app is fully functional on mobile devices for in-classroom use
+- The app is fully functional on mobile devices for in-classroom use (with minimal 'Save as Draft')
 - The platform complements rather than replaces formal evaluation systems
 - Teacher satisfaction with frequency, timeliness, and actionability of feedback (survey score > 4/5)
 - The app is robust, user-friendly, and ready for early adopters

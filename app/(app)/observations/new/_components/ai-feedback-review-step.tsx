@@ -12,10 +12,10 @@ type IndicatorContext = {
   indicator_code: string;
   indicator_name: string;
   overview?: string;
-  key_terms?: string | string[];
+  key_terms?: string;
   effective_practice?: string;
   development_evidence?: string;
-  student_centered_evidence?: string | string[];
+  student_centered_evidence?: string;
 };
 
 export function AIFeedbackReviewStep() {
@@ -48,10 +48,14 @@ export function AIFeedbackReviewStep() {
             indicator_code: indicator.indicator_code,
             indicator_name: indicator.indicator_name,
             overview: indicator.overview || "",
-            key_terms: indicator.key_terms || "",
+            key_terms: Array.isArray(indicator.key_terms)
+              ? indicator.key_terms.join(", ")
+              : (indicator.key_terms || ""),
             effective_practice: indicator.effective_practice || "",
             development_evidence: indicator.development_evidence || "",
-            student_centered_evidence: indicator.student_centered_evidence || "",
+            student_centered_evidence: Array.isArray(indicator.student_centered_evidence)
+              ? indicator.student_centered_evidence.join(", ")
+              : (indicator.student_centered_evidence || ""),
           };
         }
       }

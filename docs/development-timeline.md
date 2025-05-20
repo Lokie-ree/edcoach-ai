@@ -12,9 +12,11 @@ This timeline separates essential MVP tasks from those that can be deferred to p
 - [x] Create basic Convex action for OpenAI API calls (8 hours)
 - [x] Design and test simple prompt templates for brief, actionable feedback (8 hours)
 - [x] Integrate basic AI feedback into walkthrough submission and review (12 hours)
-- [ ] Add basic offline form completion and sync (Convex/Service Worker) (16 hours)
-- [ ] Add visual indicators for offline/online status (4 hours)
-- [ ] Optimize performance for slow connections (8 hours)
+- [ ] Implement minimal 'Save as Draft' for walkthroughs (4 hours)
+- [ ] Implement focus indicator tracking and aggregation (UI/visualization) (12 hours)
+- [ ] Create visualizations for feedback and walkthrough trends (charts, tables) (12 hours)
+- [ ] Design analytics dashboard with filters (date, teacher, indicator, observer) (16 hours)
+- [ ] Add admin/leaderboard views for school leaders (8 hours)
 
 **Note:** The MVP will use OpenAI's GPT-4.1 Mini model for all feedback generation. This model is selected for its strong performance on instruction following, low latency, and cost-effectiveness, ensuring high-quality, actionable feedback for teachers and coaches.
 
@@ -47,14 +49,13 @@ This timeline separates essential MVP tasks from those that can be deferred to p
 ### Advanced Mobile & Offline
 - [ ] Add conflict resolution for offline edits
 - [ ] Build advanced sync mechanism for complex offline scenarios
+- [ ] Add basic offline form completion and sync (Convex/Service Worker)
+- [ ] Add visual indicators for offline/online status
+- [ ] Optimize performance for slow connections
 - [ ] Comprehensive device/browser testing and optimization
 
 ### Analytics & Reporting
-- [ ] Implement focus indicator tracking and aggregation (UI/visualization)
-- [ ] Create visualizations for feedback and walkthrough trends (charts, tables)
-- [ ] Design analytics dashboard with filters (date, teacher, indicator, observer)
 - [ ] Add export/reporting functionality (CSV, PDF)
-- [ ] Add admin/leaderboard views for school leaders
 
 ### Testing, Polish, and Launch Prep
 - [ ] Write and run E2E tests for all non-critical flows
@@ -74,20 +75,20 @@ This timeline separates essential MVP tasks from those that can be deferred to p
 ## Notes
 - This split allows for a much faster MVP launch, focusing on the features that deliver the most value to early users.
 - Post-MVP tasks can be prioritized based on user feedback and adoption.
-- The MVP should be robust, usable, and demonstrate the core value proposition: fast, AI-powered feedback for informal walkthroughs, on mobile, with basic offline support.
+- The MVP should be robust, usable, and demonstrate the core value proposition: fast, AI-powered feedback for informal walkthroughs, on mobile, with basic offline support (minimal 'Save as Draft' only).
 - All AI feedback generation tasks are scoped to use GPT-4.1 Mini, ensuring consistent, high-quality outputs and predictable costs.
-- **Analytics dashboards and visualizations are deferred to post-MVP.**
+- **Advanced offline capabilities and export/reporting are deferred to post-MVP.**
 
 ## Dependencies & Critical Path
 
 1. **Critical Path:**
-   - Mobile optimization → Offline capabilities → Testing with users
+   - Mobile optimization → Analytics/dashboard views → Testing with users
    - AI integration → Feedback generation → Teacher notification system
-   - Core functionality → (Analytics and dashboard visualization are post-MVP)
+   - Core functionality → (Advanced offline and export/reporting are post-MVP)
 
 2. **Integration Points:**
    - AI feedback generation must integrate with the walkthrough submission workflow
-   - Analytics requires completed walkthrough data structure (post-MVP)
+   - Analytics requires completed walkthrough data structure (now MVP)
    - Email notifications depend on AI feedback generation
 
 ## Total Time Estimates
@@ -112,9 +113,11 @@ This timeline separates essential MVP tasks from those that can be deferred to p
 ### Frontend Focus Areas
 - Mobile optimization
 - Feedback display components
-- Offline capability implementation
+- Analytics/dashboard implementation
+- Minimal 'Save as Draft' capability
 
 ### Backend Focus Areas
 - OpenAI integration
 - Notification system
+- Analytics/dashboard data aggregation
 - Testing and performance optimization 

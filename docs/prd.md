@@ -63,10 +63,16 @@ The platform specifically addresses the need for continuous support and growth i
     - Comprehensive digital form with all LER domains and indicators
     - Ability to input ratings and evidence for each indicator
   
-- **Draft/Finalized Status** (Priority: High)
-  - Allow walkthroughs/observations to be saved as draft for later completion
+- **Analytics/Dashboard Views** (Priority: High, MVP)
+  - Role-based dashboards for teachers, coaches, and principals showing feedback frequency, trends, and growth analytics
+  - Visualizations for feedback and walkthrough trends
+  - Filters for date, teacher, indicator, observer
+  - Admin/leaderboard views for school leaders
+
+- **Draft/Finalized Status** (Priority: High, MVP)
+  - Allow walkthroughs/observations to be saved as draft for later completion (minimal 'Save as Draft' only)
   - Provide streamlined finalization workflow before sharing with teachers
-  
+
 - **AI-Generated Feedback** (Priority: High)
   - Generate concise, actionable feedback from both detailed formal notes and brief informal walkthrough evidence
   - Allow observers to quickly edit AI suggestions before finalizing
@@ -85,7 +91,7 @@ The platform specifically addresses the need for continuous support and growth i
   
 - **Device Optimization** (Priority: High)
   - Mobile-first design optimized for classroom walkthrough capture
-  - Offline capabilities for in-classroom use
+  - Minimal 'Save as Draft' capability for in-classroom use
   - Touch-optimized interface
 
 ## 5. User experience
@@ -99,6 +105,7 @@ The platform specifically addresses the need for continuous support and growth i
 - **Conducting an Informal Walkthrough:** Observers select a teacher, quickly choose a focus indicator for reinforcement/refinement from the Louisiana Educator Rubric, jot down brief evidence notes, and generate feedback. The process is designed for completion in minutes.
   - Streamlined, mobile-optimized interface with minimal typing requirements
   - Progress indicators show completion status
+  - Minimal 'Save as Draft' option to prevent data loss
   
 - **Generating feedback:** After completing walkthrough notes, AI generates concise, targeted feedback suggestions aligned with the evidence and selected indicators. Observers quickly review/edit before sharing. 
   - Quick review interface optimized for rapid approval/editing
@@ -107,11 +114,12 @@ The platform specifically addresses the need for continuous support and growth i
 - **Reviewing feedback:** Teachers access a feed of all feedback interactions, including frequent informal points and less frequent formal observations
   - Clean, distraction-free reading experience with option to download
   - Historical view allows tracking growth over time
+  - Role-based dashboards and analytics views for teachers, coaches, and principals
 
 ### 5.3. Advanced features & edge cases
-- Handling incomplete walkthroughs with draft status
+- Handling incomplete walkthroughs with draft status (minimal 'Save as Draft' in MVP; full offline/draft support post-MVP)
 - Managing feedback for underperforming indicators with constructive language
-- Supporting offline completion when internet connectivity is limited
+- Supporting offline completion when internet connectivity is limited (post-MVP)
 - Linking informal feedback points to formal observation goals
 - Aggregating informal feedback trends to inform formal evaluations
 
@@ -139,7 +147,7 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
 - Average time to complete and deliver feedback for an Informal Walkthrough (target: < 10 minutes)
 - Average number of informal feedback interactions recorded per teacher per month (target: > 2)
 - Teacher satisfaction with frequency, timeliness, and actionability of feedback (survey score > 4/5)
-- Percentage of teachers actively accessing their feedback (target: >80%)
+- Percentage of teachers and coaches actively accessing dashboards/analytics (target: >80%)
 
 ### 7.2. Business metrics
 - User adoption and retention rates (target: >85% retention)
@@ -177,6 +185,7 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
   - Users, Organizations, Teachers, Rubrics
   - Observations, Evidence, Feedback
   - Walkthroughs, WalkthroughEntries
+  - AnalyticsViews (for dashboards)
   - AuditLogs for sensitive actions
   [Reference: See project plan Section 9.1 for detailed schema]
 
@@ -203,11 +212,11 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
   - 1 product manager, 2-3 engineers, 1 designer
 
 ### 9.3. Suggested phases
-- **Phase 1:** Core authentication, Informal Walkthrough template development, basic teacher access portal (3 weeks)
-  - Key deliverables: User registration, role management, mobile-optimized walkthrough form
+- **Phase 1:** Core authentication, Informal Walkthrough template development, basic teacher access portal, minimal 'Save as Draft' (3 weeks)
+  - Key deliverables: User registration, role management, mobile-optimized walkthrough form, minimal 'Save as Draft'
 
-- **Phase 2:** AI feedback generation optimized for informal feedback, draft management, Formal Observation template as secondary feature (3 weeks)
-  - Key deliverables: LLM integration for concise feedback, quick editing workflow, teacher access portal
+- **Phase 2:** AI feedback generation optimized for informal feedback, analytics/dashboard views, draft management, Formal Observation template as secondary feature (3 weeks)
+  - Key deliverables: LLM integration for concise feedback, quick editing workflow, teacher access portal, analytics/dashboard views
 
 - **Phase 3:** Analytics dashboards emphasizing informal trends, mobile optimization refinement (2 weeks)
   - Key deliverables: Role-based dashboards showing feedback frequency and trends, responsive design
@@ -269,11 +278,8 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
 ### 10.7. All rubric data is loaded from the database (Convex), not from local files
 
 ## Post-MVP Features (Deferred)
-- Analytics dashboards and visualizations
-  - Role-based dashboards showing walkthrough frequency and trends
-  - Visualizations for feedback and walkthrough trends
-  - Growth analytics and indicator tracking
-  - Filters, exports, and advanced reporting
+- Advanced offline form completion and sync
+- Exports and advanced reporting
 
 ## Document References
 - PRD: [Link to PRD]
