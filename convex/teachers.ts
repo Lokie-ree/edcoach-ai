@@ -148,4 +148,55 @@ export const list = query({
       return [];
     }
   },
+});
+
+export const update = mutation({
+  args: {
+    id: v.id("teachers"),
+    name: v.string(),
+    email: v.optional(v.string()),
+    subject: v.array(v.string()),
+    gradeLevels: v.array(v.string()),
+    status: v.optional(v.string()),
+  },
+  returns: v.object({ success: v.boolean() }),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) throw new Error("Not authenticated");
+    const teacher = await ctx.db.get(args.id);
+    if (!teacher) throw new Error("Teacher not found");
+    if (teacher.createdBy !== user._id) throw new Error("No permission");
+    await ctx.db.patch(args.id, {
+      name: args.name,
+      email: args.email,
+      subject: args.subject,
+      gradeLevels: args.gradeLevels,
+      status: args.status,
+    });
+    return { success: true };
+  },
+});
+
+export const remove = mutation({
+  args: { id: v.id("teachers") },
+  returns: v.object({ success: v.boolean() }),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) throw new Error("Not authenticated");
+    const teacher = await ctx.db.get(args.id);
+    if (!teacher) throw new Error("Teacher not found");
+    if (teacher.createdBy !== user._id) throw new Error("No permission");
+    await ctx.db.delete(args.id);
+    return { success: true };
+  },
 }); 

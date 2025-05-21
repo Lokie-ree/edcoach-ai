@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import MultipleSelector, { Option } from "@/components/multiple-selector";
+import { Id } from "@/convex/_generated/dataModel";
 
 const SUBJECT_OPTIONS: Option[] = [
   { value: "math", label: "Math" },
@@ -54,16 +55,32 @@ type TeachersFormProps = {
     gradeLevels: string[];
     status?: string;
   }) => Promise<unknown>;
+  updateTeacher?: (values: {
+    id: Id<'teachers'>;
+    name: string;
+    email?: string;
+    subject: string[];
+    gradeLevels: string[];
+    status?: string;
+  }) => Promise<unknown>;
+  teacher?: {
+    _id: string;
+    name: string;
+    email?: string;
+    subject: string[];
+    gradeLevels: string[];
+    status?: string;
+  };
 };
 
-export default function TeachersForm({ onSuccess, createTeacher }: TeachersFormProps) {
+export default function TeachersForm({ onSuccess, createTeacher, updateTeacher, teacher }: TeachersFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      subject: [],
-      gradeLevels: [],
+      name: teacher?.name || "",
+      email: teacher?.email || "",
+      subject: teacher?.subject || [],
+      gradeLevels: teacher?.gradeLevels || [],
     },
   });
 
@@ -72,26 +89,42 @@ export default function TeachersForm({ onSuccess, createTeacher }: TeachersFormP
 
   const onSubmit = async (values: FormValues) => {
     try {
-      await createTeacher({
-        name: values.name,
-        email: values.email,
-        subject: values.subject,
-        gradeLevels: values.gradeLevels,
-        status: "pending",
-      });
-      toast.success("Teacher added successfully");
+      if (teacher && updateTeacher) {
+        await updateTeacher({
+          id: teacher._id as Id<'teachers'>,
+          name: values.name,
+          email: values.email,
+          subject: values.subject,
+          gradeLevels: values.gradeLevels,
+          status: teacher.status,
+        });
+        toast.success("Teacher updated successfully");
+      } else {
+        await createTeacher({
+          name: values.name,
+          email: values.email,
+          subject: values.subject,
+          gradeLevels: values.gradeLevels,
+          status: "pending",
+        });
+        toast.success("Teacher added successfully");
+      }
       form.reset();
       onSuccess();
     } catch (error) {
-      console.error("Failed to add teacher:", error);
-      toast.error("Failed to add teacher. Please try again.");
+      console.error("Failed to save teacher:", error);
+      toast.error(`Failed to ${teacher ? "update" : "add"} teacher. Please try again.`);
     }
   };
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-foreground mb-2">Add New Teacher</h2>
-      <p className="text-foreground mb-4">Enter the teacher&apos;s details to send them an invitation</p>
+      <h2 className="text-2xl font-bold text-foreground mb-2">
+        {teacher ? "Edit Teacher" : "Add New Teacher"}
+      </h2>
+      <p className="text-foreground mb-4">
+        {teacher ? "Update the teacher's details" : "Enter the teacher's details to send them an invitation"}
+      </p>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -170,7 +203,9 @@ export default function TeachersForm({ onSuccess, createTeacher }: TeachersFormP
               Cancel
             </Button>
             <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Adding..." : "Add Teacher"}
+              {form.formState.isSubmitting
+                ? (teacher ? "Updating..." : "Adding...")
+                : (teacher ? "Update Teacher" : "Add Teacher")}
             </Button>
           </div>
         </form>

@@ -10,11 +10,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Plus, UserPlus, Users, GraduationCap } from "lucide-react";
+import { Plus, UserPlus, Users, GraduationCap, Pencil, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import Modal from "@/components/mage-ui/modal";
 import TeachersForm from "@/components/teachers-form";
+import { Id } from "@/convex/_generated/dataModel";
 
 const SUBJECT_OPTIONS = [
   { value: "math", label: "Math" },
@@ -42,10 +53,36 @@ const GRADE_LEVEL_OPTIONS = [
   { value: "12", label: "12th Grade" },
 ];
 
+// Define a Teacher type for state
+interface Teacher {
+  _id: string;
+  name: string;
+  email?: string;
+  subject: string[];
+  gradeLevels: string[];
+  status?: string;
+}
+
 export default function TeachersPage() {
   const [isAddingTeacher, setIsAddingTeacher] = useState(false);
+  const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
+  const [deletingTeacher, setDeletingTeacher] = useState<Teacher | null>(null);
   const teachers = useQuery(api.teachers.list);
   const createTeacher = useMutation(api.teachers.create);
+  const updateTeacher = useMutation(api.teachers.update);
+  const removeTeacher = useMutation(api.teachers.remove);
+
+  const handleDelete = async () => {
+    if (!deletingTeacher) return;
+    try {
+      await removeTeacher({ id: deletingTeacher._id as Id<'teachers'> });
+      toast.success("Teacher deleted successfully");
+      setDeletingTeacher(null);
+    } catch (error) {
+      console.error("Failed to delete teacher:", error);
+      toast.error("Failed to delete teacher. Please try again.");
+    }
+  };
 
   return (
     <div className="relative">
@@ -115,12 +152,45 @@ export default function TeachersPage() {
         </div>
 
         {/* Add Teacher Modal */}
-        <Modal isOpen={isAddingTeacher} onOpenChange={setIsAddingTeacher} modalSize="lg">
+        <Modal
+          isOpen={isAddingTeacher || !!editingTeacher}
+          onOpenChange={(open) => {
+            if (!open) {
+              setIsAddingTeacher(false);
+              setEditingTeacher(null);
+            }
+          }}
+          modalSize="lg"
+        >
           <TeachersForm
-            onSuccess={() => setIsAddingTeacher(false)}
+            onSuccess={() => {
+              setIsAddingTeacher(false);
+              setEditingTeacher(null);
+            }}
             createTeacher={createTeacher}
+            updateTeacher={updateTeacher}
+            teacher={editingTeacher ?? undefined}
           />
         </Modal>
+
+        <Dialog open={!!deletingTeacher} onOpenChange={(open) => { if (!open) setDeletingTeacher(null); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Are you sure?</DialogTitle>
+              <DialogDescription>
+                This will permanently delete {deletingTeacher?.name}. This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline">Cancel</Button>
+              </DialogClose>
+              <Button onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Teachers List */}
         <div className="space-y-4">
@@ -133,9 +203,31 @@ export default function TeachersPage() {
                 <CardContent className="p-4 flex-1">
                   <div className="flex flex-col h-full justify-between">
                     <div>
-                      <h3 className="font-medium text-foreground">
-                        {teacher.name}
-                      </h3>
+                      <div className="flex items-start justify-between">
+                        <h3 className="font-medium text-foreground">
+                          {teacher.name}
+                        </h3>
+                        <div className="flex gap-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            aria-label="Edit teacher"
+                            onClick={() => setEditingTeacher(teacher)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 text-destructive"
+                            aria-label="Delete teacher"
+                            onClick={() => setDeletingTeacher(teacher)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                       <p className="text-sm text-foreground">
                         {teacher.email}
                       </p>
