@@ -57,8 +57,8 @@ export const create = mutation({
   args: {
     name: v.string(),
     email: v.optional(v.string()),
-    department: v.optional(v.string()),
-    gradeLevel: v.optional(v.string()),
+    subject: v.array(v.string()),
+    gradeLevels: v.array(v.string()),
     status: v.optional(v.string()),
   },
   returns: v.object({
@@ -85,8 +85,8 @@ export const create = mutation({
       const teacherId = await ctx.db.insert("teachers", {
         name: args.name,
         email: args.email,
-        department: args.department,
-        gradeLevel: args.gradeLevel,
+        subject: args.subject,
+        gradeLevels: args.gradeLevels,
         status: args.status || "pending", // Default to pending if not provided
         createdBy: user._id,
         createdAt: Date.now(),
@@ -109,8 +109,8 @@ export const list = query({
         _creationTime: v.number(),
         name: v.string(),
         email: v.optional(v.string()),
-        department: v.optional(v.string()),
-        gradeLevel: v.optional(v.string()),
+        subject: v.array(v.string()),
+        gradeLevels: v.array(v.string()),
         status: v.optional(v.string()),
         createdBy: v.id("users"),
         createdAt: v.number(),

@@ -4,72 +4,48 @@ import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { motion } from "framer-motion";
 import { Plus, UserPlus, Users, GraduationCap } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { toast } from "sonner";
+
 import { cn } from "@/lib/utils";
+import Modal from "@/components/mage-ui/modal";
+import TeachersForm from "@/components/teachers-form";
 
-const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  department: z.string().optional(),
-  gradeLevel: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+const SUBJECT_OPTIONS = [
+  { value: "math", label: "Math" },
+  { value: "science", label: "Science" },
+  { value: "english", label: "English" },
+  { value: "history", label: "History" },
+  { value: "art", label: "Art" },
+  { value: "music", label: "Music" },
+  { value: "pe", label: "Physical Education" },
+  { value: "other", label: "Other" },
+];
+const GRADE_LEVEL_OPTIONS = [
+  { value: "k", label: "Kindergarten" },
+  { value: "1", label: "1st Grade" },
+  { value: "2", label: "2nd Grade" },
+  { value: "3", label: "3rd Grade" },
+  { value: "4", label: "4th Grade" },
+  { value: "5", label: "5th Grade" },
+  { value: "6", label: "6th Grade" },
+  { value: "7", label: "7th Grade" },
+  { value: "8", label: "8th Grade" },
+  { value: "9", label: "9th Grade" },
+  { value: "10", label: "10th Grade" },
+  { value: "11", label: "11th Grade" },
+  { value: "12", label: "12th Grade" },
+];
 
 export default function TeachersPage() {
   const [isAddingTeacher, setIsAddingTeacher] = useState(false);
   const teachers = useQuery(api.teachers.list);
   const createTeacher = useMutation(api.teachers.create);
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      department: "",
-      gradeLevel: "",
-    },
-  });
-
-  const onSubmit = async (values: FormValues) => {
-    try {
-      await createTeacher({
-        name: values.name,
-        email: values.email,
-        department: values.department,
-        gradeLevel: values.gradeLevel,
-        status: "pending",
-      });
-
-      toast.success("Teacher added successfully");
-      form.reset();
-      setIsAddingTeacher(false);
-    } catch (error) {
-      console.error("Failed to add teacher:", error);
-      toast.error("Failed to add teacher. Please try again.");
-    }
-  };
 
   return (
     <div className="relative">
@@ -138,112 +114,13 @@ export default function TeachersPage() {
           </Card>
         </div>
 
-        {/* Add Teacher Form */}
-        {isAddingTeacher && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="space-y-4"
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Add New Teacher</CardTitle>
-                <CardDescription className="text-foreground">
-                  Enter the teacher&apos;s details to send them an invitation
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4"
-                  >
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter teacher's name"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="email"
-                              placeholder="Enter teacher's email"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="department"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Department (Optional)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter department" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="gradeLevel"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Grade Level (Optional)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter grade level" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          form.reset();
-                          setIsAddingTeacher(false);
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="submit"
-                        disabled={form.formState.isSubmitting}
-                      >
-                        {form.formState.isSubmitting
-                          ? "Adding..."
-                          : "Add Teacher"}
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
+        {/* Add Teacher Modal */}
+        <Modal isOpen={isAddingTeacher} onOpenChange={setIsAddingTeacher} modalSize="lg">
+          <TeachersForm
+            onSuccess={() => setIsAddingTeacher(false)}
+            createTeacher={createTeacher}
+          />
+        </Modal>
 
         {/* Teachers List */}
         <div className="space-y-4">
@@ -262,16 +139,18 @@ export default function TeachersPage() {
                       <p className="text-sm text-foreground">
                         {teacher.email}
                       </p>
-                      {teacher.department && (
+                      {/* Show subject(s) */}
+                      {(teacher.subject && teacher.subject.length > 0) ? (
                         <p className="text-sm text-foreground mt-1">
-                          Department: {teacher.department}
+                          Subject(s): {Array.isArray(teacher.subject) ? teacher.subject.map((s) => SUBJECT_OPTIONS.find(o => o.value === s)?.label || s).join(", ") : teacher.subject}
                         </p>
-                      )}
-                      {teacher.gradeLevel && (
+                      ) : null}
+                      {/* Show grade level(s) with fallback to gradeLevel for legacy data */}
+                      {(teacher.gradeLevels && teacher.gradeLevels.length > 0) ? (
                         <p className="text-sm text-foreground">
-                          Grade Level: {teacher.gradeLevel}
+                          Grade Level(s): {Array.isArray(teacher.gradeLevels) ? teacher.gradeLevels.map((g) => GRADE_LEVEL_OPTIONS.find(o => o.value === g)?.label || g).join(", ") : teacher.gradeLevels}
                         </p>
-                      )}
+                      ) : null}
                     </div>
                     <div className="mt-4">
                       <span

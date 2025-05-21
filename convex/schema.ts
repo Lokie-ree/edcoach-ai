@@ -35,8 +35,8 @@ export default defineSchema({
   teachers: defineTable({
     name: v.string(),
     email: v.optional(v.string()),
-    department: v.optional(v.string()),
-    gradeLevel: v.optional(v.string()),
+    subject: v.array(v.string()),
+    gradeLevels: v.array(v.string()),
     createdBy: v.id("users"),
     createdAt: v.number(),
     status: v.optional(v.string()),
