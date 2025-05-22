@@ -96,11 +96,6 @@ const Header = () => {
             </SignedIn>
 
             <SignedOut>
-              <Link href="/about">
-                <Button variant="ghost" size="sm">
-                  About
-                </Button>
-              </Link>
               <SignInButton mode="modal">
                 <Button>Login</Button>
               </SignInButton>

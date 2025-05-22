@@ -26,6 +26,7 @@ import { motion } from "framer-motion";
 import { useAuthQuery } from "@/hooks/use-auth-query";
 import { useUser, useOrganization } from "@clerk/nextjs";
 import { useMutation } from "convex/react";
+import { WalkthroughDraftsList } from "@/components/walkthrough-drafts-list";
 
 // Tilted Card Component
 const TiltedCard = ({
@@ -305,6 +306,11 @@ const Dashboard = () => {
           </Card>
         </TiltedCard>
       </motion.div>
+      {/* Walkthrough Drafts List */}
+      <div className="mt-10">
+        <h2 className="text-xl font-semibold mb-4 text-foreground">Your Walkthrough Drafts</h2>
+        <WalkthroughDraftsList />
+      </div>
     </div>
   );
 };

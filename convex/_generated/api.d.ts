@@ -27,6 +27,9 @@ import type * as rubricIndicators from "../rubricIndicators.js";
 import type * as rubrics from "../rubrics.js";
 import type * as teachers from "../teachers.js";
 import type * as users from "../users.js";
+import type * as validation_walkthroughDraftSchema from "../validation/walkthroughDraftSchema.js";
+import type * as validation_walkthroughFinalSchema from "../validation/walkthroughFinalSchema.js";
+import type * as walkthroughEntries from "../walkthroughEntries.js";
 import type * as walkthroughs from "../walkthroughs.js";
 
 /**
@@ -52,6 +55,9 @@ declare const fullApi: ApiFromModules<{
   rubrics: typeof rubrics;
   teachers: typeof teachers;
   users: typeof users;
+  "validation/walkthroughDraftSchema": typeof validation_walkthroughDraftSchema;
+  "validation/walkthroughFinalSchema": typeof validation_walkthroughFinalSchema;
+  walkthroughEntries: typeof walkthroughEntries;
   walkthroughs: typeof walkthroughs;
 }>;
 export declare const api: FilterApi<

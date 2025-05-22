@@ -9,7 +9,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   CardHeader,
@@ -34,6 +34,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CalendarInput } from "@/components/ui/calendar-input";
+import { walkthroughDraftSchema } from "@/convex/validation/walkthroughDraftSchema";
+import { walkthroughFinalSchema } from "@/convex/validation/walkthroughFinalSchema";
 
 // Types
 export type WalkthroughFormData = z.infer<typeof walkthroughSchema>;
@@ -61,7 +63,7 @@ interface Indicator {
   student_centered_evidence?: string | string[] | Record<string, string>;
 }
 
-export function WalkthroughForm() {
+export function WalkthroughForm({ walkthroughId }: { walkthroughId?: Id<"walkthroughs"> }) {
   const methods = useForm<WalkthroughFormData>({
     resolver: zodResolver(walkthroughSchema),
     defaultValues: {
@@ -79,12 +81,13 @@ export function WalkthroughForm() {
     },
     mode: "onChange",
   });
-  const { handleSubmit, setValue, watch, formState: { isSubmitting } } = methods;
+  const { handleSubmit, setValue, watch, formState: { isSubmitting }, reset } = methods;
   const createWalkthrough = useMutation(api.walkthroughs.createWalkthroughAndEntries);
+  const updateWalkthrough = useMutation(api.walkthroughs.updateWalkthroughAndEntries);
   const router = useRouter();
   const { toast } = useToast();
-  const [aiFeedback, setAIFeedback] = useState({ reinforcement: "", refinement: "" });
   const [aiLoading, setAILoading] = useState(false);
+  const lastResetId = useRef<Id<"walkthroughs"> | undefined>(undefined);
 
   // Fetch teachers and indicators
   const teachers = (useQuery(api.teachers.list) ?? []) as Teacher[];
@@ -96,15 +99,61 @@ export function WalkthroughForm() {
   // Find indicator object by code
   const getIndicatorByCode = (code: string): Indicator | undefined => indicators.find((i) => i.indicator_code === code);
 
+  // Fetch draft if editing
+  const drafts = useQuery(api.walkthroughs.listDraftWalkthroughs, {}) ?? [];
+  const draft = walkthroughId ? drafts.find((w) => w._id === walkthroughId) : undefined;
+  // Fetch walkthrough entries if editing
+  const shouldFetchEntries = Boolean(walkthroughId && draft);
+  const walkthroughEntries = useQuery(
+    api.walkthroughEntries.listByWalkthrough,
+    shouldFetchEntries && walkthroughId ? { walkthroughId } : "skip"
+  ) ?? [];
+
+  // Pre-fill form if editing a draft
+  useEffect(() => {
+    console.log("walkthroughEntries", walkthroughEntries);
+    if (
+      draft &&
+      walkthroughId &&
+      walkthroughEntries.length === 2 &&
+      lastResetId.current !== walkthroughId
+    ) {
+      const reinforcementEntry = walkthroughEntries.find((e: any) => e.type === "reinforcement");
+      const refinementEntry = walkthroughEntries.find((e: any) => e.type === "refinement");
+
+      reset({
+        teacherId: draft.teacherId,
+        walkthroughDate: new Date(draft.walkthroughDate),
+        status: draft.status,
+        evidenceSummary: draft.evidenceSummary,
+        reinforcementIndicator: reinforcementEntry ? reinforcementEntry.indicatorAcronym : draft.reinforcementIndicator,
+        refinementIndicator: refinementEntry ? refinementEntry.indicatorAcronym : draft.refinementIndicator,
+        walkthroughEntries: [
+          {
+            indicatorAcronym: reinforcementEntry?.indicatorAcronym || "",
+            type: "reinforcement" as const,
+            aiFeedback: reinforcementEntry?.aiFeedback || "",
+          },
+          {
+            indicatorAcronym: refinementEntry?.indicatorAcronym || "",
+            type: "refinement" as const,
+            aiFeedback: refinementEntry?.aiFeedback || "",
+          },
+        ],
+      });
+
+      lastResetId.current = walkthroughId;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, walkthroughEntries, walkthroughId, reset]);
+
   // Real AI feedback logic
   const generateFeedback = useAction(api.aiFeedback.generateFeedback);
   const handleAIFeedback = async () => {
     setAILoading(true);
-    setAIFeedback({ reinforcement: "", refinement: "" });
     try {
       const evidence = watch("evidenceSummary") || "";
-      const reinforcementCode = watch("reinforcementIndicator");
-      const refinementCode = watch("refinementIndicator");
+      const { reinforcementIndicator: reinforcementCode, refinementIndicator: refinementCode } = methods.getValues();
       const reinforcementIndicator = getIndicatorByCode(reinforcementCode);
       const refinementIndicator = getIndicatorByCode(refinementCode);
       if (!reinforcementIndicator || !refinementIndicator) {
@@ -146,10 +195,17 @@ export function WalkthroughForm() {
           promptType: "refinement",
         }),
       ]);
-      setAIFeedback({ reinforcement, refinement });
       setValue("walkthroughEntries", [
-        { indicatorAcronym: reinforcementCode, type: "reinforcement", aiFeedback: reinforcement },
-        { indicatorAcronym: refinementCode, type: "refinement", aiFeedback: refinement },
+        {
+          indicatorAcronym: reinforcementCode,
+          type: "reinforcement" as const,
+          aiFeedback: reinforcement,
+        },
+        {
+          indicatorAcronym: refinementCode,
+          type: "refinement" as const,
+          aiFeedback: refinement,
+        },
       ]);
     } catch {
       toast({ title: "Error", description: "Failed to generate AI feedback.", variant: "destructive" });
@@ -160,31 +216,127 @@ export function WalkthroughForm() {
 
   // Handler for editable feedback textareas
   const handleFeedbackChange = (type: "reinforcement" | "refinement", value: string) => {
-    setAIFeedback((prev) => ({ ...prev, [type]: value }));
-    // Also update walkthroughEntries in the form state
     const entries = methods.getValues("walkthroughEntries") || [];
     type Entry = WalkthroughFormData['walkthroughEntries'][number];
     const updatedEntries = entries.map((entry: Entry) =>
-      entry.type === type ? { ...entry, aiFeedback: value } : entry
+      entry.type === type
+        ? { ...entry, type: type as typeof entry.type, aiFeedback: value }
+        : entry
     );
     methods.setValue("walkthroughEntries", updatedEntries);
   };
 
-  const onSubmit = async (data: WalkthroughFormData) => {
+  // Save as Draft handler
+  const onSaveDraft = async (data: WalkthroughFormData) => {
     try {
-      // Convert date to timestamp
-      const walkthroughDate = typeof data.walkthroughDate === "object" && data.walkthroughDate instanceof Date
+      setValue("status", "draft");
+      await methods.trigger(); // ensure freshest form state
+      const walkthroughDate = data.walkthroughDate instanceof Date
         ? data.walkthroughDate.getTime()
         : Number(data.walkthroughDate);
-      await createWalkthrough({
-        teacherId: data.teacherId as Id<"teachers">,
+      const entries = methods.getValues("walkthroughEntries");
+      console.log("[onSaveDraft] After trigger, walkthroughEntries:", entries);
+      const draftValidation = walkthroughDraftSchema.safeParse({
+        ...data,
+        status: "draft",
+        walkthroughEntries: entries,
         walkthroughDate,
-        status: data.status,
-        reinforcementIndicator: data.reinforcementIndicator,
-        refinementIndicator: data.refinementIndicator,
-        evidenceSummary: data.evidenceSummary,
-        walkthroughEntries: data.walkthroughEntries,
       });
+      if (!draftValidation.success) {
+        toast({
+          title: "Validation Error",
+          description: draftValidation.error.errors.map((e: any) => e.message).join(", "),
+          variant: "destructive",
+        });
+        return;
+      }
+      if (walkthroughId && draft) {
+        // Update existing draft
+        await updateWalkthrough({
+          walkthroughId,
+          teacherId: data.teacherId as Id<"teachers">,
+          walkthroughDate,
+          status: "draft",
+          reinforcementIndicator: data.reinforcementIndicator,
+          refinementIndicator: data.refinementIndicator,
+          evidenceSummary: data.evidenceSummary,
+          walkthroughEntries: entries,
+        });
+      } else {
+        // Create new draft
+        await createWalkthrough({
+          teacherId: data.teacherId as Id<"teachers">,
+          walkthroughDate,
+          status: "draft",
+          reinforcementIndicator: data.reinforcementIndicator,
+          refinementIndicator: data.refinementIndicator,
+          evidenceSummary: data.evidenceSummary,
+          walkthroughEntries: entries,
+        });
+      }
+      toast({
+        title: "Draft Saved",
+        description: "You can resume this walkthrough later.",
+        variant: "success",
+      });
+      router.push("/dashboard");
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to save draft.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Submit handler (finalize)
+  const onSubmit = async (data: WalkthroughFormData) => {
+    try {
+      setValue("status", "completed");
+      await methods.trigger(); // ensure freshest form state
+      const walkthroughDate = data.walkthroughDate instanceof Date
+        ? data.walkthroughDate.getTime()
+        : Number(data.walkthroughDate);
+      const entries = methods.getValues("walkthroughEntries");
+      console.log("[onSubmit] After trigger, walkthroughEntries:", entries);
+      const finalValidation = walkthroughFinalSchema.safeParse({
+        ...data,
+        status: "completed",
+        walkthroughEntries: entries,
+        walkthroughDate,
+      });
+      if (!finalValidation.success) {
+        toast({
+          title: "Validation Error",
+          description: finalValidation.error.errors.map((e: any) => e.message).join(", "),
+          variant: "destructive",
+        });
+        return;
+      }
+      if (walkthroughId && draft) {
+        // Update and finalize existing draft
+        await updateWalkthrough({
+          walkthroughId,
+          teacherId: data.teacherId as Id<"teachers">,
+          walkthroughDate,
+          status: "completed",
+          reinforcementIndicator: data.reinforcementIndicator,
+          refinementIndicator: data.refinementIndicator,
+          evidenceSummary: data.evidenceSummary,
+          walkthroughEntries: entries,
+        });
+      } else {
+        // Create new finalized walkthrough
+        await createWalkthrough({
+          teacherId: data.teacherId as Id<"teachers">,
+          walkthroughDate,
+          status: "completed",
+          reinforcementIndicator: data.reinforcementIndicator,
+          refinementIndicator: data.refinementIndicator,
+          evidenceSummary: data.evidenceSummary,
+          walkthroughEntries: entries,
+        });
+      }
       toast({
         title: "Success",
         description: "Walkthrough created successfully",
@@ -206,7 +358,7 @@ export function WalkthroughForm() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Card className="max-w-2xl mx-auto">
             <CardHeader>
-              <CardTitle>New Walkthrough</CardTitle>
+              <CardTitle>{walkthroughId ? "Edit Walkthrough Draft" : "New Walkthrough"}</CardTitle>
             </CardHeader>
             <CardContent>
               {/* Section 1: Teacher, Date */}
@@ -355,50 +507,71 @@ export function WalkthroughForm() {
               </div>
 
               {/* AI Feedback and Action Buttons */}
-              {(aiFeedback.reinforcement || aiFeedback.refinement) && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                  {/* Reinforcement Card */}
-                  <Card className="bg-muted/50">
-                    <CardHeader>
-                      <CardTitle className="text-base">Reinforcement Feedback</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Textarea
-                        value={aiFeedback.reinforcement}
-                        onChange={e => handleFeedbackChange("reinforcement", e.target.value)}
-                        rows={4}
-                        className="w-full"
-                        placeholder="AI-generated reinforcement feedback will appear here."
-                      />
-                    </CardContent>
-                  </Card>
-                  {/* Refinement Card */}
-                  <Card className="bg-muted/50">
-                    <CardHeader>
-                      <CardTitle className="text-base">Refinement Feedback</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Textarea
-                        value={aiFeedback.refinement}
-                        onChange={e => handleFeedbackChange("refinement", e.target.value)}
-                        rows={4}
-                        className="w-full"
-                        placeholder="AI-generated refinement feedback will appear here."
-                      />
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
+              {(() => {
+                const entries = watch("walkthroughEntries") || [];
+                const reinforcementFeedback = entries.find(e => e.type === "reinforcement")?.aiFeedback || "";
+                const refinementFeedback = entries.find(e => e.type === "refinement")?.aiFeedback || "";
+                if (reinforcementFeedback || refinementFeedback) {
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                      {/* Reinforcement Card */}
+                      <Card className="bg-muted/50">
+                        <CardHeader>
+                          <CardTitle className="text-base">Reinforcement Feedback</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <Textarea
+                            value={reinforcementFeedback}
+                            onChange={e => handleFeedbackChange("reinforcement", e.target.value)}
+                            rows={4}
+                            className="w-full"
+                            placeholder="AI-generated reinforcement feedback will appear here."
+                          />
+                        </CardContent>
+                      </Card>
+                      {/* Refinement Card */}
+                      <Card className="bg-muted/50">
+                        <CardHeader>
+                          <CardTitle className="text-base">Refinement Feedback</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <Textarea
+                            value={refinementFeedback}
+                            onChange={e => handleFeedbackChange("refinement", e.target.value)}
+                            rows={4}
+                            className="w-full"
+                            placeholder="AI-generated refinement feedback will appear here."
+                          />
+                        </CardContent>
+                      </Card>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
               <div className="flex gap-4 mt-6">
-                {!(aiFeedback.reinforcement && aiFeedback.refinement) ? (
-                  <Button type="button" variant="secondary" onClick={handleAIFeedback} disabled={aiLoading}>
-                    {aiLoading ? "Generating AI Feedback..." : "Generate AI Feedback"}
-                  </Button>
-                ) : (
-                  <Button type="submit" disabled={isSubmitting || !(aiFeedback.reinforcement && aiFeedback.refinement)}>
-                    {isSubmitting ? "Submitting..." : "Submit"}
-                  </Button>
-                )}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleAIFeedback}
+                  disabled={aiLoading}
+                >
+                  {aiLoading ? "Generating AI Feedback..." : "Generate AI Feedback"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSubmit(onSaveDraft)}
+                  disabled={isSubmitting}
+                >
+                  Save as Draft
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || !((watch("walkthroughEntries")?.find(e => e.type === "reinforcement")?.aiFeedback) && (watch("walkthroughEntries")?.find(e => e.type === "refinement")?.aiFeedback))}
+                >
+                  {isSubmitting ? "Submitting..." : "Submit"}
+                </Button>
               </div>
             </CardContent>
           </Card>
