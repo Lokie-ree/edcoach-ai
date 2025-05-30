@@ -63,6 +63,13 @@ interface Indicator {
   student_centered_evidence?: string | string[] | Record<string, string>;
 }
 
+// Add after Indicator interface
+type WalkthroughEntry = {
+  indicatorAcronym: string;
+  type: "reinforcement" | "refinement";
+  aiFeedback: string;
+};
+
 export function WalkthroughForm({ walkthroughId }: { walkthroughId?: Id<"walkthroughs"> }) {
   const methods = useForm<WalkthroughFormData>({
     resolver: zodResolver(walkthroughSchema),
@@ -111,15 +118,24 @@ export function WalkthroughForm({ walkthroughId }: { walkthroughId?: Id<"walkthr
 
   // Pre-fill form if editing a draft
   useEffect(() => {
-    console.log("walkthroughEntries", walkthroughEntries);
+    const entryList: WalkthroughEntry[] = (walkthroughEntries as Array<{
+      indicatorAcronym?: string;
+      type: "reinforcement" | "refinement";
+      aiFeedback?: string;
+    }>).map((entry) => ({
+      indicatorAcronym: entry.indicatorAcronym ?? "",
+      type: entry.type,
+      aiFeedback: entry.aiFeedback ?? "",
+    }));
+
     if (
       draft &&
       walkthroughId &&
-      walkthroughEntries.length === 2 &&
+      entryList.length === 2 &&
       lastResetId.current !== walkthroughId
     ) {
-      const reinforcementEntry = walkthroughEntries.find((e: any) => e.type === "reinforcement");
-      const refinementEntry = walkthroughEntries.find((e: any) => e.type === "refinement");
+      const reinforcementEntry = entryList.find((e) => e.type === "reinforcement");
+      const refinementEntry = entryList.find((e) => e.type === "refinement");
 
       reset({
         teacherId: draft.teacherId,
@@ -141,11 +157,9 @@ export function WalkthroughForm({ walkthroughId }: { walkthroughId?: Id<"walkthr
           },
         ],
       });
-
       lastResetId.current = walkthroughId;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draft, walkthroughEntries, walkthroughId, reset]);
+  }, [draft, walkthroughId, reset, walkthroughEntries]);
 
   // Real AI feedback logic
   const generateFeedback = useAction(api.aiFeedback.generateFeedback);
@@ -217,8 +231,12 @@ export function WalkthroughForm({ walkthroughId }: { walkthroughId?: Id<"walkthr
   // Handler for editable feedback textareas
   const handleFeedbackChange = (type: "reinforcement" | "refinement", value: string) => {
     const entries = methods.getValues("walkthroughEntries") || [];
-    type Entry = WalkthroughFormData['walkthroughEntries'][number];
-    const updatedEntries = entries.map((entry: Entry) =>
+    // Ensure aiFeedback is always a string and cast to WalkthroughEntry[]
+    const normalizedEntries: WalkthroughEntry[] = entries.map((entry) => ({
+      ...entry,
+      aiFeedback: entry.aiFeedback ?? "",
+    }));
+    const updatedEntries = normalizedEntries.map((entry) =>
       entry.type === type
         ? { ...entry, type: type as typeof entry.type, aiFeedback: value }
         : entry
@@ -245,7 +263,7 @@ export function WalkthroughForm({ walkthroughId }: { walkthroughId?: Id<"walkthr
       if (!draftValidation.success) {
         toast({
           title: "Validation Error",
-          description: draftValidation.error.errors.map((e: any) => e.message).join(", "),
+          description: draftValidation.error.errors.map((e: { message: string }) => e.message).join(", "),
           variant: "destructive",
         });
         return;
@@ -308,7 +326,7 @@ export function WalkthroughForm({ walkthroughId }: { walkthroughId?: Id<"walkthr
       if (!finalValidation.success) {
         toast({
           title: "Validation Error",
-          description: finalValidation.error.errors.map((e: any) => e.message).join(", "),
+          description: finalValidation.error.errors.map((e: { message: string }) => e.message).join(", "),
           variant: "destructive",
         });
         return;
