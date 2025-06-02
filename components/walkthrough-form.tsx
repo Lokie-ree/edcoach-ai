@@ -34,7 +34,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CalendarInput } from "@/components/ui/calendar-input";
-import { walkthroughDraftSchema } from "@/convex/validation/walkthroughDraftSchema";
 import { walkthroughFinalSchema } from "@/convex/validation/walkthroughFinalSchema";
 
 // Types
@@ -242,69 +241,6 @@ export function WalkthroughForm({ walkthroughId }: { walkthroughId?: Id<"walkthr
         : entry
     );
     methods.setValue("walkthroughEntries", updatedEntries);
-  };
-
-  // Save as Draft handler
-  const onSaveDraft = async (data: WalkthroughFormData) => {
-    try {
-      setValue("status", "draft");
-      await methods.trigger(); // ensure freshest form state
-      const walkthroughDate = data.walkthroughDate instanceof Date
-        ? data.walkthroughDate.getTime()
-        : Number(data.walkthroughDate);
-      const entries = methods.getValues("walkthroughEntries");
-      console.log("[onSaveDraft] After trigger, walkthroughEntries:", entries);
-      const draftValidation = walkthroughDraftSchema.safeParse({
-        ...data,
-        status: "draft",
-        walkthroughEntries: entries,
-        walkthroughDate,
-      });
-      if (!draftValidation.success) {
-        toast({
-          title: "Validation Error",
-          description: draftValidation.error.errors.map((e: { message: string }) => e.message).join(", "),
-          variant: "destructive",
-        });
-        return;
-      }
-      if (walkthroughId && draft) {
-        // Update existing draft
-        await updateWalkthrough({
-          walkthroughId,
-          teacherId: data.teacherId as Id<"teachers">,
-          walkthroughDate,
-          status: "draft",
-          reinforcementIndicator: data.reinforcementIndicator,
-          refinementIndicator: data.refinementIndicator,
-          evidenceSummary: data.evidenceSummary,
-          walkthroughEntries: entries,
-        });
-      } else {
-        // Create new draft
-        await createWalkthrough({
-          teacherId: data.teacherId as Id<"teachers">,
-          walkthroughDate,
-          status: "draft",
-          reinforcementIndicator: data.reinforcementIndicator,
-          refinementIndicator: data.refinementIndicator,
-          evidenceSummary: data.evidenceSummary,
-          walkthroughEntries: entries,
-        });
-      }
-      toast({
-        title: "Draft Saved",
-        description: "You can resume this walkthrough later.",
-        variant: "success",
-      });
-      router.push("/dashboard");
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to save draft.",
-        variant: "destructive",
-      });
-    }
   };
 
   // Submit handler (finalize)
