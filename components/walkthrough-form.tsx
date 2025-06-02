@@ -577,14 +577,6 @@ export function WalkthroughForm({ walkthroughId }: { walkthroughId?: Id<"walkthr
                   {aiLoading ? "Generating AI Feedback..." : "Generate AI Feedback"}
                 </Button>
                 <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleSubmit(onSaveDraft)}
-                  disabled={isSubmitting}
-                >
-                  Save as Draft
-                </Button>
-                <Button
                   type="submit"
                   disabled={isSubmitting || !((watch("walkthroughEntries")?.find(e => e.type === "reinforcement")?.aiFeedback) && (watch("walkthroughEntries")?.find(e => e.type === "refinement")?.aiFeedback))}
                 >

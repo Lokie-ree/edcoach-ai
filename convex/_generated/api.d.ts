@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as aiFeedback from "../aiFeedback.js";
 import type * as aiFeedbackMutations from "../aiFeedbackMutations.js";
+import type * as analytics from "../analytics.js";
 import type * as audit from "../audit.js";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
@@ -43,6 +44,7 @@ import type * as walkthroughs from "../walkthroughs.js";
 declare const fullApi: ApiFromModules<{
   aiFeedback: typeof aiFeedback;
   aiFeedbackMutations: typeof aiFeedbackMutations;
+  analytics: typeof analytics;
   audit: typeof audit;
   auth: typeof auth;
   http: typeof http;
