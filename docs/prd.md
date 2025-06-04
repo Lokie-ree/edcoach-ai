@@ -12,7 +12,7 @@
 ### 1.2 Product summary
 EdCoach AI is an AI-powered instructional coaching and feedback platform designed to supplement formal teacher evaluations in K-12 schools. The system enhances the ongoing coaching workflow between school leaders, instructional coaches, and teachers by providing tools for frequent, informal classroom walkthroughs, generating timely, rubric-aligned feedback snippets, and tracking developmental trends at the school level.
 
-The platform specifically addresses the need for continuous support and growth in the intervals between mandated formal observations, making feedback more frequent, actionable, and less burdensome. While it also supports formal observation workflows, its primary focus is facilitating the high-frequency, low-burden feedback that drives ongoing teacher development.
+The platform specifically addresses the need for continuous support and growth in the intervals between mandated formal observations, making feedback more frequent, actionable, and less burdensome. While it can support formal observation workflows in the future, its primary focus is facilitating the high-frequency, low-burden feedback that drives ongoing teacher development through informal walkthroughs.
 
 ## 2. Goals
 ### 2.1 Business goals
@@ -31,7 +31,7 @@ The platform specifically addresses the need for continuous support and growth i
 - Replacing or serving as the sole system for official, state-mandated teacher evaluations (e.g., LEADS). EdCoach AI is a supplementary coaching tool
 - Support for custom rubrics beyond LER in the MVP phase
 - District-level user roles and analytics in the MVP phase
-- Teacher response/feedback loop on observations
+- Teacher response/feedback loop on walkthroughs in the MVP phase
 - Integration with third-party teacher evaluation systems
 - Student assessment or performance tracking
 - Parent/guardian access to observation data
@@ -49,46 +49,35 @@ The platform specifically addresses the need for continuous support and growth i
 - **Teachers:** Classroom instructors who receive regular, actionable feedback snippets throughout the year to support continuous professional growth
 
 ### 3.3 Role-based access
-- **Principals:** Can conduct walkthroughs/observations, view all staff data/analytics, and access comprehensive school dashboards showing feedback frequency and trends
-- **Assistant Principals/Instructional Coaches:** Can conduct walkthroughs/observations, access assigned teacher data, and view limited analytics
-- **Teachers:** Can view/download all their feedback interactions (both informal and formal), access personal growth analytics
+- **Principals:** Can conduct walkthroughs, view all staff data/analytics, and access comprehensive school dashboards showing feedback frequency and trends
+- **Assistant Principals/Instructional Coaches:** Can conduct walkthroughs, access assigned teacher data, and view limited analytics
+- **Teachers:** Can view/download all their feedback interactions from informal walkthroughs, access personal growth analytics
 
 ## 4. Functional requirements
-- **Observation Templates (LER-Based)** (Priority: High)
-  - **Informal Walkthrough Template** (Priority: Critical)
-    - Streamlined interface for selecting exactly one focus indicator for reinforcement and one for refinement
-    - Simplified evidence capture optimized for quick completion
-    - Target completion time under 10 minutes
-  - **Formal Observation Template** (Priority: Medium)
-    - Comprehensive digital form with all LER domains and indicators
-    - Ability to input ratings and evidence for each indicator
-  
+- **Informal Walkthrough Templates (LER-Based)** (Priority: Critical)
+  - Streamlined interface for selecting exactly one focus indicator for reinforcement and one for refinement
+  - Simplified evidence capture optimized for quick completion
+  - Target completion time under 10 minutes
 - **Analytics/Dashboard Views** (Priority: High, MVP)
   - Role-based dashboards for teachers, coaches, and principals showing feedback frequency, trends, and growth analytics
   - Visualizations for feedback and walkthrough trends
   - Filters for date, teacher, indicator, observer
   - Admin/leaderboard views for school leaders
-
 - **Draft/Finalized Status** (Priority: High, MVP)
-  - Allow walkthroughs/observations to be saved as draft for later completion (minimal 'Save as Draft' only)
+  - Allow walkthroughs to be saved as draft for later completion (minimal 'Save as Draft' only)
   - Provide streamlined finalization workflow before sharing with teachers
-
 - **AI-Generated Feedback** (Priority: High)
-  - Generate concise, actionable feedback from both detailed formal notes and brief informal walkthrough evidence
+  - Generate concise, actionable feedback from brief informal walkthrough evidence
   - Allow observers to quickly edit AI suggestions before finalizing
-  
   **AI Model Selection Rationale:**
   For all AI-generated feedback, EdCoach AI uses OpenAI's GPT-4.1 Mini model. This model was selected for its optimal balance of cost, speed, and high-quality instruction following. GPT-4.1 Mini provides a 1M token context window (sufficient for large rubrics and evidence), strong alignment with rubric-based feedback, and reliable, actionable outputs. It is significantly more cost-effective than full GPT-4.1 or GPT-4o, and outperforms smaller models (e.g., Nano) in reasoning and factuality—making it ideal for user-facing, rubric-aligned feedback in K-12 education.
-  
 - **Teacher Feedback Access** (Priority: High)
-  - Secure portal for teachers to view all their feedback interactions
-  - Feed-style interface showing both informal and formal feedback
+  - Secure portal for teachers to view all their feedback interactions from informal walkthroughs
+  - Feed-style interface showing informal feedback
   - Ability to download feedback reports
-  
 - **Authentication and Role Management** (Priority: High)
   - Secure login, registration, and session management via Clerk
   - Role and permission management in Convex DB
-  
 - **Device Optimization** (Priority: High)
   - Mobile-first design optimized for classroom walkthrough capture
   - Minimal 'Save as Draft' capability for in-classroom use
@@ -106,12 +95,10 @@ The platform specifically addresses the need for continuous support and growth i
   - Streamlined, mobile-optimized interface with minimal typing requirements
   - Progress indicators show completion status
   - Minimal 'Save as Draft' option to prevent data loss
-  
 - **Generating feedback:** After completing walkthrough notes, AI generates concise, targeted feedback suggestions aligned with the evidence and selected indicators. Observers quickly review/edit before sharing. 
   - Quick review interface optimized for rapid approval/editing
   - System ensures feedback is actionable and growth-oriented
-  
-- **Reviewing feedback:** Teachers access a feed of all feedback interactions, including frequent informal points and less frequent formal observations
+- **Reviewing feedback:** Teachers access a feed of all feedback interactions from informal walkthroughs
   - Clean, distraction-free reading experience with option to download
   - Historical view allows tracking growth over time
   - Role-based dashboards and analytics views for teachers, coaches, and principals
@@ -120,8 +107,8 @@ The platform specifically addresses the need for continuous support and growth i
 - Handling incomplete walkthroughs with draft status (minimal 'Save as Draft' in MVP; full offline/draft support post-MVP)
 - Managing feedback for underperforming indicators with constructive language
 - Supporting offline completion when internet connectivity is limited (post-MVP)
-- Linking informal feedback points to formal observation goals
-- Aggregating informal feedback trends to inform formal evaluations
+- Linking informal feedback points to formal observation goals (post-MVP)
+- Aggregating informal feedback trends to inform formal evaluations (post-MVP)
 
 ### 5.4. UI/UX highlights
 - Single-page walkthrough form with logical flow for rapid completion
@@ -135,7 +122,7 @@ The platform specifically addresses the need for continuous support and growth i
   - Accessibility-first approach
   - Mobile-first responsive design
 - **Filter & Sort Capabilities:**
-  - Walkthrough/observation filters
+  - Walkthrough filters
   - Analytics filters with state persistence
   - Sort options for feedback review
 
@@ -176,15 +163,14 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
   - Framer Motion for animations
 
 ### 8.2. Data storage & privacy
-- Role-based access controls for all observation data
+- Role-based access controls for all walkthrough data
 - School-level data isolation to prevent cross-school data access
-- Encrypted storage of all observation content
+- Encrypted storage of all walkthrough content
 - Compliance with FERPA and education data privacy requirements
 - Data retention policies aligned with educational record requirements
 - **Core Data Entities:**
   - Users, Organizations, Teachers, Rubrics
-  - Observations, Evidence, Feedback
-  - Walkthroughs, WalkthroughEntries
+  - Walkthroughs, WalkthroughEntries, Evidence, Feedback
   - AnalyticsViews (for dashboards)
   - AuditLogs for sensitive actions
   [Reference: See project plan Section 9.1 for detailed schema]
@@ -214,13 +200,10 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
 ### 9.3. Suggested phases
 - **Phase 1:** Core authentication, Informal Walkthrough template development, basic teacher access portal, minimal 'Save as Draft' (3 weeks)
   - Key deliverables: User registration, role management, mobile-optimized walkthrough form, minimal 'Save as Draft'
-
-- **Phase 2:** AI feedback generation optimized for informal feedback, analytics/dashboard views, draft management, Formal Observation template as secondary feature (3 weeks)
+- **Phase 2:** AI feedback generation optimized for informal feedback, analytics/dashboard views, draft management (3 weeks)
   - Key deliverables: LLM integration for concise feedback, quick editing workflow, teacher access portal, analytics/dashboard views
-
 - **Phase 3:** Analytics dashboards emphasizing informal trends, mobile optimization refinement (2 weeks)
   - Key deliverables: Role-based dashboards showing feedback frequency and trends, responsive design
-
 - **Phase 4:** Testing, refinement, and launch preparation (2 weeks)
   - Key deliverables: Quality assurance, performance optimization, launch documentation
 
@@ -270,9 +253,9 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
 - **Description:** As an instructional coach, I want to compare a teacher's growth trends over time so that I can track their professional development.
 - **Acceptance criteria:**
   - Coach can select a specific teacher to view longitudinal data
-  - System visualizes trends based on the accumulation of frequent informal feedback points over time, potentially alongside formal observation data
+  - System visualizes trends based on the accumulation of frequent informal feedback points over time
   - Visualization highlights changes in specific domains and indicators
-  - Coach can filter by observation type or date range
+  - Coach can filter by walkthrough type or date range
   - Growth patterns are clearly identified and highlighted
 
 ### 10.7. All rubric data is loaded from the database (Convex), not from local files
@@ -280,6 +263,7 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
 ## Post-MVP Features (Deferred)
 - Advanced offline form completion and sync
 - Exports and advanced reporting
+- Formal observation support
 
 ## Document References
 - PRD: [Link to PRD]
@@ -288,4 +272,4 @@ Principal Maria feels the pressure of the state's formal evaluation system (LEAD
 
 ## Version History
 - v1.1 (May 5, 2025): Initial synchronization
-- v1.2 (2024-06-09): Updated to align PRD and project plan
+- v1.2 (June 6, 2025) updated to align PRD and project plan

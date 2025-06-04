@@ -1,36 +1,42 @@
 # EdCoach AI
 
-EdCoach AI is an instructional support platform for school leaders, instructional coaches, and teachers. The MVP streamlines classroom observations, provides instant, rubric-aligned feedback, and tracks teacher growth at the school level.
+EdCoach AI is an AI-powered instructional coaching and feedback platform for K-12 schools. It is designed to supplement (not replace) formal teacher evaluations by streamlining informal classroom walkthroughs, generating instant, rubric-aligned feedback, and tracking teacher growth at the school level. The platform focuses on making feedback more frequent, actionable, and less burdensome, supporting continuous professional development between formal observations.
 
 ## Core MVP Features
 
-- **Role-Based Dashboards:** For teachers, instructional coaches/assistant principals, and principals
-- **Observation System:** Two templates (Formal Observation, Informal Walkthrough) using the LER rubric
-- **Draft/Finalized Workflow:** Observations can be saved as draft or finalized before sharing
-- **AI-Assisted Feedback:** Instantly generate and edit professional feedback based on observation evidence
-- **Teacher Feedback Access:** Teachers can view and download observation results and feedback
-- **Analytics Dashboard:** Visualize observation trends and teacher performance, scoped to school
-- **Authentication:** Secure login and registration with Clerk
-- **Role/Permission Management:** Roles and permissions managed in Convex DB for future scalability
-- **Responsive Design:** Works on desktop, tablet, and mobile
+- **Role-Based Dashboards:** Tailored for teachers, instructional coaches/assistant principals, and principals, showing feedback frequency, trends, and growth analytics
+- **LER-Based Informal Walkthrough System:** Streamlined, mobile-first form for selecting one focus indicator for reinforcement and one for refinement, with quick evidence capture using the Louisiana Educator Rubric (LER)
+- **Draft/Finalized Workflow:** Walkthroughs can be saved as draft or finalized before sharing
+- **AI-Assisted Feedback:** Instantly generate and edit professional, rubric-aligned feedback using OpenAI GPT-4.1 Mini, optimized for educational context
+- **Teacher Feedback Access:** Secure portal for teachers to view and download all informal feedback interactions
+- **Analytics Dashboard:** Visualize walkthrough trends and teacher performance, scoped to school and role
+- **Authentication & Role Management:** Secure login and registration with Clerk; roles and permissions managed in Convex DB
+- **Mobile-First, Responsive Design:** Optimized for classroom use on any device, with touch-friendly UI and minimal typing
 
 ## Technology Stack
 
-- **Frontend:** Next.js 15, Tailwind CSS, ShadCN UI, MagicUI
+- **Frontend:** Next.js 15, Tailwind CSS, shadcn UI, MagicUI
 - **Backend:** Convex for database and server logic
 - **Authentication:** Clerk (Convex DB for roles/permissions)
-- **AI:** LLM for educational context and LER rubric alignment
+- **AI:** OpenAI GPT-4.1 Mini for feedback generation (chosen for cost, speed, and rubric alignment)
 
 ## Development Status
 
-EdCoach AI is in active MVP development, focusing on the core observation-feedback-analytics loop for school-level users.
+EdCoach AI is in active MVP development, focusing on:
+- Informal walkthroughs with LER-based templates
+- AI-generated, actionable feedback
+- Draft/finalized workflow
+- Role-based dashboards and analytics
+- Secure teacher feedback access
 
 ## Planned Features (Post-MVP)
 
 - Custom rubric support
-- District admin features
+- District admin roles and analytics
 - Advanced analytics and reporting
-- Teacher response to feedback
+- Teacher response/feedback loop on walkthroughs
+- Advanced offline form completion and sync
+- Exports and advanced reporting
 - Gamification and subscription management
 
 ## Getting Started
@@ -71,7 +77,7 @@ EdCoach AI is in active MVP development, focusing on the core observation-feedba
 
 ## Learn More
 
-- [Product Requirements Document](documentation/prd.md)
+- [Product Requirements Document](docs/prd.md)
 - [Development Roadmap](documentation/development-roadmap.md)
 - [Testing Plan](documentation/testing-plan.md)
 - [Convex Documentation](https://docs.convex.dev/)
