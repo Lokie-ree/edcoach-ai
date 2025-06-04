@@ -11,37 +11,62 @@ import { query, mutation, internalQuery } from "./_generated/server";
 export const storeMetadata = mutation({
   args: {
     preferences: v.optional(v.any()),
-    organization: v.string(),
+    role: v.union(v.literal("coach"), v.literal("teacher")),
+    coachId: v.optional(v.id("users")),
+    subscriptionStatus: v.optional(v.union(v.literal("active"), v.literal("inactive"))),
+    subscriptionTier: v.optional(v.union(v.literal("basic"), v.literal("pro"))),
+    imageUrl: v.optional(v.string()),
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error("Not authenticated");
     }
-
     // Check if user exists in our DB
     const existingUser = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
-
+    const baseUser = {
+      preferences: args.preferences ?? {},
+      role: args.role,
+      name: args.name ?? identity.name ?? "",
+      email: args.email ?? identity.email ?? "",
+      imageUrl: args.imageUrl ?? undefined,
+      createdAt: Date.now(),
+      organization: "", // Default value for schema compatibility
+    };
     if (existingUser) {
+      // Patch missing role/coachId for existing users (for testing before onboarding)
+      let patchFields: any = { ...baseUser };
+      if (!existingUser.role) {
+        patchFields.role = "coach";
+      }
+      if (!existingUser.coachId) {
+        patchFields.coachId = existingUser._id;
+      }
       // Update existing user
       await ctx.db.patch(existingUser._id, {
-        preferences: args.preferences,
-        organization: args.organization,
+        ...patchFields,
+        coachId: args.role === "teacher" ? args.coachId : patchFields.coachId,
+        subscriptionStatus: args.role === "coach" ? args.subscriptionStatus : undefined,
+        subscriptionTier: args.role === "coach" ? args.subscriptionTier : undefined,
       });
       return { success: true, userId: existingUser._id };
     } else {
-      // Create new user record
+      // Create new user record with default role/coachId for testing
       const userId = await ctx.db.insert("users", {
         clerkId: identity.subject,
-        name: identity.name ?? "",
-        email: identity.email ?? "",
-        organization: args.organization,
-        preferences: args.preferences ?? {},
-        createdAt: Date.now(),
+        ...baseUser,
+        role: "coach",
+        coachId: undefined, // will patch below
+        subscriptionStatus: args.subscriptionStatus,
+        subscriptionTier: args.subscriptionTier,
       });
+      // Patch coachId to be their own userId
+      await ctx.db.patch(userId, { coachId: userId });
       return { success: true, userId };
     }
   },
@@ -54,7 +79,6 @@ export const getCurrentUser = query({
     if (!identity) {
       return null;
     }
-
     return await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
@@ -78,8 +102,12 @@ export const createUser = mutation({
     clerkId: v.string(),
     name: v.string(),
     email: v.string(),
-    organization: v.string(),
+    role: v.union(v.literal("coach"), v.literal("teacher")),
+    coachId: v.optional(v.id("users")),
+    subscriptionStatus: v.optional(v.union(v.literal("active"), v.literal("inactive"))),
+    subscriptionTier: v.optional(v.union(v.literal("basic"), v.literal("pro"))),
     imageUrl: v.optional(v.string()),
+    preferences: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
     // Check if user already exists
@@ -87,21 +115,23 @@ export const createUser = mutation({
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
       .unique();
-
     if (existingUser) {
       return { userId: existingUser._id, created: false };
     }
-
     // Create new user
     const userId = await ctx.db.insert("users", {
       clerkId: args.clerkId,
       name: args.name,
       email: args.email,
-      organization: args.organization,
-      imageUrl: args.imageUrl,
+      imageUrl: args.imageUrl ?? undefined,
+      preferences: args.preferences ?? {},
+      role: args.role,
+      coachId: args.role === "teacher" ? args.coachId : undefined,
+      subscriptionStatus: args.role === "coach" ? args.subscriptionStatus : undefined,
+      subscriptionTier: args.role === "coach" ? args.subscriptionTier : undefined,
       createdAt: Date.now(),
+      organization: "", // Default value for schema compatibility
     });
-
     return { userId, created: true };
   },
 });
@@ -116,7 +146,6 @@ export const getUserByClerkId = query({
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
       .unique();
-    
     return user;
   },
 });
@@ -127,29 +156,27 @@ export const updateUser = mutation({
     userId: v.id("users"),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
-    organization: v.optional(v.string()),
+    role: v.optional(v.union(v.literal("coach"), v.literal("teacher"))),
+    coachId: v.optional(v.id("users")),
+    subscriptionStatus: v.optional(v.union(v.literal("active"), v.literal("inactive"))),
+    subscriptionTier: v.optional(v.union(v.literal("basic"), v.literal("pro"))),
     imageUrl: v.optional(v.string()),
+    preferences: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
     const { userId, ...updates } = args;
-
-    // Define the type for the keys we expect in updates
     type UpdateKeys = keyof Omit<typeof args, 'userId'>;
-    
-    const filteredUpdates: Partial<typeof updates> = {};
-
-    // Build updates object only with defined values
+    // Add organization to the type
+    type UpdatesWithOrg = Partial<typeof updates> & { organization?: string };
+    const filteredUpdates: UpdatesWithOrg = {};
     (Object.keys(updates) as UpdateKeys[]).forEach((key) => {
       if (updates[key] !== undefined) {
         filteredUpdates[key] = updates[key];
       }
     });
-
-    // Only update if there are changes
-    if (Object.keys(filteredUpdates).length === 0) {
-      return { success: false, message: "No updates provided" };
+    if (filteredUpdates.organization === undefined) {
+      filteredUpdates.organization = "";
     }
-
     await ctx.db.patch(userId, filteredUpdates);
     return { success: true };
   },
@@ -159,56 +186,16 @@ export const updateUser = mutation({
 export const updateSubscription = mutation({
   args: {
     userId: v.id("users"),
-    subscriptionStatus: v.string(),
-    subscriptionTier: v.string(),
+    subscriptionStatus: v.union(v.literal("active"), v.literal("inactive")),
+    subscriptionTier: v.union(v.literal("basic"), v.literal("pro")),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.userId, {
       subscriptionStatus: args.subscriptionStatus,
       subscriptionTier: args.subscriptionTier,
+      organization: "", // Default value for schema compatibility
     });
-    
     return { success: true };
-  },
-});
-
-export const updateProfile = mutation({
-  args: {
-    name: v.string(),
-    email: v.string(),
-    organization: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    // Check if user exists
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (user) {
-      // Update existing user
-      await ctx.db.patch(user._id, {
-        name: args.name,
-        email: args.email,
-        organization: args.organization,
-      });
-      return { success: true };
-    } else {
-      // Create new user
-      await ctx.db.insert("users", {
-        clerkId: identity.subject,
-        name: args.name,
-        email: args.email,
-        organization: args.organization,
-        createdAt: Date.now(),
-      });
-      return { success: true };
-    }
   },
 });
 
@@ -221,4 +208,5 @@ export const internalGetUserByClerkId = internalQuery({
       .unique();
   },
 });
+
 

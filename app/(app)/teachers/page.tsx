@@ -21,6 +21,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useUser } from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
 import Modal from "@/components/mage-ui/modal";
@@ -67,15 +68,26 @@ export default function TeachersPage() {
   const [isAddingTeacher, setIsAddingTeacher] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [deletingTeacher, setDeletingTeacher] = useState<Teacher | null>(null);
-  const teachers = useQuery(api.teachers.list);
+  const { user } = useUser();
+  const convexUser = useQuery(
+    api.users.getUserByClerkId,
+    user ? { clerkId: user.id } : "skip"
+  );
+  const coachId = convexUser?._id;
+
+  // Only fetch teachers when coachId is available
+  const teachers = useQuery(
+    api.teachers.list,
+    coachId ? { coachId } : "skip"
+  );
   const createTeacher = useMutation(api.teachers.create);
   const updateTeacher = useMutation(api.teachers.update);
   const removeTeacher = useMutation(api.teachers.remove);
 
   const handleDelete = async () => {
-    if (!deletingTeacher) return;
+    if (!deletingTeacher || !coachId) return;
     try {
-      await removeTeacher({ id: deletingTeacher._id as Id<'teachers'> });
+      await removeTeacher({ id: deletingTeacher._id as Id<'teachers'>, coachId });
       toast.success("Teacher deleted successfully");
       setDeletingTeacher(null);
     } catch (error) {
@@ -167,8 +179,14 @@ export default function TeachersPage() {
               setIsAddingTeacher(false);
               setEditingTeacher(null);
             }}
-            createTeacher={createTeacher}
-            updateTeacher={updateTeacher}
+            createTeacher={async (values) => {
+              if (!coachId) return;
+              await createTeacher({ ...values, coachId });
+            }}
+            updateTeacher={async (values) => {
+              if (!coachId) return;
+              await updateTeacher({ ...values, coachId });
+            }}
             teacher={editingTeacher ?? undefined}
           />
         </Modal>

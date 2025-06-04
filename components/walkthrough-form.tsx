@@ -4,12 +4,13 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { walkthroughSchema } from "../app/(app)/walkthrough/new/validation";
 import { z } from "zod";
+import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Card,
   CardHeader,
@@ -47,7 +48,7 @@ interface Teacher {
   department?: string;
   gradeLevel?: string;
   status?: string;
-  createdBy: string;
+  createdBy?: string;
   createdAt: number;
   organization?: string;
 }
@@ -69,7 +70,7 @@ type WalkthroughEntry = {
   aiFeedback: string;
 };
 
-export function WalkthroughForm({ walkthroughId }: { walkthroughId?: Id<"walkthroughs"> }) {
+export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkthroughId?: Id<"walkthroughs">, coachId?: Id<"users"> }) {
   const methods = useForm<WalkthroughFormData>({
     resolver: zodResolver(walkthroughSchema),
     defaultValues: {
@@ -95,8 +96,16 @@ export function WalkthroughForm({ walkthroughId }: { walkthroughId?: Id<"walkthr
   const [aiLoading, setAILoading] = useState(false);
   const lastResetId = useRef<Id<"walkthroughs"> | undefined>(undefined);
 
-  // Fetch teachers and indicators
-  const teachers = (useQuery(api.teachers.list) ?? []) as Teacher[];
+  // Use propCoachId if provided, otherwise fetch current user
+  const { user } = useUser();
+  const convexUser = useQuery(
+    api.users.getUserByClerkId,
+    !propCoachId && user ? { clerkId: user.id } : "skip"
+  );
+  const coachId = propCoachId || convexUser?._id;
+
+  // Only fetch teachers when coachId is available
+  const teachers = (useQuery(api.teachers.list, coachId ? { coachId } : "skip") ?? []) as Teacher[];
   const rubricData = useQuery(api.rubrics.listRubricWithIndicators);
   const indicators: Indicator[] = rubricData
     ? rubricData.domains.flatMap((domain: { indicators: Indicator[] }) => domain.indicators)
@@ -115,9 +124,9 @@ export function WalkthroughForm({ walkthroughId }: { walkthroughId?: Id<"walkthr
     shouldFetchEntries && walkthroughId ? { walkthroughId } : "skip"
   ) ?? [];
 
-  // Pre-fill form if editing a draft
-  useEffect(() => {
-    const entryList: WalkthroughEntry[] = (walkthroughEntries as Array<{
+  // Add this before the useEffect
+  const entryList = useMemo(() => {
+    return (walkthroughEntries as Array<{
       indicatorAcronym?: string;
       type: "reinforcement" | "refinement";
       aiFeedback?: string;
@@ -126,7 +135,10 @@ export function WalkthroughForm({ walkthroughId }: { walkthroughId?: Id<"walkthr
       type: entry.type,
       aiFeedback: entry.aiFeedback ?? "",
     }));
+  }, [walkthroughEntries]);
 
+  // Then modify the useEffect to use entryList
+  useEffect(() => {
     if (
       draft &&
       walkthroughId &&
@@ -158,7 +170,7 @@ export function WalkthroughForm({ walkthroughId }: { walkthroughId?: Id<"walkthr
       });
       lastResetId.current = walkthroughId;
     }
-  }, [draft, walkthroughId, reset, walkthroughEntries]);
+  }, [draft, walkthroughId, reset, entryList]);
 
   // Real AI feedback logic
   const generateFeedback = useAction(api.aiFeedback.generateFeedback);

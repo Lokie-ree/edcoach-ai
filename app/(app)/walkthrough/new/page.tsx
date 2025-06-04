@@ -1,22 +1,20 @@
-import { Metadata } from "next";
+"use client";
+
 import { WalkthroughForm } from "@/components/walkthrough-form";
-export const metadata: Metadata = {
-  title: "New Observation | EdCoach AI",
-  description: "Create a new observation or walkthrough using our simplified form",
-  keywords: ["observation", "walkthrough", "education", "teaching", "feedback"],
-  openGraph: {
-    title: "New Observation | EdCoach AI",
-    description: "Create a new observation or walkthrough using our simplified form",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "New Observation | EdCoach AI",
-    description: "Create a new observation or walkthrough using our simplified form",
-  },
-};
+import { useUser } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+
 
 export default function NewObservationPage() {
+  const { user } = useUser();
+  const convexUser = useQuery(
+    api.users.getUserByClerkId,
+    user ? { clerkId: user.id } : "skip"
+  );
+  const coachId = convexUser?._id as Id<'users'> | undefined;
+
   return (
     <div className="relative">
       {/* Background gradient effect */}
@@ -26,7 +24,7 @@ export default function NewObservationPage() {
 
       {/* Content */}
       <div className="container max-w-4xl py-8 relative">
-        <WalkthroughForm />
+        {coachId && <WalkthroughForm coachId={coachId} />}
       </div>
     </div>
   );

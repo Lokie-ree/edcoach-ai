@@ -40,8 +40,14 @@ async function getUserIdForMutation(ctx: MutationCtx, identity: any) {
       clerkId: identity.subject,
       name: identity.name ?? "",
       email: identity.email ?? "",
-      organization: "default", // Default organization
+      organization: "", // Default for schema compatibility
       createdAt: Date.now(),
+      role: "coach" as const, // Default to coach for this context
+      imageUrl: undefined,
+      preferences: {},
+      subscriptionStatus: undefined,
+      subscriptionTier: undefined,
+      coachId: undefined,
     };
 
     // Use proper database operation
@@ -53,6 +59,7 @@ async function getUserIdForMutation(ctx: MutationCtx, identity: any) {
   }
 }
 
+// Create a teacher (must be called by a coach)
 export const create = mutation({
   args: {
     name: v.string(),
@@ -60,96 +67,59 @@ export const create = mutation({
     subject: v.array(v.string()),
     gradeLevels: v.array(v.string()),
     status: v.optional(v.string()),
+    coachId: v.id("users"),
   },
   returns: v.object({
     success: v.boolean(),
     teacherId: v.id("teachers"),
   }),
   handler: async (ctx, args) => {
-    try {
-      const identity = await ctx.auth.getUserIdentity();
-      if (!identity) {
-        throw new Error("Not authenticated");
-      }
-
-      // Create the teacher using proper database operation
-      const user = await ctx.db
-        .query("users")
-        .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-        .unique();
-
-      if (!user) {
-        throw new Error("Not authenticated");
-      }
-
-      const teacherId = await ctx.db.insert("teachers", {
-        name: args.name,
-        email: args.email,
-        subject: args.subject,
-        gradeLevels: args.gradeLevels,
-        status: args.status || "pending", // Default to pending if not provided
-        createdBy: user._id,
-        createdAt: Date.now(),
-        organization: user.organization, // Set organization from user
-      });
-      return { success: true, teacherId };
-    } catch (error) {
-      console.error("Error in create function:", error);
-      throw new Error("Failed to create teacher");
+    // Only a coach can create a teacher
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
     }
+    // Optionally, you could check the role of the user here
+    const teacherId = await ctx.db.insert("teachers", {
+      name: args.name,
+      email: args.email,
+      subject: args.subject,
+      gradeLevels: args.gradeLevels,
+      status: args.status || "pending",
+      coachId: args.coachId,
+      createdAt: Date.now(),
+    });
+    return { success: true, teacherId };
   },
 });
 
+// List all teachers for a coach
 export const list = query({
-  args: {},
-  returns: v.union(
-    v.array(
-      v.object({
-        _id: v.id("teachers"),
-        _creationTime: v.number(),
-        name: v.string(),
-        email: v.optional(v.string()),
-        subject: v.array(v.string()),
-        gradeLevels: v.array(v.string()),
-        status: v.optional(v.string()),
-        createdBy: v.id("users"),
-        createdAt: v.number(),
-        organization: v.optional(v.string()),
-      })
-    ),
-    v.null()
+  args: {
+    coachId: v.id("users"),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("teachers"),
+      _creationTime: v.number(),
+      name: v.string(),
+      email: v.optional(v.string()),
+      subject: v.array(v.string()),
+      gradeLevels: v.array(v.string()),
+      status: v.optional(v.string()),
+      coachId: v.id("users"),
+      createdAt: v.number(),
+    })
   ),
-  handler: async (ctx) => {
-    try {
-      const identity = await ctx.auth.getUserIdentity();
-      if (!identity) {
-        return [];
-      }
-
-      // Get the current user
-      const user = await ctx.db
-        .query("users")
-        .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-        .unique();
-
-      if (!user) {
-        return [];
-      }
-
-      // Get all teachers from the user's organization
-      return await ctx.db
-        .query("teachers")
-        .filter((q) => 
-          q.eq(q.field("createdBy"), user._id)
-        )
-        .collect();
-    } catch (error) {
-      console.error("Error in list function:", error);
-      return [];
-    }
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("teachers")
+      .filter((q) => q.eq(q.field("coachId"), args.coachId))
+      .collect();
   },
 });
 
+// Update a teacher
 export const update = mutation({
   args: {
     id: v.id("teachers"),
@@ -158,19 +128,13 @@ export const update = mutation({
     subject: v.array(v.string()),
     gradeLevels: v.array(v.string()),
     status: v.optional(v.string()),
+    coachId: v.id("users"),
   },
   returns: v.object({ success: v.boolean() }),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("Not authenticated");
     const teacher = await ctx.db.get(args.id);
     if (!teacher) throw new Error("Teacher not found");
-    if (teacher.createdBy !== user._id) throw new Error("No permission");
+    if (teacher.coachId !== args.coachId) throw new Error("No permission");
     await ctx.db.patch(args.id, {
       name: args.name,
       email: args.email,
@@ -182,20 +146,14 @@ export const update = mutation({
   },
 });
 
+// Remove a teacher
 export const remove = mutation({
-  args: { id: v.id("teachers") },
+  args: { id: v.id("teachers"), coachId: v.id("users") },
   returns: v.object({ success: v.boolean() }),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) throw new Error("Not authenticated");
     const teacher = await ctx.db.get(args.id);
     if (!teacher) throw new Error("Teacher not found");
-    if (teacher.createdBy !== user._id) throw new Error("No permission");
+    if (teacher.coachId !== args.coachId) throw new Error("No permission");
     await ctx.db.delete(args.id);
     return { success: true };
   },

@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query, action } from "./_generated/server";
 import { api } from "./_generated/api";
+import { MutationCtx } from "./_generated/server";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
@@ -36,6 +37,7 @@ export const createOrGetUser = mutation({
       imageUrl: args.imageUrl,
       organization: args.organization,
       createdAt: Date.now(),
+      role: "coach" as const,
     });
 
     const newUser = await ctx.db.get(userId);
@@ -101,8 +103,8 @@ export const handleClerkWebhook = action({
             clerkId: payload.data.id,
             email: payload.data.email_addresses[0]?.email_address || "",
             name: `${payload.data.first_name || ""} ${payload.data.last_name || ""}`.trim(),
-            organization: payload.data.organization || "default",
             imageUrl: payload.data.image_url,
+            role: "coach" as const,
           });
         }
         break;
@@ -118,11 +120,47 @@ export const handleClerkWebhook = action({
             userId: user._id,
             name: `${payload.data.first_name || ""} ${payload.data.last_name || ""}`.trim(),
             email: payload.data.email_addresses[0]?.email_address || user.email,
-            organization: payload.data.organization || user.organization,
             imageUrl: payload.data.image_url,
           });
         }
         break;
     }
   },
-}); 
+});
+
+// Helper function to get or create user ID from Clerk identity (for mutations)
+async function getUserIdForMutation(ctx: MutationCtx, identity: any) {
+  try {
+    // Check if user exists in our database using proper index
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (user) {
+      return user._id;
+    }
+
+    // If user doesn't exist, create a basic user entry
+    const newUser = {
+      clerkId: identity.subject,
+      name: identity.name ?? "",
+      email: identity.email ?? "",
+      role: "coach" as const,
+      imageUrl: undefined,
+      preferences: {},
+      subscriptionStatus: undefined,
+      subscriptionTier: undefined,
+      coachId: undefined,
+      organization: "",
+      createdAt: Date.now(),
+    };
+
+    // Use proper database operation
+    const userId = await ctx.db.insert("users", newUser);
+    return userId;
+  } catch (error) {
+    console.error("Error in getUserIdForMutation:", error);
+    throw new Error("Failed to get or create user");
+  }
+} 

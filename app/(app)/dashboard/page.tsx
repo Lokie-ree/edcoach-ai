@@ -21,12 +21,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { Doc } from "@/convex/_generated/dataModel";
 import { motion } from "framer-motion";
-import { useAuthQuery } from "@/hooks/use-auth-query";
-import { useUser, useOrganization } from "@clerk/nextjs";
-import { useMutation } from "convex/react";
+import { useUser } from "@clerk/nextjs";
+import { useMutation, useQuery, Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { WalkthroughDraftsList } from "@/components/walkthrough-drafts-list";
+import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 
 // Tilted Card Component
 const TiltedCard = ({
@@ -72,27 +71,65 @@ const GridDistortion = () => {
   );
 };
 
-const Dashboard = () => {
-  const { isLoading: isLoadingTeachers, data: teachers = [] } = useAuthQuery<
-    Doc<"teachers">[]
-  >(api.teachers.list);
-  const { isLoading: isLoadingObservations, data: observations = [] } =
-    useAuthQuery<Doc<"observations">[]>(api.observations.list);
+export default function DashboardPage() {
+  return (
+    <>
+      <Authenticated>
+        <DashboardContent />
+      </Authenticated>
+      <Unauthenticated>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Button asChild variant="outline">
+            <Link href="/sign-in">Sign in to access your dashboard</Link>
+          </Button>
+        </div>
+      </Unauthenticated>
+      <AuthLoading>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AuthLoading>
+    </>
+  );
+}
+
+function DashboardContent() {
   const { user } = useUser();
-  const { organization } = useOrganization();
   const upsertUser = useMutation(api.users.storeMetadata);
 
+  // Upsert user in Convex on login
   React.useEffect(() => {
-    if (user && organization) {
+    if (user) {
       upsertUser({
+        // Do not pass coachId here; let backend handle it
         preferences: user.publicMetadata?.preferences || {},
-        organization: organization.id,
+        role: "coach",
+        name: user.fullName || user.username || user.id,
+        email: user.primaryEmailAddress?.emailAddress || undefined,
+        imageUrl: user.imageUrl || undefined,
       });
     }
-  }, [user, organization, upsertUser]);
+  }, [user, upsertUser]);
 
-  // Show loading state
-  if (isLoadingTeachers || isLoadingObservations) {
+  // Fetch Convex user doc by Clerk ID
+  const convexUser = useQuery(
+    api.users.getUserByClerkId,
+    user ? { clerkId: user.id } : "skip"
+  );
+
+  // Use Convex user _id as coachId in all queries
+  const coachId = convexUser?._id;
+
+  const teachers = useQuery(
+    api.teachers.list,
+    coachId ? { coachId } : "skip"
+  );
+  const observations = useQuery(
+    api.observations.list,
+    coachId ? { coachId } : "skip"
+  );
+
+  if (!user || !convexUser || teachers === undefined || observations === undefined) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -100,7 +137,6 @@ const Dashboard = () => {
     );
   }
 
-  // Ensure we have arrays to work with
   const safeTeachers = teachers ?? [];
   const safeObservations = observations ?? [];
 
@@ -122,13 +158,13 @@ const Dashboard = () => {
       <GridDistortion />
 
       {/* Debug: Organization Info */}
-      {organization && (
+      {/* {organization && (
         <div className="p-4 mb-4 rounded bg-yellow-100 text-yellow-900 border border-yellow-300">
           <strong>Organization Debug Info:</strong><br />
           <span><b>ID:</b> {organization.id}</span><br />
           <span><b>Name:</b> {organization.name}</span>
         </div>
-      )}
+      )} */}
 
       {/* Header */}
       <motion.div
@@ -140,7 +176,12 @@ const Dashboard = () => {
           Dashboard
         </h1>
         <p className="text-foreground mt-2">
-          Welcome to EdCoach AI. Here&apos;s an overview of your organization.
+          Welcome, {" "}
+          <AnimatedGradientText>
+          {user.firstName}
+          </AnimatedGradientText>.
+          <br></br>
+          Here&apos;s an overview of your organization.
         </p>
       </motion.div>
 
@@ -313,6 +354,4 @@ const Dashboard = () => {
       </div>
     </div>
   );
-};
-
-export default Dashboard;
+}

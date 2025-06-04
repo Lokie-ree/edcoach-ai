@@ -21,29 +21,19 @@ export const createWalkthroughAndEntries = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
-
-    // Get role from Clerk JWT
-    const role = (identity as any).role || (identity as any).token?.role;
-    const allowedRoles = ["admin", "school_leader", "instructional_coach"];
-    if (!allowedRoles.includes(role)) {
-      throw new Error("You don't have permission to create walkthroughs");
-    }
-
-    // Get user (for organization and _id)
+    // Get user
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
     if (!user) throw new Error("User not found");
-
-    // Check teacher
+    // Get teacher
     const teacher = await ctx.db.get(args.teacherId);
     if (!teacher) throw new Error("Teacher not found");
-    const teacherOrg = teacher.organization || "";
-    if (user.organization !== teacherOrg && role !== "admin") {
+    // Only the coach associated with this teacher can create walkthroughs
+    if (teacher.coachId !== user._id) {
       throw new Error("You don't have permission to create walkthroughs for this teacher");
     }
-
     const now = Date.now();
     const walkthroughId = await ctx.db.insert("walkthroughs", {
       teacherId: args.teacherId,
@@ -56,7 +46,6 @@ export const createWalkthroughAndEntries = mutation({
       createdAt: now,
       updatedAt: now,
     });
-
     for (const entry of args.walkthroughEntries) {
       await ctx.db.insert("walkthroughEntries", {
         walkthroughId,
@@ -66,7 +55,6 @@ export const createWalkthroughAndEntries = mutation({
         createdAt: now,
       });
     }
-
     return walkthroughId;
   },
 });
@@ -92,11 +80,6 @@ export const updateWalkthroughAndEntries = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
-    const role = (identity as any).role || (identity as any).token?.role;
-    const allowedRoles = ["admin", "school_leader", "instructional_coach"];
-    if (!allowedRoles.includes(role)) {
-      throw new Error("You don't have permission to update walkthroughs");
-    }
     // Get user
     const user = await ctx.db
       .query("users")
@@ -106,14 +89,14 @@ export const updateWalkthroughAndEntries = mutation({
     // Check teacher
     const teacher = await ctx.db.get(args.teacherId);
     if (!teacher) throw new Error("Teacher not found");
-    const teacherOrg = teacher.organization || "";
-    if (user.organization !== teacherOrg && role !== "admin") {
+    // Only the coach associated with this teacher can update walkthroughs
+    if (teacher.coachId !== user._id) {
       throw new Error("You don't have permission to update walkthroughs for this teacher");
     }
     // Check walkthrough
     const walkthrough = await ctx.db.get(args.walkthroughId);
     if (!walkthrough) throw new Error("Walkthrough not found");
-    if (walkthrough.observerId !== user._id && role !== "admin") {
+    if (walkthrough.observerId !== user._id) {
       throw new Error("You can only update your own walkthroughs");
     }
     const now = Date.now();
@@ -182,5 +165,40 @@ export const listDraftWalkthroughs = query({
       .order("desc")
       .collect();
     return drafts;
+  },
+});
+
+// List all walkthroughs for a coach (by their teachers)
+export const listByCoach = query({
+  args: {
+    coachId: v.id("users"),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("walkthroughs"),
+      _creationTime: v.number(),
+      teacherId: v.id("teachers"),
+      observerId: v.id("users"),
+      walkthroughDate: v.number(),
+      status: v.union(v.literal("draft"), v.literal("completed")),
+      evidenceSummary: v.string(),
+      reinforcementIndicator: v.string(),
+      refinementIndicator: v.string(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+  ),
+  handler: async (ctx, args) => {
+    // Get all teachers for this coach
+    const teachers = await ctx.db
+      .query("teachers")
+      .filter((q) => q.eq(q.field("coachId"), args.coachId))
+      .collect();
+    const teacherIds = teachers.map((t) => t._id);
+    // Get all walkthroughs for these teachers
+    return await ctx.db
+      .query("walkthroughs")
+      .filter((q) => q.or(...teacherIds.map(id => q.eq(q.field("teacherId"), id))))
+      .collect();
   },
 }); 

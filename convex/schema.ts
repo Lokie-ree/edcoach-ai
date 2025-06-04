@@ -15,11 +15,21 @@ export default defineSchema({
     imageUrl: v.optional(v.string()),
     preferences: v.optional(v.any()),
     createdAt: v.number(),
-    subscriptionStatus: v.optional(v.string()),
-    subscriptionTier: v.optional(v.string()),
+    subscriptionStatus: v.optional(v.union(v.literal("active"), v.literal("inactive"))),
+    subscriptionTier: v.optional(v.union(v.literal("basic"), v.literal("pro"))),
+    role: v.union(v.literal("coach"), v.literal("teacher")),
+    coachId: v.optional(v.id("users")),
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_organization", ["organization"]),
+
+  invites: defineTable({
+    email: v.string(),
+    coachId: v.id("users"),
+    token: v.string(),
+    accepted: v.boolean(),
+    createdAt: v.number(),
+  }).index("by_token", ["token"]),
 
   // Schools/organizations table
   organizations: defineTable({
@@ -37,13 +47,11 @@ export default defineSchema({
     email: v.optional(v.string()),
     subject: v.array(v.string()),
     gradeLevels: v.array(v.string()),
-    createdBy: v.id("users"),
+    coachId: v.id("users"),
     createdAt: v.number(),
     status: v.optional(v.string()),
-    organization: v.optional(v.string()),
   })
-    .index("by_creator", ["createdBy"])
-    .index("by_organization", ["organization"]),
+    .index("by_coach", ["coachId"]),
 
   // Rubrics table - for storing evaluation frameworks (metadata and full structure)
   rubrics: defineTable({
