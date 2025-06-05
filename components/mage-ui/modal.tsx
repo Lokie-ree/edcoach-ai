@@ -16,7 +16,6 @@ export default function Modal({
     <AnimatePresence>
       {isOpen && (
         <div
-          onClick={() => onOpenChange(false)}
           className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center overflow-y-scroll bg-background/80 p-8 backdrop-blur"
         >
           <motion.div
