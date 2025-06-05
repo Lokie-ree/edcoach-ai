@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/select";
 import { CalendarInput } from "@/components/ui/calendar-input";
 import { walkthroughFinalSchema } from "@/convex/validation/walkthroughFinalSchema";
+import { Sparkles } from "lucide-react";
 
 // Types
 export type WalkthroughFormData = z.infer<typeof walkthroughSchema>;
@@ -70,7 +71,7 @@ type WalkthroughEntry = {
   aiFeedback: string;
 };
 
-export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkthroughId?: Id<"walkthroughs">, coachId?: Id<"users"> }) {
+export function WalkthroughForm({ walkthroughId, coachId: propCoachId, onCancel }: { walkthroughId?: Id<"walkthroughs">, coachId?: Id<"users">, onCancel?: () => void }) {
   const methods = useForm<WalkthroughFormData>({
     resolver: zodResolver(walkthroughSchema),
     defaultValues: {
@@ -95,6 +96,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
   const { toast } = useToast();
   const [aiLoading, setAILoading] = useState(false);
   const lastResetId = useRef<Id<"walkthroughs"> | undefined>(undefined);
+  const [feedbackGenerated, setFeedbackGenerated] = useState(false);
 
   // Use propCoachId if provided, otherwise fetch current user
   const { user } = useUser();
@@ -232,6 +234,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
           aiFeedback: refinement,
         },
       ]);
+      setFeedbackGenerated(true);
     } catch {
       toast({ title: "Error", description: "Failed to generate AI feedback.", variant: "destructive" });
     } finally {
@@ -515,21 +518,39 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
                 }
                 return null;
               })()}
-              <div className="flex gap-4 mt-6">
+              <div className="flex justify-center gap-4 mt-6">
                 <Button
                   type="button"
-                  variant="secondary"
-                  onClick={handleAIFeedback}
-                  disabled={aiLoading}
+                  variant="outline"
+                  onClick={() => {
+                    router.push("/dashboard");
+                  }}
                 >
-                  {aiLoading ? "Generating AI Feedback..." : "Generate AI Feedback"}
+                  Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting || !((watch("walkthroughEntries")?.find(e => e.type === "reinforcement")?.aiFeedback) && (watch("walkthroughEntries")?.find(e => e.type === "refinement")?.aiFeedback))}
-                >
-                  {isSubmitting ? "Submitting..." : "Submit"}
-                </Button>
+                {(!feedbackGenerated && !(watch("walkthroughEntries")?.find(e => e.type === "reinforcement")?.aiFeedback && watch("walkthroughEntries")?.find(e => e.type === "refinement")?.aiFeedback)) ? (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={handleAIFeedback}
+                    disabled={aiLoading}
+                  >
+                    {aiLoading ? (
+                      "Generating AI Feedback..."
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4" /> AI Feedback
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting || !((watch("walkthroughEntries")?.find(e => e.type === "reinforcement")?.aiFeedback) && (watch("walkthroughEntries")?.find(e => e.type === "refinement")?.aiFeedback))}
+                  >
+                    {isSubmitting ? "Submitting..." : "Submit"}
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

@@ -347,11 +347,12 @@ function DashboardContent() {
           </Card>
         </TiltedCard>
       </motion.div>
-      {/* Walkthrough Drafts List */}
+      {/* Walkthrough Drafts List 
       <div className="mt-10">
         <h2 className="text-xl font-semibold mb-4 text-foreground">Your Walkthrough Drafts</h2>
         <WalkthroughDraftsList />
       </div>
+      */}
     </div>
   );
 }
