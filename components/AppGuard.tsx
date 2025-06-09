@@ -26,16 +26,25 @@ export default function AppGuard({ children }: { children: React.ReactNode }) {
     const publicRoutes = ["/", "/about"];
     const isPublicRoute = publicRoutes.includes(pathname);
 
-    if (user && convexUser) {
-      // User is authenticated and we have their Convex data
-      if (convexUser.onboardingComplete === true) {
-        // Onboarding complete - redirect to dashboard if on public/onboarding routes
-        if (isPublicRoute || pathname === "/onboarding") {
-          router.replace("/dashboard");
-          return;
+    if (user) {
+      // User is authenticated with Clerk
+      if (convexUser) {
+        // We have Convex user data
+        if (convexUser.onboardingComplete === true) {
+          // Onboarding complete - redirect to dashboard if on public/onboarding routes
+          if (isPublicRoute || pathname === "/onboarding") {
+            router.replace("/dashboard");
+            return;
+          }
+        } else {
+          // Onboarding not complete - redirect to onboarding unless already there
+          if (pathname !== "/onboarding") {
+            router.replace("/onboarding");
+            return;
+          }
         }
       } else {
-        // Onboarding not complete - redirect to onboarding unless already there
+        // User exists in Clerk but not in Convex - needs onboarding
         if (pathname !== "/onboarding") {
           router.replace("/onboarding");
           return;

@@ -1,37 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
-import RoleSelectionForm from "@/components/forms/role-selection-form";
-import CoachProfileForm from "@/components/forms/coach-profile-form";
-import TeacherProfileForm from "@/components/forms/teacher-profile-form";
+import SimplifiedOnboardingForm from "@/components/forms/simplified-onboarding-form";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { toast } from "sonner";
 
 // Types for form values
-interface RoleSelectionValues {
-  role: "coach" | "teacher";
+interface OnboardingFormValues {
   name: string;
   email: string;
-}
-interface CoachProfileValues {
-  name: string;
-  email: string;
-  subscriptionTier: "basic" | "pro";
-}
-interface TeacherProfileValues {
-  name: string;
-  email: string;
-  subject: string[];
-  gradeLevels: string[];
 }
 
 export default function OnboardingPage() {
-  const [step, setStep] = useState<"role" | "profile" | "done">("role");
-  const [roleData, setRoleData] = useState<RoleSelectionValues | null>(null);
   const router = useRouter();
   const { user } = useUser();
 
@@ -40,8 +25,7 @@ export default function OnboardingPage() {
     user ? { clerkId: user.id } : "skip"
   );
 
-  const upsertUserOnboarding = useMutation(api.users.upsertUserOnboarding);
-  const completeOnboarding = useMutation(api.users.completeOnboarding);
+  const completeSimplifiedOnboarding = useMutation(api.users.completeSimplifiedOnboarding);
 
   useEffect(() => {
     if (convexUser && convexUser.onboardingComplete === true) {
@@ -51,39 +35,29 @@ export default function OnboardingPage() {
 
   // Loading State
   if (!user || convexUser === undefined) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
-  // Save role selection to Convex
-  const handleRoleSelection = async (values: RoleSelectionValues) => {
-    await upsertUserOnboarding({
-      clerkId: user.id,
-      role: values.role,
-      name: values.name,
-      email: values.email,
-    });
-    setRoleData(values);
-    setStep("profile");
-  };
-
-  // Save profile completion to Convex
-  const handleProfileComplete = async (
-    profileValues: CoachProfileValues | TeacherProfileValues
-  ) => {
-    if (!roleData) return;
-    if (roleData.role === "coach") {
-      const coachVals = profileValues as CoachProfileValues;
-      await completeOnboarding({
-        clerkId: user.id,
-        subscriptionTier: coachVals.subscriptionTier,
+  // Complete onboarding with simplified form data
+  const handleOnboardingComplete = async (values: OnboardingFormValues) => {
+    try {
+      await completeSimplifiedOnboarding({
+        name: values.name,
+        email: values.email,
       });
-    } else {
-      await completeOnboarding({
-        clerkId: user.id,
-      });
+      toast.success("Welcome to EdCoach AI!");
+      router.replace("/dashboard");
+    } catch (error) {
+      console.error("Failed to complete onboarding:", error);
+      toast.error("Failed to complete onboarding. Please try again.");
     }
-    setStep("done");
-    router.replace("/dashboard");
   };
 
   return (
@@ -98,29 +72,11 @@ export default function OnboardingPage() {
       </SignedOut>
       <SignedIn>
         <Card className="p-8 max-w-lg w-full">
-          {step === "role" && (
-            <RoleSelectionForm onSuccess={handleRoleSelection} />
-          )}
-          {step === "profile" && roleData?.role === "coach" && (
-            <CoachProfileForm
-              defaultName={roleData.name}
-              defaultEmail={roleData.email}
-              onSuccess={handleProfileComplete}
-            />
-          )}
-          {step === "profile" && roleData?.role === "teacher" && (
-            <TeacherProfileForm
-              defaultName={roleData.name}
-              defaultEmail={roleData.email}
-              onSuccess={handleProfileComplete}
-            />
-          )}
-          {step === "done" && (
-            <div className="text-center">
-              <h2 className="text-2xl font-bold mb-4">Onboarding Complete!</h2>
-              <p>Redirecting to your dashboard...</p>
-            </div>
-          )}
+          <SimplifiedOnboardingForm
+            defaultName={user.fullName || user.firstName || ""}
+            defaultEmail={user.primaryEmailAddress?.emailAddress || ""}
+            onSuccess={handleOnboardingComplete}
+          />
         </Card>
       </SignedIn>
     </div>

@@ -209,7 +209,7 @@ export const internalGetUserByClerkId = internalQuery({
   },
 });
 
-// Upsert user for onboarding (role selection step)
+// Legacy onboarding functions - kept for backward compatibility during migration
 export const upsertUserOnboarding = mutation({
   args: {
     clerkId: v.string(),
@@ -218,51 +218,146 @@ export const upsertUserOnboarding = mutation({
     role: v.union(v.literal("coach"), v.literal("teacher")),
   },
   handler: async (ctx, args) => {
-    const existing = await ctx.db
+    // Redirect to simplified onboarding
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    
+    const existingUser = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
       .unique();
-    if (existing) {
-      await ctx.db.patch(existing._id, {
+
+    if (existingUser) {
+      await ctx.db.patch(existingUser._id, {
         name: args.name,
         email: args.email,
-        role: args.role,
-        onboardingComplete: false,
+        role: "coach", // Always default to coach
+        subscriptionTier: "basic",
+        subscriptionStatus: "inactive",
+        onboardingComplete: true,
+        organization: "",
       });
-      return { userId: existing._id, created: false };
+      return { userId: existingUser._id, created: false };
     } else {
       const userId = await ctx.db.insert("users", {
         clerkId: args.clerkId,
         name: args.name,
         email: args.email,
-        role: args.role,
-        onboardingComplete: false,
-        createdAt: Date.now(),
+        role: "coach",
+        subscriptionTier: "basic",
+        subscriptionStatus: "inactive",
+        onboardingComplete: true,
         organization: "",
+        imageUrl: identity.pictureUrl,
+        preferences: {},
+        createdAt: Date.now(),
       });
       return { userId, created: true };
     }
   },
 });
 
-// Complete onboarding (profile step)
 export const completeOnboarding = mutation({
   args: {
     clerkId: v.string(),
     subscriptionTier: v.optional(v.union(v.literal("basic"), v.literal("pro"))),
   },
   handler: async (ctx, args) => {
+    // Redirect to simplified onboarding completion
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
       .unique();
     if (!user) throw new Error("User not found");
-    const patch: any = { onboardingComplete: true };
-    if (user.role === "coach" && args.subscriptionTier) {
-      patch.subscriptionTier = args.subscriptionTier;
-    }
-    await ctx.db.patch(user._id, patch);
+    
+    await ctx.db.patch(user._id, {
+      role: "coach",
+      subscriptionTier: args.subscriptionTier || "basic",
+      subscriptionStatus: "inactive",
+      onboardingComplete: true,
+      organization: "",
+    });
     return { success: true };
+  },
+});
+
+// Simplified onboarding - complete coach onboarding in one step
+export const completeSimplifiedOnboarding = mutation({
+  args: {
+    name: v.string(),
+    email: v.string(),
+  },
+  returns: v.object({ success: v.boolean(), userId: v.id("users") }),
+  handler: async (ctx, args) => {
+    console.log("completeSimplifiedOnboarding called with:", { name: args.name, email: args.email });
+    
+    const identity = await ctx.auth.getUserIdentity();
+    console.log("Identity retrieved:", identity ? "Found" : "None");
+    
+    if (!identity) {
+      console.log("No authentication identity found");
+      throw new Error("Not authenticated");
+    }
+
+    console.log("Clerk ID:", identity.subject);
+
+    // Check if user already exists
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    console.log("Existing user found:", existingUser ? "Yes" : "No");
+
+    if (existingUser) {
+      console.log("Updating existing user:", existingUser._id);
+      // Update existing user with complete onboarding
+      const updateData = {
+        name: args.name,
+        email: args.email,
+        role: "coach" as const,
+        subscriptionTier: "basic" as const,
+        subscriptionStatus: "inactive" as const, // Default to inactive until payment
+        onboardingComplete: true,
+        organization: "", // Required for schema compatibility
+      };
+      console.log("About to update user with data:", updateData);
+      
+      await ctx.db.patch(existingUser._id, updateData);
+      console.log("User updated successfully");
+      
+      // Verify the user was updated with all fields
+      const updatedUser = await ctx.db.get(existingUser._id);
+      console.log("Updated user verification:", updatedUser);
+      
+      return { success: true, userId: existingUser._id };
+    } else {
+      console.log("Creating new user");
+      // Create new user with complete onboarding
+      const userData = {
+        clerkId: identity.subject,
+        name: args.name,
+        email: args.email,
+        role: "coach" as const,
+        subscriptionTier: "basic" as const,
+        subscriptionStatus: "inactive" as const,
+        onboardingComplete: true,
+        organization: "",
+        imageUrl: identity.pictureUrl,
+        preferences: {},
+        createdAt: Date.now(),
+      };
+      console.log("About to insert user data:", userData);
+      
+      const userId = await ctx.db.insert("users", userData);
+      console.log("New user created with ID:", userId);
+      
+      // Verify the user was created with all fields
+      const createdUser = await ctx.db.get(userId);
+      console.log("Created user verification:", createdUser);
+      
+      return { success: true, userId };
+    }
   },
 });
 
