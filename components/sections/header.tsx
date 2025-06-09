@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { Users, ChartSpline, Home, MenuIcon, X } from "lucide-react";
 import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
-import { Button } from "./ui/button";
-import { ModeToggle } from "./mode-toggle";
-import MaxWidthWrapper from "./max-width-wrapper";
-import { Logo } from "./logo";
+import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/mode-toggle";
+import MaxWidthWrapper from "@/components/max-width-wrapper";
+import { Logo } from "@/components/logo";
 import { useState } from "react";
+
 
 const navItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard" },

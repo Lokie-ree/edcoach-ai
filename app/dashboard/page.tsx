@@ -5,12 +5,10 @@ import { api } from "@/convex/_generated/api";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import {
-  School,
   Users,
   BarChart,
   BookOpen,
@@ -23,7 +21,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useUser } from "@clerk/nextjs";
-import { useMutation, useQuery, Authenticated, Unauthenticated, AuthLoading } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { WalkthroughDraftsList } from "@/components/walkthrough-drafts-list";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 
@@ -72,28 +70,6 @@ const GridDistortion = () => {
 };
 
 export default function DashboardPage() {
-  return (
-    <>
-      <Authenticated>
-        <DashboardContent />
-      </Authenticated>
-      <Unauthenticated>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Button asChild variant="outline">
-            <Link href="/sign-in">Sign in to access your dashboard</Link>
-          </Button>
-        </div>
-      </Unauthenticated>
-      <AuthLoading>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </AuthLoading>
-    </>
-  );
-}
-
-function DashboardContent() {
   const { user } = useUser();
   const upsertUser = useMutation(api.users.storeMetadata);
 
@@ -157,15 +133,6 @@ function DashboardContent() {
     <div className="space-y-6 relative">
       <GridDistortion />
 
-      {/* Debug: Organization Info */}
-      {/* {organization && (
-        <div className="p-4 mb-4 rounded bg-yellow-100 text-yellow-900 border border-yellow-300">
-          <strong>Organization Debug Info:</strong><br />
-          <span><b>ID:</b> {organization.id}</span><br />
-          <span><b>Name:</b> {organization.name}</span>
-        </div>
-      )} */}
-
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -180,8 +147,6 @@ function DashboardContent() {
           <AnimatedGradientText>
           {user.firstName}
           </AnimatedGradientText>.
-          <br></br>
-          Here&apos;s an overview of your organization.
         </p>
       </motion.div>
 
@@ -199,9 +164,7 @@ function DashboardContent() {
               <CardTitle className="text-foreground">
                 Quick Actions
               </CardTitle>
-              <CardDescription className="text-foreground">
-                Common tasks you might want to perform
-              </CardDescription>
+             
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
@@ -274,7 +237,7 @@ function DashboardContent() {
         </TiltedCard>
 
         <TiltedCard>
-          <Card className="bg-card">
+          <Card className="h-full bg-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
               <CardTitle className="text-sm font-medium text-foreground">
                 Total Observations
@@ -287,23 +250,15 @@ function DashboardContent() {
               <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                 {totalObservations}
               </div>
-              <div className="flex items-center text-xs text-foreground mt-2 md:mt-3">
-                <span className="flex items-center">
-                  <div className="w-2 h-2 rounded-full bg-success mr-1"></div>
-                  {completedObservations} completed
-                </span>
-                <span className="mx-2">•</span>
-                <span className="flex items-center">
-                  <div className="w-2 h-2 rounded-full bg-primary mr-1"></div>
-                  {inProgressObservations} in progress
-                </span>
-              </div>
+              <p className="text-xs text-foreground mt-2 md:mt-3">
+                {completedObservations} completed, {inProgressObservations} in progress
+              </p>
             </CardContent>
           </Card>
         </TiltedCard>
 
         <TiltedCard>
-          <Card className="bg-card">
+          <Card className="h-full bg-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
               <CardTitle className="text-sm font-medium text-foreground">
                 Completion Rate
@@ -314,45 +269,44 @@ function DashboardContent() {
             </CardHeader>
             <CardContent className="pt-0">
               <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                {completionRate.toFixed(1)}%
+                {Math.round(completionRate)}%
               </div>
-              <div className="mt-4 md:mt-6">
-                <Progress
-                  value={completionRate}
-                  className="h-2 bg-muted"
-                />
-              </div>
+              <Progress value={completionRate} className="mt-2 md:mt-3" />
             </CardContent>
           </Card>
         </TiltedCard>
 
         <TiltedCard>
-          <Card className="bg-card">
+          <Card className="h-full bg-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
               <CardTitle className="text-sm font-medium text-foreground">
-                School Info
+                This Month
               </CardTitle>
               <div className="rounded-full bg-primary/10 p-2">
-                <School className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                <BarChart className="h-4 w-4 md:h-5 md:w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                1
+                {/* TODO: Calculate monthly stats */}
+                {totalObservations}
               </div>
               <p className="text-xs text-foreground mt-2 md:mt-3">
-                Schools in your network
+                Observations completed
               </p>
             </CardContent>
           </Card>
         </TiltedCard>
       </motion.div>
-      {/* Walkthrough Drafts List 
-      <div className="mt-10">
-        <h2 className="text-xl font-semibold mb-4 text-foreground">Your Walkthrough Drafts</h2>
+
+      {/* Drafts List */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+      >
         <WalkthroughDraftsList />
-      </div>
-      */}
+      </motion.div>
     </div>
   );
 }

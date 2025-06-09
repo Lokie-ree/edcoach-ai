@@ -2,9 +2,9 @@
 
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { walkthroughSchema } from "../app/(app)/walkthrough/new/validation";
 import { z } from "zod";
 import { useUser } from "@clerk/nextjs";
+import { walkthroughSchema } from "@/app/walkthrough/new/validation";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -71,7 +71,7 @@ type WalkthroughEntry = {
   aiFeedback: string;
 };
 
-export function WalkthroughForm({ walkthroughId, coachId: propCoachId, onCancel }: { walkthroughId?: Id<"walkthroughs">, coachId?: Id<"users">, onCancel?: () => void }) {
+export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkthroughId?: Id<"walkthroughs">, coachId?: Id<"users">, onCancel?: () => void }) {
   const methods = useForm<WalkthroughFormData>({
     resolver: zodResolver(walkthroughSchema),
     defaultValues: {

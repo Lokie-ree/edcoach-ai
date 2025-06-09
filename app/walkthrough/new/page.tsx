@@ -1,6 +1,6 @@
 "use client";
 
-import { WalkthroughForm } from "@/components/walkthrough-form";
+import { WalkthroughForm } from "@/components/forms/walkthrough-form";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";

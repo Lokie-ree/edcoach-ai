@@ -1,4 +1,4 @@
-import Header from "@/components/header";
+import Header from "@/components/sections/header";
 import { Toaster } from "sonner";
 import MaxWidthWrapper from "@/components/max-width-wrapper";
 

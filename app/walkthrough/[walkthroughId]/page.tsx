@@ -1,6 +1,6 @@
 "use client";
 
-import { WalkthroughForm } from "@/components/walkthrough-form";
+import { WalkthroughForm } from "@/components/forms/walkthrough-form";
 import { Id } from "@/convex/_generated/dataModel";
 import React from "react";
 

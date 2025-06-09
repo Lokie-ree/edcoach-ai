@@ -191,7 +191,7 @@ export default function TeachersForm({ onSuccess, createTeacher, updateTeacher, 
               </FormItem>
             )}
           />
-          <div className="flex justify-end space-x-2 pt-2">
+          <div className="flex justify-between px-4 pt-2">
             <Button
               type="button"
               variant="outline"

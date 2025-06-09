@@ -1,13 +1,13 @@
-import HeroSection from "@/components/hero-section";
-import FeaturesSection from "@/components/features-section";
-import HowItWorksSection from "@/components/how-it-works-section";
-import Pricing from "@/components/pricing";
-import TestimonialsSection from "@/components/testimonials-section";
-import FAQSection from "@/components/faq-section";
-import Footer from "@/components/footer";
+import HeroSection from "@/components/sections/hero-section";
+import FeaturesSection from "@/components/sections/features-section";
+import HowItWorksSection from "@/components/sections/how-it-works-section";
+import Pricing from "@/components/sections/pricing";
+import TestimonialsSection from "@/components/sections/testimonials-section";
+import FAQSection from "@/components/sections/faq-section";
+import Footer from "@/components/sections/footer";
 import { Metadata } from "next";
 import Script from "next/script";
-import CTASection from "@/components/cta-section";
+import CTASection from "@/components/sections/cta-section";
 
 export const metadata: Metadata = {
   title: "EdCoach AI - AI-Powered Instructional Coaching Platform",

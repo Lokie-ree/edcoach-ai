@@ -209,4 +209,61 @@ export const internalGetUserByClerkId = internalQuery({
   },
 });
 
+// Upsert user for onboarding (role selection step)
+export const upsertUserOnboarding = mutation({
+  args: {
+    clerkId: v.string(),
+    name: v.string(),
+    email: v.string(),
+    role: v.union(v.literal("coach"), v.literal("teacher")),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        name: args.name,
+        email: args.email,
+        role: args.role,
+        onboardingComplete: false,
+      });
+      return { userId: existing._id, created: false };
+    } else {
+      const userId = await ctx.db.insert("users", {
+        clerkId: args.clerkId,
+        name: args.name,
+        email: args.email,
+        role: args.role,
+        onboardingComplete: false,
+        createdAt: Date.now(),
+        organization: "",
+      });
+      return { userId, created: true };
+    }
+  },
+});
+
+// Complete onboarding (profile step)
+export const completeOnboarding = mutation({
+  args: {
+    clerkId: v.string(),
+    subscriptionTier: v.optional(v.union(v.literal("basic"), v.literal("pro"))),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
+    if (!user) throw new Error("User not found");
+    const patch: any = { onboardingComplete: true };
+    if (user.role === "coach" && args.subscriptionTier) {
+      patch.subscriptionTier = args.subscriptionTier;
+    }
+    await ctx.db.patch(user._id, patch);
+    return { success: true };
+  },
+});
+
 

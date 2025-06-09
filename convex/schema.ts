@@ -19,6 +19,7 @@ export default defineSchema({
     subscriptionTier: v.optional(v.union(v.literal("basic"), v.literal("pro"))),
     role: v.union(v.literal("coach"), v.literal("teacher")),
     coachId: v.optional(v.id("users")),
+    onboardingComplete: v.optional(v.boolean()),
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_organization", ["organization"]),

@@ -25,7 +25,7 @@ import { useUser } from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
 import Modal from "@/components/mage-ui/modal";
-import TeachersForm from "@/components/teachers-form";
+import TeachersForm from "@/components/forms/teachers-form";
 import { Id } from "@/convex/_generated/dataModel";
 
 const SUBJECT_OPTIONS = [

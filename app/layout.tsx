@@ -5,6 +5,8 @@ import ConvexClientProvider from "@/components/ConvexClientProvider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
+import AppGuard from "@/components/AppGuard";
+import AppLayout from "@/components/AppLayout";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -36,7 +38,11 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              {children}
+              <AppGuard>
+                <AppLayout>
+                  {children}
+                </AppLayout>
+              </AppGuard>
             </ThemeProvider>
           </ConvexClientProvider>
         </ClerkProvider>

@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 
 export default function Modal({
   isOpen,
-  onOpenChange,
   modalSize = "lg",
   children,
 }: {
