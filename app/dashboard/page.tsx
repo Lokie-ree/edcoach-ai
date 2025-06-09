@@ -21,9 +21,232 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useUser } from "@clerk/nextjs";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { WalkthroughDraftsList } from "@/components/walkthrough-drafts-list";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
+
+// Teacher Dashboard Component
+const TeacherDashboard = ({ 
+  user, 
+  convexUser, 
+  observations 
+}: { 
+  user: {
+    firstName?: string | null;
+    fullName?: string | null;
+  }; 
+  convexUser: {
+    coachId?: string;
+    role: "teacher" | "coach";
+  }; 
+  observations: {
+    _id: string;
+    subject: string;
+    observationDate: number;
+    status: "draft" | "completed" | "feedback_generated";
+  }[] | undefined; 
+}) => {
+  const safeObservations = observations ?? [];
+  
+  // Calculate teacher-specific stats
+  const totalObservations = safeObservations.length;
+  const completedObservations = safeObservations.filter(
+    (o) => o.status === "completed",
+  ).length;
+  const recentObservations = safeObservations
+    .sort((a, b) => b.observationDate - a.observationDate)
+    .slice(0, 3);
+
+  return (
+    <div className="space-y-6 relative">
+      <GridDistortion />
+
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          Teacher Dashboard
+        </h1>
+        <p className="text-foreground mt-2">
+          Welcome, {" "}
+          <AnimatedGradientText>
+            {user.firstName || user.fullName || "Teacher"}
+          </AnimatedGradientText>.
+        </p>
+      </motion.div>
+
+      {/* Teacher Quick Actions */}
+      <motion.div
+        className="grid gap-4 md:grid-cols-3"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <TiltedCard className="md:col-span-2">
+          <Card className="h-full bg-card">
+            <CardHeader>
+              <CardTitle className="text-foreground">
+                Quick Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+                <Button
+                  variant="outline"
+                  className="w-full h-24 flex flex-col items-center justify-center gap-2 border hover:bg-muted/50"
+                  disabled
+                >
+                  <div className="rounded-full bg-primary/10 p-2">
+                    <BookOpen className="h-6 w-6 text-primary" />
+                  </div>
+                  <span className="text-sm font-medium text-foreground">View My Observations</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full h-24 flex flex-col items-center justify-center gap-2 border hover:bg-muted/50"
+                  disabled
+                >
+                  <div className="rounded-full bg-primary/10 p-2">
+                    <BarChart className="h-6 w-6 text-primary" />
+                  </div>
+                  <span className="text-sm font-medium text-foreground">My Progress</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full h-24 flex flex-col items-center justify-center gap-2 border hover:bg-muted/50"
+                  disabled
+                >
+                  <div className="rounded-full bg-primary/10 p-2">
+                    <CheckCircle className="h-6 w-6 text-primary" />
+                  </div>
+                  <span className="text-sm font-medium text-foreground">Action Plans</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TiltedCard>
+      </motion.div>
+
+      {/* Teacher Stats */}
+      <motion.div
+        className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-3"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <TiltedCard>
+          <Card className="h-full bg-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
+              <CardTitle className="text-sm font-medium text-foreground">
+                Total Observations
+              </CardTitle>
+              <div className="rounded-full bg-primary/10 p-2">
+                <BookOpen className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+                {totalObservations}
+              </div>
+              <p className="text-xs text-foreground mt-2 md:mt-3">
+                Classroom observations completed
+              </p>
+            </CardContent>
+          </Card>
+        </TiltedCard>
+
+        <TiltedCard>
+          <Card className="h-full bg-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
+              <CardTitle className="text-sm font-medium text-foreground">
+                Completed
+              </CardTitle>
+              <div className="rounded-full bg-primary/10 p-2">
+                <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+                {completedObservations}
+              </div>
+              <p className="text-xs text-foreground mt-2 md:mt-3">
+                Observations with feedback
+              </p>
+            </CardContent>
+          </Card>
+        </TiltedCard>
+
+        <TiltedCard>
+          <Card className="h-full bg-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
+              <CardTitle className="text-sm font-medium text-foreground">
+                My Coach
+              </CardTitle>
+              <div className="rounded-full bg-primary/10 p-2">
+                <Users className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-lg font-medium text-foreground">
+                {convexUser.coachId ? "Connected" : "Not Assigned"}
+              </div>
+              <p className="text-xs text-foreground mt-2 md:mt-3">
+                Coach assignment status
+              </p>
+            </CardContent>
+          </Card>
+        </TiltedCard>
+      </motion.div>
+
+      {/* Recent Observations Placeholder */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+      >
+        <Card className="bg-card">
+          <CardHeader>
+            <CardTitle className="text-foreground">Recent Observations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {recentObservations.length > 0 ? (
+              <div className="space-y-4">
+                {recentObservations.map((obs) => (
+                  <div key={obs._id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{obs.subject}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(obs.observationDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="text-sm">
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        obs.status === "completed" 
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}>
+                        {obs.status === "completed" ? "Completed" : "In Progress"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No observations yet</p>
+                <p className="text-sm">Your coach will schedule observations soon</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
+  );
+};
 
 // Tilted Card Component
 const TiltedCard = ({
@@ -71,21 +294,6 @@ const GridDistortion = () => {
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const upsertUser = useMutation(api.users.storeMetadata);
-
-  // Upsert user in Convex on login
-  React.useEffect(() => {
-    if (user) {
-      upsertUser({
-        // Do not pass coachId here; let backend handle it
-        preferences: user.publicMetadata?.preferences || {},
-        role: "coach",
-        name: user.fullName || user.username || user.id,
-        email: user.primaryEmailAddress?.emailAddress || undefined,
-        imageUrl: user.imageUrl || undefined,
-      });
-    }
-  }, [user, upsertUser]);
 
   // Fetch Convex user doc by Clerk ID
   const convexUser = useQuery(
@@ -93,19 +301,35 @@ export default function DashboardPage() {
     user ? { clerkId: user.id } : "skip"
   );
 
-  // Use Convex user _id as coachId in all queries
-  const coachId = convexUser?._id;
+  // Determine user role and appropriate data fetching
+  const userRole = convexUser?.role;
+  const coachId = userRole === "coach" ? convexUser?._id : convexUser?.coachId;
 
+  // Fetch data based on user role
   const teachers = useQuery(
     api.teachers.list,
-    coachId ? { coachId } : "skip"
+    coachId && userRole === "coach" ? { coachId } : "skip"
   );
   const observations = useQuery(
     api.observations.list,
     coachId ? { coachId } : "skip"
   );
 
-  if (!user || !convexUser || teachers === undefined || observations === undefined) {
+  if (!user || !convexUser) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Render appropriate dashboard based on role
+  if (userRole === "teacher") {
+    return <TeacherDashboard user={user} convexUser={convexUser} observations={observations} />;
+  }
+
+  // Default to coach dashboard
+  if (teachers === undefined || observations === undefined) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

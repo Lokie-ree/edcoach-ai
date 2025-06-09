@@ -281,15 +281,16 @@ export const completeOnboarding = mutation({
   },
 });
 
-// Simplified onboarding - complete coach onboarding in one step
+// Auto-role assignment onboarding - detects coach vs teacher based on email
 export const completeSimplifiedOnboarding = mutation({
-  args: {
-    name: v.string(),
-    email: v.string(),
-  },
-  returns: v.object({ success: v.boolean(), userId: v.id("users") }),
+  args: {},
+  returns: v.object({ 
+    success: v.boolean(), 
+    userId: v.id("users"),
+    role: v.union(v.literal("coach"), v.literal("teacher"))
+  }),
   handler: async (ctx, args) => {
-    console.log("completeSimplifiedOnboarding called with:", { name: args.name, email: args.email });
+    console.log("completeSimplifiedOnboarding called");
     
     const identity = await ctx.auth.getUserIdentity();
     console.log("Identity retrieved:", identity ? "Found" : "None");
@@ -300,8 +301,33 @@ export const completeSimplifiedOnboarding = mutation({
     }
 
     console.log("Clerk ID:", identity.subject);
+    console.log("Clerk name:", identity.name);
+    console.log("Clerk email:", identity.email);
 
-    // Check if user already exists
+    const userEmail = identity.email;
+    if (!userEmail) {
+      throw new Error("No email found in Clerk identity");
+    }
+
+    // Check if this email exists as a teacher
+    const teacherRecord = await ctx.db
+      .query("teachers")
+      .filter((q) => q.eq(q.field("email"), userEmail))
+      .first();
+
+    console.log("Teacher record found:", teacherRecord ? "Yes" : "No");
+    if (teacherRecord) {
+      console.log("Teacher belongs to coach:", teacherRecord.coachId);
+    }
+
+    // Determine role and coachId
+    const role = teacherRecord ? ("teacher" as const) : ("coach" as const);
+    const coachId = teacherRecord ? teacherRecord.coachId : undefined;
+
+    console.log("Assigned role:", role);
+    console.log("Coach ID:", coachId);
+
+    // Check if user already exists in users table
     const existingUser = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
@@ -313,11 +339,10 @@ export const completeSimplifiedOnboarding = mutation({
       console.log("Updating existing user:", existingUser._id);
       // Update existing user with complete onboarding
       const updateData = {
-        name: args.name,
-        email: args.email,
-        role: "coach" as const,
-        subscriptionTier: "basic" as const,
-        subscriptionStatus: "inactive" as const, // Default to inactive until payment
+        name: identity.name || existingUser.name,
+        email: userEmail,
+        role: role,
+        coachId: coachId,
         onboardingComplete: true,
         organization: "", // Required for schema compatibility
       };
@@ -326,21 +351,29 @@ export const completeSimplifiedOnboarding = mutation({
       await ctx.db.patch(existingUser._id, updateData);
       console.log("User updated successfully");
       
+      // If this is a teacher, update their status to active
+      if (teacherRecord) {
+        console.log("Updating teacher status to active for teacher:", teacherRecord._id);
+        await ctx.db.patch(teacherRecord._id, {
+          status: "active",
+        });
+        console.log("Teacher status updated to active");
+      }
+      
       // Verify the user was updated with all fields
       const updatedUser = await ctx.db.get(existingUser._id);
       console.log("Updated user verification:", updatedUser);
       
-      return { success: true, userId: existingUser._id };
+      return { success: true, userId: existingUser._id, role: role };
     } else {
       console.log("Creating new user");
       // Create new user with complete onboarding
       const userData = {
         clerkId: identity.subject,
-        name: args.name,
-        email: args.email,
-        role: "coach" as const,
-        subscriptionTier: "basic" as const,
-        subscriptionStatus: "inactive" as const,
+        name: identity.name || "User",
+        email: userEmail,
+        role: role,
+        coachId: coachId,
         onboardingComplete: true,
         organization: "",
         imageUrl: identity.pictureUrl,
@@ -352,11 +385,20 @@ export const completeSimplifiedOnboarding = mutation({
       const userId = await ctx.db.insert("users", userData);
       console.log("New user created with ID:", userId);
       
+      // If this is a teacher, update their status to active
+      if (teacherRecord) {
+        console.log("Updating teacher status to active for teacher:", teacherRecord._id);
+        await ctx.db.patch(teacherRecord._id, {
+          status: "active",
+        });
+        console.log("Teacher status updated to active");
+      }
+      
       // Verify the user was created with all fields
       const createdUser = await ctx.db.get(userId);
       console.log("Created user verification:", createdUser);
       
-      return { success: true, userId };
+      return { success: true, userId, role: role };
     }
   },
 });
