@@ -80,7 +80,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${oswald.className} antialiased`}>
-        <ClerkProvider>
+        <ClerkProvider afterSignOutUrl="/">
           <ConvexClientProvider>
             <ThemeProvider
               attribute="class"

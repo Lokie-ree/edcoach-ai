@@ -31,13 +31,18 @@ const navItems = [
 export function FloatingDock() {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
 
-  // Get user role from Convex
+  // Get user role from Convex (use skip when user is not available)
   const convexUser = useQuery(
     api.users.getUserByClerkId,
     user ? { clerkId: user.id } : "skip"
   );
+
+  // Don't render if user is not loaded yet or not authenticated
+  if (!isLoaded || !user) {
+    return null;
+  }
   
   const userRole = convexUser?.role;
 
@@ -55,12 +60,19 @@ export function FloatingDock() {
 
   return (
     <TooltipProvider>
-      <Dock className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 md:hidden">
+      <Dock 
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 md:hidden"
+        iconMagnification={60}
+        iconDistance={100}
+      >
         {mainNavItems.map((item) => (
           <Tooltip key={item.href}>
             <TooltipTrigger asChild>
-              <DockIcon onClick={() => handleNavigation(item.href)}>
-                <item.icon className="h-5 w-5" />
+              <DockIcon 
+                onClick={() => handleNavigation(item.href)}
+                className="bg-black/10 dark:bg-white/10"
+              >
+                <item.icon className="size-full" />
               </DockIcon>
             </TooltipTrigger>
             <TooltipContent>{item.label}</TooltipContent>
@@ -69,11 +81,14 @@ export function FloatingDock() {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <DockIcon onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
+            <DockIcon 
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              className="bg-black/10 dark:bg-white/10"
+            >
               {theme === "light" ? (
-                <Moon className="h-5 w-5" />
+                <Moon className="size-full" />
               ) : (
-                <Sun className="h-5 w-5" />
+                <Sun className="size-full" />
               )}
             </DockIcon>
           </TooltipTrigger>

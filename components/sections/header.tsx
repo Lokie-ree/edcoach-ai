@@ -68,7 +68,7 @@ const Header = () => {
               <DesktopNav userRole={userRole} />
             </SignedIn>
             <SignedIn>
-              <UserButton afterSignOutUrl="/" />
+              <UserButton />
             </SignedIn>
 
             <SignedOut>
