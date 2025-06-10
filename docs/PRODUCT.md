@@ -73,11 +73,11 @@ EdCoach AI is an AI-powered instructional coaching and feedback platform for K-1
 ---
 
 ## 5. Database & Core Features
-- See [Technical Schema Documentation](./schema.md) for full details
 - Key tables: users, teachers, walkthroughs, feedback, auditLogs, aiUsageLogs
 - Teachers are associated with a coach (not org/district) for MVP
 - Role-based access enforced in backend
 - All rubric data loaded from Convex DB
+- Schema details available in `convex/schema.ts`
 
 ---
 
@@ -120,12 +120,11 @@ EdCoach AI is an AI-powered instructional coaching and feedback platform for K-1
 ---
 
 ## 9. Documentation & References
-- [Technical Schema Documentation](./schema.md)
-- [Prompt Engineering Notes](./prompt-iteration1.md)
-- [AI Feedback Revision Rationale](./ai-feedback-revision.md)
-- [Development Timeline Archive](./development-timeline.md)
-- [Legacy PRD/Project Plan](./prd.md), [project-plan.md] (for historical reference)
+- [AI Feedback System](./AI_FEEDBACK_REVISION.md) - AI integration and prompt engineering rationale
+- [AI Prompt Template](./PROMPTITERATION_V1.md) - Current feedback generation prompt
+- [Auto-Role Onboarding](./AUTO_ROLE_ONBOARDING.md) - User onboarding and role assignment system
+- [Main README](../README.md) - Getting started and project overview
 
 ---
 
-*This document is the single source of truth for EdCoach AI MVP. All onboarding, role, and subscription flows are up-to-date as of June 4, 2025. For deep technical details, see linked docs above.* 
+*This document is the single source of truth for EdCoach AI MVP. For implementation details, see the actual code in the convex/ and app/ directories. For specific system documentation, see the linked docs above.* 

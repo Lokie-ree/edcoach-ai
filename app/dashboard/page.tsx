@@ -104,12 +104,11 @@ const TeacherDashboard = ({
 
       {/* Teacher Quick Actions */}
       <motion.div
-        className="grid gap-4 md:grid-cols-3"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <TiltedCard className="md:col-span-2">
+        <TiltedCard>
           <Card className="h-full bg-card">
             <CardHeader>
               <CardTitle className="text-foreground">
@@ -118,26 +117,28 @@ const TeacherDashboard = ({
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-                <Button
-                  variant="outline"
-                  className="w-full h-24 flex flex-col items-center justify-center gap-2 border hover:bg-muted/50"
-                  disabled
-                >
-                  <div className="rounded-full bg-primary/10 p-2">
-                    <BookOpen className="h-6 w-6 text-primary" />
-                  </div>
-                  <span className="text-sm font-medium text-foreground">View My Walkthroughs</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full h-24 flex flex-col items-center justify-center gap-2 border hover:bg-muted/50"
-                  disabled
-                >
-                  <div className="rounded-full bg-primary/10 p-2">
-                    <BarChart className="h-6 w-6 text-primary" />
-                  </div>
-                  <span className="text-sm font-medium text-foreground">My Progress</span>
-                </Button>
+                <Link href="/my-walkthroughs">
+                  <Button
+                    variant="outline"
+                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border hover:bg-muted/50"
+                  >
+                    <div className="rounded-full bg-primary/10 p-2">
+                      <BookOpen className="h-6 w-6 text-primary" />
+                    </div>
+                    <span className="text-sm font-medium text-foreground">View My Walkthroughs</span>
+                  </Button>
+                </Link>
+                <Link href="/my-progress">
+                  <Button
+                    variant="outline"
+                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border hover:bg-muted/50"
+                  >
+                    <div className="rounded-full bg-primary/10 p-2">
+                      <BarChart className="h-6 w-6 text-primary" />
+                    </div>
+                    <span className="text-sm font-medium text-foreground">My Progress</span>
+                  </Button>
+                </Link>
                 <Button
                   variant="outline"
                   className="w-full h-24 flex flex-col items-center justify-center gap-2 border hover:bg-muted/50"
@@ -147,6 +148,7 @@ const TeacherDashboard = ({
                     <CheckCircle className="h-6 w-6 text-primary" />
                   </div>
                   <span className="text-sm font-medium text-foreground">Action Plans</span>
+                  <span className="text-xs text-muted-foreground">(Coming Soon)</span>
                 </Button>
               </div>
             </CardContent>
@@ -154,82 +156,13 @@ const TeacherDashboard = ({
         </TiltedCard>
       </motion.div>
 
-      {/* Teacher Stats */}
-      <motion.div
-        className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-3"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <TiltedCard>
-          <Card className="h-full bg-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
-              <CardTitle className="text-sm font-medium text-foreground">
-                Total Walkthroughs
-              </CardTitle>
-              <div className="rounded-full bg-primary/10 p-2">
-                <BookOpen className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                {totalWalkthroughs}
-              </div>
-              <p className="text-xs text-foreground mt-2 md:mt-3">
-                Classroom walkthroughs completed
-              </p>
-            </CardContent>
-          </Card>
-        </TiltedCard>
 
-        <TiltedCard>
-          <Card className="h-full bg-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
-              <CardTitle className="text-sm font-medium text-foreground">
-                Completed
-              </CardTitle>
-              <div className="rounded-full bg-primary/10 p-2">
-                <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                {completedWalkthroughs}
-              </div>
-              <p className="text-xs text-foreground mt-2 md:mt-3">
-                Walkthroughs with feedback
-              </p>
-            </CardContent>
-          </Card>
-        </TiltedCard>
-
-        <TiltedCard>
-          <Card className="h-full bg-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
-              <CardTitle className="text-sm font-medium text-foreground">
-                My Coach
-              </CardTitle>
-              <div className="rounded-full bg-primary/10 p-2">
-                <Users className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-lg font-medium text-foreground">
-                {convexUser.coachId ? "Connected" : "Not Assigned"}
-              </div>
-              <p className="text-xs text-foreground mt-2 md:mt-3">
-                Coach assignment status
-              </p>
-            </CardContent>
-          </Card>
-        </TiltedCard>
-      </motion.div>
 
       {/* Recent Walkthroughs */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
       >
         <Card className="bg-card">
           <CardHeader>
@@ -239,22 +172,37 @@ const TeacherDashboard = ({
             {recentWalkthroughs.length > 0 ? (
               <div className="space-y-4">
                 {recentWalkthroughs.map((walkthrough) => (
-                  <div key={walkthrough._id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <p className="font-medium">Walkthrough</p>
+                  <div key={walkthrough._id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="font-medium">Classroom Walkthrough</p>
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          walkthrough.status === "completed" 
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400"
+                        }`}>
+                          {walkthrough.status === "completed" ? "Completed" : "In Progress"}
+                        </span>
+                      </div>
                       <p className="text-sm text-muted-foreground">
                         {new Date(walkthrough.walkthroughDate).toLocaleDateString()}
                       </p>
+                      {walkthrough.status === "completed" && (
+                        <div className="flex gap-2 mt-2">
+                          <span className="text-xs px-2 py-1 bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-400 rounded">
+                            ✓ {walkthrough.reinforcementIndicator.substring(0, 20)}...
+                          </span>
+                          <span className="text-xs px-2 py-1 bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400 rounded">
+                            → {walkthrough.refinementIndicator.substring(0, 20)}...
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <div className="text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        walkthrough.status === "completed" 
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}>
-                        {walkthrough.status === "completed" ? "Completed" : "In Progress"}
-                      </span>
-                    </div>
+                    <Link href={`/walkthrough/${walkthrough._id}/view`}>
+                      <Button variant="outline" size="sm">
+                        View
+                      </Button>
+                    </Link>
                   </div>
                 ))}
               </div>

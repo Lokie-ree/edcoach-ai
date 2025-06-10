@@ -1,6 +1,7 @@
 {
-  "name": "agent-receipt-tracker",
+  "name": "edcoach-ai",
   "version": "0.1.0",
+  "description": "AI-powered instructional coaching and feedback platform for K-12 schools",
   "private": true,
   "scripts": {
     "dev": "npm-run-all --parallel dev:frontend dev:backend",

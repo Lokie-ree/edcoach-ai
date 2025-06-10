@@ -96,6 +96,17 @@ export const getUser = query({
   },
 });
 
+// Get a user by ID (alternative naming for consistency)
+export const getUserById = query({
+  args: {
+    userId: v.id("users"),
+  },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.userId);
+  },
+});
+
 // Create a new user in the system
 export const createUser = mutation({
   args: {

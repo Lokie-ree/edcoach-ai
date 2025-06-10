@@ -229,4 +229,30 @@ export const listByTeacher = query({
       .withIndex("by_teacher", (q) => q.eq("teacherId", args.teacherId))
       .collect();
   },
+});
+
+// Get a specific walkthrough by ID
+export const getById = query({
+  args: {
+    walkthroughId: v.id("walkthroughs"),
+  },
+  returns: v.union(
+    v.object({
+      _id: v.id("walkthroughs"),
+      _creationTime: v.number(),
+      teacherId: v.id("teachers"),
+      observerId: v.id("users"),
+      walkthroughDate: v.number(),
+      status: v.union(v.literal("draft"), v.literal("completed")),
+      evidenceSummary: v.string(),
+      reinforcementIndicator: v.string(),
+      refinementIndicator: v.string(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.walkthroughId);
+  },
 }); 

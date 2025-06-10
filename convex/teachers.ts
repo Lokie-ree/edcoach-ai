@@ -196,4 +196,15 @@ export const getByUserClerkId = query({
     
     return teacher;
   },
+});
+
+// Get a teacher by ID
+export const getById = query({
+  args: {
+    teacherId: v.id("teachers"),
+  },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.teacherId);
+  },
 }); 
