@@ -20,6 +20,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
+import { getIndicatorName } from "@/lib/indicator-utils";
 
 export default function MyWalkthroughsPage() {
   const { user } = useUser();
@@ -189,7 +190,7 @@ export default function MyWalkthroughsPage() {
                               Reinforcement
                             </p>
                             <p className="text-sm text-green-600 dark:text-green-400">
-                              {walkthrough.reinforcementIndicator}
+                              {getIndicatorName(walkthrough.reinforcementIndicator)}
                             </p>
                           </div>
                           <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg">
@@ -197,7 +198,7 @@ export default function MyWalkthroughsPage() {
                               Refinement
                             </p>
                             <p className="text-sm text-blue-600 dark:text-blue-400">
-                              {walkthrough.refinementIndicator}
+                              {getIndicatorName(walkthrough.refinementIndicator)}
                             </p>
                           </div>
                         </div>

@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 export const insert = mutation({
@@ -20,5 +20,41 @@ export const insert = mutation({
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("rubricIndicators", args);
+  },
+});
+
+export const getByIndicatorCode = query({
+  args: { indicatorCode: v.string() },
+  returns: v.union(
+    v.object({
+      _id: v.id("rubricIndicators"),
+      indicator_code: v.string(),
+      indicator_name: v.string(),
+      domain: v.string(),
+      overview: v.optional(v.string()),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("rubricIndicators")
+      .withIndex("by_indicator_code", (q) => q.eq("indicator_code", args.indicatorCode))
+      .first();
+  },
+});
+
+export const getAllIndicators = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("rubricIndicators"),
+      indicator_code: v.string(),
+      indicator_name: v.string(),
+      domain: v.string(),
+      overview: v.optional(v.string()),
+    })
+  ),
+  handler: async (ctx) => {
+    return await ctx.db.query("rubricIndicators").collect();
   },
 });

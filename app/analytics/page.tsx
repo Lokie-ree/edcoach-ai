@@ -4,6 +4,7 @@ import React from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getIndicatorName } from "@/lib/indicator-utils";
 
 const Counter = () => {
   const currentUser = useQuery(api.users.getCurrentUser, {});
@@ -85,12 +86,12 @@ const BarChart = () => {
                     borderRadius: 6,
                     transition: "height 0.3s",
                   }}
-                  title={indicator}
+                  title={getIndicatorName(indicator)}
                   className="group-hover:opacity-80"
                 />
                 <span
                   className="text-[10px] mt-1 text-muted-foreground truncate max-w-[40px] text-center"
-                  title={indicator}
+                  title={getIndicatorName(indicator)}
                 >
                   {indicator}
                 </span>
@@ -176,7 +177,7 @@ const DonutChart = () => {
           return (
             <div key={indicator} className="flex items-center gap-2 text-xs">
               <span style={{ width: 10, height: 10, background: color, borderRadius: 2, display: 'inline-block' }} />
-              <span className="truncate max-w-[60px]" title={indicator}>{indicator}</span>
+              <span className="truncate max-w-[60px]" title={getIndicatorName(indicator)}>{getIndicatorName(indicator)}</span>
               <span className="text-muted-foreground">{percent}%</span>
             </div>
           );

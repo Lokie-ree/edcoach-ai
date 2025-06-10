@@ -8,20 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
-  TrendingUp, 
-  TrendingDown,
   Target,
   Award,
-  BookOpen,
-  CheckCircle,
-  BarChart3,
-  Calendar,
   Users,
-  ArrowUp,
-  ArrowDown,
-  Minus
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { getIndicatorName } from "@/lib/indicator-utils";
+import { useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Calendar, MessageSquare } from "lucide-react";
 
 export default function MyProgressPage() {
   const { user } = useUser();
@@ -38,6 +33,64 @@ export default function MyProgressPage() {
     api.walkthroughs.listByTeacher,
     teacherRecord ? { teacherId: teacherRecord._id } : "skip"
   );
+
+  // Get walkthrough entries for reinforcement feedback
+  const walkthroughEntries = useQuery(
+    api.walkthroughEntries.listByTeacher,
+    teacherRecord ? { teacherId: teacherRecord._id } : "skip"
+  );
+
+  // Get recent reinforcement entries (last 8-10)
+  const recentReinforcements = useMemo(() => {
+    if (!walkthroughEntries || !walkthroughs) return [];
+    
+    const safeWalkthroughs = walkthroughs ?? [];
+    const reinforcements = walkthroughEntries
+      .filter(entry => entry.type === "reinforcement" && entry.aiFeedback)
+      .map(entry => {
+        const walkthrough = safeWalkthroughs.find(w => w._id === entry.walkthroughId);
+        return {
+          ...entry,
+          walkthroughDate: walkthrough?.walkthroughDate || 0,
+          indicatorName: getIndicatorName(entry.indicatorAcronym || "")
+        };
+      })
+      .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
+      .slice(0, 8);
+    
+    return reinforcements;
+  }, [walkthroughEntries, walkthroughs]);
+
+  // Get coach information
+  const coach = useQuery(
+    api.users.getUserById,
+    convexUser?.coachId ? { userId: convexUser.coachId } : "skip"
+  );
+
+  // Calculate coaching relationship stats
+  const coachingStats = useMemo(() => {
+    if (!walkthroughs || !coach) return null;
+    
+    const safeWalkthroughs = walkthroughs ?? [];
+    const totalWalkthroughs = safeWalkthroughs.length;
+    const recentWalkthrough = safeWalkthroughs.length > 0 ? 
+      safeWalkthroughs.sort((a, b) => b.walkthroughDate - a.walkthroughDate)[0] : null;
+    
+    const completedWalkthroughs = safeWalkthroughs.filter(w => w.status === "completed").length;
+    const draftWalkthroughs = safeWalkthroughs.filter(w => w.status === "draft").length;
+    
+    // Get most recent coaching feedback
+    const latestReinforcement = recentReinforcements.length > 0 ? recentReinforcements[0] : null;
+    
+    return {
+      totalWalkthroughs,
+      completedWalkthroughs,
+      draftWalkthroughs,
+      lastObservation: recentWalkthrough?.walkthroughDate,
+      latestFeedback: latestReinforcement?.aiFeedback,
+      latestIndicator: latestReinforcement?.indicatorName
+    };
+  }, [walkthroughs, coach, recentReinforcements]);
 
   if (isLoading) {
     return (
@@ -65,6 +118,7 @@ export default function MyProgressPage() {
   // Calculate progress metrics
   const totalWalkthroughs = safeWalkthroughs.length;
   const completedWalkthroughs = safeWalkthroughs.filter(w => w.status === "completed").length;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const completionRate = totalWalkthroughs > 0 ? Math.round((completedWalkthroughs / totalWalkthroughs) * 100) : 0;
 
   // Calculate indicator frequencies for strengths and growth areas
@@ -105,6 +159,7 @@ export default function MyProgressPage() {
 
   const recentCount = recentWalkthroughs.length;
   const previousCount = previousWalkthroughs.length;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const trendDirection = recentCount > previousCount ? "up" : recentCount < previousCount ? "down" : "same";
 
   return (
@@ -123,73 +178,12 @@ export default function MyProgressPage() {
         </p>
       </motion.div>
 
-      {/* Key Metrics */}
-      <motion.div
-        className="grid gap-4 md:grid-cols-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Walkthroughs</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalWalkthroughs}</div>
-            <div className="flex items-center text-xs text-muted-foreground mt-1">
-              {trendDirection === "up" && <ArrowUp className="h-3 w-3 text-green-500 mr-1" />}
-              {trendDirection === "down" && <ArrowDown className="h-3 w-3 text-red-500 mr-1" />}
-              {trendDirection === "same" && <Minus className="h-3 w-3 text-gray-500 mr-1" />}
-              {recentCount} this month
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{completionRate}%</div>
-            <Progress value={completionRate} className="mt-2 h-2" />
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Strengths Found</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{topStrengths.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Key strengths identified
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Growth Areas</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{topGrowthAreas.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Areas for development
-            </p>
-          </CardContent>
-        </Card>
-      </motion.div>
-
       {/* Strengths and Growth Areas */}
       <motion.div
         className="grid gap-6 lg:grid-cols-2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
       >
         {/* Strengths */}
         <Card>
@@ -211,7 +205,7 @@ export default function MyProgressPage() {
                 {topStrengths.map(([indicator, count]) => (
                   <div key={indicator} className="flex items-center justify-between">
                     <div className="flex-1">
-                      <p className="font-medium text-sm">{indicator}</p>
+                      <p className="font-medium text-sm">{getIndicatorName(indicator)}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <Progress value={(count / completedWalkthroughs) * 100} className="flex-1 h-2" />
                         <span className="text-xs text-muted-foreground">
@@ -246,7 +240,7 @@ export default function MyProgressPage() {
                 {topGrowthAreas.map(([indicator, count]) => (
                   <div key={indicator} className="flex items-center justify-between">
                     <div className="flex-1">
-                      <p className="font-medium text-sm">{indicator}</p>
+                      <p className="font-medium text-sm">{getIndicatorName(indicator)}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <Progress value={(count / completedWalkthroughs) * 100} className="flex-1 h-2" />
                         <span className="text-xs text-muted-foreground">
@@ -262,50 +256,46 @@ export default function MyProgressPage() {
         </Card>
       </motion.div>
 
-      {/* Recent Activity */}
+      {/* Recent Reinforcements */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
       >
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Recent Activity
+              <Award className="h-5 w-5 text-green-500" />
+              Recent Reinforcements
             </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Your recent strengths and positive feedback
+            </p>
           </CardHeader>
           <CardContent>
-            {safeWalkthroughs.length === 0 ? (
+            {recentReinforcements.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No walkthroughs yet</p>
-                <p className="text-sm">Your progress tracking will appear here once you have walkthroughs</p>
+                <Award className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No reinforcements yet</p>
+                <p className="text-sm">Complete walkthroughs to see your positive feedback here</p>
               </div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-2xl font-bold text-primary">{recentCount}</div>
-                  <p className="text-sm text-muted-foreground">This Month</p>
-                </div>
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-2xl font-bold text-primary">{previousCount}</div>
-                  <p className="text-sm text-muted-foreground">Last Month</p>
-                </div>
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="flex items-center justify-center gap-1 text-2xl font-bold">
-                    {trendDirection === "up" && <TrendingUp className="h-6 w-6 text-green-500" />}
-                    {trendDirection === "down" && <TrendingDown className="h-6 w-6 text-red-500" />}
-                    {trendDirection === "same" && <Minus className="h-6 w-6 text-gray-500" />}
-                    <span className={
-                      trendDirection === "up" ? "text-green-500" : 
-                      trendDirection === "down" ? "text-red-500" : "text-gray-500"
-                    }>
-                      {trendDirection === "up" ? "Up" : trendDirection === "down" ? "Down" : "Same"}
-                    </span>
+              <div className="space-y-4">
+                {recentReinforcements.map((reinforcement, index) => (
+                  <div key={`${reinforcement.walkthroughId}-${index}`} className="border-l-4 border-green-500 pl-4 py-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                        {reinforcement.indicatorName}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(reinforcement.walkthroughDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                      {reinforcement.aiFeedback}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">Trend</p>
-                </div>
+                ))}
               </div>
             )}
           </CardContent>
@@ -316,32 +306,100 @@ export default function MyProgressPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
       >
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Coach Connection
+              Recent Coaching Activity
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">
-                  {convexUser.coachId ? "Connected to Coach" : "No Coach Assigned"}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {convexUser.coachId 
-                    ? "Your coach can view your progress and provide feedback"
-                    : "Contact your administrator to get assigned to a coach"
-                  }
-                </p>
+            {!convexUser.coachId ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No Coach Assigned</p>
+                <p className="text-sm">Contact your administrator to get connected with a coach</p>
               </div>
-              <Badge variant={convexUser.coachId ? "default" : "secondary"}>
-                {convexUser.coachId ? "Active" : "Pending"}
-              </Badge>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Coach Info */}
+                <div className="flex items-center justify-between pb-3 border-b">
+                  <div>
+                    <p className="font-medium">{coach?.name || "Loading..."}</p>
+                    <p className="text-sm text-muted-foreground">Your Instructional Coach</p>
+                  </div>
+                  <Badge variant="default">Active</Badge>
+                </div>
+
+                {/* Collaboration Stats */}
+                {coachingStats && (
+                  <div className="grid grid-cols-3 gap-4 py-3 border-b">
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-primary">{coachingStats.totalWalkthroughs}</div>
+                      <p className="text-xs text-muted-foreground">Walkthroughs</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-green-600">{coachingStats.completedWalkthroughs}</div>
+                      <p className="text-xs text-muted-foreground">Completed</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-blue-600">
+                        {coachingStats.lastObservation ? 
+                          `${Math.floor((Date.now() - coachingStats.lastObservation) / (1000 * 60 * 60 * 24))}d` : 
+                          "N/A"
+                        }
+                      </div>
+                      <p className="text-xs text-muted-foreground">Days Ago</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Latest Coaching Insight */}
+                {coachingStats?.latestFeedback && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Latest Coaching Insight</p>
+                    <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-lg border-l-3 border-green-500">
+                      <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">
+                        {coachingStats.latestIndicator}
+                      </p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                        {coachingStats.latestFeedback.length > 120 ? 
+                          `${coachingStats.latestFeedback.substring(0, 120)}...` : 
+                          coachingStats.latestFeedback
+                        }
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Quick Actions */}
+                <div className="flex gap-2 pt-2">
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    Schedule Meeting
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <MessageSquare className="h-3 w-3 mr-1" />
+                    Send Message
+                  </Button>
+                </div>
+
+                {/* Next Steps Placeholder */}
+                <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg">
+                  <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">
+                    Upcoming
+                  </p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400">
+                    {coachingStats?.draftWalkthroughs && coachingStats.draftWalkthroughs > 0
+                      ? `${coachingStats.draftWalkthroughs} draft walkthrough${coachingStats.draftWalkthroughs === 1 ? '' : 's'} pending completion`
+                      : "Next coaching session: Schedule with your coach"
+                    }
+                  </p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>

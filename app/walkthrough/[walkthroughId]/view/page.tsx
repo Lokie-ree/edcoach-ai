@@ -20,6 +20,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import React from "react";
 import { Id } from "@/convex/_generated/dataModel";
+import { getIndicatorName } from "@/lib/indicator-utils";
 
 export default function ViewWalkthroughPage({ 
   params 
@@ -202,26 +203,6 @@ export default function ViewWalkthroughPage({
         </Card>
       </motion.div>
 
-      {/* Evidence Summary */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle>Evidence Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm max-w-none">
-              <p className="whitespace-pre-wrap text-foreground">
-                {walkthrough.evidenceSummary || "No evidence summary provided."}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
       {/* Feedback Sections */}
       {walkthrough.status === "completed" && (
         <motion.div
@@ -242,7 +223,7 @@ export default function ViewWalkthroughPage({
               <div className="space-y-3">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Indicator</p>
-                  <p className="font-medium">{walkthrough.reinforcementIndicator}</p>
+                  <p className="font-medium">{getIndicatorName(walkthrough.reinforcementIndicator)}</p>
                 </div>
                 {reinforcementEntry?.aiFeedback && (
                   <div>
@@ -270,7 +251,7 @@ export default function ViewWalkthroughPage({
               <div className="space-y-3">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Indicator</p>
-                  <p className="font-medium">{walkthrough.refinementIndicator}</p>
+                  <p className="font-medium">{getIndicatorName(walkthrough.refinementIndicator)}</p>
                 </div>
                 {refinementEntry?.aiFeedback && (
                   <div>
