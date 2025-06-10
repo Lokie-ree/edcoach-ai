@@ -1,13 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Users, ChartSpline, Home, MenuIcon, X, BookOpen, BarChart } from "lucide-react";
+import { Users, ChartSpline, Home, BookOpen, BarChart } from "lucide-react";
 import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
-import { ModeToggle } from "@/components/mode-toggle";
 import MaxWidthWrapper from "@/components/max-width-wrapper";
 import { Logo } from "@/components/logo";
-import { useState } from "react";
 import { useQuery } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
@@ -20,38 +18,6 @@ const navItems = [
   { href: "/my-walkthroughs", icon: BookOpen, label: "My Walkthroughs", roles: ["teacher"] },
   { href: "/my-progress", icon: BarChart, label: "My Progress", roles: ["teacher"] },
 ];
-
-const MobileNav = ({
-  isOpen,
-  onClose,
-  userRole,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  userRole?: "coach" | "teacher";
-}) => {
-  if (!isOpen) return null;
-
-  // Filter nav items based on user role
-  const filteredNavItems = navItems.filter(item => 
-    !userRole || item.roles.includes(userRole)
-  );
-
-  return (
-    <div className="absolute right-0 mt-2 w-48 bg-background rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 divide-y divide-gray-200 dark:divide-gray-700">
-      <div className="py-1">
-        {filteredNavItems.map((item) => (
-          <Link key={item.href} href={item.href} onClick={onClose}>
-            <div className="flex items-center px-4 py-2 text-sm hover:bg-accent cursor-pointer">
-              <item.icon className="w-4 h-4 mr-2" />
-              <span>{item.label}</span>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 const DesktopNav = ({ userRole }: { userRole?: "coach" | "teacher" }) => {
   // Filter nav items based on user role
@@ -78,7 +44,6 @@ const DesktopNav = ({ userRole }: { userRole?: "coach" | "teacher" }) => {
 };
 
 const Header = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
   const { user } = useUser();
   
   // Get user role from Convex
@@ -101,26 +66,7 @@ const Header = () => {
           <div className="flex items-center space-x-1 md:space-x-2">
             <SignedIn>
               <DesktopNav userRole={userRole} />
-
-              <div className="md:hidden relative">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setMenuOpen(!menuOpen)}
-                  className="flex items-center"
-                >
-                  {menuOpen ? <X size={18} /> : <MenuIcon size={18} />}
-                </Button>
-                <MobileNav
-                  isOpen={menuOpen}
-                  onClose={() => setMenuOpen(false)}
-                  userRole={userRole}
-                />
-              </div>
             </SignedIn>
-
-            <ModeToggle />
-
             <SignedIn>
               <UserButton afterSignOutUrl="/" />
             </SignedIn>

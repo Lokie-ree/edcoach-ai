@@ -1,6 +1,7 @@
 import Header from "@/components/sections/header";
 import { Toaster } from "sonner";
 import MaxWidthWrapper from "@/components/max-width-wrapper";
+import { FloatingDock } from "@/components/FloatingDock";
 
 export default function AppLayout({
   children,
@@ -15,6 +16,7 @@ export default function AppLayout({
           {children}
         </MaxWidthWrapper>
       </main>
+      <FloatingDock />
       <Toaster />
     </div>
   );
