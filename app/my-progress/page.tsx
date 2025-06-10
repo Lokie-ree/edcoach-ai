@@ -208,7 +208,7 @@ export default function MyProgressPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {topStrengths.map(([indicator, count], index) => (
+                {topStrengths.map(([indicator, count]) => (
                   <div key={indicator} className="flex items-center justify-between">
                     <div className="flex-1">
                       <p className="font-medium text-sm">{indicator}</p>
@@ -243,7 +243,7 @@ export default function MyProgressPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {topGrowthAreas.map(([indicator, count], index) => (
+                {topGrowthAreas.map(([indicator, count]) => (
                   <div key={indicator} className="flex items-center justify-between">
                     <div className="flex-1">
                       <p className="font-medium text-sm">{indicator}</p>

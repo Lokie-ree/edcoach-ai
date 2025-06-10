@@ -4,7 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
@@ -13,7 +13,6 @@ import {
   CheckCircle, 
   Clock, 
   Eye,
-  Filter,
   Search
 } from "lucide-react";
 import { motion } from "framer-motion";

@@ -2,7 +2,6 @@
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useUser } from "@clerk/nextjs";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +27,7 @@ export default function ViewWalkthroughPage({
   params: Promise<{ walkthroughId: string }> 
 }) {
   const { walkthroughId } = React.use(params);
-  const { user } = useUser();
+
   const { isLoading, isAuthenticated, user: convexUser } = useAuthRedirect();
 
   // Get walkthrough details
@@ -301,7 +300,7 @@ export default function ViewWalkthroughPage({
               <Clock className="h-12 w-12 mx-auto mb-4 text-yellow-500 opacity-50" />
               <h3 className="text-lg font-medium mb-2">Draft Walkthrough</h3>
               <p className="text-muted-foreground">
-                This walkthrough is still in draft mode. Feedback will be available once it's completed.
+                This walkthrough is still in draft mode. Feedback will be available once it&apos;s completed.
               </p>
               {convexUser.role === "coach" && (
                 <Link href={`/walkthrough/${walkthroughId}`} className="mt-4 inline-block">

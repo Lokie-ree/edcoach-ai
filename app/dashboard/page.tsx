@@ -63,7 +63,7 @@ type ClerkUser = {
 // Teacher Dashboard Component
 const TeacherDashboard = ({ 
   user, 
-  convexUser, 
+  convexUser: _convexUser, // eslint-disable-line @typescript-eslint/no-unused-vars
   walkthroughs 
 }: { 
   user: ClerkUser; 
@@ -72,11 +72,7 @@ const TeacherDashboard = ({
 }) => {
   const safeWalkthroughs = walkthroughs ?? [];
   
-  // Calculate teacher-specific stats
-  const totalWalkthroughs = safeWalkthroughs.length;
-  const completedWalkthroughs = safeWalkthroughs.filter(
-    (w) => w.status === "completed",
-  ).length;
+
   const recentWalkthroughs = safeWalkthroughs
     .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
     .slice(0, 3);
