@@ -157,4 +157,43 @@ export const remove = mutation({
     await ctx.db.delete(args.id);
     return { success: true };
   },
+});
+
+// Get teacher record by user's clerk ID (for teachers who are also users)
+export const getByUserClerkId = query({
+  args: {
+    clerkId: v.string(),
+  },
+  returns: v.union(
+    v.object({
+      _id: v.id("teachers"),
+      _creationTime: v.number(),
+      name: v.string(),
+      email: v.optional(v.string()),
+      subject: v.array(v.string()),
+      gradeLevels: v.array(v.string()),
+      status: v.optional(v.string()),
+      coachId: v.id("users"),
+      createdAt: v.number(),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    // First get the user record by clerk ID
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
+    
+    if (!user) return null;
+    
+    // Now find the teacher record where the user's email matches the teacher's email
+    // This assumes teachers have the same email in both users and teachers tables
+    const teacher = await ctx.db
+      .query("teachers")
+      .filter((q) => q.eq(q.field("email"), user.email))
+      .unique();
+    
+    return teacher;
+  },
 }); 

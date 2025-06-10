@@ -5,7 +5,6 @@ import ConvexClientProvider from "@/components/ConvexClientProvider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
-import AppGuard from "@/components/AppGuard";
 import AppLayout from "@/components/AppLayout";
 
 const oswald = Oswald({
@@ -14,9 +13,60 @@ const oswald = Oswald({
 });
 
 export const metadata: Metadata = {
-  title: "EdCoach AI - AI-Powered Instructional Coaching",
+  title: "EdCoach AI - AI-Powered Instructional Coaching Platform",
   description:
-    "EdCoach AI empowers school leaders and coaches with real-time, rubric-aligned feedback suggestions.",
+    "EdCoach AI empowers school leaders and coaches with real-time, rubric-aligned feedback suggestions to improve teacher effectiveness.",
+  keywords: [
+    "instructional coaching",
+    "AI coaching",
+    "educational technology",
+    "teacher feedback",
+    "coaching platform",
+    "education AI",
+    "teaching improvement",
+    "classroom observation",
+    "education leadership",
+    "rubric-aligned feedback",
+  ],
+  authors: [{ name: "EdCoach AI Team" }],
+  openGraph: {
+    title: "EdCoach AI - Transform Your Instructional Coaching",
+    description:
+      "Deliver better feedback faster with AI-powered coaching insights tailored to your teaching standards.",
+    url: "https://edcoachai.org",
+    siteName: "EdCoach AI",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "EdCoach AI Platform Preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "EdCoach AI - AI-Powered Instructional Coaching",
+    description:
+      "Deliver better feedback faster with AI-powered coaching insights.",
+    images: ["/twitter-image.jpg"],
+    creator: "@edcoachai",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "https://edcoachai.com",
+  },
   icons: {
     icon: "/logo.png",
   },
@@ -38,11 +88,9 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <AppGuard>
-                <AppLayout>
-                  {children}
-                </AppLayout>
-              </AppGuard>
+              <AppLayout>
+                {children}  
+              </AppLayout>
             </ThemeProvider>
           </ConvexClientProvider>
         </ClerkProvider>

@@ -22,39 +22,63 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { WalkthroughDraftsList } from "@/components/walkthrough-drafts-list";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
+import { Id } from "@/convex/_generated/dataModel";
+
+// Type definitions for better type safety
+type WalkthroughDoc = {
+  _id: Id<"walkthroughs">;
+  _creationTime: number;
+  teacherId: Id<"teachers">;
+  observerId: Id<"users">;
+  walkthroughDate: number;
+  status: "draft" | "completed";
+  evidenceSummary: string;
+  reinforcementIndicator: string;
+  refinementIndicator: string;
+  createdAt: number;
+  updatedAt: number;
+};
+
+type ConvexUser = {
+  _id: Id<"users">;
+  role: "teacher" | "coach";
+  coachId?: Id<"users">;
+  onboardingComplete?: boolean;
+  name: string;
+  email: string;
+  organization: string;
+  clerkId: string;
+  createdAt: number;
+};
+
+type ClerkUser = {
+  firstName?: string | null;
+  fullName?: string | null;
+  id: string;
+};
 
 // Teacher Dashboard Component
 const TeacherDashboard = ({ 
   user, 
   convexUser, 
-  observations 
+  walkthroughs 
 }: { 
-  user: {
-    firstName?: string | null;
-    fullName?: string | null;
-  }; 
-  convexUser: {
-    coachId?: string;
-    role: "teacher" | "coach";
-  }; 
-  observations: {
-    _id: string;
-    subject: string;
-    observationDate: number;
-    status: "draft" | "completed" | "feedback_generated";
-  }[] | undefined; 
+  user: ClerkUser; 
+  convexUser: ConvexUser; 
+  walkthroughs: WalkthroughDoc[] | undefined; 
 }) => {
-  const safeObservations = observations ?? [];
+  const safeWalkthroughs = walkthroughs ?? [];
   
   // Calculate teacher-specific stats
-  const totalObservations = safeObservations.length;
-  const completedObservations = safeObservations.filter(
-    (o) => o.status === "completed",
+  const totalWalkthroughs = safeWalkthroughs.length;
+  const completedWalkthroughs = safeWalkthroughs.filter(
+    (w) => w.status === "completed",
   ).length;
-  const recentObservations = safeObservations
-    .sort((a, b) => b.observationDate - a.observationDate)
+  const recentWalkthroughs = safeWalkthroughs
+    .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
     .slice(0, 3);
 
   return (
@@ -102,7 +126,7 @@ const TeacherDashboard = ({
                   <div className="rounded-full bg-primary/10 p-2">
                     <BookOpen className="h-6 w-6 text-primary" />
                   </div>
-                  <span className="text-sm font-medium text-foreground">View My Observations</span>
+                  <span className="text-sm font-medium text-foreground">View My Walkthroughs</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -141,7 +165,7 @@ const TeacherDashboard = ({
           <Card className="h-full bg-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
               <CardTitle className="text-sm font-medium text-foreground">
-                Total Observations
+                Total Walkthroughs
               </CardTitle>
               <div className="rounded-full bg-primary/10 p-2">
                 <BookOpen className="h-4 w-4 md:h-5 md:w-5 text-primary" />
@@ -149,10 +173,10 @@ const TeacherDashboard = ({
             </CardHeader>
             <CardContent className="pt-0">
               <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                {totalObservations}
+                {totalWalkthroughs}
               </div>
               <p className="text-xs text-foreground mt-2 md:mt-3">
-                Classroom observations completed
+                Classroom walkthroughs completed
               </p>
             </CardContent>
           </Card>
@@ -170,10 +194,10 @@ const TeacherDashboard = ({
             </CardHeader>
             <CardContent className="pt-0">
               <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                {completedObservations}
+                {completedWalkthroughs}
               </div>
               <p className="text-xs text-foreground mt-2 md:mt-3">
-                Observations with feedback
+                Walkthroughs with feedback
               </p>
             </CardContent>
           </Card>
@@ -201,7 +225,7 @@ const TeacherDashboard = ({
         </TiltedCard>
       </motion.div>
 
-      {/* Recent Observations Placeholder */}
+      {/* Recent Walkthroughs */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -209,26 +233,26 @@ const TeacherDashboard = ({
       >
         <Card className="bg-card">
           <CardHeader>
-            <CardTitle className="text-foreground">Recent Observations</CardTitle>
+            <CardTitle className="text-foreground">Recent Walkthroughs</CardTitle>
           </CardHeader>
           <CardContent>
-            {recentObservations.length > 0 ? (
+            {recentWalkthroughs.length > 0 ? (
               <div className="space-y-4">
-                {recentObservations.map((obs) => (
-                  <div key={obs._id} className="flex items-center justify-between p-4 border rounded-lg">
+                {recentWalkthroughs.map((walkthrough) => (
+                  <div key={walkthrough._id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
-                      <p className="font-medium">{obs.subject}</p>
+                      <p className="font-medium">Walkthrough</p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(obs.observationDate).toLocaleDateString()}
+                        {new Date(walkthrough.walkthroughDate).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="text-sm">
                       <span className={`px-2 py-1 rounded-full text-xs ${
-                        obs.status === "completed" 
+                        walkthrough.status === "completed" 
                           ? "bg-green-100 text-green-800"
                           : "bg-yellow-100 text-yellow-800"
                       }`}>
-                        {obs.status === "completed" ? "Completed" : "In Progress"}
+                        {walkthrough.status === "completed" ? "Completed" : "In Progress"}
                       </span>
                     </div>
                   </div>
@@ -237,8 +261,8 @@ const TeacherDashboard = ({
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No observations yet</p>
-                <p className="text-sm">Your coach will schedule observations soon</p>
+                <p>No walkthroughs yet</p>
+                <p className="text-sm">Your coach will schedule walkthroughs soon</p>
               </div>
             )}
           </CardContent>
@@ -294,27 +318,56 @@ const GridDistortion = () => {
 
 export default function DashboardPage() {
   const { user } = useUser();
+  const { isLoading, isAuthenticated, user: convexUser } = useAuthRedirect();
 
-  // Fetch Convex user doc by Clerk ID
-  const convexUser = useQuery(
-    api.users.getUserByClerkId,
-    user ? { clerkId: user.id } : "skip"
+  // Determine user role and appropriate data fetching - must be done before hooks
+  const userRole = convexUser?.role;
+  
+  // ALL HOOKS MUST BE CALLED AT THE TOP - before any early returns
+  // For teachers, get their teacher record
+  const teacherRecord = useQuery(
+    api.teachers.getByUserClerkId,
+    userRole === "teacher" && user ? { clerkId: user.id } : "skip"
   );
 
-  // Determine user role and appropriate data fetching
-  const userRole = convexUser?.role;
+  // Determine the correct IDs for data fetching
   const coachId = userRole === "coach" ? convexUser?._id : convexUser?.coachId;
+  const teacherId = teacherRecord?._id;
 
   // Fetch data based on user role
   const teachers = useQuery(
     api.teachers.list,
     coachId && userRole === "coach" ? { coachId } : "skip"
   );
-  const observations = useQuery(
-    api.observations.list,
-    coachId ? { coachId } : "skip"
+  
+  // For coaches: get all walkthroughs for their teachers
+  // For teachers: get only their own walkthroughs
+  const coachWalkthroughs = useQuery(
+    api.walkthroughs.listByCoach,
+    coachId && userRole === "coach" ? { coachId } : "skip"
+  );
+  const teacherWalkthroughs = useQuery(
+    api.walkthroughs.listByTeacher,
+    teacherId && userRole === "teacher" ? { teacherId } : "skip"
   );
 
+  // Use appropriate walkthroughs based on role
+  const walkthroughs = userRole === "coach" ? coachWalkthroughs : teacherWalkthroughs;
+
+  // NOW we can do early returns after all hooks are called
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Redirect is happening
+  }
+
+  // Type guard to ensure we have proper user data
   if (!user || !convexUser) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -325,11 +378,17 @@ export default function DashboardPage() {
 
   // Render appropriate dashboard based on role
   if (userRole === "teacher") {
-    return <TeacherDashboard user={user} convexUser={convexUser} observations={observations} />;
+    return (
+      <TeacherDashboard 
+        user={user} 
+        convexUser={convexUser} 
+        walkthroughs={walkthroughs} 
+      />
+    );
   }
 
   // Default to coach dashboard
-  if (teachers === undefined || observations === undefined) {
+  if (teachers === undefined || walkthroughs === undefined) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -338,19 +397,19 @@ export default function DashboardPage() {
   }
 
   const safeTeachers = teachers ?? [];
-  const safeObservations = observations ?? [];
+  const safeWalkthroughs = walkthroughs ?? [];
 
-  // Calculate observation stats
-  const totalObservations = safeObservations.length;
-  const completedObservations = safeObservations.filter(
-    (o) => o.status === "completed",
+  // Calculate walkthrough stats
+  const totalWalkthroughs = safeWalkthroughs.length;
+  const completedWalkthroughs = safeWalkthroughs.filter(
+    (w) => w.status === "completed",
   ).length;
-  const inProgressObservations = safeObservations.filter(
-    (o) => o.status === "draft",
+  const inProgressWalkthroughs = safeWalkthroughs.filter(
+    (w) => w.status === "draft",
   ).length;
   const completionRate =
-    totalObservations > 0
-      ? (completedObservations / totalObservations) * 100
+    totalWalkthroughs > 0
+      ? (completedWalkthroughs / totalWalkthroughs) * 100
       : 0;
 
   return (
@@ -369,7 +428,7 @@ export default function DashboardPage() {
         <p className="text-foreground mt-2">
           Welcome, {" "}
           <AnimatedGradientText>
-          {user.firstName}
+          {user?.firstName}
           </AnimatedGradientText>.
         </p>
       </motion.div>
@@ -464,7 +523,7 @@ export default function DashboardPage() {
           <Card className="h-full bg-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 md:pb-6">
               <CardTitle className="text-sm font-medium text-foreground">
-                Total Observations
+                Total Walkthroughs
               </CardTitle>
               <div className="rounded-full bg-primary/10 p-2">
                 <BookOpen className="h-4 w-4 md:h-5 md:w-5 text-primary" />
@@ -472,10 +531,10 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className="pt-0">
               <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                {totalObservations}
+                {totalWalkthroughs}
               </div>
               <p className="text-xs text-foreground mt-2 md:mt-3">
-                {completedObservations} completed, {inProgressObservations} in progress
+                {completedWalkthroughs} completed, {inProgressWalkthroughs} in progress
               </p>
             </CardContent>
           </Card>
@@ -513,10 +572,10 @@ export default function DashboardPage() {
             <CardContent className="pt-0">
               <div className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                 {/* TODO: Calculate monthly stats */}
-                {totalObservations}
+                {totalWalkthroughs}
               </div>
               <p className="text-xs text-foreground mt-2 md:mt-3">
-                Observations completed
+                Walkthroughs completed
               </p>
             </CardContent>
           </Card>

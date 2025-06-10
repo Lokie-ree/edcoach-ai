@@ -96,4 +96,17 @@ export const createObservationAndResponses = mutation({
   },
 });
 
+// List all observations for a specific teacher
+export const listByTeacher = query({
+  args: {
+    teacherId: v.id("teachers"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("observations")
+      .filter((q) => q.eq(q.field("teacherId"), args.teacherId))
+      .collect();
+  },
+});
+
 

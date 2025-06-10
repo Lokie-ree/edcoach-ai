@@ -201,4 +201,32 @@ export const listByCoach = query({
       .filter((q) => q.or(...teacherIds.map(id => q.eq(q.field("teacherId"), id))))
       .collect();
   },
+});
+
+// List all walkthroughs for a specific teacher
+export const listByTeacher = query({
+  args: {
+    teacherId: v.id("teachers"),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("walkthroughs"),
+      _creationTime: v.number(),
+      teacherId: v.id("teachers"),
+      observerId: v.id("users"),
+      walkthroughDate: v.number(),
+      status: v.union(v.literal("draft"), v.literal("completed")),
+      evidenceSummary: v.string(),
+      reinforcementIndicator: v.string(),
+      refinementIndicator: v.string(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+  ),
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("walkthroughs")
+      .withIndex("by_teacher", (q) => q.eq("teacherId", args.teacherId))
+      .collect();
+  },
 }); 
