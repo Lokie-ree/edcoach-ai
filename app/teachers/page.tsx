@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils";
 import Modal from "@/components/mage-ui/modal";
 import TeachersForm from "@/components/forms/teachers-form";
 import { Id } from "@/convex/_generated/dataModel";
+import { motion } from "framer-motion";
+import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 
 const SUBJECT_OPTIONS = [
   { value: "math", label: "Math" },
@@ -65,6 +67,27 @@ interface Teacher {
   status?: string;
 }
 
+// Grid Distortion Background Component
+const GridDistortion = () => {
+  return (
+    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 grid grid-cols-12 gap-1 opacity-5">
+        {Array.from({ length: 144 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="bg-primary/10 rounded-sm"
+            whileHover={{
+              scale: 1.2,
+              backgroundColor: "rgba(var(--primary), 0.15)",
+            }}
+            transition={{ duration: 0.2 }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default function TeachersPage() {
   const [isAddingTeacher, setIsAddingTeacher] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
@@ -98,67 +121,76 @@ export default function TeachersPage() {
   };
 
   return (
-    <div className="relative">
-      {/* Background using theme colors */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-br from-background to-primary/5" />
-      </div>
+    <div className="space-y-6 relative">
+      <GridDistortion />
 
       <div className="container max-w-4xl py-8 space-y-6">
-        {/* Header */}
+        {/* Header with Animation */}
         <PageHeader
           title="Teachers"
-          description="Manage your teaching staff and their observations"
-          rightContent={
-            <Button onClick={() => setIsAddingTeacher(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Teacher
-            </Button>
+          description={
+            <>
+              Manage your <AnimatedGradientText className="font-semibold">teaching staff</AnimatedGradientText> and their professional growth
+            </>
           }
         />
 
-        {/* Stats */}
-        <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-4">
-          <Card className="md:col-span-1">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-foreground">
-                Total Teachers
-              </CardTitle>
-              <Users className="h-4 w-4 text-primary" />
+        {/* Stats Card with Animation */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <Card className="bg-card border-border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle className="text-foreground">Teacher Overview</CardTitle>
+                <p className="text-sm text-muted-foreground">Summary of your teaching staff</p>
+              </div>
+              <Button onClick={() => setIsAddingTeacher(true)} className="shrink-0">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Teacher
+              </Button>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">
-                {teachers?.length || 0}
+              <div className="grid gap-6 sm:grid-cols-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Users className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-foreground">
+                      {teachers?.length || 0}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Total Teachers</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10">
+                    <GraduationCap className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-foreground">
+                      {teachers?.filter((t) => t.status === "active").length || 0}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Active Teachers</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+                    <UserPlus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-foreground">
+                      {teachers?.filter((t) => t.status === "pending").length || 0}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Pending Invites</p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="md:col-span-1">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-foreground">
-                Active Teachers
-              </CardTitle>
-              <GraduationCap className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">
-                {teachers?.filter((t) => t.status === "active").length || 0}
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="md:col-span-1">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-foreground">
-                Pending Invites
-              </CardTitle>
-              <UserPlus className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">
-                {teachers?.filter((t) => t.status === "pending").length || 0}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        </motion.div>
 
         {/* Add Teacher Modal */}
         <Modal
@@ -207,26 +239,80 @@ export default function TeachersPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Teachers List */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-foreground">
-            All Teachers
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-4">
-            {teachers?.map((teacher) => (
-              <Card key={teacher._id} className="flex flex-col">
-                <CardContent className="p-4 flex-1">
-                  <div className="flex flex-col h-full justify-between">
-                    <div>
+        {/* Teachers List with Animation */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-foreground">All Teachers</CardTitle>
+              <p className="text-sm text-muted-foreground">Manage your teaching staff details and status</p>
+            </CardHeader>
+            <CardContent>
+              {teachers && teachers.length > 0 ? (
+                <div className="space-y-4">
+                  {teachers.map((teacher) => (
+                    <motion.div
+                      key={teacher._id}
+                      whileHover={{ scale: 1.01 }}
+                      transition={{ duration: 0.2 }}
+                      className="p-4 border border-border rounded-lg hover:bg-accent/30 transition-colors"
+                    >
                       <div className="flex items-start justify-between">
-                        <h3 className="font-medium text-foreground">
-                          {teacher.name}
-                        </h3>
-                        <div className="flex gap-1">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="font-medium text-foreground">
+                              {teacher.name}
+                            </h3>
+                            <span
+                              className={cn(
+                                "text-xs px-2 py-1 rounded-full",
+                                {
+                                  "bg-green-100 text-green-700 dark:bg-green-950/20 dark:text-green-300 border border-green-200 dark:border-green-800": teacher.status === "active",
+                                  "bg-blue-100 text-blue-700 dark:bg-blue-950/20 dark:text-blue-300 border border-blue-200 dark:border-blue-800": teacher.status === "pending",
+                                  "bg-gray-100 text-gray-700 dark:bg-gray-950/20 dark:text-gray-300 border border-gray-200 dark:border-gray-800": teacher.status !== "active" && teacher.status !== "pending",
+                                }
+                              )}
+                            >
+                              {(teacher.status || "inactive")
+                                .charAt(0)
+                                .toUpperCase() +
+                                (teacher.status || "inactive").slice(1)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {teacher.email}
+                          </p>
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {(teacher.subject && teacher.subject.length > 0) && 
+                              (Array.isArray(teacher.subject) ? teacher.subject : [teacher.subject]).map((subject) => (
+                                <span
+                                  key={subject}
+                                  className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                                >
+                                  {SUBJECT_OPTIONS.find(o => o.value === subject)?.label || subject}
+                                </span>
+                              ))
+                            }
+                            {(teacher.gradeLevels && teacher.gradeLevels.length > 0) && 
+                              (Array.isArray(teacher.gradeLevels) ? teacher.gradeLevels : [teacher.gradeLevels]).map((grade) => (
+                                <span
+                                  key={grade}
+                                  className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-accent/60 text-accent-foreground border border-accent"
+                                >
+                                  {GRADE_LEVEL_OPTIONS.find(o => o.value === grade)?.label || grade}
+                                </span>
+                              ))
+                            }
+                          </div>
+                        </div>
+                        <div className="flex gap-1 ml-4">
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-7 w-7"
+                            className="h-8 w-8"
                             aria-label="Edit teacher"
                             onClick={() => setEditingTeacher(teacher)}
                           >
@@ -235,7 +321,7 @@ export default function TeachersPage() {
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-7 w-7 text-destructive"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
                             aria-label="Delete teacher"
                             onClick={() => setDeletingTeacher(teacher)}
                           >
@@ -243,49 +329,19 @@ export default function TeachersPage() {
                           </Button>
                         </div>
                       </div>
-                      <p className="text-sm text-foreground">
-                        {teacher.email}
-                      </p>
-                      {/* Show subject(s) */}
-                      {(teacher.subject && teacher.subject.length > 0) ? (
-                        <p className="text-sm text-foreground mt-1">
-                          Subject(s): {Array.isArray(teacher.subject) ? teacher.subject.map((s) => SUBJECT_OPTIONS.find(o => o.value === s)?.label || s).join(", ") : teacher.subject}
-                        </p>
-                      ) : null}
-                      {/* Show grade level(s) with fallback to gradeLevel for legacy data */}
-                      {(teacher.gradeLevels && teacher.gradeLevels.length > 0) ? (
-                        <p className="text-sm text-foreground">
-                          Grade Level(s): {Array.isArray(teacher.gradeLevels) ? teacher.gradeLevels.map((g) => GRADE_LEVEL_OPTIONS.find(o => o.value === g)?.label || g).join(", ") : teacher.gradeLevels}
-                        </p>
-                      ) : null}
-                    </div>
-                    <div className="mt-4">
-                      <span
-                        // Use theme colors for status badges
-                        className={cn(
-                          "text-sm px-2 py-1 rounded-full",
-                          {
-                            // Increase background opacity in light mode
-                            "bg-success/20 text-success dark:bg-success/20 dark:text-success": teacher.status === "active",
-                            // Increase background opacity in light mode
-                            "bg-info/20 text-info dark:bg-info/20 dark:text-info": teacher.status === "pending",
-                            // Increase background opacity in light mode
-                            "bg-destructive/20 text-destructive dark:bg-destructive/20 dark:text-destructive": teacher.status !== "active" && teacher.status !== "pending",
-                          }
-                        )}
-                      >
-                        {(teacher.status || "inactive")
-                          .charAt(0)
-                          .toUpperCase() +
-                          (teacher.status || "inactive").slice(1)}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No teachers added yet</p>
+                  <p className="text-sm">Click "Add Teacher" to get started</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );
