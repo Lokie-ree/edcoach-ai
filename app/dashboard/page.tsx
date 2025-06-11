@@ -99,6 +99,7 @@ const TeacherDashboard = ({
             Welcome back, <AnimatedGradientText className="font-semibold">{user.firstName || user.fullName || "Teacher"}</AnimatedGradientText>! Ready to continue your professional growth journey?
           </>
         }
+        gradient={true}
       />
 
       {/* Recent Walkthroughs */}
@@ -320,6 +321,7 @@ export default function DashboardPage() {
             Welcome back, <AnimatedGradientText className="font-semibold">{user?.firstName || user?.fullName || "Coach"}</AnimatedGradientText>! Ready to support your teachers&apos; professional growth?
           </>
         }
+        gradient={true}
         rightContent={
           <div className="hidden md:flex items-center gap-6 text-sm">
             <div className="flex items-center gap-2">

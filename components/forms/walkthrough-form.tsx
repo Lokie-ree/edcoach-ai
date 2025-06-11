@@ -326,7 +326,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
     <FormProvider {...methods}>
       <Form {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Card className="max-w-2xl mx-auto">
+          <Card className="max-w-2xl">
             <CardHeader>
               <CardTitle>{walkthroughId ? "Edit Walkthrough Draft" : "New Walkthrough"}</CardTitle>
             </CardHeader>

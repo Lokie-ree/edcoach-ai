@@ -1,6 +1,7 @@
 "use client";
 
 import { WalkthroughForm } from "@/components/forms/walkthrough-form";
+import { PageHeader } from "@/components/ui/page-header";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -16,14 +17,16 @@ export default function NewObservationPage() {
   const coachId = convexUser?._id as Id<'users'> | undefined;
 
   return (
-    <div className="relative">
-      {/* Background gradient effect */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-br from-background to-card/30" />
-      </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <PageHeader
+        title="New Walkthrough"
+        description="Create a new classroom observation and provide feedback to support teacher growth"
+        gradient={true}
+      />
 
       {/* Content */}
-      <div className="container max-w-4xl py-8 relative">
+      <div className="container max-w-4xl relative">
         {coachId && <WalkthroughForm coachId={coachId} />}
       </div>
     </div>
