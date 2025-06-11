@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/card";
 import {
   Users,
-  BarChart,
   BookOpen,
   CheckCircle,
   Loader2,
+  Award,
+  Target,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,8 @@ import { useQuery } from "convex/react";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { Id } from "@/convex/_generated/dataModel";
 import { getIndicatorName } from "@/lib/indicator-utils";
+import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
+import { PageHeader } from "@/components/ui/page-header";
 
 // Type definitions for better type safety
 type WalkthroughDoc = {
@@ -90,96 +93,21 @@ const TeacherDashboard = ({
     <div className="space-y-6 relative">
       <GridDistortion />
 
-      {/* Welcome Banner */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Card className="bg-gradient-to-r from-primary/5 to-accent/10 border-primary/20">
-          <CardContent className="p-6">
-            <div className="text-center">
-              <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">
-                Welcome back, {user.firstName || user.fullName || "Teacher"}! 👋
-              </h1>
-              <p className="text-muted-foreground text-lg">
-                Ready to continue your professional growth journey?
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Header - Updated to be smaller since we have the banner */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <h2 className="text-xl font-semibold tracking-tight text-foreground">
-          Dashboard Overview
-        </h2>
-      </motion.div>
-
-      {/* Teacher Quick Actions */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <TiltedCard>
-          <Card className="h-full bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-foreground">
-                Quick Actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-                <Link href="/my-walkthroughs">
-                  <Button
-                    variant="outline"
-                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border-border hover:bg-accent/50 hover:text-accent-foreground transition-colors"
-                  >
-                    <div className="rounded-full bg-primary/10 p-2">
-                      <BookOpen className="h-6 w-6 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium">View My Walkthroughs</span>
-                  </Button>
-                </Link>
-                <Link href="/my-progress">
-                  <Button
-                    variant="outline"
-                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border-border hover:bg-accent/50 hover:text-accent-foreground transition-colors"
-                  >
-                    <div className="rounded-full bg-primary/10 p-2">
-                      <BarChart className="h-6 w-6 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium">My Progress</span>
-                  </Button>
-                </Link>
-                <Button
-                  variant="outline"
-                  className="w-full h-24 flex flex-col items-center justify-center gap-2 border-border hover:bg-muted/50 transition-colors"
-                  disabled
-                >
-                  <div className="rounded-full bg-muted/50 p-2">
-                    <CheckCircle className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <span className="text-sm font-medium">Action Plans</span>
-                  <span className="text-xs text-muted-foreground">(Coming Soon)</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TiltedCard>
-      </motion.div>
+      {/* Main Header */}
+      <PageHeader
+        title="Dashboard"
+        description={
+          <>
+            Welcome back, <AnimatedGradientText className="font-semibold">{user.firstName || user.fullName || "Teacher"}</AnimatedGradientText>! Ready to continue your professional growth journey?
+          </>
+        }
+      />
 
       {/* Recent Walkthroughs */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
       >
         <Card className="bg-card border-border">
           <CardHeader>
@@ -189,38 +117,41 @@ const TeacherDashboard = ({
             {recentWalkthroughs.length > 0 ? (
               <div className="space-y-4">
                 {recentWalkthroughs.map((walkthrough) => (
-                  <div key={walkthrough._id} className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent/30 transition-colors">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium text-foreground">Classroom Walkthrough</p>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          walkthrough.status === "completed" 
-                            ? "bg-primary/10 text-primary border border-primary/20"
-                            : "bg-accent/10 text-accent-foreground border border-accent/20"
-                        }`}>
-                          {walkthrough.status === "completed" ? "Completed" : "In Progress"}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(walkthrough.walkthroughDate).toLocaleDateString()}
-                      </p>
-                      {walkthrough.status === "completed" && (
-                        <div className="flex gap-2 mt-2">
-                          <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded border border-primary/20">
-                            ✓ {walkthrough.reinforcementIndicator.substring(0, 20)}...
-                          </span>
-                          <span className="text-xs px-2 py-1 bg-accent/10 text-accent-foreground rounded border border-accent/20">
-                            → {walkthrough.refinementIndicator.substring(0, 20)}...
+                  <Link 
+                    key={walkthrough._id} 
+                    href={`/walkthrough/${walkthrough._id}/view`}
+                    className="block"
+                  >
+                    <div className="p-4 border border-border rounded-lg hover:bg-accent/30 transition-colors cursor-pointer">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium text-foreground">Classroom Walkthrough</p>
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            walkthrough.status === "completed" 
+                              ? "bg-primary/10 text-primary border border-primary/20"
+                              : "bg-accent/10 text-accent-foreground border border-accent/20"
+                          }`}>
+                            {walkthrough.status === "completed" ? "Completed" : "In Progress"}
                           </span>
                         </div>
-                      )}
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(walkthrough.walkthroughDate).toLocaleDateString()}
+                        </p>
+                        {walkthrough.status === "completed" && (
+                          <div className="flex flex-wrap gap-2 mt-3">
+                            <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-300 rounded-full border border-green-200 dark:border-green-800">
+                              <Award className="h-3 w-3" />
+                              {getIndicatorName(walkthrough.reinforcementIndicator)}
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-300 rounded-full border border-blue-200 dark:border-blue-800">
+                              <Target className="h-3 w-3" />
+                              {getIndicatorName(walkthrough.refinementIndicator)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <Link href={`/walkthrough/${walkthrough._id}/view`}>
-                      <Button variant="outline" size="sm" className="border-border hover:bg-accent/50">
-                        View
-                      </Button>
-                    </Link>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
@@ -406,113 +337,37 @@ export default function DashboardPage() {
     <div className="space-y-6 relative">
       <GridDistortion />
 
-      {/* Welcome Banner */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Card className="bg-gradient-to-r from-primary/5 to-accent/10 border-primary/20">
-          <CardContent className="p-6">
-            <div className="text-center">
-              <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">
-                Welcome back, {user?.firstName}! 👋
-              </h1>
-              <p className="text-muted-foreground text-lg mb-3">
-                Ready to support your teachers&apos; professional growth?
-              </p>
-              <div className="flex justify-center gap-6 text-sm">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-primary" />
-                  <span className="text-foreground font-medium">{safeTeachers.length} Teachers</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4 text-primary" />
-                  <span className="text-foreground font-medium">{thisMonthWalkthroughs} This Month</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-primary" />
-                  <span className="text-foreground font-medium">{completedWalkthroughs} Completed</span>
-                </div>
-              </div>
+      {/* Main Header */}
+      <PageHeader
+        title="Dashboard"
+        description={
+          <>
+            Welcome back, <AnimatedGradientText className="font-semibold">{user?.firstName || user?.fullName || "Coach"}</AnimatedGradientText>! Ready to support your teachers&apos; professional growth?
+          </>
+        }
+        rightContent={
+          <div className="hidden md:flex items-center gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" />
+              <span className="text-foreground font-medium">{safeTeachers.length} Teachers</span>
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <h2 className="text-xl font-semibold tracking-tight text-foreground">
-          Coaching Overview
-        </h2>
-      </motion.div>
-
-      {/* Quick Actions - Full Width */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <TiltedCard>
-          <Card className="h-full bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-foreground">
-                Quick Actions
-              </CardTitle>
-             
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-                <Link href="/teachers">
-                  <Button
-                    variant="outline"
-                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border-border hover:bg-accent/50 hover:text-accent-foreground transition-colors"
-                  >
-                    <div className="rounded-full bg-primary/10 p-2">
-                      <Users className="h-6 w-6 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium">Manage Teachers</span>
-                  </Button>
-                </Link>
-                <Link href="/walkthrough/new">
-                  <Button
-                    variant="outline"
-                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border-border hover:bg-accent/50 hover:text-accent-foreground transition-colors"
-                  >
-                    <div className="rounded-full bg-primary/10 p-2">
-                      <BookOpen className="h-6 w-6 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium">
-                      Start New Walkthrough
-                    </span>
-                  </Button>
-                </Link>
-                <Link href="/analytics">
-                  <Button
-                    variant="outline"
-                    className="w-full h-24 flex flex-col items-center justify-center gap-2 border-border hover:bg-accent/50 hover:text-accent-foreground transition-colors"
-                  >
-                    <div className="rounded-full bg-primary/10 p-2">
-                      <BarChart className="h-6 w-6 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium">View Analytics</span>
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </TiltedCard>
-      </motion.div>
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-primary" />
+              <span className="text-foreground font-medium">{thisMonthWalkthroughs} This Month</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-primary" />
+              <span className="text-foreground font-medium">{completedWalkthroughs} Completed</span>
+            </div>
+          </div>
+        }
+      />
 
       {/* Teacher Status Overview */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
       >
         <Card className="bg-card border-border">
           <CardHeader>
@@ -626,7 +481,7 @@ export default function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
       >
         <Card className="bg-card border-border">
           <CardHeader>
@@ -636,41 +491,77 @@ export default function DashboardPage() {
           <CardContent>
             {entries && entries.length > 0 ? (
               <div className="space-y-4">
-                {entries
-                  .filter(entry => entry.aiFeedback && entry.type === "reinforcement")
-                  .slice(0, 6)
-                  .map((entry) => (
-                    <div key={entry._id} className="p-4 border border-primary/20 rounded-lg bg-primary/5">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm font-medium text-primary">
-                              {getIndicatorName(entry.indicatorAcronym)}
-                            </span>
-                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                            {(entry as any).teacherName && (
-                              <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded">
-                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {(entry as any).teacherName}
-                              </span>
-                            )}
+                {(() => {
+                  // Group entries by teacher
+                  const teacherGroups = entries
+                    .filter(entry => entry.aiFeedback && (entry.type === "reinforcement" || entry.type === "refinement"))
+                    .reduce((groups, entry) => {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      const teacherName = (entry as any).teacherName || "Unknown Teacher";
+                      if (!groups[teacherName]) {
+                        groups[teacherName] = [];
+                      }
+                      groups[teacherName].push(entry);
+                      return groups;
+                    }, {} as Record<string, typeof entries>);
+
+                  // Convert to array and sort by most recent
+                  return Object.entries(teacherGroups)
+                    .map(([teacherName, teacherEntries]) => ({
+                      teacherName,
+                      entries: teacherEntries.sort((a, b) => b.createdAt - a.createdAt),
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      mostRecentDate: Math.max(...teacherEntries.map(e => (e as any).walkthroughDate || e.createdAt))
+                    }))
+                    .sort((a, b) => b.mostRecentDate - a.mostRecentDate)
+                    .slice(0, 4)
+                    .map(({ teacherName, entries: teacherEntries }) => (
+                      <div key={teacherName} className="p-4 border border-border rounded-lg bg-card">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-foreground">{teacherName}</h4>
+                            <div className="flex flex-wrap gap-1">
+                              {teacherEntries.slice(0, 2).map((entry) => (
+                                <span key={entry._id} className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${
+                                  entry.type === "reinforcement"
+                                    ? "bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-300 border-green-200 dark:border-green-800"
+                                    : "bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+                                }`}>
+                                  {entry.type === "reinforcement" ? (
+                                    <Award className="h-3 w-3" />
+                                  ) : (
+                                    <Target className="h-3 w-3" />
+                                  )}
+                                  {entry.indicatorAcronym}
+                                </span>
+                              ))}
+                            </div>
                           </div>
-                          <p className="text-sm text-foreground leading-relaxed">
-                            {entry.aiFeedback}
-                          </p>
+                          <span className="text-xs text-muted-foreground flex-shrink-0">
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                            {(teacherEntries[0] as any).walkthroughDate ? 
+                              /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+                              new Date((teacherEntries[0] as any).walkthroughDate).toLocaleDateString() : 
+                              new Date(teacherEntries[0].createdAt).toLocaleDateString()
+                            }
+                          </span>
                         </div>
-                        <span className="text-xs text-muted-foreground ml-4 flex-shrink-0">
-                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                          {(entry as any).walkthroughDate ? 
-                            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-                            new Date((entry as any).walkthroughDate).toLocaleDateString() : 
-                            new Date(entry.createdAt).toLocaleDateString()
-                          }
-                        </span>
+                        <div className="space-y-2">
+                          {teacherEntries.slice(0, 2).map((entry) => (
+                            <p key={entry._id} className="text-sm text-foreground leading-relaxed">
+                              <span className={`font-medium ${
+                                entry.type === "reinforcement" ? "text-green-700 dark:text-green-300" : "text-blue-700 dark:text-blue-300"
+                              }`}>
+                                {entry.type === "reinforcement" ? "Reinforcement" : "Refinement"}:
+                              </span>{" "}
+                              {entry.aiFeedback}
+                            </p>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                {entries.filter(entry => entry.aiFeedback && entry.type === "reinforcement").length === 0 && (
+                    ));
+                })()}
+                {entries.filter(entry => entry.aiFeedback && (entry.type === "reinforcement" || entry.type === "refinement")).length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>No feedback highlights yet</p>
@@ -693,7 +584,7 @@ export default function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
       >
       </motion.div>
     </div>

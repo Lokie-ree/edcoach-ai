@@ -10,7 +10,7 @@ import {
   ChartSpline,
   BookOpen,
   BarChart,
-  Plus
+  ClipboardPlus
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
@@ -22,7 +22,7 @@ import { api } from "@/convex/_generated/api";
 const navItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard", roles: ["coach", "teacher"] },
   { href: "/teachers", icon: Users, label: "Teachers", roles: ["coach"] },
-  { href: "/walkthrough/new", icon: Plus, label: "New Walkthrough", roles: ["coach"] },
+  { href: "/walkthrough/new", icon: ClipboardPlus, label: "New Walkthrough", roles: ["coach"] },
   { href: "/analytics", icon: ChartSpline, label: "Analytics", roles: ["coach"] },
   { href: "/my-walkthroughs", icon: BookOpen, label: "My Walkthroughs", roles: ["teacher"] },
   { href: "/my-progress", icon: BarChart, label: "My Progress", roles: ["teacher"] },

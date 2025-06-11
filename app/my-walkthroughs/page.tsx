@@ -13,7 +13,9 @@ import {
   CheckCircle, 
   Clock, 
   Eye,
-  Search
+  Search,
+  Award,
+  Target
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -21,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
 import { getIndicatorName } from "@/lib/indicator-utils";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default function MyWalkthroughsPage() {
   const { user } = useUser();
@@ -81,20 +84,10 @@ export default function MyWalkthroughsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          My Walkthroughs
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          View and track all your classroom observation walkthroughs
-        </p>
-      </motion.div>
-
-
+      <PageHeader
+        title="My Walkthroughs"
+        description="View and track all your classroom observation walkthroughs"
+      />
 
       {/* Filters */}
       <motion.div
@@ -151,10 +144,10 @@ export default function MyWalkthroughsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 * index }}
             >
-              <Card className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-2 flex-1">
+              <Link href={`/walkthrough/${walkthrough._id}/view`} className="block">
+                <Card className="hover:shadow-md hover:bg-accent/30 transition-all duration-200 cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className="space-y-2">
                       <div className="flex items-center gap-2 mb-2">
                         <Badge variant={walkthrough.status === "completed" ? "default" : "secondary"}>
                           {walkthrough.status === "completed" ? (
@@ -184,38 +177,21 @@ export default function MyWalkthroughsPage() {
                       </p>
                       
                       {walkthrough.status === "completed" && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                          <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-lg">
-                            <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">
-                              Reinforcement
-                            </p>
-                            <p className="text-sm text-green-600 dark:text-green-400">
-                              {getIndicatorName(walkthrough.reinforcementIndicator)}
-                            </p>
-                          </div>
-                          <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg">
-                            <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">
-                              Refinement
-                            </p>
-                            <p className="text-sm text-blue-600 dark:text-blue-400">
-                              {getIndicatorName(walkthrough.refinementIndicator)}
-                            </p>
-                          </div>
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-300 rounded-full border border-green-200 dark:border-green-800">
+                            <Award className="h-3 w-3" />
+                            {getIndicatorName(walkthrough.reinforcementIndicator)}
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-300 rounded-full border border-blue-200 dark:border-blue-800">
+                            <Target className="h-3 w-3" />
+                            {getIndicatorName(walkthrough.refinementIndicator)}
+                          </span>
                         </div>
                       )}
                     </div>
-                    
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <Link href={`/walkthrough/${walkthrough._id}/view`}>
-                        <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Details
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             </motion.div>
           ))
         )}

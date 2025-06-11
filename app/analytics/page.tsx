@@ -5,6 +5,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getIndicatorName } from "@/lib/indicator-utils";
+import { PageHeader } from "@/components/ui/page-header";
 
 const Counter = () => {
   const currentUser = useQuery(api.users.getCurrentUser, {});
@@ -221,11 +222,10 @@ const WideCard = () => {
 export default function AnalyticsDashboardPage() {
   return (
     <div className="container max-w-4xl py-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Analytics Dashboard
-        </h1>
-      </div>
+      <PageHeader
+        title="Analytics Dashboard"
+        description="View comprehensive analytics and insights from your walkthrough observations"
+      />
       <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-4">
         <Card>
           <CardHeader>

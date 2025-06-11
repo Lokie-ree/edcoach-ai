@@ -8,15 +8,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
-  Target,
+  Calendar, 
   Award,
-  Users,
+  Target,
+  Users
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { getIndicatorName } from "@/lib/indicator-utils";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
+import { PageHeader } from "@/components/ui/page-header";
 
 export default function MyProgressPage() {
   const { user } = useUser();
@@ -165,18 +167,10 @@ export default function MyProgressPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          My Progress
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Track your professional growth and development over time
-        </p>
-      </motion.div>
+      <PageHeader
+        title="My Progress"
+        description="Track your professional growth and development over time"
+      />
 
       {/* Strengths and Growth Areas */}
       <motion.div

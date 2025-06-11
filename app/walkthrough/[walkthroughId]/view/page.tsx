@@ -4,17 +4,18 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { BorderBeam } from "@/components/magicui/border-beam";
+import { PageHeader } from "@/components/ui/page-header";
 import { 
   ArrowLeft,
   Calendar,
   User,
   BookOpen,
-  CheckCircle,
   Clock,
   Award,
-  Target
+  Target,
+  FileText
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -102,103 +103,107 @@ export default function ViewWalkthroughPage({
   const reinforcementEntry = walkthroughEntries?.find(e => e.type === "reinforcement");
   const refinementEntry = walkthroughEntries?.find(e => e.type === "refinement");
 
+  // Status-based color scheme
+  const statusColors = walkthrough.status === "completed" 
+    ? { from: "#10B981", to: "#059669" } // green
+    : { from: "#F59E0B", to: "#D97706" }; // amber
+
   return (
-    <div className="container max-w-6xl py-8 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="flex items-center justify-between"
-      >
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Link href={convexUser.role === "teacher" ? "/my-walkthroughs" : "/dashboard"}>
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                {convexUser.role === "teacher" ? "My Walkthroughs" : "Dashboard"}
+      <PageHeader
+        title="Classroom Walkthrough"
+        description={`Professional development observation for ${teacher?.name || "teacher"}`}
+        gradient={true}
+        rightContent={
+          convexUser.role === "coach" ? (
+            <Link href={`/walkthrough/${walkthroughId}`}>
+              <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                Edit Walkthrough
               </Button>
             </Link>
-            <Badge variant={walkthrough.status === "completed" ? "default" : "secondary"}>
-              {walkthrough.status === "completed" ? (
-                <>
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Completed
-                </>
-              ) : (
-                <>
-                  <Clock className="h-3 w-3 mr-1" />
-                  Draft
-                </>
-              )}
-            </Badge>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Classroom Walkthrough
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {new Date(walkthrough.walkthroughDate).toLocaleDateString(undefined, {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}
-          </p>
-        </div>
-        {convexUser.role === "coach" && (
-          <Link href={`/walkthrough/${walkthroughId}`}>
-            <Button>
-              Edit Walkthrough
-            </Button>
-          </Link>
-        )}
-      </motion.div>
+          ) : undefined
+        }
+      />
 
-      {/* Overview Cards */}
+      {/* Subtle Walkthrough Overview Card */}
       <motion.div
-        className="grid gap-4 md:grid-cols-3"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Teacher</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
+        <Card className="relative overflow-hidden bg-card border-border/30 hover:border-border/50 transition-all duration-300">
+          <CardHeader className="relative z-10 pb-4">
+            <CardTitle className="flex items-center gap-3 text-foreground">
+              <div className="p-1.5 rounded-lg bg-muted">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div>
+                <span className="text-lg font-medium text-foreground">
+                  Walkthrough Overview
+                </span>
+                <p className="text-xs text-muted-foreground font-normal mt-1">
+                  Participant information and observation details
+                </p>
+              </div>
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-lg font-medium">{teacher?.name || "Loading..."}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {teacher?.subject?.join(", ") || ""} • {teacher?.gradeLevels?.join(", ") || ""}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Observer</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-medium">{observer?.name || "Loading..."}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Coach
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Date</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-medium">
-              {new Date(walkthrough.walkthroughDate).toLocaleDateString()}
+          <CardContent className="relative z-10 pt-0">
+            <div className="grid gap-4 md:grid-cols-2">
+              {/* Teacher Information */}
+              <div className="space-y-3 p-3 rounded-lg bg-muted/30 border border-border/20">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-md bg-blue-100/50 dark:bg-blue-900/20">
+                    <User className="h-3.5 w-3.5 text-blue-600/70 dark:text-blue-400/70" />
+                  </div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Teacher</h3>
+                </div>
+                <div className="pl-6 space-y-1">
+                  <p className="text-base font-medium text-foreground">
+                    {teacher?.name || "Loading..."}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {teacher?.subject?.join(", ") || ""} • {teacher?.gradeLevels?.join(", ") || ""}
+                  </p>
+                </div>
+              </div>
+
+              {/* Observer Information */}
+              <div className="space-y-3 p-3 rounded-lg bg-muted/30 border border-border/20">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-md bg-purple-100/50 dark:bg-purple-900/20">
+                    <BookOpen className="h-3.5 w-3.5 text-purple-600/70 dark:text-purple-400/70" />
+                  </div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Observer</h3>
+                </div>
+                <div className="pl-6 space-y-1">
+                  <p className="text-base font-medium text-foreground">
+                    {observer?.name || "Loading..."}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Coach</p>
+                </div>
+              </div>
+
+              {/* Date Information */}
+              <div className="space-y-3 p-3 rounded-lg bg-muted/30 border border-border/20 md:col-span-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-md bg-green-100/50 dark:bg-green-900/20">
+                    <Calendar className="h-3.5 w-3.5 text-green-600/70 dark:text-green-400/70" />
+                  </div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Observation Date</h3>
+                </div>
+                <div className="pl-6">
+                  <p className="text-base font-medium text-foreground">
+                    {new Date(walkthrough.walkthroughDate).toLocaleDateString(undefined, {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Observation date
-            </p>
           </CardContent>
         </Card>
       </motion.div>
@@ -209,10 +214,16 @@ export default function ViewWalkthroughPage({
           className="grid gap-6 lg:grid-cols-2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
           {/* Reinforcement */}
-          <Card className="border-green-200 dark:border-green-800">
+          <Card className="border-green-200 dark:border-green-800 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <BorderBeam
+              duration={6}
+              size={200}
+              colorFrom="#10B981"
+              colorTo="#059669"
+            />
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300">
                 <Award className="h-5 w-5" />
@@ -240,7 +251,13 @@ export default function ViewWalkthroughPage({
           </Card>
 
           {/* Refinement */}
-          <Card className="border-blue-200 dark:border-blue-800">
+          <Card className="border-blue-200 dark:border-blue-800 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <BorderBeam
+              duration={6}
+              size={200}
+              colorFrom="#3B82F6"
+              colorTo="#1D4ED8"
+            />
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
                 <Target className="h-5 w-5" />
@@ -274,9 +291,15 @@ export default function ViewWalkthroughPage({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Card className="border-yellow-200 dark:border-yellow-800">
+          <Card className="border-yellow-200 dark:border-yellow-800 relative overflow-hidden">
+            <BorderBeam
+              duration={6}
+              size={200}
+              colorFrom="#F59E0B"
+              colorTo="#D97706"
+            />
             <CardContent className="text-center py-8">
               <Clock className="h-12 w-12 mx-auto mb-4 text-yellow-500 opacity-50" />
               <h3 className="text-lg font-medium mb-2">Draft Walkthrough</h3>
@@ -285,7 +308,7 @@ export default function ViewWalkthroughPage({
               </p>
               {convexUser.role === "coach" && (
                 <Link href={`/walkthrough/${walkthroughId}`} className="mt-4 inline-block">
-                  <Button>
+                  <Button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
                     Complete Walkthrough
                   </Button>
                 </Link>

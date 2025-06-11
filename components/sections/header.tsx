@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users, ChartSpline, Home, BookOpen, BarChart } from "lucide-react";
+import { Users, ChartSpline, Home, BookOpen, BarChart, ClipboardPlus } from "lucide-react";
 import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import MaxWidthWrapper from "@/components/max-width-wrapper";
@@ -14,6 +14,7 @@ import { api } from "@/convex/_generated/api";
 const navItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard", roles: ["coach", "teacher"] },
   { href: "/teachers", icon: Users, label: "Teachers", roles: ["coach"] },
+  { href: "/walkthrough/new", icon: ClipboardPlus, label: "New Walkthrough", roles: ["coach"] },
   { href: "/analytics", icon: ChartSpline, label: "Analytics", roles: ["coach"] },
   { href: "/my-walkthroughs", icon: BookOpen, label: "My Walkthroughs", roles: ["teacher"] },
   { href: "/my-progress", icon: BarChart, label: "My Progress", roles: ["teacher"] },

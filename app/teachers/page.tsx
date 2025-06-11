@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
+import { PageHeader } from "@/components/ui/page-header";
 
 import { cn } from "@/lib/utils";
 import Modal from "@/components/mage-ui/modal";
@@ -105,20 +106,16 @@ export default function TeachersPage() {
 
       <div className="container max-w-4xl py-8 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">
-              Teachers
-            </h1>
-            <p className="text-foreground">
-              Manage your teaching staff and their observations
-            </p>
-          </div>
-          <Button onClick={() => setIsAddingTeacher(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Teacher
-          </Button>
-        </div>
+        <PageHeader
+          title="Teachers"
+          description="Manage your teaching staff and their observations"
+          rightContent={
+            <Button onClick={() => setIsAddingTeacher(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Teacher
+            </Button>
+          }
+        />
 
         {/* Stats */}
         <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-4">
