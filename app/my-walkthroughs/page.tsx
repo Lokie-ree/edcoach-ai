@@ -6,13 +6,11 @@ import { useUser } from "@clerk/nextjs";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { 
   BookOpen, 
   Calendar, 
   CheckCircle, 
   Clock, 
-  Eye,
   Search,
   Award,
   Target

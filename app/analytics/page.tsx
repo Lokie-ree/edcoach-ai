@@ -1,273 +1,534 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { getIndicatorName } from "@/lib/indicator-utils";
 import { PageHeader } from "@/components/ui/page-header";
-
-const Counter = () => {
-  const currentUser = useQuery(api.users.getCurrentUser, {});
-  const observerId = currentUser?._id;
-  const analytics = useQuery(
-    api.analytics.observerAnalytics,
-    observerId ? { observerId } : "skip"
-  );
-
-  // Loading state
-  if (!currentUser || (observerId && !analytics)) {
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import { motion } from "framer-motion";
+import { 
+  Users, 
+  Calendar, 
+  Target, 
+  MessageSquare, 
+  AlertCircle,
+  Clock,
+  TrendingUp,
+  CheckCircle2,
+  FileText,
+  ArrowRight,
+  BarChart3,
+  PieChart
+} from "lucide-react";
+// Overview Metrics Cards
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const OverviewMetrics = ({ analytics }: { analytics: any }) => {
+  if (!analytics) {
     return (
-      <div className="flex flex-col items-center justify-center h-full animate-pulse">
-        <span className="text-4xl font-bold text-gray-300">--</span>
-        <span className="text-sm text-muted-foreground mt-1">Walkthroughs this month</span>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i} className="animate-pulse">
+            <CardHeader className="pb-2">
+              <div className="h-4 bg-gray-200 rounded w-24"></div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 bg-gray-200 rounded w-16 mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-20"></div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     );
   }
 
-  // TODO: Handle error and edge cases
+  const metrics = [
+    {
+      title: "Active Teachers",
+      value: analytics.activeTeachers,
+      subtitle: `${analytics.totalTeachers} total assigned`,
+      icon: Users,
+      color: "text-primary",
+    },
+    {
+      title: "Monthly Walkthroughs",
+      value: analytics.thisMonthWalkthroughs,
+      subtitle: "This month",
+      icon: Calendar,
+      color: "text-blue-600",
+    },
+    {
+      title: "Completion Rate",
+      value: `${analytics.completionRate}%`,
+      subtitle: "Walkthroughs completed",
+      icon: Target,
+      color: "text-green-600",
+    },
+    {
+      title: "Avg Feedback/Teacher",
+      value: analytics.avgFeedbackPerTeacherPerMonth,
+      subtitle: "Per month",
+      icon: MessageSquare,
+      color: "text-purple-600",
+    },
+  ];
+
   return (
-    <div className="flex flex-col items-center justify-center h-full">
-      <span className="text-4xl font-bold">{analytics?.totalWalkthroughsThisMonth ?? 0}</span>
-      <span className="text-sm text-muted-foreground mt-1">Walkthroughs this month</span>
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {metrics.map((metric, index) => (
+        <motion.div
+          key={metric.title}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: index * 0.1 }}
+        >
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                {metric.title}
+              </CardTitle>
+              <metric.icon className={`h-4 w-4 ${metric.color}`} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{metric.value}</div>
+              <p className="text-xs text-muted-foreground">
+                {metric.subtitle}
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
     </div>
   );
 };
 
-const BAR_COLORS = [
-  "#6366f1", // Indigo
-  "#f59e42", // Orange
-  "#10b981", // Green
-  "#f43f5e", // Red
-  "#3b82f6", // Blue
-  "#a21caf", // Purple
-];
-
-const BarChart = () => {
-  const currentUser = useQuery(api.users.getCurrentUser, {});
-  const observerId = currentUser?._id;
-  const analytics = useQuery(
-    api.analytics.observerAnalytics,
-    observerId ? { observerId } : "skip"
-  );
-
-  if (!currentUser || (observerId && !analytics)) {
+// Feedback Analysis Section
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const FeedbackAnalysis = ({ analytics }: { analytics: any }) => {
+  if (!analytics) {
     return (
-      <div className="h-full flex flex-col justify-center animate-pulse">
-        <div className="text-sm font-semibold mb-2">Feedback by Indicator</div>
-        <div className="flex items-end gap-2 h-16">
-          <div className="w-6 h-6 bg-gray-200 rounded" />
-          <div className="w-6 h-10 bg-gray-200 rounded" />
-          <div className="w-6 h-4 bg-gray-200 rounded" />
+      <div className="grid gap-4 md:grid-cols-2">
+        {[...Array(2)].map((_, i) => (
+          <Card key={i} className="animate-pulse">
+            <CardHeader>
+              <div className="h-6 bg-gray-200 rounded w-32"></div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-48 bg-gray-200 rounded"></div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  // Donut chart for feedback distribution
+  const DonutChart = () => {
+    const total = analytics.reinforcementCount + analytics.refinementCount;
+    
+    if (total === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center h-48">
+          <PieChart className="h-12 w-12 text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">No feedback data yet</p>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  const indicatorCounts = analytics?.indicatorCounts || {};
-  const indicators = Object.keys(indicatorCounts);
-  const maxCount = Math.max(...Object.values(indicatorCounts), 1);
+    const reinforcementPercent = (analytics.reinforcementCount / total) * 100;
+    const refinementPercent = (analytics.refinementCount / total) * 100;
 
-  return (
-    <div className="h-full flex flex-col justify-center">
-      {indicators.length === 0 ? (
-        <div className="text-xs text-muted-foreground">No feedback yet</div>
-      ) : (
-        <div className="rounded-lg p-2 flex items-end gap-4 h-28">
-          {indicators.map((indicator, i) => {
-            const count = indicatorCounts[indicator];
-            const color = BAR_COLORS[i % BAR_COLORS.length];
-            return (
-              <div key={indicator} className="flex flex-col items-center group">
-                <div
-                  style={{
-                    width: 20,
-                    height: Math.max(12, (count / maxCount) * 64),
-                    background: color,
-                    borderRadius: 6,
-                    transition: "height 0.3s",
-                  }}
-                  title={getIndicatorName(indicator)}
-                  className="group-hover:opacity-80"
-                />
-                <span
-                  className="text-[10px] mt-1 text-muted-foreground truncate max-w-[40px] text-center"
-                  title={getIndicatorName(indicator)}
-                >
-                  {indicator}
-                </span>
-                <span className="text-[11px] text-gray-700 font-medium">{count}</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const DonutChart = () => {
-  const currentUser = useQuery(api.users.getCurrentUser, {});
-  const observerId = currentUser?._id;
-  const analytics = useQuery(
-    api.analytics.observerAnalytics,
-    observerId ? { observerId } : "skip"
-  );
-
-  if (!currentUser || (observerId && !analytics)) {
     return (
-      <div className="flex flex-col items-center justify-center h-full animate-pulse">
-        <svg width="60" height="60" viewBox="0 0 36 36">
-          <circle cx="18" cy="18" r="16" fill="#f3f4f6" />
-        </svg>
-        <div className="text-xs mt-2 text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
-
-  const indicatorCounts = analytics?.indicatorCounts || {};
-  const indicators = Object.keys(indicatorCounts);
-  const total = Object.values(indicatorCounts).reduce((a, b) => a + b, 0);
-
-  if (indicators.length === 0 || total === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full">
-        <svg width="60" height="60" viewBox="0 0 36 36">
-          <circle cx="18" cy="18" r="16" fill="#f3f4f6" />
-        </svg>
-        <div className="text-xs mt-2 text-muted-foreground">No feedback yet</div>
-      </div>
-    );
-  }
-
-  // Calculate donut slices
-  let startAngle = 0;
-  const slices = indicators.map((indicator, i) => {
-    const count = indicatorCounts[indicator];
-    const percent = count / total;
-    const angle = percent * 360;
-    const endAngle = startAngle + angle;
-    // Convert angles to coordinates
-    const largeArc = angle > 180 ? 1 : 0;
-    const radius = 16;
-    const center = 18;
-    const x1 = center + radius * Math.sin((Math.PI * startAngle) / 180);
-    const y1 = center - radius * Math.cos((Math.PI * startAngle) / 180);
-    const x2 = center + radius * Math.sin((Math.PI * endAngle) / 180);
-    const y2 = center - radius * Math.cos((Math.PI * endAngle) / 180);
-    const path = `M${center},${center} L${x1},${y1} A${radius},${radius} 0 ${largeArc},1 ${x2},${y2} Z`;
-    const color = BAR_COLORS[i % BAR_COLORS.length];
-    const slice = (
-      <path key={indicator} d={path} fill={color} stroke="#fff" strokeWidth={0.5} />
-    );
-    startAngle = endAngle;
-    return slice;
-  });
-
-  return (
-    <div className="flex flex-col items-center justify-center h-full">
-      <svg width="60" height="60" viewBox="0 0 36 36">
-        <circle cx="18" cy="18" r="16" fill="#f3f4f6" />
-        {slices}
-      </svg>
-      <div className="flex flex-col gap-1 mt-2">
-        {indicators.map((indicator, i) => {
-          const count = indicatorCounts[indicator];
-          const percent = ((count / total) * 100).toFixed(0);
-          const color = BAR_COLORS[i % BAR_COLORS.length];
-          return (
-            <div key={indicator} className="flex items-center gap-2 text-xs">
-              <span style={{ width: 10, height: 10, background: color, borderRadius: 2, display: 'inline-block' }} />
-              <span className="truncate max-w-[60px]" title={getIndicatorName(indicator)}>{getIndicatorName(indicator)}</span>
-              <span className="text-muted-foreground">{percent}%</span>
+      <div className="flex flex-col items-center justify-center h-48">
+        <div className="relative">
+          <svg width="120" height="120" viewBox="0 0 36 36">
+            <circle
+              cx="18"
+              cy="18"
+              r="16"
+              fill="transparent"
+              stroke="#f3f4f6"
+              strokeWidth="2"
+            />
+            <circle
+              cx="18"
+              cy="18"
+              r="16"
+              fill="transparent"
+              stroke="#10b981"
+              strokeWidth="2"
+              strokeDasharray={`${reinforcementPercent} ${100 - reinforcementPercent}`}
+              strokeDashoffset="25"
+              transform="rotate(-90 18 18)"
+            />
+            <circle
+              cx="18"
+              cy="18"
+              r="16"
+              fill="transparent"
+              stroke="#3b82f6"
+              strokeWidth="2"
+              strokeDasharray={`${refinementPercent} ${100 - refinementPercent}`}
+              strokeDashoffset={`${25 - reinforcementPercent}`}
+              transform="rotate(-90 18 18)"
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-2xl font-bold">{total}</div>
+              <div className="text-xs text-muted-foreground">Total</div>
             </div>
-          );
-        })}
+          </div>
+        </div>
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center gap-2 text-sm">
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <span>Reinforcement ({analytics.reinforcementCount})</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+            <span>Refinement ({analytics.refinementCount})</span>
+          </div>
+        </div>
       </div>
-    </div>
+    );
+  };
+
+  return (
+    <motion.div
+      className="grid gap-4 md:grid-cols-2"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.4 }}
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <PieChart className="h-5 w-5" />
+            Feedback Distribution
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DonutChart />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Top Indicators
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div>
+              <h4 className="text-sm font-medium mb-3 text-green-700 dark:text-green-400">
+                Most Reinforced
+              </h4>
+              {analytics.topReinforcementIndicators.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No data yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  {analytics.topReinforcementIndicators.slice(0, 3).map((item: any) => (
+                    <div key={item.indicator} className="flex items-center justify-between">
+                      <span className="text-sm truncate flex-1 mr-2" title={getIndicatorName(item.indicator)}>
+                        {getIndicatorName(item.indicator)}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-12 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-green-500 h-2 rounded-full transition-all"
+                            style={{ 
+                              /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+                              width: `${(item.count / Math.max(...analytics.topReinforcementIndicators.map((i: any) => i.count))) * 100}%` 
+                            }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium w-6 text-right">{item.count}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium mb-3 text-blue-700 dark:text-blue-400">
+                Most Refined
+              </h4>
+              {analytics.topRefinementIndicators.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No data yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {analytics.topRefinementIndicators.slice(0, 3).map((item: any) => (
+                    <div key={item.indicator} className="flex items-center justify-between">
+                      <span className="text-sm truncate flex-1 mr-2" title={getIndicatorName(item.indicator)}>
+                        {getIndicatorName(item.indicator)}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-12 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-500 h-2 rounded-full transition-all"
+                            style={{ 
+                              width: `${(item.count / Math.max(...analytics.topRefinementIndicators.map((i: any) => i.count))) * 100}%` 
+                            }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium w-6 text-right">{item.count}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 
-const Report = () => (
-  <div className="animate-pulse rounded-lg h-20 w-full flex items-center justify-center">
-    <span className="text-gray-400">Loading report...</span>
-  </div>
-);
-
-const WideCard = () => {
-  const currentUser = useQuery(api.users.getCurrentUser, {});
-  const observerId = currentUser?._id;
-  const analytics = useQuery(
-    api.analytics.observerAnalytics,
-    observerId ? { observerId } : "skip"
-  );
-
-  if (!currentUser || (observerId && !analytics)) {
+// Monthly Trends Chart
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const MonthlyTrends = ({ analytics }: { analytics: any }) => {
+  if (!analytics) {
     return (
-      <div className="rounded-lg h-20 w-full flex flex-col items-center justify-center animate-pulse">
-        <span className="text-2xl font-bold text-gray-300">--</span>
-        <span className="text-xs text-muted-foreground mt-1">Unique teachers observed</span>
-      </div>
+      <Card className="animate-pulse">
+        <CardHeader>
+          <div className="h-6 bg-gray-200 rounded w-32"></div>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </CardContent>
+      </Card>
     );
   }
 
+  const maxValue = Math.max(
+    ...analytics.monthlyTrends.map((trend: any) => trend.total),
+    1
+  );
+
   return (
-    <div className="rounded-lg h-20 w-full flex flex-col items-center justify-center">
-      <span className="text-2xl font-bold">{analytics?.uniqueTeachersObserved ?? 0}</span>
-      <span className="text-xs text-muted-foreground mt-1">Unique teachers observed</span>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.5 }}
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Monthly Trends
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {analytics.monthlyTrends.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No trend data available</p>
+            </div>
+          ) : (
+            <div className="h-64 flex items-end justify-center gap-4">
+              {analytics.monthlyTrends.map((trend: any) => (
+                <div key={trend.month} className="flex flex-col items-center">
+                  <div className="flex flex-col items-center gap-1 mb-2">
+                    {/* Completed bar */}
+                    <div
+                      className="w-12 bg-green-500 rounded-t transition-all hover:opacity-80"
+                      style={{
+                        height: Math.max(4, (trend.completed / maxValue) * 200),
+                      }}
+                      title={`Completed: ${trend.completed}`}
+                    ></div>
+                    {/* Draft bar */}
+                    <div
+                      className="w-12 bg-blue-500 rounded-b transition-all hover:opacity-80"
+                      style={{
+                        height: Math.max(4, (trend.draft / maxValue) * 200),
+                      }}
+                      title={`Draft: ${trend.draft}`}
+                    ></div>
+                  </div>
+                  <span className="text-xs text-muted-foreground text-center">
+                    {trend.month}
+                  </span>
+                  <span className="text-xs font-medium text-center">
+                    {trend.total}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex justify-center gap-4 mt-4">
+            <div className="flex items-center gap-2 text-sm">
+              <div className="w-3 h-3 bg-green-500 rounded"></div>
+              <span>Completed</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <div className="w-3 h-3 bg-blue-500 rounded"></div>
+              <span>Draft</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+};
+
+// Action Items Section
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ActionItems = ({ analytics }: { analytics: any }) => {
+  if (!analytics) {
+    return (
+      <Card className="animate-pulse">
+        <CardHeader>
+          <div className="h-6 bg-gray-200 rounded w-32"></div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-16 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "high":
+        return "text-red-600 bg-red-50 border-red-200 dark:bg-red-950/20 dark:text-red-300 dark:border-red-800";
+      case "medium":
+        return "text-orange-600 bg-orange-50 border-orange-200 dark:bg-orange-950/20 dark:text-orange-300 dark:border-orange-800";
+      case "low":
+        return "text-green-600 bg-green-50 border-green-200 dark:bg-green-950/20 dark:text-green-300 dark:border-green-800";
+      default:
+        return "text-gray-600 bg-gray-50 border-gray-200 dark:bg-gray-950/20 dark:text-gray-300 dark:border-gray-800";
+    }
+  };
+
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case "high":
+        return <AlertCircle className="h-4 w-4" />;
+      case "medium":
+        return <Clock className="h-4 w-4" />;
+      case "low":
+      default:
+        return <CheckCircle2 className="h-4 w-4" />;
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <FileText className="h-5 w-5" />
+          Action Items
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {analytics.actionItems.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <CheckCircle2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>No action items</p>
+            <p className="text-sm">All tasks are complete!</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {analytics.actionItems.map((item: any) => (
+              <div 
+                key={item.id}
+                className="p-3 border border-border rounded-lg hover:bg-accent/30 transition-colors"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium text-sm">{item.title}</h4>
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs ${getPriorityColor(item.priority)}`}
+                      >
+                        <span className="flex items-center gap-1">
+                          {getPriorityIcon(item.priority)}
+                          {item.priority}
+                        </span>
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Due: {new Date(item.dueDate).toLocaleDateString()} • Assigned to: {item.assignedTo}
+                    </p>
+                  </div>
+                  <div className="ml-4">
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
 export default function AnalyticsDashboardPage() {
+  const { isLoading, isAuthenticated, user: convexUser } = useAuthRedirect();
+
+  // Get analytics data for coach
+  const analytics = useQuery(
+    api.analytics.coachAnalytics,
+    convexUser?.role === "coach" && convexUser._id ? { coachId: convexUser._id } : "skip"
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !convexUser) {
+    return null;
+  }
+
+  if (convexUser.role !== "coach") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
+        <p>This analytics dashboard is only available for coaches.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="container max-w-4xl py-8 space-y-6">
+    <div className="space-y-6">
+      {/* Header */}
       <PageHeader
         title="Analytics Dashboard"
-        description="View comprehensive analytics and insights from your walkthrough observations"
+        description="Comprehensive insights and metrics for your coaching effectiveness"
+        gradient={true}
       />
-      <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Walkthroughs This Month</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Counter />
-          </CardContent>
-        </Card>
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Feedback by Indicator</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <BarChart />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Indicator Distribution</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DonutChart />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Report</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Report />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Unique Teachers Observed</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <WideCard />
-          </CardContent>
-        </Card>
-      </div>
+
+      {/* Overview Metrics */}
+      <OverviewMetrics analytics={analytics} />
+
+      {/* Feedback Analysis */}
+      <FeedbackAnalysis analytics={analytics} />
+
+      {/* Monthly Trends */}
+      <MonthlyTrends analytics={analytics} />
+
+      {/* Action Items */}
+      <ActionItems analytics={analytics} />
     </div>
   );
 } 

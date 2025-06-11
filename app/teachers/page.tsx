@@ -336,7 +336,7 @@ export default function TeachersPage() {
                 <div className="text-center py-8 text-muted-foreground">
                   <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>No teachers added yet</p>
-                  <p className="text-sm">Click "Add Teacher" to get started</p>
+                  <p className="text-sm">Click &quot;Add Teacher&quot; to get started</p>
                 </div>
               )}
             </CardContent>

@@ -103,11 +103,6 @@ export default function ViewWalkthroughPage({
   const reinforcementEntry = walkthroughEntries?.find(e => e.type === "reinforcement");
   const refinementEntry = walkthroughEntries?.find(e => e.type === "refinement");
 
-  // Status-based color scheme
-  const statusColors = walkthrough.status === "completed" 
-    ? { from: "#10B981", to: "#059669" } // green
-    : { from: "#F59E0B", to: "#D97706" }; // amber
-
   return (
     <div className="space-y-6">
       {/* Header */}

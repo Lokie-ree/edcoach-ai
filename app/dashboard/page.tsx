@@ -17,8 +17,6 @@ import {
   Target,
 } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
@@ -55,7 +53,8 @@ type ConvexUser = {
   createdAt: number;
 };
 
-// Removing unused type definition - using 'any' where needed with eslint-disable comments
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TeacherRecord = any;
 
 type ClerkUser = {
   firstName?: string | null;
@@ -73,8 +72,7 @@ const TeacherDashboard = ({
   user: ClerkUser; 
   convexUser: ConvexUser; 
   walkthroughs: WalkthroughDoc[] | undefined; 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  teacherRecord: any;
+  teacherRecord: TeacherRecord;
 }) => {
   const safeWalkthroughs = walkthroughs ?? [];
   
@@ -165,29 +163,6 @@ const TeacherDashboard = ({
         </Card>
       </motion.div>
     </div>
-  );
-};
-
-// Tilted Card Component
-const TiltedCard = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
-  return (
-    <motion.div
-      className={cn("relative", className)}
-      whileHover={{
-        scale: 1.02,
-        transition: { duration: 0.2 },
-      }}
-      whileTap={{ scale: 0.98 }}
-      style={{ zIndex: 1 }}
-    >
-      {children}
-    </motion.div>
   );
 };
 

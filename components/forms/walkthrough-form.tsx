@@ -128,6 +128,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
 
   // Add this before the useEffect
   const entryList = useMemo(() => {
+    if (!walkthroughEntries) return [];
     return (walkthroughEntries as Array<{
       indicatorAcronym?: string;
       type: "reinforcement" | "refinement";
