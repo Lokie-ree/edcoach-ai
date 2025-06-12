@@ -21,9 +21,14 @@ const navItems = [
 ];
 
 const DesktopNav = ({ userRole }: { userRole?: "coach" | "teacher" }) => {
+  // Only show navigation if user has a defined role (completed onboarding)
+  if (!userRole) {
+    return null;
+  }
+
   // Filter nav items based on user role
   const filteredNavItems = navItems.filter(item => 
-    !userRole || item.roles.includes(userRole)
+    item.roles.includes(userRole)
   );
 
   return (

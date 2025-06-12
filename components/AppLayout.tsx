@@ -1,7 +1,8 @@
 import Header from "@/components/sections/header";
 import { Toaster } from "sonner";
 import MaxWidthWrapper from "@/components/max-width-wrapper";
-import { FloatingDock } from "@/components/FloatingDock";
+import { FloatingDock } from "./FloatingDock";
+
 
 export default function AppLayout({
   children,
