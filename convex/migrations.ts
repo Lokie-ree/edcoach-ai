@@ -47,3 +47,56 @@ export const bulkInsertRubricIndicators = mutation({
     return null;
   },
 });
+
+// Helper function to map grade levels to grade bands
+function mapGradeLevelsToGradeBand(gradeLevels: string[]): string {
+  const elementary = ["k", "1", "2", "3", "4", "5"];
+  const middle = ["6", "7", "8"];
+  const high = ["9", "10", "11", "12"];
+
+  // Check which grade band the majority of grades fall into
+  const counts = {
+    elementary: gradeLevels.filter(g => elementary.includes(g)).length,
+    middle: gradeLevels.filter(g => middle.includes(g)).length,
+    high: gradeLevels.filter(g => high.includes(g)).length,
+  };
+
+  // Return the grade band with the highest count
+  const maxCount = Math.max(...Object.values(counts));
+  const gradeBand = Object.entries(counts).find(([_, count]) => count === maxCount)?.[0];
+  
+  return gradeBand || "elementary"; // Default to elementary if no match
+}
+
+export const migrateTeachersToGradeBands = mutation({
+  args: {},
+  returns: v.object({
+    success: v.boolean(),
+    migratedCount: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    // Get all teachers with the old gradeLevels field
+    const teachers = await ctx.db.query("teachers").collect();
+    let migratedCount = 0;
+
+    for (const teacher of teachers) {
+      // Check if teacher has the old gradeLevels field
+      if ('gradeLevels' in teacher && Array.isArray((teacher as any).gradeLevels)) {
+        const gradeLevels = (teacher as any).gradeLevels as string[];
+        const gradeBand = mapGradeLevelsToGradeBand(gradeLevels);
+        
+        // Update the teacher record with the new gradeBand field
+        await ctx.db.patch(teacher._id, {
+          gradeBand,
+        });
+        
+        migratedCount++;
+      }
+    }
+
+    return {
+      success: true,
+      migratedCount,
+    };
+  },
+});

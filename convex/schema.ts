@@ -47,7 +47,7 @@ export default defineSchema({
     name: v.string(),
     email: v.optional(v.string()),
     subject: v.array(v.string()),
-    gradeLevels: v.array(v.string()),
+    gradeBand: v.string(),
     coachId: v.id("users"),
     createdAt: v.number(),
     status: v.optional(v.string()),

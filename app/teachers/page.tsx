@@ -31,30 +31,21 @@ import { Id } from "@/convex/_generated/dataModel";
 import { motion } from "framer-motion";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 
-const SUBJECT_OPTIONS = [
-  { value: "math", label: "Math" },
-  { value: "science", label: "Science" },
-  { value: "english", label: "English" },
-  { value: "history", label: "History" },
-  { value: "art", label: "Art" },
-  { value: "music", label: "Music" },
-  { value: "pe", label: "Physical Education" },
-  { value: "other", label: "Other" },
+// Define grade bands for display - simplified
+const GRADE_BAND_OPTIONS = [
+  { value: "elementary", label: "Elementary" },
+  { value: "middle", label: "Middle School" },
+  { value: "high", label: "High School" },
 ];
-const GRADE_LEVEL_OPTIONS = [
-  { value: "k", label: "Kindergarten" },
-  { value: "1", label: "1st Grade" },
-  { value: "2", label: "2nd Grade" },
-  { value: "3", label: "3rd Grade" },
-  { value: "4", label: "4th Grade" },
-  { value: "5", label: "5th Grade" },
-  { value: "6", label: "6th Grade" },
-  { value: "7", label: "7th Grade" },
-  { value: "8", label: "8th Grade" },
-  { value: "9", label: "9th Grade" },
-  { value: "10", label: "10th Grade" },
-  { value: "11", label: "11th Grade" },
-  { value: "12", label: "12th Grade" },
+
+// Define subjects - simplified list
+const SUBJECTS = [
+  { value: "math", label: "Math" },
+  { value: "ela", label: "ELA" },
+  { value: "science", label: "Science" },
+  { value: "social_studies", label: "Social Studies" },
+  { value: "elective", label: "Elective" },
+  { value: "sped", label: "SPED" },
 ];
 
 // Define a Teacher type for state
@@ -63,7 +54,7 @@ interface Teacher {
   name: string;
   email?: string;
   subject: string[];
-  gradeLevels: string[];
+  gradeBand: string;
   status?: string;
 }
 
@@ -292,20 +283,15 @@ export default function TeachersPage() {
                                 key={subject}
                                 className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
                               >
-                                {SUBJECT_OPTIONS.find(o => o.value === subject)?.label || subject}
+                                {SUBJECTS.find(o => o.value === subject)?.label || subject}
                               </span>
                             ))
                           }
-                          {(teacher.gradeLevels && teacher.gradeLevels.length > 0) && 
-                            (Array.isArray(teacher.gradeLevels) ? teacher.gradeLevels : [teacher.gradeLevels]).map((grade) => (
-                              <span
-                                key={grade}
-                                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-accent/60 text-accent-foreground border border-accent"
-                              >
-                                {GRADE_LEVEL_OPTIONS.find(o => o.value === grade)?.label || grade}
-                              </span>
-                            ))
-                          }
+                          <span
+                            className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-accent/60 text-accent-foreground border border-accent"
+                          >
+                            {GRADE_BAND_OPTIONS.find(o => o.value === teacher.gradeBand)?.label || teacher.gradeBand}
+                          </span>
                         </div>
                       </div>
                       <div className="flex gap-1 ml-4">

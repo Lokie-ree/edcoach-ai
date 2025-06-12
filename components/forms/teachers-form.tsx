@@ -6,42 +6,32 @@ import * as z from "zod";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import MultipleSelector, { Option } from "@/components/multiple-selector";
 import { Id } from "@/convex/_generated/dataModel";
 
-const SUBJECT_OPTIONS: Option[] = [
-  { value: "math", label: "Math" },
-  { value: "science", label: "Science" },
-  { value: "english", label: "English" },
-  { value: "social_studies", label: "Social Studies" },
-  { value: "art", label: "Art" },
-  { value: "music", label: "Music" },
-  { value: "pe", label: "Physical Education" },
-  { value: "spanish", label: "Spanish" },
-  { value: "other", label: "Other" },
+// Define grade bands - simplified to 3 main categories
+const GRADE_BANDS = [
+  { value: "elementary", label: "Elementary" },
+  { value: "middle", label: "Middle School" },
+  { value: "high", label: "High School" },
 ];
-const GRADE_LEVEL_OPTIONS: Option[] = [
-  { value: "k", label: "Kindergarten" },
-  { value: "1", label: "1st Grade" },
-  { value: "2", label: "2nd Grade" },
-  { value: "3", label: "3rd Grade" },
-  { value: "4", label: "4th Grade" },
-  { value: "5", label: "5th Grade" },
-  { value: "6", label: "6th Grade" },
-  { value: "7", label: "7th Grade" },
-  { value: "8", label: "8th Grade" },
-  { value: "9", label: "9th Grade" },
-  { value: "10", label: "10th Grade" },
-  { value: "11", label: "11th Grade" },
-  { value: "12", label: "12th Grade" },
+
+// Define subjects - simplified list that works across all grade bands
+const SUBJECTS = [
+  { value: "math", label: "Math" },
+  { value: "ela", label: "ELA" },
+  { value: "science", label: "Science" },
+  { value: "social_studies", label: "Social Studies" },
+  { value: "elective", label: "Elective" },
+  { value: "sped", label: "SPED" },
 ];
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
-  subject: z.array(z.string()).min(1, "Please select at least one subject"),
-  gradeLevels: z.array(z.string()).min(1, "Please select at least one grade level"),
+  gradeBand: z.string().min(1, "Please select a grade band"),
+  subject: z.string().min(1, "Please select a subject"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -52,7 +42,7 @@ type TeachersFormProps = {
     name: string;
     email?: string;
     subject: string[];
-    gradeLevels: string[];
+    gradeBand: string;
     status?: string;
   }) => Promise<unknown>;
   updateTeacher?: (values: {
@@ -60,7 +50,7 @@ type TeachersFormProps = {
     name: string;
     email?: string;
     subject: string[];
-    gradeLevels: string[];
+    gradeBand: string;
     status?: string;
   }) => Promise<unknown>;
   teacher?: {
@@ -68,7 +58,7 @@ type TeachersFormProps = {
     name: string;
     email?: string;
     subject: string[];
-    gradeLevels: string[];
+    gradeBand: string;
     status?: string;
   };
 };
@@ -79,13 +69,10 @@ export default function TeachersForm({ onSuccess, createTeacher, updateTeacher, 
     defaultValues: {
       name: teacher?.name || "",
       email: teacher?.email || "",
-      subject: teacher?.subject || [],
-      gradeLevels: teacher?.gradeLevels || [],
+      gradeBand: teacher?.gradeBand || "",
+      subject: teacher?.subject?.[0] || "", // Take first subject if multiple exist
     },
   });
-
-  // Helper to map Option[] to string[]
-  const getValuesFromOptions = (options: Option[]) => options.map((o) => o.value);
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -94,8 +81,8 @@ export default function TeachersForm({ onSuccess, createTeacher, updateTeacher, 
           id: teacher._id as Id<'teachers'>,
           name: values.name,
           email: values.email,
-          subject: values.subject,
-          gradeLevels: values.gradeLevels,
+          subject: [values.subject], // Convert single subject to array
+          gradeBand: values.gradeBand,
           status: teacher.status,
         });
         toast.success("Teacher updated successfully");
@@ -103,8 +90,8 @@ export default function TeachersForm({ onSuccess, createTeacher, updateTeacher, 
         await createTeacher({
           name: values.name,
           email: values.email,
-          subject: values.subject,
-          gradeLevels: values.gradeLevels,
+          subject: [values.subject], // Convert single subject to array
+          gradeBand: values.gradeBand,
           status: "pending",
         });
         toast.success("Teacher added successfully");
@@ -155,46 +142,57 @@ export default function TeachersForm({ onSuccess, createTeacher, updateTeacher, 
           />
           <FormField
             control={form.control}
-            name="subject"
+            name="gradeBand"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Subject(s)</FormLabel>
-                <FormControl>
-                  <MultipleSelector
-                    options={SUBJECT_OPTIONS}
-                    value={SUBJECT_OPTIONS.filter(option => field.value.includes(option.value))}
-                    onChange={(selected) => field.onChange(getValuesFromOptions(selected))}
-                    placeholder="Select subject(s)"
-                    hideClearAllButton
-                  />
-                </FormControl>
+                <FormLabel>Grade Band</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a grade band" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {GRADE_BANDS.map((band) => (
+                      <SelectItem key={band.value} value={band.value}>
+                        {band.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="gradeLevels"
+            name="subject"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Grade Level(s)</FormLabel>
-                <FormControl>
-                  <MultipleSelector
-                    options={GRADE_LEVEL_OPTIONS}
-                    value={GRADE_LEVEL_OPTIONS.filter(option => field.value.includes(option.value))}
-                    onChange={(selected) => field.onChange(getValuesFromOptions(selected))}
-                    placeholder="Select grade level(s)"
-                    hideClearAllButton
-                  />
-                </FormControl>
+                <FormLabel>Subject</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a subject" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {SUBJECTS.map((subject) => (
+                      <SelectItem key={subject.value} value={subject.value}>
+                        {subject.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="flex justify-between px-4 pt-2">
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button
               type="button"
               variant="outline"
+              className="flex-1"
               onClick={() => {
                 form.reset();
                 onSuccess();
@@ -202,7 +200,7 @@ export default function TeachersForm({ onSuccess, createTeacher, updateTeacher, 
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
+            <Button type="submit" disabled={form.formState.isSubmitting} className="flex-1">
               {form.formState.isSubmitting
                 ? (teacher ? "Updating..." : "Adding...")
                 : (teacher ? "Update Teacher" : "Add Teacher")}

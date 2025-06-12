@@ -519,10 +519,11 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
                 }
                 return null;
               })()}
-              <div className="flex justify-center gap-4 mt-6">
+              <div className="flex flex-col sm:flex-row gap-3 mt-6">
                 <Button
                   type="button"
                   variant="outline"
+                  className="flex-1"
                   onClick={() => {
                     router.push("/dashboard");
                   }}
@@ -533,6 +534,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
                   <Button
                     type="button"
                     variant="secondary"
+                    className="flex-1"
                     onClick={handleAIFeedback}
                     disabled={aiLoading}
                   >
@@ -547,6 +549,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
                 ) : (
                   <Button
                     type="submit"
+                    className="flex-1"
                     disabled={isSubmitting || !((watch("walkthroughEntries")?.find(e => e.type === "reinforcement")?.aiFeedback) && (watch("walkthroughEntries")?.find(e => e.type === "refinement")?.aiFeedback))}
                   >
                     {isSubmitting ? "Submitting..." : "Submit"}
