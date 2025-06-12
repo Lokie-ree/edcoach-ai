@@ -137,7 +137,7 @@ export function FloatingDock() {
           isHovered ? "scale-100 opacity-100" : "scale-0 opacity-0"
         } flex flex-col items-end gap-3 transition-all duration-500 ease-in-out origin-bottom order-0`}
       >
-        {actionButtons.map((action, index) => (
+        {actionButtons.map((action) => (
           <Tooltip text={action.label} key={action.key} direction="up">
             <button
               onClick={action.action}

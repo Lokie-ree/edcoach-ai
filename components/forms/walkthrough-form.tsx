@@ -121,19 +121,19 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
   const draft = walkthroughId ? drafts.find((w) => w._id === walkthroughId) : undefined;
   // Fetch walkthrough entries if editing
   const shouldFetchEntries = Boolean(walkthroughId && draft);
-  const walkthroughEntries = useQuery(
+  const rawWalkthroughEntries = useQuery(
     api.walkthroughEntries.listByWalkthrough,
     shouldFetchEntries && walkthroughId ? { walkthroughId } : "skip"
-  ) ?? [];
+  );
 
-  // Add this before the useEffect
+  // Wrap walkthroughEntries initialization in useMemo to fix dependency warning
+  const walkthroughEntries = useMemo(() => rawWalkthroughEntries ?? [], [rawWalkthroughEntries]);
+
+  // Move the logic inside useMemo to fix dependency warning
   const entryList = useMemo(() => {
     if (!walkthroughEntries) return [];
-    return (walkthroughEntries as Array<{
-      indicatorAcronym?: string;
-      type: "reinforcement" | "refinement";
-      aiFeedback?: string;
-    }>).map((entry) => ({
+    
+    return walkthroughEntries.map((entry) => ({
       indicatorAcronym: entry.indicatorAcronym ?? "",
       type: entry.type,
       aiFeedback: entry.aiFeedback ?? "",

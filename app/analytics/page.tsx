@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from "react";
@@ -24,9 +23,72 @@ import {
   BarChart3,
   PieChart
 } from "lucide-react";
+
+// Define proper types based on Convex analytics return types
+interface IndicatorCount {
+  indicator: string;
+  count: number;
+}
+
+interface TeacherProgress {
+  teacherId: string;
+  teacherName: string;
+  totalWalkthroughs: number;
+  completedWalkthroughs: number;
+  draftWalkthroughs: number;
+  lastObservation?: number;
+  completionRate: number;
+  recentFeedbackCount: number;
+}
+
+interface MonthlyTrend {
+  month: string;
+  completed: number;
+  draft: number;
+  total: number;
+}
+
+interface ActionItem {
+  type: string;
+  priority: string;
+  title: string;
+  description: string;
+  teacherId?: string;
+  teacherName?: string;
+}
+
+interface AnalyticsData {
+  // Overview metrics
+  totalTeachers: number;
+  activeTeachers: number;
+  totalWalkthroughs: number;
+  thisMonthWalkthroughs: number;
+  completedWalkthroughs: number;
+  draftWalkthroughs: number;
+  completionRate: number;
+  
+  // Feedback metrics
+  totalFeedbackInteractions: number;
+  avgFeedbackPerTeacherPerMonth: number;
+  reinforcementCount: number;
+  refinementCount: number;
+  
+  // Indicator analysis
+  topReinforcementIndicators: IndicatorCount[];
+  topRefinementIndicators: IndicatorCount[];
+  
+  // Teacher progress data
+  teacherProgress: TeacherProgress[];
+  
+  // Monthly trends
+  monthlyTrends: MonthlyTrend[];
+  
+  // Action items
+  actionItems: ActionItem[];
+}
+
 // Overview Metrics Cards
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const OverviewMetrics = ({ analytics }: { analytics: any }) => {
+const OverviewMetrics = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
   if (!analytics) {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -106,8 +168,7 @@ const OverviewMetrics = ({ analytics }: { analytics: any }) => {
 };
 
 // Feedback Analysis Section
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const FeedbackAnalysis = ({ analytics }: { analytics: any }) => {
+const FeedbackAnalysis = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
   if (!analytics) {
     return (
       <div className="grid gap-4 md:grid-cols-2">
@@ -265,7 +326,7 @@ const FeedbackAnalysis = ({ analytics }: { analytics: any }) => {
                 <p className="text-sm text-muted-foreground">No data yet</p>
               ) : (
                 <div className="space-y-2">
-                  {analytics.topRefinementIndicators.slice(0, 3).map((item: any) => (
+                  {analytics.topRefinementIndicators.slice(0, 3).map((item) => (
                     <div key={item.indicator} className="flex items-center justify-between">
                       <span className="text-sm truncate flex-1 mr-2" title={getIndicatorName(item.indicator)}>
                         {getIndicatorName(item.indicator)}
@@ -275,7 +336,7 @@ const FeedbackAnalysis = ({ analytics }: { analytics: any }) => {
                           <div 
                             className="bg-blue-500 h-2 rounded-full transition-all"
                             style={{ 
-                              width: `${(item.count / Math.max(...analytics.topRefinementIndicators.map((i: any) => i.count))) * 100}%` 
+                              width: `${(item.count / Math.max(...analytics.topRefinementIndicators.map((i) => i.count))) * 100}%` 
                             }}
                           ></div>
                         </div>
@@ -294,8 +355,7 @@ const FeedbackAnalysis = ({ analytics }: { analytics: any }) => {
 };
 
 // Monthly Trends Chart
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MonthlyTrends = ({ analytics }: { analytics: any }) => {
+const MonthlyTrends = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
   if (!analytics) {
     return (
       <Card className="animate-pulse">
@@ -310,7 +370,7 @@ const MonthlyTrends = ({ analytics }: { analytics: any }) => {
   }
 
   const maxValue = Math.max(
-    ...analytics.monthlyTrends.map((trend: any) => trend.total),
+    ...analytics.monthlyTrends.map((trend) => trend.total),
     1
   );
 
@@ -335,7 +395,7 @@ const MonthlyTrends = ({ analytics }: { analytics: any }) => {
             </div>
           ) : (
             <div className="h-64 flex items-end justify-center gap-4">
-              {analytics.monthlyTrends.map((trend: any) => (
+              {analytics.monthlyTrends.map((trend) => (
                 <div key={trend.month} className="flex flex-col items-center">
                   <div className="flex flex-col items-center gap-1 mb-2">
                     {/* Completed bar */}
@@ -382,8 +442,7 @@ const MonthlyTrends = ({ analytics }: { analytics: any }) => {
 };
 
 // Action Items Section
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ActionItems = ({ analytics }: { analytics: any }) => {
+const ActionItems = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
   if (!analytics) {
     return (
       <Card className="animate-pulse">
@@ -443,9 +502,9 @@ const ActionItems = ({ analytics }: { analytics: any }) => {
           </div>
         ) : (
           <div className="space-y-3">
-            {analytics.actionItems.map((item: any) => (
+            {analytics.actionItems.map((item, index) => (
               <div 
-                key={item.id}
+                key={`${item.type}-${item.teacherId || index}`}
                 className="p-3 border border-border rounded-lg hover:bg-accent/30 transition-colors"
               >
                 <div className="flex items-start justify-between">
@@ -463,7 +522,7 @@ const ActionItems = ({ analytics }: { analytics: any }) => {
                       </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Due: {new Date(item.dueDate).toLocaleDateString()} • Assigned to: {item.assignedTo}
+                      {item.description}
                     </p>
                   </div>
                   <div className="ml-4">

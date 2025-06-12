@@ -149,7 +149,10 @@ export default defineSchema({
   })
     .index("by_observer", ["observerId"])
     .index("by_teacher", ["teacherId"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_observer_and_status", ["observerId", "status"])
+    .index("by_teacher_and_status", ["teacherId", "status"])
+    .index("by_date", ["walkthroughDate"]),
 
   walkthroughEntries: defineTable({
     walkthroughId: v.id("walkthroughs"),
