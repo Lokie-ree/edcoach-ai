@@ -9,6 +9,7 @@ import { Logo } from "@/components/logo";
 import { useQuery } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
+import { NavMenuBtn } from "@/components/NavMenuBtn";
 
 // Define navigation items with role restrictions
 const navItems = [
@@ -76,6 +77,13 @@ const Header = () => {
             <SignedIn>
               <UserButton />
             </SignedIn>
+
+            {/* Mobile NavMenuBtn, only after onboarding */}
+            {userRole && (
+              <div className="md:hidden">
+                <NavMenuBtn />
+              </div>
+            )}
 
             <SignedOut>
               <SignInButton mode="modal">
