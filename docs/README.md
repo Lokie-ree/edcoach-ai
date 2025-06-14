@@ -44,4 +44,8 @@ When updating documentation:
 1. Check for cross-references in other files
 2. Update the documentation index if adding/removing files
 3. Ensure consistency with actual implementation
-4. Update timestamps and version information where applicable 
+4. Update timestamps and version information where applicable
+
+## Billing Provider
+
+EdCoach AI uses **Clerk Billing** for all subscription and payment management for coaches. All documentation and implementation should reference Clerk Billing as the official provider. 

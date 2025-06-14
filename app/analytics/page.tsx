@@ -394,13 +394,13 @@ const MonthlyTrends = ({ analytics }: { analytics: AnalyticsData | null | undefi
               <p>No trend data available</p>
             </div>
           ) : (
-            <div className="h-64 flex items-end justify-center gap-4">
+            <div className="h-64 flex items-end justify-between sm:justify-center sm:gap-4 overflow-x-auto pb-4">
               {analytics.monthlyTrends.map((trend) => (
-                <div key={trend.month} className="flex flex-col items-center">
+                <div key={trend.month} className="flex flex-col items-center min-w-[60px] sm:min-w-0">
                   <div className="flex flex-col items-center gap-1 mb-2">
                     {/* Completed bar */}
                     <div
-                      className="w-12 bg-green-500 rounded-t transition-all hover:opacity-80"
+                      className="w-8 sm:w-12 bg-green-500 rounded-t transition-all hover:opacity-80"
                       style={{
                         height: Math.max(4, (trend.completed / maxValue) * 200),
                       }}
@@ -408,7 +408,7 @@ const MonthlyTrends = ({ analytics }: { analytics: AnalyticsData | null | undefi
                     ></div>
                     {/* Draft bar */}
                     <div
-                      className="w-12 bg-blue-500 rounded-b transition-all hover:opacity-80"
+                      className="w-8 sm:w-12 bg-blue-500 rounded-b transition-all hover:opacity-80"
                       style={{
                         height: Math.max(4, (trend.draft / maxValue) * 200),
                       }}

@@ -19,7 +19,7 @@ EdCoach AI is an AI-powered instructional coaching and feedback platform for K-1
 - Mobile-first, low-burden walkthrough capture
 - Role-based dashboards and analytics
 - Coach-managed teacher groups (no org/district for MVP)
-- Subscription-based access for coaches (via Polar)
+- Subscription-based access for coaches (via Clerk Billing)
 
 ### Business Goals
 - Reduce time for walkthroughs/feedback by 40%
@@ -46,7 +46,7 @@ EdCoach AI is an AI-powered instructional coaching and feedback platform for K-1
 - User visits app and signs up with email
 - Selects role: `coach` or `teacher`
 - **Coach:**
-  - Must subscribe (via Polar) before accessing coach features
+  - Must subscribe (via Clerk Billing) before accessing coach features
   - Sees role-specific onboarding tutorial
 - **Teacher:**
   - Can only sign up via invite link from a coach
@@ -59,7 +59,7 @@ EdCoach AI is an AI-powered instructional coaching and feedback platform for K-1
 ### 3.3 Subscription Management
 - Only coaches require a subscription
 - Two products at launch (e.g., "Coach Basic" and "Coach Pro"), each with monthly/yearly pricing
-- Polar integration for checkout, subscription gating, and management
+- Clerk Billing integration for checkout, subscription gating, and management
 
 ---
 
@@ -68,7 +68,7 @@ EdCoach AI is an AI-powered instructional coaching and feedback platform for K-1
 - **Backend:** Convex (real-time DB, functions, schema)
 - **Authentication:** Clerk (user/session management, RBAC)
 - **AI Integration:** OpenAI GPT-4.1 Mini (feedback generation)
-- **Payments:** Polar (subscription management for coaches)
+- **Payments:** Clerk Billing (subscription management for coaches)
 
 ---
 
@@ -102,7 +102,7 @@ EdCoach AI is an AI-powered instructional coaching and feedback platform for K-1
 ### MVP Essential Tasks (~120 hours)
 - Core AI & Mobile: OpenAI integration, prompt templates, walkthrough UI, analytics
 - Onboarding & Role Management: Self-signup, invite flow, role-specific onboarding
-- Subscription Gating: Polar integration, coach gating, product/pricing setup
+- Subscription Gating: Clerk Billing integration, coach gating, product/pricing setup
 - Testing & Launch: E2E tests, mobile testing, documentation, onboarding materials
 
 ### Post-MVP (Deferred)

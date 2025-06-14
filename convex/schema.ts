@@ -12,6 +12,7 @@ export default defineSchema({
     name: v.string(),
     email: v.string(),
     organization: v.string(),
+    clerkOrgId: v.optional(v.string()), // <-- Add this line
     imageUrl: v.optional(v.string()),
     preferences: v.optional(v.any()),
     createdAt: v.number(),
