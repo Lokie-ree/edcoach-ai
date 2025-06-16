@@ -16,6 +16,8 @@
     "headline": "AI-Powered Coaching for Frequent, Actionable Feedback Between Formal Evaluations",
     "sub_headline": "Designed for K-12 leaders and coaches to streamline informal walkthroughs, generate rubric-aligned feedback, and foster continuous teacher growth—without replacing your formal evaluation system.",
     "cta_primary": {"label": "Join the Early Access Waitlist", "href": "#waitlist"},
+    "cta_secondary": {"label": "Learn More", "href": "#features"},
+
     "image_description": "Illustration: Coach using EdCoach AI on a tablet, providing feedback to a teacher, with subtle background elements suggesting growth charts and student success pathways."
   },
   "features": {
@@ -72,55 +74,51 @@
     ]
   },
   "pricing": {
-    "headline": "Pricing Built for Educational Impact",
-    "sub_headline": "Choose the plan that scales with your coaching needs.",
+    "headline": "Fair, Transparent Pricing for Every Coach",
+    "sub_headline": "Simple plans for individual coaches and small teams. No hidden fees, no surprise overages.",
     "tiers": [
       {
-        "name": "Coach",
-        "price": "$19/mo",
-        "price_description": "Per user, billed annually. For individual leaders/coaches supporting up to 5 teachers.",
+        "name": "Coach Starter (Free)",
+        "price": "$0/mo",
+        "price_description": "For new users and small teams. Up to 5 teachers. 20 AI feedback generations per month.",
         "features": [
           "Supports up to 5 Teachers",
+          "Up to 20 AI Feedback Generations per Month",
           "Standard Rubrics (LEADS, LER)",
           "AI Feedback Generation",
           "Observation Logs",
           "Basic Trend View",
-          "Standard Support"
+          "Standard Support",
+          "14-Day Trial for New Users"
         ],
-        "cta": {"label": "Start Coaching", "href": "#waitlist"},
+        "cta": {"label": "Start Free", "href": "#waitlist"},
         "highlight": false
       },
       {
-        "name": "School",
-        "price": "$499/mo",
-        "price_description": "Per school, billed annually. For schools needing unlimited users, advanced analytics, and custom rubrics.",
+        "name": "Coach Basic",
+        "price": "$9/mo",
+        "price_description": "For coaches needing more feedback and analytics. Up to 5 teachers, 100 AI feedback generations per month.",
         "features": [
-          "Unlimited Users & Teachers",
-          "Standard & Custom Rubrics",
-          "AI Feedback Generation",
-          "Advanced Logs & Filtering",
-          "Detailed Trend Analysis",
-          "Optional Gamification",
+          "All Coach Starter Features",
+          "Up to 100 AI Feedback Generations per Month",
+          "Enhanced Analytics",
           "Priority Support"
         ],
-        "cta": {"label": "Empower Your School", "href": "#waitlist"},
-        "highlight": true
+        "cta": {"label": "Upgrade to Basic", "href": "#waitlist"},
+        "highlight": false
       },
       {
-        "name": "District",
-        "price": "Custom",
-        "price_description": "Coming soon: Tailored for multiple schools with cross-school analytics and dedicated support.",
+        "name": "Coach Pro",
+        "price": "$19/mo",
+        "price_description": "For power users. Up to 5 teachers, 300 AI feedback generations per month, advanced analytics, and early access to new features.",
         "features": [
-          "All School Features",
-          "District Analytics Dashboard",
-          "Dedicated Account Manager",
-          "Premium Support & Training",
-          "Integration Roadmap Access",
-          "Customization Options"
+          "All Coach Basic Features",
+          "Up to 300 AI Feedback Generations per Month",
+          "Advanced Analytics (Group Trends, Comparisons)",
+          "Early Access to New Features (e.g., Data Export)"
         ],
-        "cta": {"label": "Request District Demo", "href": "/contact-sales"},
-        "highlight": false,
-        "coming_soon": true
+        "cta": {"label": "Go Pro", "href": "#waitlist"},
+        "highlight": true
       }
     ]
   },

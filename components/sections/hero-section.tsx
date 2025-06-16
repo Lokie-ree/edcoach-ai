@@ -147,23 +147,24 @@ export default function HeroSection() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex flex-col sm:flex-row gap-4"
               >
-                <SignInButton mode="modal">
-                  <Button
-                    size="lg"
-                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg group"
-                  >
-                    <span>Login</span>
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg group"
+                  asChild
+                >
+                  <Link href={hero.cta_primary.href}>
+                    <span>{hero.cta_primary.label}</span>
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Button>
-                </SignInButton>
+                  </Link>
+                </Button>
                 <Button
                   size="lg"
                   variant="outline"
                   className="border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition-all duration-300"
                   asChild
                 >
-                  <Link href="#how-it-works">
-                    <span>Learn More</span>
+                  <Link href={hero.cta_secondary.href}>
+                    <span>{hero.cta_secondary.label}</span>
                   </Link>
                 </Button>
               </motion.div>
