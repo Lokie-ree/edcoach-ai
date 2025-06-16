@@ -13,7 +13,6 @@ import { motion } from "framer-motion";
 import landingContent from "@/data/landing-content.json";
 import { Logo } from "@/components/logo";
 import { Section } from "@/components/ui/section";
-import { SignInButton } from "@clerk/nextjs"
 
 export default function HeroSection() {
   const heroRef = useRef<HTMLDivElement>(null);
