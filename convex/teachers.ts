@@ -67,26 +67,46 @@ export const create = mutation({
     subject: v.array(v.string()),
     gradeBand: v.string(),
     status: v.optional(v.string()),
-    coachId: v.id("users"),
+    userId: v.optional(v.id("users")),
+    clerkOrganizationId: v.optional(v.string()),
   },
   returns: v.object({
     success: v.boolean(),
     teacherId: v.id("teachers"),
   }),
   handler: async (ctx, args) => {
-    // Only a coach can create a teacher
+    // Only a coach can create a teacher (TODO: check org membership)
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error("Not authenticated");
     }
-    // Optionally, you could check the role of the user here
+    
+    // Create a placeholder user if no userId provided
+    let userId = args.userId;
+    if (!userId && args.email) {
+      // Create a placeholder user for the teacher
+      userId = await ctx.db.insert("users", {
+        clerkId: `pending_${Date.now()}_${Math.random()}`, // Temporary placeholder
+        name: args.name,
+        email: args.email,
+        clerkOrganizationId: args.clerkOrganizationId,
+        role: "teacher",
+        createdAt: Date.now(),
+        onboardingComplete: false,
+      });
+    }
+    
+    if (!userId) {
+      throw new Error("Either userId or email must be provided");
+    }
+    
     const teacherId = await ctx.db.insert("teachers", {
       name: args.name,
       email: args.email,
       subject: args.subject,
       gradeBand: args.gradeBand,
       status: args.status || "pending",
-      coachId: args.coachId,
+      userId: userId,
       createdAt: Date.now(),
     });
     return { success: true, teacherId };
@@ -96,7 +116,7 @@ export const create = mutation({
 // List all teachers for a coach
 export const list = query({
   args: {
-    coachId: v.id("users"),
+    clerkOrganizationId: v.optional(v.string()),
   },
   returns: v.array(
     v.object({
@@ -107,15 +127,26 @@ export const list = query({
       subject: v.array(v.string()),
       gradeBand: v.string(),
       status: v.optional(v.string()),
-      coachId: v.id("users"),
+      userId: v.id("users"),
       createdAt: v.number(),
     })
   ),
   handler: async (ctx, args) => {
-    return await ctx.db
-      .query("teachers")
-      .filter((q) => q.eq(q.field("coachId"), args.coachId))
-      .collect();
+    if (args.clerkOrganizationId) {
+      // Get all users in this org
+      const users = await ctx.db
+        .query("users")
+        .withIndex("by_organization", (q) => q.eq("clerkOrganizationId", args.clerkOrganizationId))
+        .collect();
+      const userIds = users.map((u) => u._id);
+      // Return teachers whose userId is in userIds
+      return await ctx.db
+        .query("teachers")
+        .filter((q) => q.or(...userIds.map((id) => q.eq(q.field("userId"), id))))
+        .collect();
+    }
+    // No org filter, return all teachers
+    return await ctx.db.query("teachers").collect();
   },
 });
 
@@ -128,13 +159,12 @@ export const update = mutation({
     subject: v.array(v.string()),
     gradeBand: v.string(),
     status: v.optional(v.string()),
-    coachId: v.id("users"),
+    clerkOrganizationId: v.optional(v.string()),
   },
   returns: v.object({ success: v.boolean() }),
   handler: async (ctx, args) => {
     const teacher = await ctx.db.get(args.id);
     if (!teacher) throw new Error("Teacher not found");
-    if (teacher.coachId !== args.coachId) throw new Error("No permission");
     await ctx.db.patch(args.id, {
       name: args.name,
       email: args.email,
@@ -148,12 +178,14 @@ export const update = mutation({
 
 // Remove a teacher
 export const remove = mutation({
-  args: { id: v.id("teachers"), coachId: v.id("users") },
+  args: { 
+    id: v.id("teachers"),
+    clerkOrganizationId: v.optional(v.string()),
+  },
   returns: v.object({ success: v.boolean() }),
   handler: async (ctx, args) => {
     const teacher = await ctx.db.get(args.id);
     if (!teacher) throw new Error("Teacher not found");
-    if (teacher.coachId !== args.coachId) throw new Error("No permission");
     await ctx.db.delete(args.id);
     return { success: true };
   },
@@ -173,7 +205,7 @@ export const getByUserClerkId = query({
       subject: v.array(v.string()),
       gradeBand: v.string(),
       status: v.optional(v.string()),
-      coachId: v.id("users"),
+      userId: v.id("users"),
       createdAt: v.number(),
     }),
     v.null()

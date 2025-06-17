@@ -3,7 +3,7 @@
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useOrganization } from "@clerk/nextjs";
 import { walkthroughSchema } from "@/app/walkthrough/new/validation";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -100,14 +100,16 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
 
   // Use propCoachId if provided, otherwise fetch current user
   const { user } = useUser();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const convexUser = useQuery(
     api.users.getUserByClerkId,
     !propCoachId && user ? { clerkId: user.id } : "skip"
   );
-  const coachId = propCoachId || convexUser?._id;
 
-  // Only fetch teachers when coachId is available
-  const teachers = (useQuery(api.teachers.list, coachId ? { coachId } : "skip") ?? []) as Teacher[];
+  // Find the appropriate org ID (replace this with your actual org ID logic)
+  const { organization } = useOrganization();
+  const clerkOrganizationId = organization?.id;
+  const teachers = (useQuery(api.teachers.list, clerkOrganizationId ? { clerkOrganizationId } : "skip") ?? []) as Teacher[];
   const rubricData = useQuery(api.rubrics.listRubricWithIndicators);
   const indicators: Indicator[] = rubricData
     ? rubricData.domains.flatMap((domain: { indicators: Indicator[] }) => domain.indicators)

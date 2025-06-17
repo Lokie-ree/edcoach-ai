@@ -11,33 +11,23 @@ export default defineSchema({
     clerkId: v.string(),
     name: v.string(),
     email: v.string(),
-    organization: v.string(),
-    clerkOrgId: v.optional(v.string()), // <-- Add this line
+    clerkOrganizationId: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     preferences: v.optional(v.any()),
     createdAt: v.number(),
     subscriptionStatus: v.optional(v.union(v.literal("active"), v.literal("inactive"))),
     subscriptionTier: v.optional(v.union(v.literal("basic"), v.literal("pro"))),
     role: v.union(v.literal("coach"), v.literal("teacher")),
-    coachId: v.optional(v.id("users")),
     onboardingComplete: v.optional(v.boolean()),
   })
     .index("by_clerk_id", ["clerkId"])
-    .index("by_organization", ["organization"]),
-
-  invites: defineTable({
-    email: v.string(),
-    coachId: v.id("users"),
-    token: v.string(),
-    accepted: v.boolean(),
-    createdAt: v.number(),
-  }).index("by_token", ["token"]),
+    .index("by_organization", ["clerkOrganizationId"]),
 
   // Schools/organizations table
   organizations: defineTable({
     name: v.string(),
     adminId: v.id("users"),
-    clerkOrgId: v.optional(v.string()),
+    clerkOrganizationId: v.string(),
     type: v.optional(v.string()),
     additionalInfo: v.optional(v.string()),
     createdAt: v.number(),
@@ -45,15 +35,15 @@ export default defineSchema({
 
   // Teachers table - for storing information about teachers being observed
   teachers: defineTable({
+    userId: v.id("users"),
     name: v.string(),
     email: v.optional(v.string()),
     subject: v.array(v.string()),
     gradeBand: v.string(),
-    coachId: v.id("users"),
     createdAt: v.number(),
     status: v.optional(v.string()),
   })
-    .index("by_coach", ["coachId"]),
+    .index("by_user", ["userId"]),
 
   // Rubrics table - for storing evaluation frameworks (metadata and full structure)
   rubrics: defineTable({

@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
+import { useOrganization } from "@clerk/nextjs";
 import { PageHeader } from "@/components/ui/page-header";
 
 import { cn } from "@/lib/utils";
@@ -84,25 +85,27 @@ export default function TeachersPage() {
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [deletingTeacher, setDeletingTeacher] = useState<Teacher | null>(null);
   const { user } = useUser();
+  const { organization } = useOrganization();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const convexUser = useQuery(
     api.users.getUserByClerkId,
     user ? { clerkId: user.id } : "skip"
   );
-  const coachId = convexUser?._id;
+  const clerkOrganizationId = organization?.id;
 
   // Only fetch teachers when coachId is available
   const teachers = useQuery(
     api.teachers.list,
-    coachId ? { coachId } : "skip"
+    clerkOrganizationId ? { clerkOrganizationId } : "skip"
   );
   const createTeacher = useMutation(api.teachers.create);
   const updateTeacher = useMutation(api.teachers.update);
   const removeTeacher = useMutation(api.teachers.remove);
 
   const handleDelete = async () => {
-    if (!deletingTeacher || !coachId) return;
+    if (!deletingTeacher || !clerkOrganizationId) return;
     try {
-      await removeTeacher({ id: deletingTeacher._id as Id<'teachers'>, coachId });
+      await removeTeacher({ id: deletingTeacher._id as Id<'teachers'>, clerkOrganizationId });
       toast.success("Teacher deleted successfully");
       setDeletingTeacher(null);
     } catch (error) {
@@ -200,12 +203,12 @@ export default function TeachersPage() {
             setEditingTeacher(null);
           }}
           createTeacher={async (values) => {
-            if (!coachId) return;
-            await createTeacher({ ...values, coachId });
+            if (!clerkOrganizationId) return;
+            await createTeacher({ ...values, clerkOrganizationId });
           }}
           updateTeacher={async (values) => {
-            if (!coachId) return;
-            await updateTeacher({ ...values, coachId });
+            if (!clerkOrganizationId) return;
+            await updateTeacher({ ...values, clerkOrganizationId });
           }}
           teacher={editingTeacher ?? undefined}
         />

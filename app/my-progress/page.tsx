@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import { useOrganization } from "@clerk/nextjs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -15,7 +16,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { getIndicatorName } from "@/lib/indicator-utils";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
@@ -23,6 +24,23 @@ import { PageHeader } from "@/components/ui/page-header";
 export default function MyProgressPage() {
   const { user } = useUser();
   const { isLoading, isAuthenticated, user: convexUser } = useAuthRedirect();
+  const { organization } = useOrganization();
+
+  // Fetch org memberships
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [memberships, setMemberships] = useState<any[]>([]);
+  const [membershipsLoading, setMembershipsLoading] = useState(false);
+  useEffect(() => {
+    if (organization) {
+      setMembershipsLoading(true);
+      organization.getMemberships().then((ms) => {
+        setMemberships(ms.data || []);
+        setMembershipsLoading(false);
+      });
+    } else {
+      setMemberships([]);
+    }
+  }, [organization]);
 
   // Get teacher record for current user
   const teacherRecord = useQuery(
@@ -63,27 +81,17 @@ export default function MyProgressPage() {
     return reinforcements;
   }, [walkthroughEntries, walkthroughs]);
 
-  // Get coach information
-  const coach = useQuery(
-    api.users.getUserById,
-    convexUser?.coachId ? { userId: convexUser.coachId } : "skip"
-  );
-
   // Calculate coaching relationship stats
   const coachingStats = useMemo(() => {
-    if (!walkthroughs || !coach) return null;
-    
+    if (!walkthroughs) return null;
     const safeWalkthroughs = walkthroughs ?? [];
     const totalWalkthroughs = safeWalkthroughs.length;
     const recentWalkthrough = safeWalkthroughs.length > 0 ? 
       safeWalkthroughs.sort((a, b) => b.walkthroughDate - a.walkthroughDate)[0] : null;
-    
     const completedWalkthroughs = safeWalkthroughs.filter(w => w.status === "completed").length;
     const draftWalkthroughs = safeWalkthroughs.filter(w => w.status === "draft").length;
-    
     // Get most recent coaching feedback
     const latestReinforcement = recentReinforcements.length > 0 ? recentReinforcements[0] : null;
-    
     return {
       totalWalkthroughs,
       completedWalkthroughs,
@@ -92,7 +100,7 @@ export default function MyProgressPage() {
       latestFeedback: latestReinforcement?.aiFeedback,
       latestIndicator: latestReinforcement?.indicatorName
     };
-  }, [walkthroughs, coach, recentReinforcements]);
+  }, [walkthroughs, recentReinforcements]);
 
   if (isLoading) {
     return (
@@ -296,7 +304,7 @@ export default function MyProgressPage() {
         </Card>
       </motion.div>
 
-      {/* Coach Connection */}
+      {/* Coach Connection (Org Admin) */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -306,27 +314,30 @@ export default function MyProgressPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Recent Coaching Activity
+              Organization Coach
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {!convexUser.coachId ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No Coach Assigned</p>
-                <p className="text-sm">Contact your administrator to get connected with a coach</p>
-              </div>
-            ) : (
+            {membershipsLoading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading organization info...</div>
+            ) : memberships.length > 0 ? (
               <div className="space-y-4">
-                {/* Coach Info */}
-                <div className="flex items-center justify-between pb-3 border-b">
-                  <div>
-                    <p className="font-medium">{coach?.name || "Loading..."}</p>
-                    <p className="text-sm text-muted-foreground">Your Instructional Coach</p>
-                  </div>
-                  <Badge variant="default">Active</Badge>
-                </div>
-
+                {/* Show the org admin as the coach */}
+                {(() => {
+                  const admin = memberships.find((m) => m.role === "org:admin");
+                  if (!admin) {
+                    return <div className="text-center py-8 text-muted-foreground">Your organization&apos;s coach will appear here.</div>;
+                  }
+                  return (
+                    <div className="flex items-center justify-between pb-3 border-b">
+                      <div>
+                        <p className="font-medium">{admin.publicUserData?.firstName || "Coach"}</p>
+                        <p className="text-sm text-muted-foreground">Your Organization Coach</p>
+                      </div>
+                      <Badge variant="default">Active</Badge>
+                    </div>
+                  );
+                })()}
                 {/* Collaboration Stats */}
                 {coachingStats && (
                   <div className="grid grid-cols-3 gap-4 py-3 border-b">
@@ -349,7 +360,6 @@ export default function MyProgressPage() {
                     </div>
                   </div>
                 )}
-
                 {/* Latest Coaching Insight */}
                 {coachingStats?.latestFeedback && (
                   <div className="space-y-2">
@@ -367,7 +377,6 @@ export default function MyProgressPage() {
                     </div>
                   </div>
                 )}
-
                 {/* Quick Actions */}
                 <div className="flex gap-2 pt-2">
                   <Button variant="outline" size="sm" className="flex-1">
@@ -379,7 +388,6 @@ export default function MyProgressPage() {
                     Send Message
                   </Button>
                 </div>
-
                 {/* Next Steps Placeholder */}
                 <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg">
                   <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">
@@ -393,6 +401,8 @@ export default function MyProgressPage() {
                   </p>
                 </div>
               </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">Your organization&apos;s coach will appear here.</div>
             )}
           </CardContent>
         </Card>

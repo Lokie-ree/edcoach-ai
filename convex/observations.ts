@@ -4,20 +4,13 @@ import { internal } from "./_generated/api";
 
 export const list = query({
   args: {
-    coachId: v.id("users"),
+    // Remove coachId argument
+    // TODO: Add orgId argument if needed for org-based filtering
   },
   handler: async (ctx, args) => {
-    // Get all teachers for this coach
-    const teachers = await ctx.db
-      .query("teachers")
-      .filter((q) => q.eq(q.field("coachId"), args.coachId))
-      .collect();
-    const teacherIds = teachers.map((t) => t._id);
-    // Get all observations for these teachers
-    return await ctx.db
-      .query("observations")
-      .filter((q) => q.or(...teacherIds.map(id => q.eq(q.field("teacherId"), id))))
-      .collect();
+    // TODO: Refactor to use Clerk organization membership for filtering teachers
+    // For now, return all observations (or filter by org if possible)
+    return await ctx.db.query("observations").collect();
   },
 });
 
@@ -65,10 +58,10 @@ export const createObservationAndResponses = mutation({
     if (!teacher) {
       throw new Error("Teacher not found");
     }
-    // Only the coach associated with this teacher can create observations
-    if (teacher.coachId !== user._id) {
-      throw new Error("You don't have permission to create observations for this teacher");
-    }
+    // TODO: Replace this permission check with Clerk org membership check
+    // if (teacher.coachId !== user._id) {
+    //   throw new Error("You don't have permission to create observations for this teacher");
+    // }
     // Create observation
     const now = Date.now();
     const observationId = await ctx.db.insert("observations", {

@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useOrganization } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { Id } from "@/convex/_generated/dataModel";
@@ -44,11 +44,9 @@ type WalkthroughDoc = {
 type ConvexUser = {
   _id: Id<"users">;
   role: "teacher" | "coach";
-  coachId?: Id<"users">;
   onboardingComplete?: boolean;
   name: string;
   email: string;
-  organization: string;
   clerkId: string;
   createdAt: number;
 };
@@ -192,6 +190,7 @@ const GridDistortion = () => {
 export default function DashboardPage() {
   const { user } = useUser();
   const { isLoading, isAuthenticated, user: convexUser } = useAuthRedirect();
+  const { organization } = useOrganization();
 
   // Determine user role and appropriate data fetching - must be done before hooks
   const userRole = convexUser?.role;
@@ -204,20 +203,20 @@ export default function DashboardPage() {
   );
 
   // Determine the correct IDs for data fetching
-  const coachId = userRole === "coach" ? convexUser?._id : convexUser?.coachId;
   const teacherId = teacherRecord?._id;
+  const clerkOrganizationId = organization?.id;
 
   // Fetch data based on user role
   const teachers = useQuery(
     api.teachers.list,
-    coachId && userRole === "coach" ? { coachId } : "skip"
+    userRole === "coach" && clerkOrganizationId ? { clerkOrganizationId } : "skip"
   );
   
-  // For coaches: get all walkthroughs for their teachers
+  // For coaches: get all walkthroughs for their org's teachers
   // For teachers: get only their own walkthroughs
   const coachWalkthroughs = useQuery(
-    api.walkthroughs.listByCoach,
-    coachId && userRole === "coach" ? { coachId } : "skip"
+    api.walkthroughs.listByOrg,
+    userRole === "coach" && clerkOrganizationId ? { clerkOrganizationId } : "skip"
   );
   const teacherWalkthroughs = useQuery(
     api.walkthroughs.listByTeacher,
@@ -230,10 +229,10 @@ export default function DashboardPage() {
     teacherId && userRole === "teacher" ? { teacherId } : "skip"
   );
 
-  // For coaches, we need to get entries across all their teachers' walkthroughs
+  // For coaches, we need to get entries across all their org's teachers' walkthroughs
   const coachWalkthroughEntries = useQuery(
-    api.walkthroughEntries.listByCoach,
-    coachId && userRole === "coach" ? { coachId } : "skip"
+    api.walkthroughEntries.listByOrg,
+    userRole === "coach" && clerkOrganizationId ? { clerkOrganizationId } : "skip"
   );
 
   // Use appropriate walkthroughs based on role
@@ -275,14 +274,6 @@ export default function DashboardPage() {
   }
 
   // Default to coach dashboard
-  if (teachers === undefined || walkthroughs === undefined) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   const safeTeachers = teachers ?? [];
   const safeWalkthroughs = walkthroughs ?? [];
 
@@ -308,6 +299,11 @@ export default function DashboardPage() {
     return walkthroughDate.getMonth() === now.getMonth() && 
            walkthroughDate.getFullYear() === now.getFullYear();
   }).length;
+
+  // Determine if the user is an org admin (coach)
+  const isCoach = user?.organizationMemberships?.some(
+    (m) => m.role === "org:admin"
+  );
 
   return (
     <div className="space-y-6 relative">
@@ -339,6 +335,12 @@ export default function DashboardPage() {
           </div>
         }
       />
+
+      {isCoach && (
+        <Link href="/org">
+          <button className="btn btn-primary mt-4">Manage Organization</button>
+        </Link>
+      )}
 
       {/* Teacher Status Overview */}
       <motion.div

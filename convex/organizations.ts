@@ -10,7 +10,7 @@ import { query, mutation } from "./_generated/server";
 // Store additional metadata about an organization
 export const storeMetadata = mutation({
   args: {
-    clerkOrgId: v.string(),
+    clerkOrganizationId: v.string(),
     name: v.string(),
     type: v.optional(v.string()),
     additionalInfo: v.optional(v.string()),
@@ -34,7 +34,7 @@ export const storeMetadata = mutation({
     // Check if organization exists in our DB
     const existingOrg = await ctx.db
       .query("organizations")
-      .filter((q) => q.eq(q.field("clerkOrgId"), args.clerkOrgId))
+      .filter((q) => q.eq(q.field("clerkOrganizationId"), args.clerkOrganizationId))
       .unique();
 
     if (existingOrg) {
@@ -49,7 +49,7 @@ export const storeMetadata = mutation({
       await ctx.db.insert("organizations", {
         name: args.name,
         adminId: user._id,
-        clerkOrgId: args.clerkOrgId,
+        clerkOrganizationId: args.clerkOrganizationId,
         type: args.type,
         additionalInfo: args.additionalInfo,
         createdAt: Date.now(),
@@ -63,12 +63,12 @@ export const storeMetadata = mutation({
 // Get organization metadata
 export const getMetadata = query({
   args: {
-    clerkOrgId: v.string(),
+    clerkOrganizationId: v.string(),
   },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("organizations")
-      .filter((q) => q.eq(q.field("clerkOrgId"), args.clerkOrgId))
+      .filter((q) => q.eq(q.field("clerkOrganizationId"), args.clerkOrganizationId))
       .unique();
   },
 }); 

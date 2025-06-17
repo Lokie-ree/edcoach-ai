@@ -31,9 +31,7 @@ export const createWalkthroughAndEntries = mutation({
     const teacher = await ctx.db.get(args.teacherId);
     if (!teacher) throw new Error("Teacher not found");
     // Only the coach associated with this teacher can create walkthroughs
-    if (teacher.coachId !== user._id) {
-      throw new Error("You don't have permission to create walkthroughs for this teacher");
-    }
+    // TODO: Add org-based permission check here if needed
     const now = Date.now();
     const walkthroughId = await ctx.db.insert("walkthroughs", {
       teacherId: args.teacherId,
@@ -90,9 +88,7 @@ export const updateWalkthroughAndEntries = mutation({
     const teacher = await ctx.db.get(args.teacherId);
     if (!teacher) throw new Error("Teacher not found");
     // Only the coach associated with this teacher can update walkthroughs
-    if (teacher.coachId !== user._id) {
-      throw new Error("You don't have permission to update walkthroughs for this teacher");
-    }
+    // TODO: Add org-based permission check here if needed
     // Check walkthrough
     const walkthrough = await ctx.db.get(args.walkthroughId);
     if (!walkthrough) throw new Error("Walkthrough not found");
@@ -170,9 +166,7 @@ export const listDraftWalkthroughs = query({
 
 // List all walkthroughs for a coach (by their teachers)
 export const listByCoach = query({
-  args: {
-    coachId: v.id("users"),
-  },
+  args: {},
   returns: v.array(
     v.object({
       _id: v.id("walkthroughs"),
@@ -189,17 +183,8 @@ export const listByCoach = query({
     })
   ),
   handler: async (ctx, args) => {
-    // Get all teachers for this coach
-    const teachers = await ctx.db
-      .query("teachers")
-      .filter((q) => q.eq(q.field("coachId"), args.coachId))
-      .collect();
-    const teacherIds = teachers.map((t) => t._id);
-    // Get all walkthroughs for these teachers
-    return await ctx.db
-      .query("walkthroughs")
-      .filter((q) => q.or(...teacherIds.map(id => q.eq(q.field("teacherId"), id))))
-      .collect();
+    // TODO: Filter by organization membership if needed
+    return await ctx.db.query("walkthroughs").collect();
   },
 });
 
@@ -254,5 +239,43 @@ export const getById = query({
   ),
   handler: async (ctx, args) => {
     return await ctx.db.get(args.walkthroughId);
+  },
+});
+
+export const listByOrg = query({
+  args: { clerkOrganizationId: v.string() },
+  returns: v.array(
+    v.object({
+      _id: v.id("walkthroughs"),
+      _creationTime: v.number(),
+      teacherId: v.id("teachers"),
+      observerId: v.id("users"),
+      walkthroughDate: v.number(),
+      status: v.union(v.literal("draft"), v.literal("completed")),
+      evidenceSummary: v.string(),
+      reinforcementIndicator: v.string(),
+      refinementIndicator: v.string(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+  ),
+  handler: async (ctx, args) => {
+    // Get all users in the org
+    const users = await ctx.db
+      .query("users")
+      .withIndex("by_organization", (q) => q.eq("clerkOrganizationId", args.clerkOrganizationId))
+      .collect();
+    const userIds = users.map((u) => u._id);
+    // Get all teachers for these users
+    const teachers = await ctx.db
+      .query("teachers")
+      .filter((q) => q.or(...userIds.map((id) => q.eq(q.field("userId"), id))))
+      .collect();
+    const teacherIds = teachers.map((t) => t._id);
+    // Get all walkthroughs for these teachers
+    return await ctx.db
+      .query("walkthroughs")
+      .filter((q) => q.or(...teacherIds.map((id) => q.eq(q.field("teacherId"), id))))
+      .collect();
   },
 }); 

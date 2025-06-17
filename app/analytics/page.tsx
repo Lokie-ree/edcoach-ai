@@ -23,6 +23,7 @@ import {
   BarChart3,
   PieChart
 } from "lucide-react";
+import { useOrganization } from "@clerk/nextjs";
 
 // Define proper types based on Convex analytics return types
 interface IndicatorCount {
@@ -540,18 +541,25 @@ const ActionItems = ({ analytics }: { analytics: AnalyticsData | null | undefine
 
 export default function AnalyticsDashboardPage() {
   const { isLoading, isAuthenticated, user: convexUser } = useAuthRedirect();
+  const { organization } = useOrganization();
+  const clerkOrganizationId = organization?.id;
 
   // Get analytics data for coach
   const analytics = useQuery(
     api.analytics.coachAnalytics,
-    convexUser?.role === "coach" && convexUser._id ? { coachId: convexUser._id } : "skip"
+    convexUser?.role === "coach" && clerkOrganizationId ? { clerkOrganizationId } : "skip"
   );
+
+  if (!clerkOrganizationId) {
+    return <div className="flex items-center justify-center min-h-[400px] text-muted-foreground">
+      You are not in an organization.
+    </div>;
+  }
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+<span className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full inline-block"></span>      </div>
     );
   }
 
@@ -559,11 +567,10 @@ export default function AnalyticsDashboardPage() {
     return null;
   }
 
-  if (convexUser.role !== "coach") {
+  if (convexUser?.role !== "coach") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
-        <p>This analytics dashboard is only available for coaches.</p>
+      <div className="flex items-center justify-center min-h-[400px] text-muted-foreground">
+        Only coaches can view analytics.
       </div>
     );
   }

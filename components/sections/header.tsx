@@ -75,7 +75,21 @@ const Header = () => {
               <DesktopNav userRole={userRole} />
             </SignedIn>
             <SignedIn>
-              <UserButton />
+              <UserButton>
+                <UserButton.MenuItems>
+                  {userRole && navItems
+                    .filter(item => item.roles.includes(userRole))
+                    .map((item) => (
+                      <UserButton.Link 
+                        key={item.href}
+                        href={item.href} 
+                        label={item.label} 
+                        labelIcon={<item.icon />} 
+                      />
+                    ))
+                  }
+                </UserButton.MenuItems>
+              </UserButton>
             </SignedIn>
 
             {/* Mobile NavMenuBtn, only after onboarding */}

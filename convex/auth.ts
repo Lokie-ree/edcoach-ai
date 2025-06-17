@@ -1,9 +1,8 @@
 import { v } from "convex/values";
 import { mutation, query, action } from "./_generated/server";
 import { api } from "./_generated/api";
-import { MutationCtx } from "./_generated/server";
 
-const isDevelopment = process.env.NODE_ENV === "development";
+
 
 // Check if a user exists and create one if they don't
 export const createOrGetUser = mutation({
@@ -12,7 +11,7 @@ export const createOrGetUser = mutation({
     email: v.string(),
     name: v.string(),
     imageUrl: v.optional(v.string()),
-    organization: v.string(),
+    clerkOrganizationId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // First, check if the user already exists
@@ -35,7 +34,7 @@ export const createOrGetUser = mutation({
       email: args.email,
       name: args.name,
       imageUrl: args.imageUrl,
-      organization: args.organization,
+      clerkOrganizationId: args.clerkOrganizationId,
       createdAt: Date.now(),
       role: "coach" as const,
     });
@@ -127,40 +126,3 @@ export const handleClerkWebhook = action({
     }
   },
 });
-
-// Helper function to get or create user ID from Clerk identity (for mutations)
-async function getUserIdForMutation(ctx: MutationCtx, identity: any) {
-  try {
-    // Check if user exists in our database using proper index
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
-      .unique();
-
-    if (user) {
-      return user._id;
-    }
-
-    // If user doesn't exist, create a basic user entry
-    const newUser = {
-      clerkId: identity.subject,
-      name: identity.name ?? "",
-      email: identity.email ?? "",
-      role: "coach" as const,
-      imageUrl: undefined,
-      preferences: {},
-      subscriptionStatus: undefined,
-      subscriptionTier: undefined,
-      coachId: undefined,
-      organization: "",
-      createdAt: Date.now(),
-    };
-
-    // Use proper database operation
-    const userId = await ctx.db.insert("users", newUser);
-    return userId;
-  } catch (error) {
-    console.error("Error in getUserIdForMutation:", error);
-    throw new Error("Failed to get or create user");
-  }
-} 

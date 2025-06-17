@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUser, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { useUser, SignedIn, SignedOut, SignInButton, CreateOrganization } from "@clerk/nextjs";
+import { useOrganization } from "@clerk/nextjs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQuery } from "convex/react";
@@ -12,6 +13,7 @@ import { toast } from "sonner";
 export default function OnboardingPage() {
   const router = useRouter();
   const { user } = useUser();
+  const { organization } = useOrganization();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const convexUser = useQuery(
@@ -20,6 +22,8 @@ export default function OnboardingPage() {
   );
 
   const completeSimplifiedOnboarding = useMutation(api.users.completeSimplifiedOnboarding);
+
+  const clerkOrganizationId = organization?.id;
 
   useEffect(() => {
     if (convexUser && convexUser.onboardingComplete === true) {
@@ -43,7 +47,7 @@ export default function OnboardingPage() {
   const handleGetStarted = async () => {
     try {
       setIsProcessing(true);
-      const result = await completeSimplifiedOnboarding();
+      const result = await completeSimplifiedOnboarding({ clerkOrganizationId });
       
       if (result.role === "teacher") {
         toast.success("Welcome teacher! You've been connected to your coach.");
@@ -84,11 +88,19 @@ export default function OnboardingPage() {
             <p className="text-sm text-muted-foreground">
               We&apos;ll automatically determine if you&apos;re joining as a coach or teacher based on your email address.
             </p>
+            {!clerkOrganizationId && (
+              <>
+                <p className="text-sm text-red-500 mt-2">You must join or create an organization to continue.</p>
+                <div className="mt-4 flex justify-center">
+                  <CreateOrganization afterCreateOrganizationUrl="/onboarding" />
+                </div>
+              </>
+            )}
           </div>
 
           <Button 
             onClick={handleGetStarted} 
-            disabled={isProcessing}
+            disabled={isProcessing || !clerkOrganizationId}
             className="w-full"
           >
             {isProcessing ? "Setting up your account..." : "Get Started"}

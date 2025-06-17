@@ -108,4 +108,62 @@ export const listByCoach = query({
     // Sort by creation time, most recent first
     return allEntries.sort((a, b) => b.createdAt - a.createdAt);
   },
+});
+
+export const listByOrg = query({
+  args: { clerkOrganizationId: v.string() },
+  returns: v.array(
+    v.object({
+      _id: v.id("walkthroughEntries"),
+      _creationTime: v.float64(),
+      walkthroughId: v.id("walkthroughs"),
+      indicatorAcronym: v.string(),
+      type: v.union(v.literal("reinforcement"), v.literal("refinement")),
+      aiFeedback: v.optional(v.string()),
+      createdAt: v.number(),
+      teacherName: v.optional(v.string()),
+      walkthroughDate: v.optional(v.number()),
+    })
+  ),
+  handler: async (ctx, args) => {
+    // Get all users in the org
+    const users = await ctx.db
+      .query("users")
+      .withIndex("by_organization", (q) => q.eq("clerkOrganizationId", args.clerkOrganizationId))
+      .collect();
+    const userIds = users.map((u) => u._id);
+    // Get all teachers for these users
+    const teachers = await ctx.db
+      .query("teachers")
+      .filter((q) => q.or(...userIds.map((id) => q.eq(q.field("userId"), id))))
+      .collect();
+    const teacherIds = teachers.map((t) => t._id);
+    // Get all walkthroughs for these teachers
+    const walkthroughs = await ctx.db
+      .query("walkthroughs")
+      .filter((q) => q.or(...teacherIds.map((id) => q.eq(q.field("teacherId"), id))))
+      .collect();
+    if (walkthroughs.length === 0) {
+      return [];
+    }
+    // Get all entries for these walkthroughs
+    const allEntries = [];
+    for (const walkthrough of walkthroughs) {
+      const entries = await ctx.db
+        .query("walkthroughEntries")
+        .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", walkthrough._id))
+        .collect();
+      // Get teacher info for context
+      const teacher = teachers.find((t) => t._id === walkthrough.teacherId);
+      // Add teacher and walkthrough context to entries
+      const enrichedEntries = entries.map((entry) => ({
+        ...entry,
+        teacherName: teacher?.name,
+        walkthroughDate: walkthrough.walkthroughDate,
+      }));
+      allEntries.push(...enrichedEntries);
+    }
+    // Sort by creation time, most recent first
+    return allEntries.sort((a, b) => b.createdAt - a.createdAt);
+  },
 }); 
