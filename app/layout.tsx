@@ -82,6 +82,7 @@ export default function RootLayout({
       <body className={`${oswald.className} antialiased`}>
         <ClerkProvider 
           afterSignOutUrl="/"
+          dynamic
         >
           <ConvexClientProvider>
             <ThemeProvider

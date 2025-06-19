@@ -1,278 +1,288 @@
-import { v } from "convex/values";
-import { query, mutation, internalQuery } from "./_generated/server";
+import { internalMutation, internalQuery, query, QueryCtx, mutation } from "./_generated/server";
+import { UserJSON } from "@clerk/backend";
+import { v, Validator } from "convex/values";
 
-/*
- * NOTE: This file is simplified to use Clerk's user management.
- * Most user management should be done through Clerk's API.
- * This file contains minimal functionality for user data specific to our app.
- */
+// Helper functions
+async function userByClerkId(ctx: QueryCtx, clerkId: string) {
+  return await ctx.db
+    .query("users")
+    .withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkId))
+    .unique();
+}
 
-// Store additional user metadata
-export const storeMetadata = mutation({
-  args: {
-    preferences: v.optional(v.any()),
-    role: v.union(v.literal("coach"), v.literal("teacher")),
-    subscriptionStatus: v.optional(v.union(v.literal("active"), v.literal("inactive"))),
-    subscriptionTier: v.optional(v.union(v.literal("basic"), v.literal("pro"))),
-    imageUrl: v.optional(v.string()),
-    name: v.optional(v.string()),
-    email: v.optional(v.string()),
-    clerkOrganizationId: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-    // Check if user exists in our DB
-    const existingUser = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    const baseUser = {
-      preferences: args.preferences ?? {},
-      role: args.role,
-      name: args.name ?? identity.name ?? "",
-      email: args.email ?? identity.email ?? "",
-      imageUrl: args.imageUrl ?? undefined,
-      createdAt: Date.now(),
-      clerkOrganizationId: args.clerkOrganizationId,
-    };
-    if (existingUser) {
-      // Patch missing role for existing users (for testing before onboarding)
-      let patchFields: any = { ...baseUser };
-      if (!existingUser.role) {
-        patchFields.role = "coach";
-      }
-      // Update existing user
-      await ctx.db.patch(existingUser._id, {
-        ...patchFields,
-        subscriptionStatus: args.role === "coach" ? args.subscriptionStatus : undefined,
-        subscriptionTier: args.role === "coach" ? args.subscriptionTier : undefined,
-      });
-      return { success: true, userId: existingUser._id };
-    } else {
-      // Create new user record
-      const userId = await ctx.db.insert("users", {
-        clerkId: identity.subject,
-        ...baseUser,
-        role: "coach",
-        subscriptionStatus: args.subscriptionStatus,
-        subscriptionTier: args.subscriptionTier,
-      });
-      return { success: true, userId };
-    }
+export async function getCurrentUser(ctx: QueryCtx) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (identity === null) {
+    return null;
+  }
+  return await userByClerkId(ctx, identity.subject);
+}
+
+export async function getCurrentUserOrThrow(ctx: QueryCtx) {
+  const userRecord = await getCurrentUser(ctx);
+  if (!userRecord) throw new Error("Can't get current user");
+  return userRecord;
+}
+
+// Public queries
+export const current = query({
+  args: {},
+  returns: v.union(
+    v.object({
+      _id: v.id("users"),
+      _creationTime: v.number(),
+      clerkId: v.string(),
+      name: v.string(),
+      email: v.string(),
+      role: v.union(v.literal("coach"), v.literal("teacher")),
+      clerkOrganizationId: v.optional(v.string()),
+      subscriptionPlan: v.optional(v.union(v.literal("free"), v.literal("pro"))),
+      imageUrl: v.optional(v.string()),
+      preferences: v.optional(v.any()),
+      createdAt: v.number(),
+      onboardingComplete: v.optional(v.boolean()),
+    }),
+    v.null()
+  ),
+  handler: async (ctx) => {
+    return await getCurrentUser(ctx);
   },
 });
 
-// Get the current authenticated user
-export const getCurrentUser = query({
-  handler: async (ctx) => {
+export const getUserByClerkId = query({
+  args: { clerkId: v.string() },
+  returns: v.union(
+    v.object({
+      _id: v.id("users"),
+      _creationTime: v.number(),
+      clerkId: v.string(),
+      name: v.string(),
+      email: v.string(),
+      role: v.union(v.literal("coach"), v.literal("teacher")),
+      clerkOrganizationId: v.optional(v.string()),
+      subscriptionPlan: v.optional(v.union(v.literal("free"), v.literal("pro"))),
+      imageUrl: v.optional(v.string()),
+      preferences: v.optional(v.any()),
+      createdAt: v.number(),
+      onboardingComplete: v.optional(v.boolean()),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       return null;
     }
-    return await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-  },
-});
-
-// Get a user by ID
-export const getUser = query({
-  args: {
-    userId: v.id("users"),
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.userId);
-  },
-});
-
-// Get a user by ID (alternative naming for consistency)
-export const getUserById = query({
-  args: {
-    userId: v.id("users"),
-  },
-  returns: v.any(),
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.userId);
-  },
-});
-
-// Create a new user in the system
-export const createUser = mutation({
-  args: {
-    clerkId: v.string(),
-    name: v.string(),
-    email: v.string(),
-    role: v.union(v.literal("coach"), v.literal("teacher")),
-    subscriptionStatus: v.optional(v.union(v.literal("active"), v.literal("inactive"))),
-    subscriptionTier: v.optional(v.union(v.literal("basic"), v.literal("pro"))),
-    imageUrl: v.optional(v.string()),
-    preferences: v.optional(v.any()),
-  },
-  handler: async (ctx, args) => {
-    // Check if user already exists
-    const existingUser = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
-      .unique();
-    if (existingUser) {
-      return { userId: existingUser._id, created: false };
+    
+    if (identity.subject !== args.clerkId) {
+      throw new Error("Unauthorized: Can only access your own user data");
     }
-    // Create new user
-    const userId = await ctx.db.insert("users", {
-      clerkId: args.clerkId,
-      name: args.name,
-      email: args.email,
-      imageUrl: args.imageUrl ?? undefined,
-      preferences: args.preferences ?? {},
-      role: args.role,
-      subscriptionStatus: args.subscriptionStatus,
-      subscriptionTier: args.subscriptionTier,
-      createdAt: Date.now(),
-    });
-    return { userId, created: true };
+    
+    return await userByClerkId(ctx, args.clerkId);
   },
 });
 
-// Get a user by their Clerk ID
-export const getUserByClerkId = query({
-  args: {
-    clerkId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
-      .unique();
-    return user;
-  },
-});
-
-// Update a user
-export const updateUser = mutation({
-  args: {
-    userId: v.id("users"),
-    name: v.optional(v.string()),
-    email: v.optional(v.string()),
-    role: v.optional(v.union(v.literal("coach"), v.literal("teacher"))),
-    subscriptionStatus: v.optional(v.union(v.literal("active"), v.literal("inactive"))),
-    subscriptionTier: v.optional(v.union(v.literal("basic"), v.literal("pro"))),
-    imageUrl: v.optional(v.string()),
-    preferences: v.optional(v.any()),
-  },
-  handler: async (ctx, args) => {
-    const { userId, ...updates } = args;
-    type UpdateKeys = keyof Omit<typeof args, 'userId'>;
-    const filteredUpdates: Partial<typeof updates> = {};
-    (Object.keys(updates) as UpdateKeys[]).forEach((key) => {
-      if (updates[key] !== undefined) {
-        filteredUpdates[key] = updates[key];
-      }
-    });
-    await ctx.db.patch(userId, filteredUpdates);
-    return { success: true };
-  },
-});
-
-// Update subscription information for a user
-export const updateSubscription = mutation({
-  args: {
-    userId: v.id("users"),
-    subscriptionStatus: v.union(v.literal("active"), v.literal("inactive")),
-    subscriptionTier: v.union(v.literal("basic"), v.literal("pro")),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.userId, {
-      subscriptionStatus: args.subscriptionStatus,
-      subscriptionTier: args.subscriptionTier,
-    });
-    return { success: true };
-  },
-});
-
+// Internal queries
 export const internalGetUserByClerkId = internalQuery({
   args: { clerkId: v.string() },
+  returns: v.union(
+    v.object({
+      _id: v.id("users"),
+      _creationTime: v.number(),
+      clerkId: v.string(),
+      name: v.string(),
+      email: v.string(),
+      role: v.union(v.literal("coach"), v.literal("teacher")),
+      clerkOrganizationId: v.optional(v.string()),
+      subscriptionPlan: v.optional(v.union(v.literal("free"), v.literal("pro"))),
+      imageUrl: v.optional(v.string()),
+      preferences: v.optional(v.any()),
+      createdAt: v.number(),
+      onboardingComplete: v.optional(v.boolean()),
+    }),
+    v.null()
+  ),
   handler: async (ctx, args) => {
-    return await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
-      .unique();
+    return await userByClerkId(ctx, args.clerkId);
   },
 });
 
-// Legacy onboarding functions - kept for backward compatibility during migration
-export const upsertUserOnboarding = mutation({
-  args: {
-    clerkId: v.string(),
-    name: v.string(),
-    email: v.string(),
-    role: v.union(v.literal("coach"), v.literal("teacher")),
-  },
-  handler: async (ctx, args) => {
-    // Redirect to simplified onboarding
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-    
-    const existingUser = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
-      .unique();
-
-    if (existingUser) {
-      await ctx.db.patch(existingUser._id, {
-        name: args.name,
-        email: args.email,
-        role: "coach", // Always default to coach
-        subscriptionTier: "basic",
-        subscriptionStatus: "inactive",
-        onboardingComplete: true,
-      });
-      return { userId: existingUser._id, created: false };
-    } else {
-      const userId = await ctx.db.insert("users", {
-        clerkId: args.clerkId,
-        name: args.name,
-        email: args.email,
-        role: "coach",
-        subscriptionTier: "basic",
-        subscriptionStatus: "inactive",
-        onboardingComplete: true,
-        imageUrl: identity.pictureUrl,
-        preferences: {},
-        createdAt: Date.now(),
-      });
-      return { userId, created: true };
+// AI usage gating
+export const checkAIUsageLimit = query({
+  args: {},
+  returns: v.object({
+    canGenerate: v.boolean(),
+    usageThisMonth: v.number(),
+    limit: v.number(),
+    subscriptionPlan: v.union(v.literal("free"), v.literal("pro"), v.literal("none")),
+  }),
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) {
+      return { canGenerate: false, usageThisMonth: 0, limit: 0, subscriptionPlan: "none" as const };
     }
-  },
-});
 
-export const completeOnboarding = mutation({
-  args: {
-    clerkId: v.string(),
-    subscriptionTier: v.optional(v.union(v.literal("basic"), v.literal("pro"))),
-  },
-  handler: async (ctx, args) => {
-    // Redirect to simplified onboarding completion
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
-      .unique();
-    if (!user) throw new Error("User not found");
+    const plan = user.subscriptionPlan || "free";
+    const limit = plan === "pro" ? 999999 : 5; // 5 for free, unlimited for pro
+
+    // Calculate current month usage
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
     
-    await ctx.db.patch(user._id, {
-      role: "coach",
-      subscriptionTier: args.subscriptionTier || "basic",
-      subscriptionStatus: "inactive",
-      onboardingComplete: true,
-    });
-    return { success: true };
+    const usageLogs = await ctx.db
+      .query("aiUsageLogs")
+      .withIndex("by_user_and_month", (q) => 
+        q.eq("userId", user._id).gte("timestamp", monthStart)
+      )
+      .collect();
+
+    const usageThisMonth = usageLogs.length;
+    const canGenerate = usageThisMonth < limit;
+
+    return {
+      canGenerate,
+      usageThisMonth,
+      limit,
+      subscriptionPlan: plan,
+    };
   },
 });
 
-// Auto-role assignment onboarding - detects coach vs teacher based on email
+// Webhook handlers
+export const upsertFromClerk = internalMutation({
+  args: { data: v.any() as Validator<UserJSON> },
+  returns: v.null(),
+  handler: async (ctx, { data }) => {
+    const userAttributes = {
+      clerkId: data.id,
+      name: `${data.first_name || ''} ${data.last_name || ''}`.trim() || 'User',
+      email: data.email_addresses[0]?.email_address || '',
+      imageUrl: data.image_url,
+      preferences: {},
+      createdAt: Date.now(),
+      onboardingComplete: false,
+      role: "coach" as const, // Default role, will be updated in onboarding
+    };
+
+    const existingUser = await userByClerkId(ctx, data.id);
+    if (existingUser === null) {
+      await ctx.db.insert("users", userAttributes);
+    } else {
+      await ctx.db.patch(existingUser._id, {
+        name: userAttributes.name,
+        email: userAttributes.email,
+        imageUrl: userAttributes.imageUrl,
+      });
+    }
+    return null;
+  },
+});
+
+export const deleteFromClerk = internalMutation({
+  args: { clerkUserId: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { clerkUserId }) => {
+    const user = await userByClerkId(ctx, clerkUserId);
+    if (user !== null) {
+      await ctx.db.delete(user._id);
+    } else {
+      console.warn(`Can't delete user, there is none for Clerk user ID: ${clerkUserId}`);
+    }
+    return null;
+  },
+});
+
+// Organization membership webhooks
+export const handleOrgMembershipCreated = internalMutation({
+  args: { data: v.any() },
+  returns: v.null(),
+  handler: async (ctx, { data }) => {
+    const user = await userByClerkId(ctx, data.public_user_data.user_id);
+    if (user) {
+      await ctx.db.patch(user._id, {
+        clerkOrganizationId: data.organization.id,
+      });
+      
+      // If this is a teacher joining an org, activate their teacher record
+      if (user.role === "teacher") {
+        const teacherRecord = await ctx.db
+          .query("teachers")
+          .withIndex("by_email", (q) => q.eq("email", user.email))
+          .first();
+        
+        if (teacherRecord && !teacherRecord.userId) {
+          await ctx.db.patch(teacherRecord._id, {
+            userId: user._id,
+            status: "active",
+          });
+        }
+      }
+    }
+    return null;
+  },
+});
+
+export const handleOrgMembershipUpdated = internalMutation({
+  args: { data: v.any() },
+  returns: v.null(),
+  handler: async (ctx, { data }) => {
+    // Handle role changes if needed
+    console.log("Organization membership updated:", data);
+    return null;
+  },
+});
+
+export const handleOrgMembershipDeleted = internalMutation({
+  args: { data: v.any() },
+  returns: v.null(),
+  handler: async (ctx, { data }) => {
+    const user = await userByClerkId(ctx, data.public_user_data.user_id);
+    if (user) {
+      await ctx.db.patch(user._id, {
+        clerkOrganizationId: undefined,
+      });
+    }
+    return null;
+  },
+});
+
+// Billing webhooks
+export const handleSubscriptionChange = internalMutation({
+  args: { data: v.any() },
+  returns: v.null(),
+  handler: async (ctx, { data }) => {
+    const user = await userByClerkId(ctx, data.user_id);
+    if (user) {
+      const plan = data.plan_name === "pro" ? "pro" : "free";
+      await ctx.db.patch(user._id, {
+        subscriptionPlan: plan,
+      });
+      
+             // Schedule Clerk organization creation for new pro subscribers (coaches)
+       if (plan === "pro" && user.role === "coach" && !user.clerkOrganizationId) {
+         // This will be handled by a separate action
+         console.log("Pro subscription activated - organization creation will be handled separately");
+       }
+    }
+    return null;
+  },
+});
+
+export const handleSubscriptionCancelled = internalMutation({
+  args: { data: v.any() },
+  returns: v.null(),
+  handler: async (ctx, { data }) => {
+    const user = await userByClerkId(ctx, data.user_id);
+    if (user) {
+      await ctx.db.patch(user._id, {
+        subscriptionPlan: "free",
+      });
+    }
+    return null;
+  },
+});
+
+// Simplified onboarding with automatic Clerk org creation
 export const completeSimplifiedOnboarding = mutation({
   args: {
     clerkOrganizationId: v.optional(v.string()),
@@ -283,63 +293,57 @@ export const completeSimplifiedOnboarding = mutation({
     role: v.union(v.literal("coach"), v.literal("teacher"))
   }),
   handler: async (ctx, args) => {
-    console.log("completeSimplifiedOnboarding called");
     const identity = await ctx.auth.getUserIdentity();
-    console.log("Identity retrieved:", identity ? "Found" : "None");
     if (!identity) {
-      console.log("No authentication identity found");
       throw new Error("Not authenticated");
     }
-    console.log("Clerk ID:", identity.subject);
-    console.log("Clerk name:", identity.name);
-    console.log("Clerk email:", identity.email);
+    
     const userEmail = identity.email;
     if (!userEmail) {
       throw new Error("No email found in Clerk identity");
     }
-    // Check if this email exists as a teacher
+
+    // Check if this user has a pending teacher record
     const teacherRecord = await ctx.db
       .query("teachers")
-      .filter((q) => q.eq(q.field("email"), userEmail))
+      .withIndex("by_email", (q) => q.eq("email", userEmail))
       .first();
-    // Determine role
+    
     const role = teacherRecord ? ("teacher" as const) : ("coach" as const);
-    // Check if user already exists in users table
-    const existingUser = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    console.log("Existing user found:", existingUser ? "Yes" : "No");
+    
+    const existingUser = await userByClerkId(ctx, identity.subject);
+    
     if (existingUser) {
-      console.log("Updating existing user:", existingUser._id);
-      // Update existing user with complete onboarding
       const updateData: any = {
         name: identity.name || existingUser.name,
         email: userEmail,
         role: role,
         onboardingComplete: true,
       };
+      
       if (args.clerkOrganizationId) {
         updateData.clerkOrganizationId = args.clerkOrganizationId;
       }
-      console.log("About to update user with data:", updateData);
+      
       await ctx.db.patch(existingUser._id, updateData);
-      console.log("User updated successfully");
-      // If this is a teacher, update their status to active
-      if (teacherRecord) {
-        console.log("Updating teacher status to active for teacher:", teacherRecord._id);
+      
+      // Link teacher record if this is a teacher
+      if (teacherRecord && !teacherRecord.userId) {
         await ctx.db.patch(teacherRecord._id, {
+          userId: existingUser._id,
           status: "active",
         });
-        console.log("Teacher status updated to active");
       }
-      // Verify the user was updated with all fields
-      const updatedUser = await ctx.db.get(existingUser._id);
-      console.log("Updated user verification:", updatedUser);
+      
+      // Create Clerk organization for coaches (will be triggered after subscription)
+      if (role === "coach" && !existingUser.clerkOrganizationId) {
+        // This will be handled by subscription webhook
+      }
+      
       return { success: true, userId: existingUser._id, role: role };
     }
-    console.log("Creating new user");
-    // Create new user with complete onboarding
+    
+    // Create new user
     const userData: any = {
       clerkId: identity.subject,
       name: identity.name || "User",
@@ -349,26 +353,25 @@ export const completeSimplifiedOnboarding = mutation({
       imageUrl: identity.pictureUrl,
       preferences: {},
       createdAt: Date.now(),
+      subscriptionPlan: role === "coach" ? "free" : undefined,
     };
+    
     if (args.clerkOrganizationId) {
       userData.clerkOrganizationId = args.clerkOrganizationId;
     }
-    console.log("About to insert user data:", userData);
+    
     const userId = await ctx.db.insert("users", userData);
-    console.log("New user created with ID:", userId);
-    // If this is a teacher, update their status to active
+    
+    // Link teacher record if this is a teacher
     if (teacherRecord) {
-      console.log("Updating teacher status to active for teacher:", teacherRecord._id);
       await ctx.db.patch(teacherRecord._id, {
+        userId: userId,
         status: "active",
       });
-      console.log("Teacher status updated to active");
     }
-    // Verify the user was created with all fields
-    const createdUser = await ctx.db.get(userId);
-    console.log("Created user verification:", createdUser);
-    return { success: true, userId, role: role };
+    
+    return { success: true, userId: userId, role: role };
   },
 });
 
-
+// Clerk organization creation will be handled by frontend or separate action

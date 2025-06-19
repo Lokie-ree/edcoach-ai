@@ -27,6 +27,24 @@ export const generateFeedback = action({
   },
   returns: v.string(),
   handler: async (ctx, args) => {
+    // Get user and check authentication
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    
+    const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, { 
+      clerkId: identity.subject 
+    });
+    if (!user) throw new Error("User not found");
+
+    // Check AI usage limits based on subscription
+    const usageCheck = await ctx.runQuery("users:checkAIUsageLimit" as any, {});
+    if (!usageCheck.canGenerate) {
+      const planInfo = usageCheck.subscriptionPlan === "free" 
+        ? `You've reached your monthly limit of ${usageCheck.limit} AI generations. Upgrade to Pro for unlimited generations.`
+        : "AI generation limit reached.";
+      throw new Error(`AI usage limit exceeded. ${planInfo}`);
+    }
+
     const indicator = args.indicator;
     if (!indicator) throw new Error("Rubric indicator not found");
 
@@ -75,58 +93,59 @@ Instructions:
 `;
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const response = await openai.chat.completions.create({
-      model: "gpt-4.1-mini-2025-04-14",
-      messages: [{ role: "system", content: prompt }],
-      max_tokens: 200,
-      temperature: 0.2,
-      top_p: 0.95,
-    });
+    
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "system", content: prompt }],
+        max_tokens: 200,
+        temperature: 0.2,
+        top_p: 0.95,
+      });
 
-    // Get userId from Clerk identity
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-    const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, { clerkId: identity.subject });
-    if (!user) throw new Error("User not found");
-    const userId = user._id;
+      const content = response.choices[0].message.content ?? "";
 
-    // Token/cost tracking
-    const promptTokens = response.usage?.prompt_tokens ?? 0;
-    const completionTokens = response.usage?.completion_tokens ?? 0;
-    const totalTokens = response.usage?.total_tokens ?? 0;
-    // Pricing as of 2024-06: Input $0.40/M, Cached $0.10/M, Output $1.60/M
-    const PROMPT_COST_PER_1K = 0.00040;
-    const CACHED_PROMPT_COST_PER_1K = 0.00010;
-    const COMPLETION_COST_PER_1K = 0.00160;
-    const isCached = await checkIfCached(prompt);
-    const promptCost = isCached ? (promptTokens * CACHED_PROMPT_COST_PER_1K / 1000) : (promptTokens * PROMPT_COST_PER_1K / 1000);
-    const completionCost = completionTokens * COMPLETION_COST_PER_1K / 1000;
-    const totalCost = promptCost + completionCost;
+      // Token/cost tracking
+      const promptTokens = response.usage?.prompt_tokens ?? 0;
+      const completionTokens = response.usage?.completion_tokens ?? 0;
+      const totalTokens = response.usage?.total_tokens ?? 0;
+      
+      // Pricing for gpt-4o-mini: Input $0.15/M, Output $0.60/M
+      const PROMPT_COST_PER_1K = 0.00015;
+      const COMPLETION_COST_PER_1K = 0.00060;
+      const isCached = await checkIfCached(prompt);
+      const promptCost = promptTokens * PROMPT_COST_PER_1K / 1000;
+      const completionCost = completionTokens * COMPLETION_COST_PER_1K / 1000;
+      const totalCost = promptCost + completionCost;
 
-    // Log usage
-    await ctx.runMutation(internal.aiFeedbackMutations.logTokenUsage, {
-      userId,
-      action: "generateFeedback",
-      model: "gpt-4.1-mini-2025-04-14",
-      promptTokens,
-      completionTokens,
-      totalTokens,
-      cost: totalCost,
-      isCached,
-      timestamp: Date.now(),
-      metadata: {
-        promptType: args.promptType,
-        indicatorCode: indicator.indicator_code,
-      },
-    });
+      // Log usage - this counts towards monthly limit
+      await ctx.runMutation(internal.aiFeedbackMutations.logTokenUsage, {
+        userId: user._id,
+        action: "generateFeedback",
+        model: "gpt-4o-mini",
+        promptTokens,
+        completionTokens,
+        totalTokens,
+        cost: totalCost,
+        isCached,
+        timestamp: Date.now(),
+        metadata: {
+          promptType: args.promptType,
+          indicatorCode: indicator.indicator_code,
+        },
+      });
 
-    // Check for cost alerts
-    await ctx.runMutation(internal.aiFeedbackMutations.checkCostAlerts, {
-      userId,
-      cost: totalCost,
-    });
+      // Check for cost alerts
+      await ctx.runMutation(internal.aiFeedbackMutations.checkCostAlerts, {
+        userId: user._id,
+        cost: totalCost,
+      });
 
-    return response.choices[0].message.content ?? "";
+      return content;
+    } catch (error) {
+      console.error("OpenAI API error:", error);
+      throw new Error("Failed to generate AI feedback. Please try again.");
+    }
   },
 });
 

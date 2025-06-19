@@ -2,10 +2,32 @@ import { query } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 
+// Helper function to get current user
+async function getCurrentUserWithOrg(ctx: any) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) throw new Error("Not authenticated");
+  
+  const user = await ctx.db
+    .query("users")
+    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
+    .unique();
+    
+  if (!user) throw new Error("User not found");
+  return user;
+}
+
 export const observerAnalytics = query({
   args: {
     observerId: v.id("users"),
   },
+  returns: v.object({
+    totalWalkthroughs: v.number(),
+    totalWalkthroughsThisMonth: v.number(),
+    indicatorCounts: v.record(v.string(), v.number()),
+    reinforcementCount: v.number(),
+    refinementCount: v.number(),
+    uniqueTeachersObserved: v.number(),
+  }),
   handler: async (ctx, args) => {
     const now = Date.now();
     const date = new Date(now);
@@ -60,9 +82,7 @@ export const observerAnalytics = query({
 });
 
 export const coachAnalytics = query({
-  args: {
-    clerkOrganizationId: v.string(),
-  },
+  args: {},
   returns: v.object({
     // Overview metrics
     totalTeachers: v.number(),
@@ -119,18 +139,56 @@ export const coachAnalytics = query({
       teacherName: v.optional(v.string()),
     })),
   }),
-  handler: async (ctx, args) => {
-    // Filter users by organization
-    const users = await ctx.db
+  handler: async (ctx) => {
+    const user = await getCurrentUserWithOrg(ctx);
+    
+    if (user.role !== "coach") {
+      throw new Error("Only coaches can view analytics");
+    }
+    
+    if (!user.clerkOrganizationId) {
+      // Return empty analytics for coaches without organizations
+      return {
+        totalTeachers: 0,
+        activeTeachers: 0,
+        totalWalkthroughs: 0,
+        thisMonthWalkthroughs: 0,
+        completedWalkthroughs: 0,
+        draftWalkthroughs: 0,
+        completionRate: 0,
+        totalFeedbackInteractions: 0,
+        avgFeedbackPerTeacherPerMonth: 0,
+        reinforcementCount: 0,
+        refinementCount: 0,
+        topReinforcementIndicators: [],
+        topRefinementIndicators: [],
+        teacherProgress: [],
+        monthlyTrends: [],
+        actionItems: [],
+      };
+    }
+    
+    // Get all users in this organization
+    const orgUsers = await ctx.db
       .query("users")
-      .withIndex("by_organization", (q) => q.eq("clerkOrganizationId", args.clerkOrganizationId))
+      .withIndex("by_organization", (q) => q.eq("clerkOrganizationId", user.clerkOrganizationId))
       .collect();
-    const userIds = users.map((u) => u._id);
-    // Filter teachers by org
-    const teachers = await ctx.db
-      .query("teachers")
-      .filter((q) => q.or(...userIds.map((id) => q.eq(q.field("userId"), id))))
-      .collect();
+    const userIds = orgUsers.map((u) => u._id);
+    
+    // Get teachers linked to these users OR pending teachers
+    const allTeachers = await ctx.db.query("teachers").collect();
+    const teachers = allTeachers.filter(teacher => {
+      // Include if teacher is linked to an org user
+      if (teacher.userId && userIds.includes(teacher.userId)) {
+        return true;
+      }
+      // Include if teacher is pending (no userId yet)
+      if (teacher.status === "pending" && !teacher.userId) {
+        return true;
+      }
+      return false;
+    });
+    
     const totalTeachers = teachers.length;
     const teacherIds = teachers.map(t => t._id);
 
@@ -253,6 +311,7 @@ export const coachAnalytics = query({
       teacherId?: Id<"teachers">;
       teacherName?: string;
     }[] = [];
+    
     // Teachers with no recent observations
     const staleTeachers = teacherProgress.filter(tp => 
       !tp.lastObservation || tp.lastObservation < (now - (30 * 24 * 60 * 60 * 1000))
@@ -267,6 +326,7 @@ export const coachAnalytics = query({
         teacherName: teacher.teacherName,
       });
     });
+    
     // Teachers with pending drafts
     const teachersWithDrafts = teacherProgress.filter(tp => tp.draftWalkthroughs > 0);
     teachersWithDrafts.forEach(teacher => {
@@ -279,6 +339,7 @@ export const coachAnalytics = query({
         teacherName: teacher.teacherName,
       });
     });
+    
     // Low feedback activity
     const lowFeedbackTeachers = teacherProgress.filter(tp => tp.recentFeedbackCount < 2);
     lowFeedbackTeachers.forEach(teacher => {
