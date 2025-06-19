@@ -19,7 +19,7 @@ import { getIndicatorName } from "@/lib/indicator-utils";
 import { useMemo, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function MyProgressPage() {
   const { user } = useUser();

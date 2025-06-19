@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
 import { getIndicatorName } from "@/lib/indicator-utils";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function MyWalkthroughsPage() {
   const { user } = useUser();

@@ -6,7 +6,7 @@ import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BorderBeam } from "@/components/magicui/border-beam";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { 
   ArrowLeft,
   Calendar,

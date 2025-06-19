@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Users, ChartSpline, Home, BookOpen, BarChart, ClipboardPlus } from "lucide-react";
 import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
-import MaxWidthWrapper from "@/components/max-width-wrapper";
+import MaxWidthWrapper from "@/components/layout/MaxWidthWrapper";
 import { Logo } from "@/components/logo";
 import { useQuery } from "convex/react";
 import { useUser } from "@clerk/nextjs";

@@ -23,6 +23,7 @@ import type * as indicatorQueries from "../indicatorQueries.js";
 import type * as migrations from "../migrations.js";
 import type * as myFunctions from "../myFunctions.js";
 import type * as observations from "../observations.js";
+import type * as organizationMembers from "../organizationMembers.js";
 import type * as organizations from "../organizations.js";
 import type * as rubricIndicators from "../rubricIndicators.js";
 import type * as rubrics from "../rubrics.js";
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   migrations: typeof migrations;
   myFunctions: typeof myFunctions;
   observations: typeof observations;
+  organizationMembers: typeof organizationMembers;
   organizations: typeof organizations;
   rubricIndicators: typeof rubricIndicators;
   rubrics: typeof rubrics;

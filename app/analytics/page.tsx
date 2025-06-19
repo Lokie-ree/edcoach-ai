@@ -6,7 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getIndicatorName } from "@/lib/indicator-utils";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { motion } from "framer-motion";
 import { 

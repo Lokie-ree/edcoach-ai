@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Oswald } from "next/font/google";
 import "./globals.css";
-import ConvexClientProvider from "@/components/ConvexClientProvider";
+import ConvexClientProvider from "@/components/providers/ConvexClientProvider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
-import AppLayout from "@/components/AppLayout";
+import AppLayout from "@/components/layout/AppLayout";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -80,7 +80,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${oswald.className} antialiased`}>
-        <ClerkProvider afterSignOutUrl="/">
+        <ClerkProvider 
+          afterSignOutUrl="/"
+        >
           <ConvexClientProvider>
             <ThemeProvider
               attribute="class"

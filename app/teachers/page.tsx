@@ -23,7 +23,7 @@ import {
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
 import { useOrganization } from "@clerk/nextjs";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 import { cn } from "@/lib/utils";
 import Modal from "@/components/mage-ui/modal";

@@ -1,7 +1,7 @@
 "use client";
 
 import { WalkthroughForm } from "@/components/forms/walkthrough-form";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Id } from "@/convex/_generated/dataModel";
 import React from "react";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { WalkthroughForm } from "@/components/forms/walkthrough-form";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
