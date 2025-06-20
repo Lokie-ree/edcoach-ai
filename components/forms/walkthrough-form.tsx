@@ -3,7 +3,7 @@
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useUser, useOrganization } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { walkthroughSchema } from "@/app/walkthrough/new/validation";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -107,9 +107,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
   );
 
   // Find the appropriate org ID (replace this with your actual org ID logic)
-  const { organization } = useOrganization();
-  const clerkOrganizationId = organization?.id;
-  const teachers = (useQuery(api.teachers.list, clerkOrganizationId ? { clerkOrganizationId } : "skip") ?? []) as Teacher[];
+  const teachers = (useQuery(api.teachers.list) ?? []) as Teacher[];
   const rubricData = useQuery(api.rubrics.listRubricWithIndicators);
   const indicators: Indicator[] = rubricData
     ? rubricData.domains.flatMap((domain: { indicators: Indicator[] }) => domain.indicators)

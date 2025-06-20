@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getIndicatorName } from "@/lib/indicator-utils";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { motion } from "framer-motion";
 import { 
   Users, 
@@ -23,7 +22,7 @@ import {
   BarChart3,
   PieChart
 } from "lucide-react";
-import { useOrganization } from "@clerk/nextjs";
+import { useUser, useOrganization } from "@clerk/nextjs";
 
 // Define proper types based on Convex analytics return types
 interface IndicatorCount {
@@ -295,8 +294,7 @@ const FeedbackAnalysis = ({ analytics }: { analytics: AnalyticsData | null | und
                 <p className="text-sm text-muted-foreground">No data yet</p>
               ) : (
                 <div className="space-y-2">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {analytics.topReinforcementIndicators.slice(0, 3).map((item: any) => (
+                  {analytics.topReinforcementIndicators.slice(0, 3).map((item) => (
                     <div key={item.indicator} className="flex items-center justify-between">
                       <span className="text-sm truncate flex-1 mr-2" title={getIndicatorName(item.indicator)}>
                         {getIndicatorName(item.indicator)}
@@ -306,8 +304,7 @@ const FeedbackAnalysis = ({ analytics }: { analytics: AnalyticsData | null | und
                           <div 
                             className="bg-green-500 h-2 rounded-full transition-all"
                             style={{ 
-                              /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-                              width: `${(item.count / Math.max(...analytics.topReinforcementIndicators.map((i: any) => i.count))) * 100}%` 
+                              width: `${(item.count / Math.max(...analytics.topReinforcementIndicators.map((i) => i.count))) * 100}%` 
                             }}
                           ></div>
                         </div>
@@ -540,14 +537,20 @@ const ActionItems = ({ analytics }: { analytics: AnalyticsData | null | undefine
 };
 
 export default function AnalyticsDashboardPage() {
-  const { isLoading, isAuthenticated, user: convexUser } = useAuthRedirect();
+  const { user, isLoaded } = useUser();
   const { organization } = useOrganization();
   const clerkOrganizationId = organization?.id;
+  
+  // Get convex user data
+  const convexUser = useQuery(
+    api.users.getUserByClerkId,
+    user && isLoaded ? { clerkId: user.id } : "skip"
+  );
 
   // Get analytics data for coach
   const analytics = useQuery(
     api.analytics.coachAnalytics,
-    convexUser?.role === "coach" && clerkOrganizationId ? { clerkOrganizationId } : "skip"
+    convexUser?.role === "coach" ? {} : "skip"
   );
 
   if (!clerkOrganizationId) {
@@ -556,14 +559,14 @@ export default function AnalyticsDashboardPage() {
     </div>;
   }
 
-  if (isLoading) {
+  if (!isLoaded || (user && convexUser === undefined)) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
 <span className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full inline-block"></span>      </div>
     );
   }
 
-  if (!isAuthenticated || !convexUser) {
+  if (!user || !convexUser) {
     return null;
   }
 

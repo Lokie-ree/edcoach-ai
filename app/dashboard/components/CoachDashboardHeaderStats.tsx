@@ -10,10 +10,10 @@ interface CoachDashboardHeaderStatsProps {
 }
 
 export default function CoachDashboardHeaderStats({ organizationId }: CoachDashboardHeaderStatsProps) {
-  // Fetch organization members with their teacher data
-  const orgMembers = useQuery(
-    api.organizationMembers.getOrgMembersWithTeacherData,
-    { clerkOrganizationId: organizationId }
+  // Fetch teachers directly
+  const teachers = useQuery(
+    api.teachers.list,
+    {}
   );
   
   const walkthroughs = useQuery(
@@ -21,8 +21,8 @@ export default function CoachDashboardHeaderStats({ organizationId }: CoachDashb
     { clerkOrganizationId: organizationId }
   );
 
-  // Filter to only count members who have teacher data (are teachers)
-  const teachers = (orgMembers ?? []).filter(member => member.teacherId && member.role === "teacher");
+  // Only count active teachers
+  const activeTeachers = (teachers ?? []).filter(teacher => teacher.status === "active");
   const safeWalkthroughs = walkthroughs ?? [];
 
   // Calculate stats
@@ -41,7 +41,7 @@ export default function CoachDashboardHeaderStats({ organizationId }: CoachDashb
     <div className="hidden md:flex items-center gap-6 text-sm">
       <div className="flex items-center gap-2">
         <Users className="h-4 w-4 text-primary" />
-        <span className="text-foreground font-medium">{teachers.length} Teachers</span>
+        <span className="text-foreground font-medium">{activeTeachers.length} Teachers</span>
       </div>
       <div className="flex items-center gap-2">
         <BookOpen className="h-4 w-4 text-primary" />

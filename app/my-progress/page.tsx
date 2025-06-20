@@ -3,7 +3,6 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
-import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useOrganization } from "@clerk/nextjs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,8 +21,13 @@ import { MessageSquare } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function MyProgressPage() {
-  const { user } = useUser();
-  const { isLoading, isAuthenticated, user: convexUser } = useAuthRedirect();
+  const { user, isLoaded } = useUser();
+  
+  // Get convex user data
+  const convexUser = useQuery(
+    api.users.getUserByClerkId,
+    user && isLoaded ? { clerkId: user.id } : "skip"
+  );
   const { organization } = useOrganization();
 
   // Fetch org memberships
@@ -102,7 +106,7 @@ export default function MyProgressPage() {
     };
   }, [walkthroughs, recentReinforcements]);
 
-  if (isLoading) {
+  if (!isLoaded || (user && convexUser === undefined)) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -110,7 +114,7 @@ export default function MyProgressPage() {
     );
   }
 
-  if (!isAuthenticated || !convexUser) {
+  if (!user || !convexUser) {
     return null;
   }
 
@@ -126,10 +130,7 @@ export default function MyProgressPage() {
   const safeWalkthroughs = walkthroughs ?? [];
   
   // Calculate progress metrics
-  const totalWalkthroughs = safeWalkthroughs.length;
   const completedWalkthroughs = safeWalkthroughs.filter(w => w.status === "completed").length;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const completionRate = totalWalkthroughs > 0 ? Math.round((completedWalkthroughs / totalWalkthroughs) * 100) : 0;
 
   // Calculate indicator frequencies for strengths and growth areas
   const reinforcementIndicators: Record<string, number> = {};
@@ -158,19 +159,16 @@ export default function MyProgressPage() {
     .slice(0, 3);
 
   // Calculate recent progress (last 30 days vs previous 30 days)
-  const now = Date.now();
-  const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
-  const sixtyDaysAgo = now - (60 * 24 * 60 * 60 * 1000);
-
-  const recentWalkthroughs = safeWalkthroughs.filter(w => w.walkthroughDate >= thirtyDaysAgo);
-  const previousWalkthroughs = safeWalkthroughs.filter(w => 
-    w.walkthroughDate >= sixtyDaysAgo && w.walkthroughDate < thirtyDaysAgo
-  );
-
-  const recentCount = recentWalkthroughs.length;
-  const previousCount = previousWalkthroughs.length;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const trendDirection = recentCount > previousCount ? "up" : recentCount < previousCount ? "down" : "same";
+  // These variables are prepared for future use but not currently displayed in the UI
+  // const now = Date.now();
+  // const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
+  // const sixtyDaysAgo = now - (60 * 24 * 60 * 60 * 1000);
+  // const recentWalkthroughs = safeWalkthroughs.filter(w => w.walkthroughDate >= thirtyDaysAgo);
+  // const previousWalkthroughs = safeWalkthroughs.filter(w => 
+  //   w.walkthroughDate >= sixtyDaysAgo && w.walkthroughDate < thirtyDaysAgo
+  // );
+  // const recentCount = recentWalkthroughs.length;
+  // const previousCount = previousWalkthroughs.length;
 
   return (
     <div className="space-y-6">

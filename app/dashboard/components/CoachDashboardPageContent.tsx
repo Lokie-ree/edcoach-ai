@@ -8,6 +8,7 @@ import QuickActionsPanel from "./QuickActionsPanel";
 import TeacherStatusOverview from "./TeacherStatusOverview";
 import RecentFeedbackHighlights from "./RecentFeedbackHighlights";
 import CoachDashboardHeaderStats from "./CoachDashboardHeaderStats";
+import { AIUsageBadge, AIUsageWarning } from "@/components/ui/ai-usage-badge";
 
 interface CoachDashboardPageContentProps {
   user: ClerkUser;
@@ -32,11 +33,19 @@ export default function CoachDashboardPageContent({
           </>
         }
         gradient={true}
-        rightContent={<CoachDashboardHeaderStats organizationId={clerkOrganizationId} />}
+        rightContent={
+          <div className="flex items-center gap-4">
+            <AIUsageBadge showDetails />
+            <CoachDashboardHeaderStats organizationId={clerkOrganizationId} />
+          </div>
+        }
       />
 
+      {/* AI Usage Warning */}
+      <AIUsageWarning />
+
       {/* Quick Actions Panel */}
-      <QuickActionsPanel organizationId={clerkOrganizationId} />
+      <QuickActionsPanel />
 
       {/* Teacher Status Overview */}
       <TeacherStatusOverview organizationId={clerkOrganizationId} />

@@ -31,12 +31,9 @@ export default function Home() {
     
     // Only redirect if user is authenticated and we have user data
     if (user && convexUser !== undefined) {
-      if (convexUser && convexUser.onboardingComplete) {
-        // User is fully set up - redirect to dashboard
+      if (convexUser) {
+        // User is set up - redirect to dashboard
         router.replace("/dashboard");
-      } else {
-        // User needs onboarding
-        router.replace("/onboarding");
       }
     }
   }, [user, isLoaded, convexUser, router]);

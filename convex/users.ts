@@ -82,6 +82,45 @@ export const getUserByClerkId = query({
   },
 });
 
+export const getUserById = query({
+  args: { userId: v.id("users") },
+  returns: v.union(
+    v.object({
+      _id: v.id("users"),
+      _creationTime: v.number(),
+      clerkId: v.string(),
+      name: v.string(),
+      email: v.string(),
+      role: v.union(v.literal("coach"), v.literal("teacher")),
+      clerkOrganizationId: v.optional(v.string()),
+      subscriptionPlan: v.optional(v.union(v.literal("free"), v.literal("pro"))),
+      imageUrl: v.optional(v.string()),
+      preferences: v.optional(v.any()),
+      createdAt: v.number(),
+      onboardingComplete: v.optional(v.boolean()),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    const currentUser = await getCurrentUser(ctx);
+    if (!currentUser) {
+      return null;
+    }
+    
+    const user = await ctx.db.get(args.userId);
+    if (!user) {
+      return null;
+    }
+    
+    // Only allow access to users in the same organization
+    if (currentUser.clerkOrganizationId !== user.clerkOrganizationId) {
+      throw new Error("Unauthorized: Can only access users in your organization");
+    }
+    
+    return user;
+  },
+});
+
 // Internal queries
 export const internalGetUserByClerkId = internalQuery({
   args: { clerkId: v.string() },

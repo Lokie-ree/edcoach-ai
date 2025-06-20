@@ -24,7 +24,7 @@ export default defineSchema({
     .index("by_clerk_id", ["clerkId"])
     .index("by_organization", ["clerkOrganizationId"]),
 
-  // Teacher records (for pending invites + app-specific data)
+  // Teacher records (app-specific data, linked to users via email/userId)
   teachers: defineTable({
     userId: v.optional(v.id("users")), // null until they accept invite
     name: v.string(),

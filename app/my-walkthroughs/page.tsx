@@ -3,7 +3,6 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
-import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -24,8 +23,13 @@ import { getIndicatorName } from "@/lib/indicator-utils";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function MyWalkthroughsPage() {
-  const { user } = useUser();
-  const { isLoading, isAuthenticated, user: convexUser } = useAuthRedirect();
+  const { user, isLoaded } = useUser();
+  
+  // Get convex user data
+  const convexUser = useQuery(
+    api.users.getUserByClerkId,
+    user && isLoaded ? { clerkId: user.id } : "skip"
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -41,7 +45,7 @@ export default function MyWalkthroughsPage() {
     teacherRecord ? { teacherId: teacherRecord._id } : "skip"
   );
 
-  if (isLoading) {
+  if (!isLoaded || (user && convexUser === undefined)) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -49,7 +53,7 @@ export default function MyWalkthroughsPage() {
     );
   }
 
-  if (!isAuthenticated || !convexUser) {
+  if (!user || !convexUser) {
     return null;
   }
 

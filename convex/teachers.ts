@@ -1,4 +1,4 @@
-import { mutation, query, action } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 // Helper function to get current user with org context
@@ -15,7 +15,67 @@ async function getCurrentUserWithOrg(ctx: any): Promise<any> {
   return user;
 }
 
-// Create a teacher and immediately send Clerk org invite
+// Create teacher details for an existing user (invited via Clerk)
+export const createFromUser = mutation({
+  args: {
+    userId: v.id("users"),
+    subject: v.array(v.string()),
+    gradeBand: v.string(),
+  },
+  returns: v.object({
+    success: v.boolean(),
+    teacherId: v.id("teachers"),
+  }),
+  handler: async (ctx, args) => {
+    const currentUser = await getCurrentUserWithOrg(ctx);
+    
+    // Only coaches can create teacher records
+    if (currentUser.role !== "coach") {
+      throw new Error("Only coaches can create teacher records");
+    }
+    
+    // Get the user we're creating a teacher record for
+    const user = await ctx.db.get(args.userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    // Verify user is in the same organization
+    if (user.clerkOrganizationId !== currentUser.clerkOrganizationId) {
+      throw new Error("User is not in your organization");
+    }
+    
+    // Verify user has teacher role
+    if (user.role !== "teacher") {
+      throw new Error("User is not a teacher");
+    }
+    
+    // Check if teacher record already exists
+    const existingTeacher = await ctx.db
+      .query("teachers")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first();
+      
+    if (existingTeacher) {
+      throw new Error("Teacher record already exists for this user");
+    }
+    
+    // Create teacher record
+    const teacherId = await ctx.db.insert("teachers", {
+      name: user.name,
+      email: user.email || "",
+      subject: args.subject,
+      gradeBand: args.gradeBand,
+      status: "active", // User is already in the org
+      userId: args.userId,
+      createdAt: Date.now(),
+    });
+    
+    return { success: true, teacherId };
+  },
+});
+
+// Create a teacher record (invites handled by Clerk OrganizationProfile)
 export const create = mutation({
   args: {
     name: v.string(),
@@ -26,7 +86,6 @@ export const create = mutation({
   returns: v.object({
     success: v.boolean(),
     teacherId: v.id("teachers"),
-    inviteSent: v.boolean(),
   }),
   handler: async (ctx, args) => {
     const user = await getCurrentUserWithOrg(ctx);
@@ -34,10 +93,6 @@ export const create = mutation({
     // Only coaches can create teachers
     if (user.role !== "coach") {
       throw new Error("Only coaches can create teachers");
-    }
-    
-    if (!user.clerkOrganizationId) {
-      throw new Error("Coach must have an organization to invite teachers");
     }
     
     // Check if teacher already exists
@@ -60,38 +115,26 @@ export const create = mutation({
       createdAt: Date.now(),
     });
     
-    // Schedule Clerk organization invite immediately
-    let inviteSent = false;
-    try {
-      await ctx.scheduler.runAfter(0, "teachers:sendClerkInvite" as any, {
-        organizationId: user.clerkOrganizationId,
-        email: args.email,
-      });
-      inviteSent = true;
-      console.log(`Scheduled Clerk org invite to ${args.email}`);
-    } catch (error) {
-      console.error("Failed to schedule Clerk org invite:", error);
-      // Don't fail the teacher creation if invite fails
-    }
-    
-    return { success: true, teacherId, inviteSent };
+    return { success: true, teacherId };
   },
 });
 
 // List teachers for the current user's organization
+// This includes both teacher records and invited users who need teacher details added
 export const list = query({
   args: {},
   returns: v.array(
     v.object({
-      _id: v.id("teachers"),
+      _id: v.union(v.id("teachers"), v.id("users")), // Could be either table
       _creationTime: v.number(),
       name: v.string(),
       email: v.string(),
       subject: v.array(v.string()),
       gradeBand: v.string(),
-      status: v.union(v.literal("pending"), v.literal("active")),
+      status: v.union(v.literal("pending"), v.literal("active"), v.literal("needs_details")),
       userId: v.optional(v.id("users")),
       createdAt: v.number(),
+      isUserRecord: v.optional(v.boolean()), // Flag to identify if this is from users table
     })
   ),
   handler: async (ctx) => {
@@ -101,20 +144,20 @@ export const list = query({
       return [];
     }
     
-    // Get all users in this organization
-    const orgUsers = await ctx.db
+    // Get all users in this organization with teacher role
+    const orgTeacherUsers = await ctx.db
       .query("users")
       .withIndex("by_organization", (q) => q.eq("clerkOrganizationId", user.clerkOrganizationId))
+      .filter((q) => q.eq(q.field("role"), "teacher"))
       .collect();
     
-    const orgUserIds = orgUsers.map(u => u._id);
-    
-    // Get teachers associated with these users OR pending teachers from this coach
+    // Get all teacher records
     const allTeachers = await ctx.db.query("teachers").collect();
     
+    // Find teacher records associated with org users
     const orgTeachers = allTeachers.filter(teacher => {
       // Include if teacher is linked to an org user
-      if (teacher.userId && orgUserIds.includes(teacher.userId)) {
+      if (teacher.userId && orgTeacherUsers.some(u => u._id === teacher.userId)) {
         return true;
       }
       // Include if teacher is pending (no userId yet) - these are created by coaches
@@ -124,11 +167,45 @@ export const list = query({
       return false;
     });
     
-    return orgTeachers;
+    // Find users who don't have teacher records yet (invited via Clerk but no details)
+    const teacherUserIds = new Set(orgTeachers.map(t => t.userId).filter(Boolean));
+    const usersWithoutTeacherRecords = orgTeacherUsers.filter(u => !teacherUserIds.has(u._id));
+    
+    // Combine both lists
+    const result = [
+      // Existing teacher records
+      ...orgTeachers.map(t => ({
+        _id: t._id as any,
+        _creationTime: t._creationTime,
+        name: t.name,
+        email: t.email,
+        subject: t.subject || [],
+        gradeBand: t.gradeBand || "",
+        status: t.status as any,
+        userId: t.userId,
+        createdAt: t.createdAt,
+        isUserRecord: false,
+      })),
+      // Users who need teacher details added
+      ...usersWithoutTeacherRecords.map(u => ({
+        _id: u._id as any,
+        _creationTime: u._creationTime,
+        name: u.name,
+        email: u.email || "",
+        subject: [] as string[],
+        gradeBand: "",
+        status: "needs_details" as const,
+        userId: u._id,
+        createdAt: u.createdAt || Date.now(),
+        isUserRecord: true,
+      })),
+    ];
+    
+    return result;
   },
 });
 
-// Update a teacher
+// Update a teacher record
 export const update = mutation({
   args: {
     id: v.id("teachers"),
@@ -243,6 +320,53 @@ export const getMyTeacherRecord = query({
   },
 });
 
+// Get teacher record by Clerk user ID (for linking user to teacher record)
+export const getByUserClerkId = query({
+  args: {
+    clerkId: v.string(),
+  },
+  returns: v.union(
+    v.object({
+      _id: v.id("teachers"),
+      _creationTime: v.number(),
+      name: v.string(),
+      email: v.string(),
+      subject: v.array(v.string()),
+      gradeBand: v.string(),
+      status: v.union(v.literal("pending"), v.literal("active")),
+      userId: v.optional(v.id("users")),
+      createdAt: v.number(),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    // Get user by Clerk ID
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
+    
+    if (!user) return null;
+    
+    // Find teacher record by userId
+    if (user._id) {
+      const teacher = await ctx.db
+        .query("teachers")
+        .withIndex("by_user", (q) => q.eq("userId", user._id))
+        .first();
+      if (teacher) return teacher;
+    }
+    
+    // Fallback: find by email for pending teachers
+    const teacherByEmail = await ctx.db
+      .query("teachers")
+      .withIndex("by_email", (q) => q.eq("email", user.email))
+      .first();
+    
+    return teacherByEmail;
+  },
+});
+
 // Get a teacher by ID (for coaches viewing teacher details)
 export const getById = query({
   args: {
@@ -288,30 +412,4 @@ export const getById = query({
   },
 });
 
-// Internal action to send Clerk organization invite
-export const sendClerkInvite = action({
-  args: {
-    organizationId: v.string(),
-    email: v.string(),
-  },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    const { createClerkClient } = await import("@clerk/backend");
-    
-    try {
-      const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
-      
-      await clerk.organizations.createOrganizationInvitation({
-        organizationId: args.organizationId,
-        emailAddress: args.email,
-        role: "org:member",
-      });
-      
-      console.log(`Successfully sent Clerk org invite to ${args.email}`);
-    } catch (error) {
-      console.error("Failed to send Clerk org invite:", error);
-      throw error;
-    }
-    return null;
-  },
-}); 
+ 

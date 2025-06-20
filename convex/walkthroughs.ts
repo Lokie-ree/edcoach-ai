@@ -243,7 +243,7 @@ export const getById = query({
 });
 
 export const listByOrg = query({
-  args: { clerkOrganizationId: v.string() },
+  args: { clerkOrganizationId: v.optional(v.string()) },
   returns: v.array(
     v.object({
       _id: v.id("walkthroughs"),
@@ -260,18 +260,33 @@ export const listByOrg = query({
     })
   ),
   handler: async (ctx, args) => {
+    // If no organization ID provided, return empty array
+    if (!args.clerkOrganizationId) {
+      return [];
+    }
+    
     // Get all users in the org
     const users = await ctx.db
       .query("users")
       .withIndex("by_organization", (q) => q.eq("clerkOrganizationId", args.clerkOrganizationId))
       .collect();
     const userIds = users.map((u) => u._id);
+    
+    if (userIds.length === 0) {
+      return [];
+    }
+    
     // Get all teachers for these users
     const teachers = await ctx.db
       .query("teachers")
       .filter((q) => q.or(...userIds.map((id) => q.eq(q.field("userId"), id))))
       .collect();
     const teacherIds = teachers.map((t) => t._id);
+    
+    if (teacherIds.length === 0) {
+      return [];
+    }
+    
     // Get all walkthroughs for these teachers
     return await ctx.db
       .query("walkthroughs")

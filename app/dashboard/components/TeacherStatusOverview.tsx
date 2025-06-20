@@ -44,7 +44,7 @@ interface TeacherStatus {
 }
 
 function calculateTeacherStatus(
-  teacherWalkthroughs: any[],
+  teacherWalkthroughs: Array<{ status: string }>,
   daysSinceLastWalkthrough: number | null
 ): TeacherStatus {
   if (daysSinceLastWalkthrough === null) {
@@ -96,10 +96,10 @@ function calculateDaysSinceLastWalkthrough(walkthroughDate: number): number {
 }
 
 export default function TeacherStatusOverview({ organizationId }: TeacherStatusOverviewProps) {
-  // Fetch organization members with their teacher data
-  const orgMembers = useQuery(
-    api.organizationMembers.getOrgMembersWithTeacherData,
-    { clerkOrganizationId: organizationId }
+  // Fetch teachers directly
+  const teachers = useQuery(
+    api.teachers.list,
+    {}
   );
   
   const walkthroughs = useQuery(
@@ -107,8 +107,8 @@ export default function TeacherStatusOverview({ organizationId }: TeacherStatusO
     { clerkOrganizationId: organizationId }
   );
 
-  // Filter to only show members who have teacher data (are teachers)
-  const teachers = (orgMembers ?? []).filter(member => member.teacherId && member.role === "teacher");
+  // Only show active teachers
+  const activeTeachers = (teachers ?? []).filter(teacher => teacher.status === "active");
   const safeWalkthroughs = walkthroughs ?? [];
 
   return (
@@ -125,7 +125,7 @@ export default function TeacherStatusOverview({ organizationId }: TeacherStatusO
           </p>
         </CardHeader>
         <CardContent>
-          {teachers.length > 0 ? (
+          {activeTeachers.length > 0 ? (
             <div className="space-y-4">
               {/* Legend */}
               <div className="flex items-center gap-6 text-xs">
@@ -145,9 +145,9 @@ export default function TeacherStatusOverview({ organizationId }: TeacherStatusO
               
               {/* Teacher Status Cards */}
               <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                {teachers.map((teacher) => {
+                {activeTeachers.map((teacher) => {
                   const teacherWalkthroughs = safeWalkthroughs.filter(
-                    w => w.teacherId === teacher.teacherId
+                    w => w.teacherId === teacher._id
                   );
                   const lastWalkthrough = teacherWalkthroughs
                     .sort((a, b) => b.walkthroughDate - a.walkthroughDate)[0];
@@ -169,7 +169,7 @@ export default function TeacherStatusOverview({ organizationId }: TeacherStatusO
                       className={`p-4 border rounded-lg transition-colors hover:bg-accent/20 ${config.colors}`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-foreground">{teacher.teacherData?.name || teacher.name}</h4>
+                        <h4 className="font-medium text-foreground">{teacher.name}</h4>
                         <div className={`w-3 h-3 rounded-full ${config.dot}`}></div>
                       </div>
                       <div className="space-y-1">

@@ -38,13 +38,6 @@ export default function TeacherDashboardPageContent({
     teacherRecord?._id ? { teacherId: teacherRecord._id } : "skip"
   );
 
-  // Get coach information if available (removing unused variable)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const coach = useQuery(
-    api.users.getUserById,
-    teacherRecord?.coachId ? { userId: teacherRecord.coachId } : "skip"
-  );
-
   const safeWalkthroughs = walkthroughs ?? [];
   
   const recentWalkthroughs = safeWalkthroughs

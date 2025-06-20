@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Plus, UserPlus, Users, GraduationCap, Pencil, Trash2 } from "lucide-react";
+import { UserPlus, Users, GraduationCap, Pencil, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,15 +22,14 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
-import { useOrganization } from "@clerk/nextjs";
 import { PageHeader } from "@/components/layout/PageHeader";
-
 import { cn } from "@/lib/utils";
 import Modal from "@/components/mage-ui/modal";
-import TeachersForm from "@/components/forms/teachers-form";
+import TeacherDetailsForm from "@/components/forms/teacher-details-form";
 import { Id } from "@/convex/_generated/dataModel";
 import { motion } from "framer-motion";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
+import { OrganizationProfile } from "@clerk/nextjs";
 
 // Define grade bands for display - simplified
 const GRADE_BAND_OPTIONS = [
@@ -53,10 +52,11 @@ const SUBJECTS = [
 interface Teacher {
   _id: string;
   name: string;
-  email?: string;
+  email: string;
   subject: string[];
   gradeBand: string;
   status?: string;
+  isUserRecord?: boolean;
 }
 
 // Grid Distortion Background Component
@@ -81,31 +81,26 @@ const GridDistortion = () => {
 };
 
 export default function TeachersPage() {
-  const [isAddingTeacher, setIsAddingTeacher] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [deletingTeacher, setDeletingTeacher] = useState<Teacher | null>(null);
   const { user } = useUser();
-  const { organization } = useOrganization();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const convexUser = useQuery(
     api.users.getUserByClerkId,
     user ? { clerkId: user.id } : "skip"
   );
-  const clerkOrganizationId = organization?.id;
 
-  // Only fetch teachers when coachId is available
-  const teachers = useQuery(
-    api.teachers.list,
-    clerkOrganizationId ? { clerkOrganizationId } : "skip"
-  );
-  const createTeacher = useMutation(api.teachers.create);
+  // Fetch teachers for the current user's organization
+  const teachers = useQuery(api.teachers.list);
+  const createTeacherFromUser = useMutation(api.teachers.createFromUser);
   const updateTeacher = useMutation(api.teachers.update);
   const removeTeacher = useMutation(api.teachers.remove);
 
   const handleDelete = async () => {
-    if (!deletingTeacher || !clerkOrganizationId) return;
+    if (!deletingTeacher) return;
     try {
-      await removeTeacher({ id: deletingTeacher._id as Id<'teachers'>, clerkOrganizationId });
+      await removeTeacher({ id: deletingTeacher._id as Id<'teachers'> });
       toast.success("Teacher deleted successfully");
       setDeletingTeacher(null);
     } catch (error) {
@@ -141,9 +136,9 @@ export default function TeachersPage() {
               <CardTitle className="text-foreground">Teacher Overview</CardTitle>
               <p className="text-sm text-muted-foreground">Summary of your teaching staff</p>
             </div>
-            <Button onClick={() => setIsAddingTeacher(true)} className="shrink-0">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Teacher
+            <Button onClick={() => setShowInviteModal(true)} className="shrink-0">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Invite Teachers
             </Button>
           </CardHeader>
           <CardContent>
@@ -171,14 +166,14 @@ export default function TeachersPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
-                  <UserPlus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10">
+                  <UserPlus className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-foreground">
-                    {teachers?.filter((t) => t.status === "pending").length || 0}
+                    {teachers?.filter((t) => t.status === "needs_details" || t.status === "pending").length || 0}
                   </div>
-                  <p className="text-sm text-muted-foreground">Pending Invites</p>
+                  <p className="text-sm text-muted-foreground">Need Details</p>
                 </div>
               </div>
             </div>
@@ -186,32 +181,52 @@ export default function TeachersPage() {
         </Card>
       </motion.div>
 
-      {/* Add Teacher Modal */}
+      {/* Invite Teachers Modal */}
       <Modal
-        isOpen={isAddingTeacher || !!editingTeacher}
+        isOpen={showInviteModal}
         onOpenChange={(open) => {
           if (!open) {
-            setIsAddingTeacher(false);
+            setShowInviteModal(false);
+          }
+        }}
+        modalSize="lg"
+      >
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-foreground mb-2">
+            Invite Teachers
+          </h2>
+          <p className="text-foreground mb-4">
+            Use Clerk&apos;s organization management to invite teachers to your organization. 
+            Once they accept, you can add their teaching details.
+          </p>
+          <OrganizationProfile />
+        </div>
+      </Modal>
+
+      {/* Edit Teacher Details Modal */}
+      <Modal
+        isOpen={!!editingTeacher}
+        onOpenChange={(open) => {
+          if (!open) {
             setEditingTeacher(null);
           }
         }}
         modalSize="lg"
       >
-        <TeachersForm
-          onSuccess={() => {
-            setIsAddingTeacher(false);
-            setEditingTeacher(null);
-          }}
-          createTeacher={async (values) => {
-            if (!clerkOrganizationId) return;
-            await createTeacher({ ...values, clerkOrganizationId });
-          }}
-          updateTeacher={async (values) => {
-            if (!clerkOrganizationId) return;
-            await updateTeacher({ ...values, clerkOrganizationId });
-          }}
-          teacher={editingTeacher ?? undefined}
-        />
+        {editingTeacher && (
+          <TeacherDetailsForm
+            onSuccess={() => {
+              setEditingTeacher(null);
+            }}
+            createTeacherFromUser={async (values) => {
+              await createTeacherFromUser(values);
+            }}
+            updateTeacher={async (values) => {
+              await updateTeacher(values);
+            }}
+            teacher={editingTeacher}
+          />
+        )}
       </Modal>
 
       <Dialog open={!!deletingTeacher} onOpenChange={(open) => { if (!open) setDeletingTeacher(null); }}>
@@ -266,14 +281,17 @@ export default function TeachersPage() {
                               {
                                 "bg-green-100 text-green-700 dark:bg-green-950/20 dark:text-green-300 border border-green-200 dark:border-green-800": teacher.status === "active",
                                 "bg-blue-100 text-blue-700 dark:bg-blue-950/20 dark:text-blue-300 border border-blue-200 dark:border-blue-800": teacher.status === "pending",
-                                "bg-gray-100 text-gray-700 dark:bg-gray-950/20 dark:text-gray-300 border border-gray-200 dark:border-gray-800": teacher.status !== "active" && teacher.status !== "pending",
+                                "bg-orange-100 text-orange-700 dark:bg-orange-950/20 dark:text-orange-300 border border-orange-200 dark:border-orange-800": teacher.status === "needs_details",
+                                "bg-gray-100 text-gray-700 dark:bg-gray-950/20 dark:text-gray-300 border border-gray-200 dark:border-gray-800": teacher.status !== "active" && teacher.status !== "pending" && teacher.status !== "needs_details",
                               }
                             )}
                           >
-                            {(teacher.status || "inactive")
-                              .charAt(0)
-                              .toUpperCase() +
-                              (teacher.status || "inactive").slice(1)}
+                            {teacher.status === "needs_details" 
+                              ? "Needs Details"
+                              : (teacher.status || "inactive")
+                                  .charAt(0)
+                                  .toUpperCase() +
+                                  (teacher.status || "inactive").slice(1)}
                           </span>
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">
@@ -324,8 +342,8 @@ export default function TeachersPage() {
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No teachers added yet</p>
-                <p className="text-sm">Click &quot;Add Teacher&quot; to get started</p>
+                <p>No teachers in your organization yet</p>
+                <p className="text-sm">Click &quot;Invite Teachers&quot; to get started</p>
               </div>
             )}
           </CardContent>

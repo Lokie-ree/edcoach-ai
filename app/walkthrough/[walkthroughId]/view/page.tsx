@@ -2,7 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import { useUser } from "@clerk/nextjs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BorderBeam } from "@/components/magicui/border-beam";
@@ -29,8 +29,13 @@ export default function ViewWalkthroughPage({
   params: Promise<{ walkthroughId: string }> 
 }) {
   const { walkthroughId } = React.use(params);
-
-  const { isLoading, isAuthenticated, user: convexUser } = useAuthRedirect();
+  const { user, isLoaded } = useUser();
+  
+  // Get convex user data
+  const convexUser = useQuery(
+    api.users.getUserByClerkId,
+    user && isLoaded ? { clerkId: user.id } : "skip"
+  );
 
   // Get walkthrough details
   const walkthrough = useQuery(
@@ -57,12 +62,16 @@ export default function ViewWalkthroughPage({
   );
 
   // Show loading while authentication or core data is loading
-  if (isLoading || !isAuthenticated || !convexUser || !walkthrough) {
+  if (!isLoaded || (user && convexUser === undefined) || !walkthrough) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
+  }
+
+  if (!user || !convexUser) {
+    return null;
   }
 
   // For teachers, we need to wait for teacher data to load before checking permissions

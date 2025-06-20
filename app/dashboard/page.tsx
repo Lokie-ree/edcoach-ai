@@ -5,18 +5,20 @@ import { api } from "@/convex/_generated/api";
 import { Loader2 } from "lucide-react";
 import { useUser, useOrganization } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
-import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import TeacherDashboardPageContent from "./components/TeacherDashboardPageContent";
 import CoachDashboardPageContent from "./components/CoachDashboardPageContent";
 import GridDistortion from "./components/GridDistortion";
 
-
-
 // Main Dashboard Component
 export default function DashboardPage() {
-  const { user } = useUser();
-  const { isLoading, isAuthenticated, user: convexUser } = useAuthRedirect();
+  const { user, isLoaded } = useUser();
   const { organization } = useOrganization();
+  
+  // Get convex user data
+  const convexUser = useQuery(
+    api.users.getUserByClerkId,
+    user && isLoaded ? { clerkId: user.id } : "skip"
+  );
 
   // Determine user role and organization info
   const userRole = convexUser?.role;
@@ -28,17 +30,13 @@ export default function DashboardPage() {
     userRole === "teacher" && user ? { clerkId: user.id } : "skip"
   );
 
-  // Early returns for loading/auth states
-  if (isLoading) {
+  // Early returns for loading states
+  if (!isLoaded || (user && convexUser === undefined)) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    return null; // Redirect is happening
   }
 
   // Type guard to ensure we have proper user data
