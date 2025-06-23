@@ -252,9 +252,14 @@ function determineAppRole(context: OrgMembershipContext): AppRole {
 function shouldPreserveExistingRole(context: OrgMembershipContext, targetRole: AppRole): boolean {
   const { user, wasAlreadyInOrg } = context;
   
-  // Only preserve coach role if they were already a coach in this organization
-  // This handles the case where org creators should keep their coach role
-  return user.role === "coach" && targetRole === "coach" && wasAlreadyInOrg;
+  // Never preserve the default coach role for new organization members
+  // Only preserve if they were already in the org AND already had the target role
+  if (!wasAlreadyInOrg) {
+    return false; // Always update role for new org members
+  }
+  
+  // If they were already in the org, only preserve if roles match
+  return user.role === targetRole;
 }
 
 // Handle linking teacher records to users
@@ -660,6 +665,85 @@ export const updateUserOrganizationAndCompleteOnboarding = internalMutation({
       });
     }
     return null;
+  },
+});
+
+// Temporary debug functions to fix the current issue
+export const debugUserInfo = query({
+  args: { clerkId: v.string() },
+  returns: v.union(
+    v.object({
+      _id: v.id("users"),
+      clerkId: v.string(),
+      name: v.string(),
+      email: v.string(),
+      role: v.union(v.literal("coach"), v.literal("teacher")),
+      clerkOrganizationId: v.optional(v.string()),
+      onboardingComplete: v.optional(v.boolean()),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    const user = await userByClerkId(ctx, args.clerkId);
+    console.log('Debug user info requested:', {
+      clerkId: args.clerkId,
+      user: user
+    });
+    return user;
+  },
+});
+
+// Manual fix function for the current issue
+export const manuallyFixUserRole = internalMutation({
+  args: { 
+    clerkId: v.string(),
+    newRole: v.union(v.literal("coach"), v.literal("teacher"))
+  },
+  returns: v.object({
+    success: v.boolean(),
+    message: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const user = await userByClerkId(ctx, args.clerkId);
+    if (!user) {
+      return { success: false, message: 'User not found' };
+    }
+    
+    console.log('Manually fixing user role:', {
+      userId: user._id,
+      fromRole: user.role,
+      toRole: args.newRole,
+      clerkId: args.clerkId
+    });
+    
+    await ctx.db.patch(user._id, {
+      role: args.newRole,
+    });
+    
+    // If changing to teacher, try to link teacher record
+    if (args.newRole === "teacher") {
+      await handleTeacherRecordLinking(ctx, user, "teacher");
+    }
+    
+    return { 
+      success: true, 
+      message: `Successfully updated role from ${user.role} to ${args.newRole}` 
+    };
+  },
+});
+
+// Action to manually fix user role (can be called from frontend)
+export const fixUserRole = action({
+  args: { 
+    clerkId: v.string(),
+    newRole: v.union(v.literal("coach"), v.literal("teacher"))
+  },
+  returns: v.object({
+    success: v.boolean(),
+    message: v.string(),
+  }),
+  handler: async (ctx, args): Promise<{ success: boolean; message: string }> => {
+    return await ctx.runMutation(internal.users.manuallyFixUserRole, args);
   },
 });
 
