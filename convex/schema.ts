@@ -13,7 +13,6 @@ export default defineSchema({
     email: v.string(),
     role: v.union(v.literal("coach"), v.literal("teacher")),
     clerkOrganizationId: v.optional(v.string()),
-    subscriptionPlan: v.optional(v.union(v.literal("free"), v.literal("pro"))),
     imageUrl: v.optional(v.string()),
     preferences: v.optional(v.any()),
     createdAt: v.number(),

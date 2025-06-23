@@ -3,10 +3,8 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Users, ClipboardList, BarChart3, ArrowRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 
 interface CoachTutorialProps {
   onComplete: () => void;
@@ -19,7 +17,7 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
   const steps = [
     {
       title: "Welcome to Your Coach Dashboard",
-      description: "Your coaching organization is now set up! Let's walk through the key features.",
+      description: "Your coaching organization is now set up! Let&#39;s walk through the key features.",
       icon: Users,
       content: (
         <div className="space-y-4">
@@ -27,9 +25,9 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
               <Users className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">You're All Set!</h3>
+            <h3 className="text-lg font-semibold mb-2">You&#39;re All Set!</h3>
             <p className="text-muted-foreground">
-              Your coaching organization has been created and you're ready to start supporting your teachers.
+                              Your coaching organization has been created and you&#39;re ready to start supporting your teachers.
             </p>
           </div>
           <div className="grid gap-2 text-sm">

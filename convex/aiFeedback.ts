@@ -36,13 +36,10 @@ export const generateFeedback = action({
     });
     if (!user) throw new Error("User not found");
 
-    // Check AI usage limits based on subscription
+    // Check AI usage limits (simplified - no subscription restrictions for now)
     const usageCheck = await ctx.runQuery("users:checkAIUsageLimit" as any, {});
     if (!usageCheck.canGenerate) {
-      const planInfo = usageCheck.subscriptionPlan === "free" 
-        ? `You've reached your monthly limit of ${usageCheck.limit} AI generations. Upgrade to Pro for unlimited generations.`
-        : "AI generation limit reached.";
-      throw new Error(`AI usage limit exceeded. ${planInfo}`);
+      throw new Error("AI generation temporarily unavailable. Please try again later.");
     }
 
     const indicator = args.indicator;

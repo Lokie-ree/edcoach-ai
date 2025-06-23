@@ -102,7 +102,7 @@ export function AIFeedbackGenerator({
   };
 
   const canGenerate = usageInfo?.canGenerate ?? false;
-  const isPro = usageInfo?.subscriptionPlan === "pro";
+      const isPro = true; // Simplified - no subscription restrictions for now
 
   return (
     <Card className={cn("w-full", className)}>

@@ -21,18 +21,19 @@ export function AIUsageBadge({ className, showDetails = false }: AIUsageBadgePro
     );
   }
 
-  const { canGenerate, usageThisMonth, limit, subscriptionPlan } = usageInfo;
-  const isPro = subscriptionPlan === "pro";
-  const isNearLimit = !isPro && usageThisMonth >= limit * 0.8; // 80% of limit
+  const { canGenerate, usageThisMonth, limit } = usageInfo;
+  const isPro = true; // Simplified - no subscription restrictions for now
+  const isNearLimit = false; // No limits for now
 
-  if (subscriptionPlan === "none") {
-    return (
-      <Badge variant="outline" className={cn("text-muted-foreground", className)}>
-        <Zap className="w-3 h-3 mr-1" />
-        Not available
-      </Badge>
-    );
-  }
+  // Always show as available now
+  // if (subscriptionPlan === "none") {
+  //   return (
+  //     <Badge variant="outline" className={cn("text-muted-foreground", className)}>
+  //       <Zap className="w-3 h-3 mr-1" />
+  //       Not available
+  //     </Badge>
+  //   );
+  // }
 
   return (
     <Badge 
@@ -66,46 +67,10 @@ export function AIUsageBadge({ className, showDetails = false }: AIUsageBadgePro
 export function AIUsageWarning() {
   const usageInfo = useQuery(api.users.checkAIUsageLimit);
 
-  if (!usageInfo || usageInfo.subscriptionPlan === "pro") {
+  if (!usageInfo) {
     return null;
   }
-
-  const { canGenerate, usageThisMonth, limit } = usageInfo;
-  const isNearLimit = usageThisMonth >= limit * 0.8; // 80% of limit
-
-  if (!isNearLimit && canGenerate) {
-    return null;
-  }
-
-  return (
-    <div className={cn(
-      "rounded-lg p-3 mb-4 border",
-      !canGenerate 
-        ? "bg-red-50 border-red-200 text-red-800 dark:bg-red-950 dark:border-red-800 dark:text-red-200"
-        : "bg-orange-50 border-orange-200 text-orange-800 dark:bg-orange-950 dark:border-orange-800 dark:text-orange-200"
-    )}>
-      <div className="flex items-start gap-2">
-        <Zap className="w-4 h-4 mt-0.5 flex-shrink-0" />
-        <div className="text-sm">
-          {!canGenerate ? (
-            <>
-              <strong>AI Generation Limit Reached</strong>
-              <p className="mt-1">
-                You&apos;ve used all {limit} AI generations for this month. 
-                Upgrade to Pro for unlimited AI generations and advanced features.
-              </p>
-            </>
-          ) : (
-            <>
-              <strong>AI Usage Warning</strong>
-              <p className="mt-1">
-                You&apos;ve used {usageThisMonth} of {limit} AI generations this month. 
-                Consider upgrading to Pro for unlimited usage.
-              </p>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  
+  // No warnings needed with simplified system
+  return null;
 } 

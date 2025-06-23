@@ -10,7 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { UserPlus, Users, GraduationCap, Pencil, Trash2 } from "lucide-react";
+import { Users, GraduationCap, Pencil, Trash2 } from "lucide-react";
+import Link from "next/link";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,6 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useUser, useOrganization, useClerk } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 import Modal from "@/components/mage-ui/modal";
@@ -30,7 +30,6 @@ import TeacherDetailsForm from "@/components/forms/teacher-details-form";
 import { Id } from "@/convex/_generated/dataModel";
 import { motion } from "framer-motion";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
-import { OrganizationProfile } from "@clerk/nextjs";
 
 // Define grade bands for display - simplified
 const GRADE_BAND_OPTIONS = [
@@ -82,15 +81,12 @@ const GridDistortion = () => {
 };
 
 export default function TeachersPage() {
-  const [showInviteModal, setShowInviteModal] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [deletingTeacher, setDeletingTeacher] = useState<Teacher | null>(null);
   const [isSettingActive, setIsSettingActive] = useState(false);
   const { user, isLoaded } = useUser();
   const { organization } = useOrganization();
   const { setActive } = useClerk();
-  const router = useRouter();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const convexUser = useQuery(
     api.users.getUserByClerkId,
     user && isLoaded ? { clerkId: user.id } : "skip"
@@ -161,15 +157,20 @@ export default function TeachersPage() {
         transition={{ duration: 0.5, delay: 0.1 }}
       >
         <Card className="bg-card border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardHeader>
             <div>
               <CardTitle className="text-foreground">Teacher Overview</CardTitle>
-              <p className="text-sm text-muted-foreground">Summary of your teaching staff</p>
+              <p className="text-sm text-muted-foreground">
+                Summary of your teaching staff • 
+                <Link href="/org" className="text-primary hover:underline ml-1">
+                  Invite new teachers in Organization Settings
+                </Link>
+                <br />
+                <span className="text-xs text-muted-foreground/80 mt-1 block">
+                  New members automatically get teacher role. Admins become coaches.
+                </span>
+              </p>
             </div>
-            <Button onClick={() => setShowInviteModal(true)} className="shrink-0">
-              <UserPlus className="mr-2 h-4 w-4" />
-              Invite Teachers
-            </Button>
           </CardHeader>
           <CardContent>
             <div className="grid gap-6 sm:grid-cols-3">
@@ -197,7 +198,7 @@ export default function TeachersPage() {
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10">
-                  <UserPlus className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  <Pencil className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-foreground">
@@ -211,39 +212,7 @@ export default function TeachersPage() {
         </Card>
       </motion.div>
 
-      {/* Invite Teachers Modal */}
-      <Modal
-        isOpen={showInviteModal}
-        onOpenChange={(open) => {
-          if (!open) {
-            setShowInviteModal(false);
-          }
-        }}
-        modalSize="lg"
-      >
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-foreground mb-2">
-            Invite Teachers
-          </h2>
-          <p className="text-foreground mb-4">
-            Use Clerk&apos;s organization management to invite teachers to your organization. 
-            Once they accept, you can add their teaching details.
-          </p>
-          {organization ? (
-            <OrganizationProfile />
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <p>No organization found. Please complete your onboarding first.</p>
-              <Button 
-                onClick={() => router.push('/onboarding')} 
-                className="mt-4"
-              >
-                Complete Setup
-              </Button>
-            </div>
-          )}
-        </div>
-      </Modal>
+
 
       {/* Edit Teacher Details Modal */}
       <Modal

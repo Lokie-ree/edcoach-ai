@@ -43,7 +43,6 @@ export const current = query({
       email: v.string(),
       role: v.union(v.literal("coach"), v.literal("teacher")),
       clerkOrganizationId: v.optional(v.string()),
-      subscriptionPlan: v.optional(v.union(v.literal("free"), v.literal("pro"))),
       imageUrl: v.optional(v.string()),
       preferences: v.optional(v.any()),
       createdAt: v.number(),
@@ -67,7 +66,6 @@ export const getUserByClerkId = query({
       email: v.string(),
       role: v.union(v.literal("coach"), v.literal("teacher")),
       clerkOrganizationId: v.optional(v.string()),
-      subscriptionPlan: v.optional(v.union(v.literal("free"), v.literal("pro"))),
       imageUrl: v.optional(v.string()),
       preferences: v.optional(v.any()),
       createdAt: v.number(),
@@ -100,7 +98,6 @@ export const getUserById = query({
       email: v.string(),
       role: v.union(v.literal("coach"), v.literal("teacher")),
       clerkOrganizationId: v.optional(v.string()),
-      subscriptionPlan: v.optional(v.union(v.literal("free"), v.literal("pro"))),
       imageUrl: v.optional(v.string()),
       preferences: v.optional(v.any()),
       createdAt: v.number(),
@@ -140,7 +137,6 @@ export const internalGetUserByClerkId = internalQuery({
       email: v.string(),
       role: v.union(v.literal("coach"), v.literal("teacher")),
       clerkOrganizationId: v.optional(v.string()),
-      subscriptionPlan: v.optional(v.union(v.literal("free"), v.literal("pro"))),
       imageUrl: v.optional(v.string()),
       preferences: v.optional(v.any()),
       createdAt: v.number(),
@@ -153,43 +149,25 @@ export const internalGetUserByClerkId = internalQuery({
   },
 });
 
-// AI usage gating
+// AI usage - simplified (no limits for now, let Clerk handle subscription logic)
 export const checkAIUsageLimit = query({
   args: {},
   returns: v.object({
     canGenerate: v.boolean(),
     usageThisMonth: v.number(),
     limit: v.number(),
-    subscriptionPlan: v.union(v.literal("free"), v.literal("pro"), v.literal("none")),
   }),
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
     if (!user) {
-      return { canGenerate: false, usageThisMonth: 0, limit: 0, subscriptionPlan: "none" as const };
+      return { canGenerate: false, usageThisMonth: 0, limit: 0 };
     }
 
-    const plan = user.subscriptionPlan || "free";
-    const limit = plan === "pro" ? 999999 : 5; // 5 for free, unlimited for pro
-
-    // Calculate current month usage
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-    
-    const usageLogs = await ctx.db
-      .query("aiUsageLogs")
-      .withIndex("by_user_and_month", (q) => 
-        q.eq("userId", user._id).gte("timestamp", monthStart)
-      )
-      .collect();
-
-    const usageThisMonth = usageLogs.length;
-    const canGenerate = usageThisMonth < limit;
-
+    // For now, allow unlimited AI usage - let Clerk handle subscription limits
     return {
-      canGenerate,
-      usageThisMonth,
-      limit,
-      subscriptionPlan: plan,
+      canGenerate: true,
+      usageThisMonth: 0,
+      limit: 999999,
     };
   },
 });
@@ -207,7 +185,7 @@ export const upsertFromClerk = internalMutation({
       preferences: {},
       createdAt: Date.now(),
       onboardingComplete: false,
-      role: "coach" as const, // Default role, will be updated in onboarding
+      role: "coach" as const, // Default role, will be updated by org membership webhooks
     };
 
     const existingUser = await userByClerkId(ctx, data.id);
@@ -238,32 +216,127 @@ export const deleteFromClerk = internalMutation({
   },
 });
 
-// Organization membership webhooks
+// Modular organization membership handling
+type ClerkOrgRole = string;
+type AppRole = "coach" | "teacher";
+
+interface OrgMembershipContext {
+  user: any;
+  clerkRole: ClerkOrgRole;
+  organizationId: string;
+  wasAlreadyInOrg: boolean;
+}
+
+// Role mapping configuration - easily extensible
+const CLERK_TO_APP_ROLE_MAPPING: Record<string, AppRole> = {
+  "org:admin": "coach",
+  "org:member": "teacher",
+  // Add more mappings as needed
+} as const;
+
+// Determine what app role a user should have based on their Clerk org role
+function determineAppRole(context: OrgMembershipContext): AppRole {
+  const { clerkRole } = context;
+  
+  // Use explicit mapping for clarity and extensibility
+  const mappedRole = CLERK_TO_APP_ROLE_MAPPING[clerkRole];
+  if (!mappedRole) {
+    console.warn(`Unknown Clerk role: ${clerkRole}, defaulting to teacher`);
+    return "teacher";
+  }
+  
+  return mappedRole;
+}
+
+// Determine if we should preserve the existing role
+function shouldPreserveExistingRole(context: OrgMembershipContext, targetRole: AppRole): boolean {
+  const { user, wasAlreadyInOrg } = context;
+  
+  // Only preserve coach role if they were already a coach in this organization
+  // This handles the case where org creators should keep their coach role
+  return user.role === "coach" && targetRole === "coach" && wasAlreadyInOrg;
+}
+
+// Handle linking teacher records to users
+async function handleTeacherRecordLinking(ctx: any, user: any, newRole: AppRole) {
+  if (newRole !== "teacher") return;
+  
+  const teacherRecord = await ctx.db
+    .query("teachers")
+    .withIndex("by_email", (q: any) => q.eq("email", user.email))
+    .first();
+  
+  if (teacherRecord && !teacherRecord.userId) {
+    console.log('Linking teacher record to user:', {
+      teacherId: teacherRecord._id,
+      userId: user._id,
+      email: user.email
+    });
+    
+    await ctx.db.patch(teacherRecord._id, {
+      userId: user._id,
+      status: "active",
+    });
+  }
+}
+
+// Main organization membership handler - now much cleaner and modular
 export const handleOrgMembershipCreated = internalMutation({
   args: { data: v.any() },
   returns: v.null(),
   handler: async (ctx, { data }) => {
     const user = await userByClerkId(ctx, data.public_user_data.user_id);
-    if (user) {
-      await ctx.db.patch(user._id, {
-        clerkOrganizationId: data.organization.id,
-      });
-      
-      // If this is a teacher joining an org, activate their teacher record
-      if (user.role === "teacher") {
-        const teacherRecord = await ctx.db
-          .query("teachers")
-          .withIndex("by_email", (q) => q.eq("email", user.email))
-          .first();
-        
-        if (teacherRecord && !teacherRecord.userId) {
-          await ctx.db.patch(teacherRecord._id, {
-            userId: user._id,
-            status: "active",
-          });
-        }
-      }
+    if (!user) {
+      console.warn('User not found for organization membership:', data.public_user_data.user_id);
+      return null;
     }
+
+    const context: OrgMembershipContext = {
+      user,
+      clerkRole: data.role,
+      organizationId: data.organization.id,
+      wasAlreadyInOrg: user.clerkOrganizationId === data.organization.id,
+    };
+
+    console.log('Processing organization membership:', {
+      userId: user._id,
+      currentRole: user.role,
+      clerkRole: context.clerkRole,
+      organizationId: context.organizationId,
+      wasAlreadyInOrg: context.wasAlreadyInOrg
+    });
+
+    // Always update organization ID
+    await ctx.db.patch(user._id, {
+      clerkOrganizationId: context.organizationId,
+    });
+
+    // Determine target role and whether to update
+    const targetRole = determineAppRole(context);
+    const shouldPreserve = shouldPreserveExistingRole(context, targetRole);
+
+    if (!shouldPreserve) {
+      console.log('Updating user role:', {
+        userId: user._id,
+        fromRole: user.role,
+        toRole: targetRole,
+        reason: 'clerk_org_role_mapping'
+      });
+
+      await ctx.db.patch(user._id, {
+        role: targetRole,
+      });
+
+      // Handle teacher-specific logic
+      await handleTeacherRecordLinking(ctx, user, targetRole);
+    } else {
+      console.log('Preserving existing role:', {
+        userId: user._id,
+        role: user.role,
+        reason: 'was_already_in_org_with_same_role'
+      });
+    }
+
     return null;
   },
 });
@@ -272,8 +345,54 @@ export const handleOrgMembershipUpdated = internalMutation({
   args: { data: v.any() },
   returns: v.null(),
   handler: async (ctx, { data }) => {
-    // Handle role changes if needed
-    console.log("Organization membership updated:", data);
+    const user = await userByClerkId(ctx, data.public_user_data.user_id);
+    if (!user) {
+      console.warn('User not found for organization membership update:', data.public_user_data.user_id);
+      return null;
+    }
+
+    const context: OrgMembershipContext = {
+      user,
+      clerkRole: data.role,
+      organizationId: data.organization?.id || user.clerkOrganizationId || '',
+      wasAlreadyInOrg: true, // For updates, they're already in the org
+    };
+
+    console.log('Processing organization membership update:', {
+      userId: user._id,
+      currentRole: user.role,
+      clerkRole: context.clerkRole,
+      organizationId: context.organizationId
+    });
+
+    // Determine target role and whether to update
+    const targetRole = determineAppRole(context);
+    const shouldPreserve = shouldPreserveExistingRole(context, targetRole);
+
+    // Only update if the role actually needs to change
+    if (!shouldPreserve && user.role !== targetRole) {
+      console.log('Updating user role due to organization role change:', {
+        userId: user._id,
+        fromRole: user.role,
+        toRole: targetRole,
+        reason: 'org_role_changed'
+      });
+
+      await ctx.db.patch(user._id, {
+        role: targetRole,
+      });
+
+      // Handle teacher-specific logic
+      await handleTeacherRecordLinking(ctx, user, targetRole);
+    } else {
+      console.log('No role update needed:', {
+        userId: user._id,
+        currentRole: user.role,
+        targetRole,
+        reason: shouldPreserve ? 'preserving_existing_role' : 'role_already_correct'
+      });
+    }
+
     return null;
   },
 });
@@ -299,15 +418,14 @@ export const handleSubscriptionChange = internalMutation({
   handler: async (ctx, { data }) => {
     const user = await userByClerkId(ctx, data.user_id);
     if (user) {
-      const plan = data.plan_name === "pro" ? "pro" : "free";
-      await ctx.db.patch(user._id, {
-        subscriptionPlan: plan,
-      });
+      const plan = data.plan_name === "coach_pro" ? "coach_pro" : "coach_starter";
+              // Subscription plan now handled by Clerk
+        console.log(`Subscription updated for user ${user._id}: ${plan}`);
       
-             // Schedule Clerk organization creation for new pro subscribers (coaches)
-       if (plan === "pro" && user.role === "coach" && !user.clerkOrganizationId) {
+             // Handle coach pro subscription
+       if (plan === "coach_pro" && user.role === "coach" && !user.clerkOrganizationId) {
          // This will be handled by a separate action
-         console.log("Pro subscription activated - organization creation will be handled separately");
+         console.log("Coach Pro subscription activated - organization creation will be handled separately");
        }
     }
     return null;
@@ -320,9 +438,8 @@ export const handleSubscriptionCancelled = internalMutation({
   handler: async (ctx, { data }) => {
     const user = await userByClerkId(ctx, data.user_id);
     if (user) {
-      await ctx.db.patch(user._id, {
-        subscriptionPlan: "free",
-      });
+      // Subscription plans now handled by Clerk
+      console.log(`Subscription cancelled for user ${user._id}`);
     }
     return null;
   },
@@ -365,6 +482,7 @@ export const completeSimplifiedOnboarding = mutation({
         email: userEmail,
         role: role,
         onboardingComplete: true,
+        // Subscription plans now handled by Clerk
       };
       
       if (args.clerkOrganizationId) {
@@ -399,7 +517,7 @@ export const completeSimplifiedOnboarding = mutation({
       imageUrl: identity.pictureUrl,
       preferences: {},
       createdAt: Date.now(),
-      subscriptionPlan: role === "coach" ? "free" : undefined,
+      // Subscription plans now handled by Clerk
     };
     
     if (args.clerkOrganizationId) {
@@ -444,7 +562,22 @@ export const createCoachOrganization = action({
         clerkId: identity.subject,
       });
 
-      if (!user || user.role !== "coach") {
+      console.log('Creating organization for user:', {
+        userId: user?._id,
+        clerkId: identity.subject,
+        role: user?.role,
+        organizationName: args.organizationName
+      });
+
+      if (!user) {
+        console.log('User not found in database');
+        throw new Error("User not found");
+      }
+
+      if (user.role === "teacher") {
+        console.log('User is a teacher, not a coach:', {
+          userRole: user.role
+        });
         throw new Error("Only coaches can create organizations");
       }
 
@@ -456,6 +589,8 @@ export const createCoachOrganization = action({
         };
       }
 
+      console.log('Calling Clerk API to create organization...');
+
       // Create organization via Clerk REST API
       const response = await fetch("https://api.clerk.com/v1/organizations", {
         method: "POST",
@@ -465,21 +600,34 @@ export const createCoachOrganization = action({
         },
         body: JSON.stringify({
           name: args.organizationName,
-          created_by: identity.subject,
+          created_by: identity.subject, // This should make the user an admin
         }),
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Clerk API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
         throw new Error(`Failed to create organization: ${response.statusText}`);
       }
 
       const clerkOrganization = await response.json();
+      console.log('Organization created successfully:', {
+        organizationId: clerkOrganization.id,
+        name: clerkOrganization.name
+      });
 
-      // Update user record with the new organization ID
-      await ctx.runMutation(internal.users.updateUserOrganization, {
+      // Update user record with the new organization ID and complete onboarding
+      console.log('Updating user record with organization ID...');
+      await ctx.runMutation(internal.users.updateUserOrganizationAndCompleteOnboarding, {
         clerkUserId: identity.subject,
         clerkOrganizationId: clerkOrganization.id,
       });
+
+      console.log('Organization creation completed successfully');
 
       return {
         success: true,
@@ -495,8 +643,8 @@ export const createCoachOrganization = action({
   },
 });
 
-// Internal mutation to update user organization
-export const updateUserOrganization = internalMutation({
+// Internal mutation to update user organization and complete onboarding
+export const updateUserOrganizationAndCompleteOnboarding = internalMutation({
   args: {
     clerkUserId: v.string(),
     clerkOrganizationId: v.string(),
@@ -507,34 +655,11 @@ export const updateUserOrganization = internalMutation({
     if (user) {
       await ctx.db.patch(user._id, {
         clerkOrganizationId: args.clerkOrganizationId,
+        onboardingComplete: true,
+        // Subscription plans now handled by Clerk
       });
     }
     return null;
   },
 });
 
-// Mutation to simulate subscription activation (for development/demo)
-export const activateTrialSubscription = mutation({
-  args: {},
-  returns: v.object({
-    success: v.boolean(),
-  }),
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    const user = await userByClerkId(ctx, identity.subject);
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    // Simulate trial subscription activation
-    await ctx.db.patch(user._id, {
-      subscriptionPlan: "pro", // Set to pro for trial
-    });
-
-    return { success: true };
-  },
-});
