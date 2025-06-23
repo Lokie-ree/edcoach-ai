@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,8 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useOrganization, useClerk } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 import Modal from "@/components/mage-ui/modal";
@@ -84,12 +85,41 @@ export default function TeachersPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [deletingTeacher, setDeletingTeacher] = useState<Teacher | null>(null);
-  const { user } = useUser();
+  const [isSettingActive, setIsSettingActive] = useState(false);
+  const { user, isLoaded } = useUser();
+  const { organization } = useOrganization();
+  const { setActive } = useClerk();
+  const router = useRouter();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const convexUser = useQuery(
     api.users.getUserByClerkId,
-    user ? { clerkId: user.id } : "skip"
+    user && isLoaded ? { clerkId: user.id } : "skip"
   );
+
+  // Try to set active organization if user has one but it's not active
+  useEffect(() => {
+    const trySetActiveOrg = async () => {
+      if (
+        convexUser?.clerkOrganizationId && 
+        !organization && 
+        !isSettingActive &&
+        setActive
+      ) {
+        console.log('User has organization ID but no active org, attempting to set active:', convexUser.clerkOrganizationId);
+        setIsSettingActive(true);
+        try {
+          await setActive({ organization: convexUser.clerkOrganizationId });
+          console.log('Successfully set active organization from Convex record');
+        } catch (error) {
+          console.warn('Failed to set active organization:', error);
+        } finally {
+          setIsSettingActive(false);
+        }
+      }
+    };
+
+    trySetActiveOrg();
+  }, [convexUser, organization, setActive, isSettingActive]);
 
   // Fetch teachers for the current user's organization
   const teachers = useQuery(api.teachers.list);
@@ -199,7 +229,19 @@ export default function TeachersPage() {
             Use Clerk&apos;s organization management to invite teachers to your organization. 
             Once they accept, you can add their teaching details.
           </p>
-          <OrganizationProfile />
+          {organization ? (
+            <OrganizationProfile />
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>No organization found. Please complete your onboarding first.</p>
+              <Button 
+                onClick={() => router.push('/onboarding')} 
+                className="mt-4"
+              >
+                Complete Setup
+              </Button>
+            </div>
+          )}
         </div>
       </Modal>
 

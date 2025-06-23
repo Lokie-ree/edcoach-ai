@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { api } from "@/convex/_generated/api";
 import { Loader2 } from "lucide-react";
 import { useUser, useOrganization } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
+import { useRouter } from "next/navigation";
 import TeacherDashboardPageContent from "./components/TeacherDashboardPageContent";
 import CoachDashboardPageContent from "./components/CoachDashboardPageContent";
 import GridDistortion from "./components/GridDistortion";
@@ -13,12 +14,20 @@ import GridDistortion from "./components/GridDistortion";
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
   const { organization } = useOrganization();
+  const router = useRouter();
   
   // Get convex user data
   const convexUser = useQuery(
     api.users.getUserByClerkId,
     user && isLoaded ? { clerkId: user.id } : "skip"
   );
+
+  // Redirect to onboarding if user hasn't completed it
+  useEffect(() => {
+    if (convexUser && !convexUser.onboardingComplete) {
+      router.push('/onboarding');
+    }
+  }, [convexUser, router]);
 
   // Determine user role and organization info
   const userRole = convexUser?.role;
@@ -41,6 +50,15 @@ export default function DashboardPage() {
 
   // Type guard to ensure we have proper user data
   if (!user || !convexUser) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Don't render dashboard if onboarding is not complete
+  if (!convexUser.onboardingComplete) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

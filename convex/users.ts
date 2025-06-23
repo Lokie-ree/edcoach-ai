@@ -1,6 +1,13 @@
-import { internalMutation, internalQuery, query, QueryCtx, mutation } from "./_generated/server";
+import { internalMutation, internalQuery, query, QueryCtx, mutation, action } from "./_generated/server";
 import { UserJSON } from "@clerk/backend";
 import { v, Validator } from "convex/values";
+import { internal } from "./_generated/api";
+
+// Initialize Clerk client for server-side operations
+const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
+if (!CLERK_SECRET_KEY) {
+  throw new Error("CLERK_SECRET_KEY environment variable is required");
+}
 
 // Helper functions
 async function userByClerkId(ctx: QueryCtx, clerkId: string) {
@@ -414,3 +421,120 @@ export const completeSimplifiedOnboarding = mutation({
 });
 
 // Clerk organization creation will be handled by frontend or separate action
+
+// Action to create Clerk organization for coaches
+export const createCoachOrganization = action({
+  args: {
+    organizationName: v.string(),
+  },
+  returns: v.object({
+    success: v.boolean(),
+    organizationId: v.optional(v.string()),
+    error: v.optional(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    try {
+      // Get current user to verify they're a coach
+      const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, {
+        clerkId: identity.subject,
+      });
+
+      if (!user || user.role !== "coach") {
+        throw new Error("Only coaches can create organizations");
+      }
+
+      // Check if user already has an organization
+      if (user.clerkOrganizationId) {
+        return {
+          success: false,
+          error: "User already has an organization",
+        };
+      }
+
+      // Create organization via Clerk REST API
+      const response = await fetch("https://api.clerk.com/v1/organizations", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${CLERK_SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: args.organizationName,
+          created_by: identity.subject,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create organization: ${response.statusText}`);
+      }
+
+      const clerkOrganization = await response.json();
+
+      // Update user record with the new organization ID
+      await ctx.runMutation(internal.users.updateUserOrganization, {
+        clerkUserId: identity.subject,
+        clerkOrganizationId: clerkOrganization.id,
+      });
+
+      return {
+        success: true,
+        organizationId: clerkOrganization.id,
+      };
+    } catch (error) {
+      console.error("Failed to create organization:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  },
+});
+
+// Internal mutation to update user organization
+export const updateUserOrganization = internalMutation({
+  args: {
+    clerkUserId: v.string(),
+    clerkOrganizationId: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await userByClerkId(ctx, args.clerkUserId);
+    if (user) {
+      await ctx.db.patch(user._id, {
+        clerkOrganizationId: args.clerkOrganizationId,
+      });
+    }
+    return null;
+  },
+});
+
+// Mutation to simulate subscription activation (for development/demo)
+export const activateTrialSubscription = mutation({
+  args: {},
+  returns: v.object({
+    success: v.boolean(),
+  }),
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const user = await userByClerkId(ctx, identity.subject);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Simulate trial subscription activation
+    await ctx.db.patch(user._id, {
+      subscriptionPlan: "pro", // Set to pro for trial
+    });
+
+    return { success: true };
+  },
+});

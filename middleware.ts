@@ -14,7 +14,8 @@ const isProtectedRoute = createRouteMatcher([
 const isPublicRoute = createRouteMatcher([
   '/',
   '/sign-in(.*)',
-  '/sign-up(.*)'
+  '/sign-up(.*)',
+  '/onboarding(.*)'
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
@@ -27,7 +28,7 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(url);
   }
 
-  // If user is authenticated and on public route, redirect to dashboard
+  // If user is authenticated and on public route (except onboarding), redirect to dashboard
   if (userId && isPublicRoute(req) && url.pathname === '/') {
     url.pathname = '/dashboard';
     return NextResponse.redirect(url);
