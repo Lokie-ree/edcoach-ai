@@ -167,17 +167,17 @@ export default function ViewWalkthroughPage({
                 </div>
                 <div className="pl-6 space-y-1">
                   <p className="text-base font-medium text-foreground">
-                    {teacher?.name || "Loading..."}
+                    {specificTeacher?.name || "Loading..."}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {teacher?.subject?.join(", ") || ""} • {teacher?.gradeBand ? 
+                    {specificTeacher?.subject?.join(", ") || ""} • {specificTeacher?.gradeBand ? 
                       (() => {
                         const gradeBandLabels = {
                           "elementary": "Elementary",
                           "middle": "Middle School",
                           "high": "High School"
                         };
-                        return gradeBandLabels[teacher.gradeBand as keyof typeof gradeBandLabels] || teacher.gradeBand;
+                        return gradeBandLabels[specificTeacher.gradeBand as keyof typeof gradeBandLabels] || specificTeacher.gradeBand;
                       })() : ""
                     }
                   </p>
