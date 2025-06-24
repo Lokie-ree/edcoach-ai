@@ -8,8 +8,80 @@ import { Logo } from "@/components/logo";
 import { 
   Home, Users, ChartSpline, BookOpen, BarChart, ClipboardPlus, Settings
 } from "lucide-react";
+import { useQuery } from "convex/react";
+import { useUser } from "@clerk/nextjs";
+import { api } from "@/convex/_generated/api";
 
 const Header = () => {
+  const { user, isLoaded } = useUser();
+  
+  // Get the current user's role from Convex
+  const convexUser = useQuery(
+    api.users.current,
+    user && isLoaded ? {} : "skip"
+  );
+
+  // Define navigation links based on user role
+  const getNavigationLinks = () => {
+    if (!convexUser) return [];
+
+    if (convexUser.role === "coach") {
+      return [
+        {
+          label: "Dashboard",
+          icon: <Home size={16} />,
+          href: "/dashboard"
+        },
+        {
+          label: "Teachers",
+          icon: <Users size={16} />,
+          href: "/teachers"
+        },
+        {
+          label: "New Walkthrough",
+          icon: <ClipboardPlus size={16} />,
+          href: "/walkthrough/new"
+        },
+        {
+          label: "Analytics",
+          icon: <ChartSpline size={16} />,
+          href: "/analytics"
+        },
+        {
+          label: "Organization",
+          icon: <Settings size={16} />,
+          href: "/org"
+        }
+      ];
+    } else if (convexUser.role === "teacher") {
+      return [
+        {
+          label: "Dashboard",
+          icon: <Home size={16} />,
+          href: "/dashboard"
+        },
+        {
+          label: "My Walkthroughs",
+          icon: <BookOpen size={16} />,
+          href: "/my-walkthroughs"
+        },
+        {
+          label: "My Progress",
+          icon: <BarChart size={16} />,
+          href: "/my-progress"
+        }
+      ];
+    }
+
+    return [
+      {
+        label: "Dashboard",
+        icon: <Home size={16} />,
+        href: "/dashboard"
+      }
+    ];
+  };
+
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-background/95 supports-[backdrop-filter]:bg-background/60 before:absolute before:bottom-0 before:left-0 before:right-0 before:h-[1px] before:bg-gradient-to-r before:from-blue-500/50 before:via-purple-500/50 before:to-pink-500/50">
       <MaxWidthWrapper>
@@ -31,41 +103,14 @@ const Header = () => {
                 }}
               >
                 <UserButton.MenuItems>
-                  <UserButton.Link 
-                    label="Dashboard" 
-                    labelIcon={<Home size={16} />}
-                    href="/dashboard" 
-                  />
-                  <UserButton.Link 
-                    label="Teachers" 
-                    labelIcon={<Users size={16} />}
-                    href="/teachers" 
-                  />
-                  <UserButton.Link 
-                    label="New Walkthrough" 
-                    labelIcon={<ClipboardPlus size={16} />}
-                    href="/walkthrough/new" 
-                  />
-                  <UserButton.Link 
-                    label="Analytics" 
-                    labelIcon={<ChartSpline size={16} />}
-                    href="/analytics" 
-                  />
-                  <UserButton.Link 
-                    label="My Walkthroughs" 
-                    labelIcon={<BookOpen size={16} />}
-                    href="/my-walkthroughs" 
-                  />
-                  <UserButton.Link 
-                    label="My Progress" 
-                    labelIcon={<BarChart size={16} />}
-                    href="/my-progress" 
-                  />
-                  <UserButton.Link 
-                    label="Organization" 
-                    labelIcon={<Settings size={16} />}
-                    href="/org" 
-                  />
+                  {getNavigationLinks().map((link) => (
+                    <UserButton.Link
+                      key={link.href}
+                      label={link.label}
+                      labelIcon={link.icon}
+                      href={link.href}
+                    />
+                  ))}
                 </UserButton.MenuItems>
               </UserButton>
             </SignedIn>

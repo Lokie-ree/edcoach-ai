@@ -2,7 +2,7 @@
 import { v } from "convex/values";
 import { query, internalQuery, mutation } from "./_generated/server";
 import { getCurrentUser } from "./auth";
-import { Doc } from "./_generated/dataModel";
+
 
 // Reusable validator for the user object to avoid repetition
 export const vUser = v.object({
@@ -85,7 +85,7 @@ export const createOrSyncFromClerk = mutation({
  * Get a user by their Convex document ID.
  * Enforces permissions:
  * - Coaches can view any user within their organization.
- * - Teachers can only view their own profile.
+ * - Teachers can view their own profile and their coach's profile.
  */
 export const getById = query({
   args: { userId: v.id("users") },
@@ -107,9 +107,12 @@ export const getById = query({
     const isCoachViewingOrgMember =
       currentUser.role === "coach" &&
       currentUser.clerkOrganizationId === targetUser.clerkOrganizationId;
+    const isTeacherViewingOrgMember =
+      currentUser.role === "teacher" &&
+      currentUser.clerkOrganizationId === targetUser.clerkOrganizationId;
 
-    // Allow access if either condition is met
-    if (isRequestingSelf || isCoachViewingOrgMember) {
+    // Allow access if any condition is met
+    if (isRequestingSelf || isCoachViewingOrgMember || isTeacherViewingOrgMember) {
       return targetUser;
     }
 

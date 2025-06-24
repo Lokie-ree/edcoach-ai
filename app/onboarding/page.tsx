@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser, useOrganization, useClerk } from "@clerk/nextjs";
-import { useQuery, useAction } from "convex/react";
+import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +28,7 @@ export default function OnboardingPage() {
   );
 
   const createOrganization = useAction(api.onboarding.createCoachOrganization);
+  const completeOnboarding = useMutation(api.onboarding.complete);
 
   // Handle redirect to dashboard after onboarding is complete
   useEffect(() => {
@@ -118,12 +119,24 @@ export default function OnboardingPage() {
     }
   };
 
-  const handleCompleteOnboarding = () => {
+  const handleCompleteOnboarding = async () => {
     setCompletingOnboarding(true);
-    // Small delay then redirect
-    setTimeout(() => {
-      router.replace('/dashboard');
-    }, 500);
+    
+    try {
+      console.log("Completing onboarding for user:", convexUser?.role);
+      await completeOnboarding({});
+      console.log("Onboarding completed successfully");
+      toast.success("Welcome to EdCoach AI!");
+      
+      // Small delay then redirect
+      setTimeout(() => {
+        router.replace('/dashboard');
+      }, 1000);
+    } catch (error) {
+      console.error('Failed to complete onboarding:', error);
+      toast.error("Failed to complete setup. Please try again.");
+      setCompletingOnboarding(false);
+    }
   };
 
   if (!isLoaded || !user) {

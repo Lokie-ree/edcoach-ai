@@ -49,14 +49,22 @@ export default function ViewWalkthroughPage({
     { walkthroughId: walkthroughId as Id<"walkthroughs"> }
   );
 
-  // Get teacher info
+  // Get teacher info for coaches (to find the specific teacher from their list)
   const teacher = useQuery(
     api.teachers.list,
     convexUser?.role === "coach" ? {} : "skip"
   );
 
-  // Find the specific teacher from the list
-  const specificTeacher = teacher?.find(t => t._id === walkthrough?.teacherId);
+  // Get the current user's teacher record if they are a teacher
+  const myTeacherRecord = useQuery(
+    api.teachers.getMyRecord,
+    convexUser?.role === "teacher" ? {} : "skip"
+  );
+
+  // Find the specific teacher from the list (for coaches) or use current user's record (for teachers)
+  const specificTeacher = convexUser?.role === "coach" 
+    ? teacher?.find(t => t._id === walkthrough?.teacherId)
+    : myTeacherRecord;
 
   // Get observer info
   const observer = useQuery(
@@ -77,8 +85,17 @@ export default function ViewWalkthroughPage({
     return null;
   }
 
-  // For teachers, we need to wait for teacher data to load before checking permissions
-  if (convexUser.role === "teacher" && teacher === undefined) {
+  // For teachers, we need to wait for their teacher record to load before checking permissions
+  if (convexUser.role === "teacher" && myTeacherRecord === undefined) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // For coaches, we need to wait for the teacher list to load
+  if (convexUser.role === "coach" && teacher === undefined) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

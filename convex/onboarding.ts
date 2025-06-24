@@ -8,7 +8,7 @@ const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
 
 /**
  * Completes the onboarding process for a user.
- * Determines their role and links any pending records.
+ * Preserves their existing role and links any pending records.
  */
 export const complete = mutation({
   args: {},
@@ -27,18 +27,17 @@ export const complete = mutation({
       return { success: true, message: "Already complete." };
     }
 
-    // Attempt to link a pending teacher record
-    const linkedTeacher: any = await ctx.runMutation(internal.teachers.internalFindAndLinkTeacher, { userId: user._id });
+    // If user is a teacher, try to link any pending teacher record
+    if (user.role === "teacher") {
+      await ctx.runMutation(internal.teachers.internalFindAndLinkTeacher, { userId: user._id });
+    }
 
-    // If a teacher record was found and linked, their role is 'teacher'
-    const role: "teacher" | "coach" = linkedTeacher ? "teacher" : "coach";
-
+    // Preserve the user's existing role (assigned by Clerk or organization membership)
     await ctx.db.patch(user._id, {
-      role: role,
       onboardingComplete: true,
     });
 
-    return { success: true, role };
+    return { success: true, role: user.role };
   },
 });
 
@@ -120,3 +119,4 @@ export const createCoachOrganization = action({
     return { success: true, organizationId: clerkOrganization.id };
   },
 });
+
