@@ -23,11 +23,11 @@ export default function OnboardingPage() {
 
   // Get current user data
   const convexUser = useQuery(
-    api.users.getUserByClerkId,
-    user && isLoaded ? { clerkId: user.id } : "skip"
+    api.users.current,
+    user && isLoaded ? {} : "skip"
   );
 
-  const createOrganization = useAction(api.users.createCoachOrganization);
+  const createOrganization = useAction(api.onboarding.createCoachOrganization);
 
   // Handle redirect to dashboard after onboarding is complete
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function OnboardingPage() {
         }, 1500);
         
       } else {
-        throw new Error(result.error || "Failed to create organization");
+        throw new Error("Failed to create organization");
       }
     } catch (error) {
       console.error('Failed to create organization:', error);

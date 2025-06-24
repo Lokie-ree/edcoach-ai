@@ -23,36 +23,33 @@ http.route({
         // User events
         case "user.created":
         case "user.updated":
-          await ctx.runMutation(internal.users.upsertFromClerk, {
+          await ctx.runMutation(internal.clerk.upsertUser, {
             data: event.data,
           });
           break;
 
         case "user.deleted": {
           const clerkUserId = event.data.id!;
-          await ctx.runMutation(internal.users.deleteFromClerk, { clerkUserId });
+          await ctx.runMutation(internal.clerk.deleteUser, { clerkUserId });
           break;
         }
         
         // Organization events
         case "organization.created":
-          console.log("Organization created:", event.data.id);
-          break;
-          
-        case "organizationMembership.created":
-          await ctx.runMutation(internal.users.handleOrgMembershipCreated, {
+          await ctx.runMutation(internal.clerk.handleOrganizationCreated, {
             data: event.data,
           });
           break;
           
+        case "organizationMembership.created":
         case "organizationMembership.updated":
-          await ctx.runMutation(internal.users.handleOrgMembershipUpdated, {
+          await ctx.runMutation(internal.clerk.handleOrgMembership, {
             data: event.data,
           });
           break;
           
         case "organizationMembership.deleted":
-          await ctx.runMutation(internal.users.handleOrgMembershipDeleted, {
+          await ctx.runMutation(internal.clerk.handleOrgMembershipDeleted, {
             data: event.data,
           });
           break;
@@ -64,15 +61,13 @@ http.route({
             switch (eventType) {
               case "billing.subscription.created":
               case "billing.subscription.updated":
-                await ctx.runMutation(internal.users.handleSubscriptionChange, {
-                  data: (event as any).data,
-                });
+                // TODO: Implement billing webhook handlers
+                console.log("Billing subscription change:", eventType);
                 break;
                 
               case "billing.subscription.deleted":
-                await ctx.runMutation(internal.users.handleSubscriptionCancelled, {
-                  data: (event as any).data,
-                });
+                // TODO: Implement billing webhook handlers  
+                console.log("Billing subscription cancelled:", eventType);
                 break;
                 
               default:

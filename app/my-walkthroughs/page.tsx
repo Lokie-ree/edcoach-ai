@@ -27,16 +27,16 @@ export default function MyWalkthroughsPage() {
   
   // Get convex user data
   const convexUser = useQuery(
-    api.users.getUserByClerkId,
-    user && isLoaded ? { clerkId: user.id } : "skip"
+    api.users.current,
+    user && isLoaded ? {} : "skip"
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   // Get teacher record for current user
   const teacherRecord = useQuery(
-    api.teachers.getByUserClerkId,
-    user ? { clerkId: user.id } : "skip"
+    api.teachers.getMyRecord,
+    convexUser?.role === "teacher" ? {} : "skip"
   );
 
   // Get walkthroughs for this teacher

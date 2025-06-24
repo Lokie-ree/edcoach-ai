@@ -101,10 +101,10 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
   // Use propCoachId if provided, otherwise fetch current user
   const { user } = useUser();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const convexUser = useQuery(
-    api.users.getUserByClerkId,
-    !propCoachId && user ? { clerkId: user.id } : "skip"
-  );
+      const convexUser = useQuery(
+      api.users.current,
+      !propCoachId && user ? {} : "skip"
+    );
 
   // Find the appropriate org ID (replace this with your actual org ID logic)
   const teachers = (useQuery(api.teachers.list) ?? []) as Teacher[];

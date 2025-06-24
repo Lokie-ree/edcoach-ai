@@ -87,10 +87,10 @@ export default function TeachersPage() {
   const { user, isLoaded } = useUser();
   const { organization } = useOrganization();
   const { setActive } = useClerk();
-  const convexUser = useQuery(
-    api.users.getUserByClerkId,
-    user && isLoaded ? { clerkId: user.id } : "skip"
-  );
+      const convexUser = useQuery(
+      api.users.current,
+      user && isLoaded ? {} : "skip"
+    );
 
   // Try to set active organization if user has one but it's not active
   useEffect(() => {

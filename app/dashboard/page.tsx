@@ -18,8 +18,8 @@ export default function DashboardPage() {
   
   // Get convex user data
   const convexUser = useQuery(
-    api.users.getUserByClerkId,
-    user && isLoaded ? { clerkId: user.id } : "skip"
+    api.users.current,
+    user && isLoaded ? {} : "skip"
   );
 
   // Debug logging
@@ -49,8 +49,8 @@ export default function DashboardPage() {
   
   // For teachers, get their teacher record
   const teacherRecord = useQuery(
-    api.teachers.getByUserClerkId,
-    userRole === "teacher" && user ? { clerkId: user.id } : "skip"
+    api.teachers.getMyRecord,
+    userRole === "teacher" ? {} : "skip"
   );
 
   // Show loading while Clerk is loading

@@ -542,10 +542,10 @@ export default function AnalyticsDashboardPage() {
   const clerkOrganizationId = organization?.id;
   
   // Get convex user data
-  const convexUser = useQuery(
-    api.users.getUserByClerkId,
-    user && isLoaded ? { clerkId: user.id } : "skip"
-  );
+      const convexUser = useQuery(
+      api.users.current,
+      user && isLoaded ? {} : "skip"
+    );
 
   // Get analytics data for coach
   const analytics = useQuery(

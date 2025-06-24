@@ -10,10 +10,10 @@ import { Id } from "@/convex/_generated/dataModel";
 
 export default function NewObservationPage() {
   const { user } = useUser();
-  const convexUser = useQuery(
-    api.users.getUserByClerkId,
-    user ? { clerkId: user.id } : "skip"
-  );
+      const convexUser = useQuery(
+      api.users.current,
+      user ? {} : "skip"
+    );
   const coachId = convexUser?._id as Id<'users'> | undefined;
 
   return (

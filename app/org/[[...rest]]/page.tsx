@@ -19,10 +19,10 @@ export default function OrganizationPage() {
   const [isSettingActive, setIsSettingActive] = useState(false);
 
   // Get user's Convex record to check for organization ID
-  const convexUser = useQuery(
-    api.users.getUserByClerkId,
-    user && isLoaded ? { clerkId: user.id } : "skip"
-  );
+      const convexUser = useQuery(
+      api.users.current,
+      user && isLoaded ? {} : "skip"
+    );
 
   // Try to set active organization if user has one but it's not active
   useEffect(() => {

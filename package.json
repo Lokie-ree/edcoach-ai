@@ -46,6 +46,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "convex": "^1.24.8",
+    "convex-helpers": "^0.1.95",
     "date-fns": "^4.1.0",
     "framer-motion": "^11.18.2",
     "isomorphic-dompurify": "^2.25.0",

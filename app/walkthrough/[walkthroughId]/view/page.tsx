@@ -31,10 +31,10 @@ export default function ViewWalkthroughPage({
   const { walkthroughId } = React.use(params);
   const { user, isLoaded } = useUser();
   
-  // Get convex user data
+  // Get current user data
   const convexUser = useQuery(
-    api.users.getUserByClerkId,
-    user && isLoaded ? { clerkId: user.id } : "skip"
+    api.users.current,
+    user && isLoaded ? {} : "skip"
   );
 
   // Get walkthrough details
@@ -51,13 +51,16 @@ export default function ViewWalkthroughPage({
 
   // Get teacher info
   const teacher = useQuery(
-    api.teachers.getById,
-    walkthrough ? { teacherId: walkthrough.teacherId } : "skip"
+    api.teachers.list,
+    convexUser?.role === "coach" ? {} : "skip"
   );
+
+  // Find the specific teacher from the list
+  const specificTeacher = teacher?.find(t => t._id === walkthrough?.teacherId);
 
   // Get observer info
   const observer = useQuery(
-    api.users.getUserById,
+    api.users.getById,
     walkthrough ? { userId: walkthrough.observerId } : "skip"
   );
 
@@ -85,7 +88,7 @@ export default function ViewWalkthroughPage({
 
   // Check permissions - teachers can only view their own walkthroughs, coaches can view their teachers' walkthroughs
   const hasPermission = convexUser.role === "coach" || 
-    (convexUser.role === "teacher" && teacher && walkthrough.teacherId === teacher._id);
+    (convexUser.role === "teacher" && specificTeacher && walkthrough.teacherId === specificTeacher._id);
 
   if (!hasPermission) {
     return (
@@ -117,7 +120,7 @@ export default function ViewWalkthroughPage({
       {/* Header */}
       <PageHeader
         title="Classroom Walkthrough"
-        description={`Professional development observation for ${teacher?.name || "teacher"}`}
+        description={`Professional development observation for ${specificTeacher?.name || "teacher"}`}
         gradient={true}
         rightContent={
           convexUser.role === "coach" ? (

@@ -1,10 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
-// The schema is entirely optional.
-// You can delete this file (schema.ts) and the
-// app will continue to work.
-// The schema provides more precise TypeScript types.
 export default defineSchema({
   // Core user management - Clerk integration
   users: defineTable({
@@ -17,7 +13,6 @@ export default defineSchema({
     preferences: v.optional(v.any()),
     createdAt: v.number(),
     onboardingComplete: v.optional(v.boolean()),
-    // Legacy field for migration compatibility
     externalId: v.optional(v.string()),
   })
     .index("by_clerk_id", ["clerkId"])
@@ -32,10 +27,15 @@ export default defineSchema({
     gradeBand: v.string(),
     status: v.union(v.literal("pending"), v.literal("active")),
     createdAt: v.number(),
+    // --- CRITICAL ADDITION FOR PERFORMANCE ---
+    // Denormalize the organization ID to allow for efficient, multi-tenant queries.
+    clerkOrganizationId: v.optional(v.string()),
   })
     .index("by_user", ["userId"])
     .index("by_email", ["email"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    // --- CRITICAL ADDITION FOR PERFORMANCE ---
+    .index("by_organization", ["clerkOrganizationId"]),
 
   // Core walkthrough functionality
   walkthroughs: defineTable({
@@ -62,13 +62,13 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_walkthrough", ["walkthroughId"]),
 
-  // Rubric system (kept for business logic)
+  // Rubric system
   rubrics: defineTable({
     name: v.string(),
     description: v.optional(v.string()),
     version: v.optional(v.string()),
     isStandard: v.boolean(),
-    structure: v.any(),
+    structure: v.any(), // Note: Could be typed further for more safety
     createdBy: v.optional(v.id("users")),
     createdAt: v.number(),
   }),
