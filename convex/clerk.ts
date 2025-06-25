@@ -44,9 +44,26 @@ export const upsertUser = internalMutation({
     };
 
     if (existingUser === null) {
+      // Check if this email has a pending teacher record to determine the correct role
+      const email = data.email_addresses[0]?.email_address;
+      let defaultRole: "coach" | "teacher" = "coach";
+      
+      if (email) {
+        const pendingTeacher = await ctx.db
+          .query("teachers")
+          .withIndex("by_email", (q) => q.eq("email", email))
+          .filter(q => q.eq(q.field("status"), "pending"))
+          .first();
+        
+        if (pendingTeacher) {
+          defaultRole = "teacher";
+          console.log(`Setting role to teacher for ${email} due to pending teacher record`);
+        }
+      }
+
       await ctx.db.insert("users", {
         ...userAttributes,
-        role: "coach", // Default role, updated by org membership
+        role: defaultRole, // Use determined role based on pending teacher record
         preferences: {},
         createdAt: Date.now(),
         onboardingComplete: false,
@@ -98,7 +115,22 @@ export const handleOrgMembership = internalMutation({
       "org:admin": "coach",
       "org:member": "teacher",
     };
-    const targetRole = CLERK_TO_APP_ROLE_MAPPING[clerkRole] || "teacher";
+    let targetRole = CLERK_TO_APP_ROLE_MAPPING[clerkRole] || "teacher";
+
+    // Safety check: If there's a pending teacher record for this user,
+    // they should be a teacher regardless of their Clerk role
+    if (user.email) {
+      const pendingTeacher = await ctx.db
+        .query("teachers")
+        .withIndex("by_email", (q) => q.eq("email", user.email))
+        .filter(q => q.eq(q.field("status"), "pending"))
+        .first();
+      
+      if (pendingTeacher) {
+        targetRole = "teacher";
+        console.log(`Overriding role for ${user.email} to teacher due to pending teacher record`);
+      }
+    }
 
     // Update user with org ID and new role
     await ctx.db.patch(user._id, {
