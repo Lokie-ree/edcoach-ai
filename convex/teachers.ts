@@ -248,8 +248,13 @@ export const internalFindAndLinkTeacher = internalMutation({
     ),
     handler: async (ctx, args) => {
         const user = await ctx.db.get(args.userId);
-        if (!user || !user.email) return null;
+        if (!user || !user.email) {
+            console.log(`internalFindAndLinkTeacher: User not found or no email for userId ${args.userId}`);
+            return null;
+        }
 
+        console.log(`internalFindAndLinkTeacher: Looking for pending teacher record for email ${user.email}`);
+        
         const teacherRecord = await ctx.db
             .query("teachers")
             .withIndex("by_email", (q) => q.eq("email", user.email!))
@@ -257,11 +262,15 @@ export const internalFindAndLinkTeacher = internalMutation({
             .first();
 
         if (teacherRecord) {
+            console.log(`internalFindAndLinkTeacher: Found pending teacher record ${teacherRecord._id}, linking to user ${user._id}`);
             await ctx.db.patch(teacherRecord._id, {
                 userId: user._id,
                 status: "active",
                 clerkOrganizationId: user.clerkOrganizationId,
             });
+            console.log(`internalFindAndLinkTeacher: Successfully linked and activated teacher record`);
+        } else {
+            console.log(`internalFindAndLinkTeacher: No pending teacher record found for ${user.email}`);
         }
         return teacherRecord;
     }

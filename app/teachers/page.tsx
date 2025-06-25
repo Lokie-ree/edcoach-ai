@@ -10,24 +10,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Users, GraduationCap, Pencil, Trash2 } from "lucide-react";
+import { Users, GraduationCap, Pencil } from "lucide-react";
 import Link from "next/link";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { toast } from "sonner";
 import { useUser, useOrganization, useClerk } from "@clerk/nextjs";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 import Modal from "@/components/mage-ui/modal";
 import TeacherDetailsForm from "@/components/forms/teacher-details-form";
-import { Id } from "@/convex/_generated/dataModel";
 import { motion } from "framer-motion";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 
@@ -82,7 +71,6 @@ const GridDistortion = () => {
 
 export default function TeachersPage() {
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
-  const [deletingTeacher, setDeletingTeacher] = useState<Teacher | null>(null);
   const [isSettingActive, setIsSettingActive] = useState(false);
   const { user, isLoaded } = useUser();
   const { organization } = useOrganization();
@@ -121,19 +109,8 @@ export default function TeachersPage() {
   const teachers = useQuery(api.teachers.list);
   const createTeacherFromUser = useMutation(api.teachers.createFromUser);
   const updateTeacher = useMutation(api.teachers.update);
-  const removeTeacher = useMutation(api.teachers.remove);
 
-  const handleDelete = async () => {
-    if (!deletingTeacher) return;
-    try {
-      await removeTeacher({ id: deletingTeacher._id as Id<'teachers'> });
-      toast.success("Teacher deleted successfully");
-      setDeletingTeacher(null);
-    } catch (error) {
-      console.error("Failed to delete teacher:", error);
-      toast.error("Failed to delete teacher. Please try again.");
-    }
-  };
+
 
   return (
     <div className="space-y-6 relative">
@@ -163,11 +140,11 @@ export default function TeachersPage() {
               <p className="text-sm text-muted-foreground">
                 Summary of your teaching staff • 
                 <Link href="/org" className="text-primary hover:underline ml-1">
-                  Invite new teachers in Organization Settings
+                  Manage teachers in Organization Settings
                 </Link>
                 <br />
                 <span className="text-xs text-muted-foreground/80 mt-1 block">
-                  New members automatically get teacher role. Admins become coaches.
+                  New members automatically get teacher role. To remove a teacher, use Organization Settings.
                 </span>
               </p>
             </div>
@@ -240,24 +217,7 @@ export default function TeachersPage() {
         )}
       </Modal>
 
-      <Dialog open={!!deletingTeacher} onOpenChange={(open) => { if (!open) setDeletingTeacher(null); }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Are you sure?</DialogTitle>
-            <DialogDescription>
-              This will permanently delete {deletingTeacher?.name}. This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
 
       {/* Teachers List with Animation */}
       <motion.div
@@ -326,24 +286,15 @@ export default function TeachersPage() {
                           </span>
                         </div>
                       </div>
-                      <div className="flex gap-1 ml-4">
+                      <div className="flex gap-2 ml-4">
                         <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8"
-                          aria-label="Edit teacher"
+                          size="sm"
+                          variant={teacher.status === "needs_details" ? "default" : "outline"}
+                          className={teacher.status === "needs_details" ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}
                           onClick={() => setEditingTeacher(teacher)}
                         >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-destructive hover:text-destructive"
-                          aria-label="Delete teacher"
-                          onClick={() => setDeletingTeacher(teacher)}
-                        >
-                          <Trash2 className="h-4 w-4" />
+                          <Pencil className="h-4 w-4 mr-1" />
+                          {teacher.status === "needs_details" ? "Add Details" : "Edit"}
                         </Button>
                       </div>
                     </div>

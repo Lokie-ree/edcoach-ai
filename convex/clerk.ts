@@ -44,26 +44,25 @@ export const upsertUser = internalMutation({
     };
 
     if (existingUser === null) {
-      // Check if this email has a pending teacher record to determine the correct role
-      const email = data.email_addresses[0]?.email_address;
-      let defaultRole: "coach" | "teacher" = "coach";
+      // For new user creation, we need to determine if this is an organization invitation
+      // Since organization invitations should create teachers, we default to "teacher"
+      // Only organization creators (who create the org) should be coaches
+      let defaultRole: "coach" | "teacher" = "teacher";
       
-      if (email) {
-        const pendingTeacher = await ctx.db
-          .query("teachers")
-          .withIndex("by_email", (q) => q.eq("email", email))
-          .filter(q => q.eq(q.field("status"), "pending"))
-          .first();
-        
-        if (pendingTeacher) {
-          defaultRole = "teacher";
-          console.log(`Setting role to teacher for ${email} due to pending teacher record`);
-        }
+      // Check if this is an organization creator (they would have public metadata indicating this)
+      // Organization creators typically get processed through organizationCreated webhook separately
+      const isOrgCreator = data.public_metadata?.organizationCreator === true;
+      
+      if (isOrgCreator) {
+        defaultRole = "coach";
+        console.log(`Setting role to coach for organization creator: ${data.email_addresses[0]?.email_address}`);
+      } else {
+        console.log(`Setting role to teacher for invited user: ${data.email_addresses[0]?.email_address}`);
       }
 
       await ctx.db.insert("users", {
         ...userAttributes,
-        role: defaultRole, // Use determined role based on pending teacher record
+        role: defaultRole,
         preferences: {},
         createdAt: Date.now(),
         onboardingComplete: false,
@@ -102,10 +101,15 @@ export const handleOrgMembership = internalMutation({
       return;
     }
 
+    console.log(`Processing org membership webhook for user ${data.public_user_data.user_id}, org ${data.organization.id}, role ${data.role}`);
+
     const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, {
       clerkId: data.public_user_data.user_id,
     });
-    if (!user) return;
+    if (!user) {
+      console.error(`User not found for Clerk ID: ${data.public_user_data.user_id}`);
+      return;
+    }
 
     const clerkRole = data.role;
     const organizationId = data.organization.id;
@@ -115,22 +119,9 @@ export const handleOrgMembership = internalMutation({
       "org:admin": "coach",
       "org:member": "teacher",
     };
-    let targetRole = CLERK_TO_APP_ROLE_MAPPING[clerkRole] || "teacher";
-
-    // Safety check: If there's a pending teacher record for this user,
-    // they should be a teacher regardless of their Clerk role
-    if (user.email) {
-      const pendingTeacher = await ctx.db
-        .query("teachers")
-        .withIndex("by_email", (q) => q.eq("email", user.email))
-        .filter(q => q.eq(q.field("status"), "pending"))
-        .first();
-      
-      if (pendingTeacher) {
-        targetRole = "teacher";
-        console.log(`Overriding role for ${user.email} to teacher due to pending teacher record`);
-      }
-    }
+    const targetRole = CLERK_TO_APP_ROLE_MAPPING[clerkRole] || "teacher";
+    
+    console.log(`Processing org membership for ${user.email}: Clerk role=${clerkRole} → App role=${targetRole}`);
 
     // Update user with org ID and new role
     await ctx.db.patch(user._id, {
@@ -140,23 +131,34 @@ export const handleOrgMembership = internalMutation({
 
     // If the user is now a teacher, handle teacher record creation/linking
     if (targetRole === "teacher") {
+      console.log(`User ${user.email} has teacher role, checking for existing teacher record...`);
+      
       // First try to link any existing pending teacher record
       const linkedTeacher = await ctx.runMutation(internal.teachers.internalFindAndLinkTeacher, { userId: user._id });
       
-      // If no pending teacher record was found, auto-create one
-      if (!linkedTeacher) {
-        await ctx.db.insert("teachers", {
-          name: user.name,
-          email: user.email,
-          subject: [], // Empty - coach can fill later
-          gradeBand: "", // Empty - coach can fill later
-          status: "needs_details",
-          userId: user._id,
-          createdAt: Date.now(),
-          clerkOrganizationId: organizationId,
-        });
-        console.log(`Auto-created teacher record for ${user.email} (no pending record found)`);
+      if (linkedTeacher) {
+        console.log(`Linked existing pending teacher record for ${user.email}`);
+      } else {
+        console.log(`No pending teacher record found for ${user.email}, creating new teacher record...`);
+        
+        try {
+          const teacherId = await ctx.db.insert("teachers", {
+            name: user.name,
+            email: user.email,
+            subject: [], // Empty - coach can fill later
+            gradeBand: "", // Empty - coach can fill later
+            status: "needs_details",
+            userId: user._id,
+            createdAt: Date.now(),
+            clerkOrganizationId: organizationId,
+          });
+          console.log(`✅ Successfully auto-created teacher record ${teacherId} for ${user.email} with status "needs_details"`);
+        } catch (error) {
+          console.error(`❌ Failed to create teacher record for ${user.email}:`, error);
+        }
       }
+    } else {
+      console.log(`User ${user.email} has role ${targetRole}, skipping teacher record creation`);
     }
   },
 });
@@ -206,9 +208,10 @@ export const handleOrganizationCreated = internalMutation({
       // Update user with organization ID and ensure they're a coach
       await ctx.db.patch(user._id, {
         clerkOrganizationId: data.id,
-        role: "coach",
+        role: "coach", // Organization creators are always coaches
         onboardingComplete: true,
       });
+      console.log(`Set organization creator ${user.email} as coach for org ${data.id}`);
     }
   },
 });

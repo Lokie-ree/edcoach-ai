@@ -55,6 +55,7 @@ type TeacherDetailsFormProps = {
     gradeBand: string;
     status?: string;
     isUserRecord?: boolean;
+    userId?: string; // Add userId field for when it's a teacher record
   };
 };
 
@@ -78,8 +79,20 @@ export default function TeacherDetailsForm({
     try {
       if (isAddingDetails) {
         // Creating teacher record from user
+        // When isUserRecord is true, _id is the user ID
+        // When isUserRecord is false, we need the userId field
+        const userIdToUse = teacher.isUserRecord ? teacher._id : teacher.userId;
+        
+        if (!userIdToUse) {
+          console.error("No user ID found for teacher:", teacher);
+          toast.error("Unable to find user ID for this teacher");
+          return;
+        }
+        
+        console.log("Creating teacher record for user ID:", userIdToUse);
+        
         await createTeacherFromUser({
-          userId: teacher._id as Id<'users'>,
+          userId: userIdToUse as Id<'users'>,
           subject: [values.subject], // Convert single subject to array
           gradeBand: values.gradeBand,
         });
@@ -99,7 +112,12 @@ export default function TeacherDetailsForm({
       onSuccess();
     } catch (error) {
       console.error("Failed to save teacher:", error);
-      toast.error(`Failed to ${isAddingDetails ? "add details for" : "update"} teacher. Please try again.`);
+      
+      // Extract more specific error message if available
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.error("Error details:", errorMessage);
+      
+      toast.error(`Failed to ${isAddingDetails ? "add details for" : "update"} teacher: ${errorMessage}`);
     }
   };
 
