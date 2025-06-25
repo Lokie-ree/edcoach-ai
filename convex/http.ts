@@ -23,35 +23,48 @@ http.route({
         // User events
         case "user.created":
         case "user.updated":
+          console.log(`Processing ${event.type} for user:`, event.data.id);
           await ctx.runMutation(internal.clerk.upsertUser, {
             data: event.data,
           });
+          console.log(`✅ Successfully processed ${event.type}`);
           break;
 
         case "user.deleted": {
           const clerkUserId = event.data.id!;
+          console.log("Processing user.deleted for user:", clerkUserId);
           await ctx.runMutation(internal.clerk.deleteUser, { clerkUserId });
+          console.log("✅ Successfully processed user.deleted");
           break;
         }
         
         // Organization events
         case "organization.created":
+          console.log("Processing organization.created for org:", event.data.id);
           await ctx.runMutation(internal.clerk.handleOrganizationCreated, {
             data: event.data,
           });
+          console.log("✅ Successfully processed organization.created");
           break;
           
         case "organizationMembership.created":
         case "organizationMembership.updated":
+          console.log(`📨 Processing ${event.type}`);
+          console.log(`📨 Event data structure:`, JSON.stringify(event.data, null, 2));
+          console.log(`📨 For user:`, event.data.public_user_data?.user_id, "org:", event.data.organization?.id, "role:", event.data.role);
+          
           await ctx.runMutation(internal.clerk.handleOrgMembership, {
             data: event.data,
           });
+          console.log(`✅ Successfully processed ${event.type}`);
           break;
           
         case "organizationMembership.deleted":
+          console.log("Processing organizationMembership.deleted for user:", event.data.public_user_data?.user_id);
           await ctx.runMutation(internal.clerk.handleOrgMembershipDeleted, {
             data: event.data,
           });
+          console.log("✅ Successfully processed organizationMembership.deleted");
           break;
         
         // Billing events (using string matching for potential future events)
@@ -74,7 +87,8 @@ http.route({
                 console.log("Ignored billing webhook event", eventType);
             }
           } else {
-            console.log("Ignored webhook event", event.type);
+            console.log("⚠️ UNHANDLED WEBHOOK EVENT:", event.type);
+            console.log("Event data:", JSON.stringify(event.data, null, 2));
           }
           break;
         }

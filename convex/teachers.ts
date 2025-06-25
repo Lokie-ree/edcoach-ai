@@ -138,7 +138,9 @@ export const create = mutation({
 });
 
 /**
- * Create a teacher record for a user who is already in the organization.
+ * Create or update a teacher record for a user who is already in the organization.
+ * This will update an existing auto-created teacher record if one exists,
+ * or create a new one if none exists.
  */
 export const createFromUser = mutation({
   args: {
@@ -164,18 +166,36 @@ export const createFromUser = mutation({
         throw new Error("User does not have the teacher role.");
     }
 
-    const teacherId = await ctx.db.insert("teachers", {
-      name: teacherUser.name,
-      email: teacherUser.email || "",
-      subject: args.subject,
-      gradeBand: args.gradeBand,
-      status: "active",
-      userId: args.userId,
-      createdAt: Date.now(),
-      clerkOrganizationId: coachUser.clerkOrganizationId, // <-- Add org ID
-    });
+    // Check if teacher record already exists for this user
+    const existingTeacher = await ctx.db
+      .query("teachers")
+      .withIndex("by_user", q => q.eq("userId", args.userId))
+      .first();
 
-    return { success: true, teacherId };
+    if (existingTeacher) {
+      // Update existing teacher record
+      console.log(`Updating existing teacher record ${existingTeacher._id} for user ${args.userId}`);
+      await ctx.db.patch(existingTeacher._id, {
+        subject: args.subject,
+        gradeBand: args.gradeBand,
+        status: "active",
+      });
+      return { success: true, teacherId: existingTeacher._id };
+    } else {
+      // Create new teacher record
+      console.log(`Creating new teacher record for user ${args.userId}`);
+      const teacherId = await ctx.db.insert("teachers", {
+        name: teacherUser.name,
+        email: teacherUser.email || "",
+        subject: args.subject,
+        gradeBand: args.gradeBand,
+        status: "active",
+        userId: args.userId,
+        createdAt: Date.now(),
+        clerkOrganizationId: coachUser.clerkOrganizationId,
+      });
+      return { success: true, teacherId };
+    }
   },
 });
 

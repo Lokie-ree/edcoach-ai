@@ -32,6 +32,8 @@ export const upsertUser = internalMutation({
       return;
     }
 
+    console.log(`🔍 upsertUser: Processing user ${data.id} with email ${data.email_addresses[0]?.email_address}`);
+
     const existingUser = await ctx.runQuery(internal.users.internalGetUserByClerkId, {
       clerkId: data.id,
     });
@@ -55,20 +57,23 @@ export const upsertUser = internalMutation({
       
       if (isOrgCreator) {
         defaultRole = "coach";
-        console.log(`Setting role to coach for organization creator: ${data.email_addresses[0]?.email_address}`);
+        console.log(`✅ upsertUser: Setting role to coach for organization creator: ${data.email_addresses[0]?.email_address}`);
       } else {
-        console.log(`Setting role to teacher for invited user: ${data.email_addresses[0]?.email_address}`);
+        console.log(`✅ upsertUser: Setting role to teacher for invited user: ${data.email_addresses[0]?.email_address}`);
       }
 
-      await ctx.db.insert("users", {
+      const userId = await ctx.db.insert("users", {
         ...userAttributes,
         role: defaultRole,
         preferences: {},
         createdAt: Date.now(),
         onboardingComplete: false,
+        // Don't set clerkOrganizationId here - let handleOrgMembership do it
       });
+      console.log(`✅ upsertUser: Created user ${userId} with role ${defaultRole}`);
     } else {
       await ctx.db.patch(existingUser._id, userAttributes);
+      console.log(`✅ upsertUser: Updated existing user ${existingUser._id}`);
     }
   },
 });
@@ -95,19 +100,28 @@ export const deleteUser = internalMutation({
 export const handleOrgMembership = internalMutation({
   args: { data: orgMembershipWebhookPayload },
   handler: async (ctx, { data }) => {
+    console.log(`🔍 handleOrgMembership: Received full payload:`, JSON.stringify(data, null, 2));
+    
+    // Log each field we're trying to extract
+    console.log(`🔍 handleOrgMembership: user_id=${data?.public_user_data?.user_id}`);
+    console.log(`🔍 handleOrgMembership: org_id=${data?.organization?.id}`);
+    console.log(`🔍 handleOrgMembership: role=${data?.role}`);
+    
     // Safely extract fields we need from the webhook payload
     if (!data?.public_user_data?.user_id || !data?.organization?.id || !data?.role) {
-      console.error("Invalid org membership webhook payload:", data);
+      console.error("❌ handleOrgMembership: Invalid org membership webhook payload:", data);
       return;
     }
 
-    console.log(`Processing org membership webhook for user ${data.public_user_data.user_id}, org ${data.organization.id}, role ${data.role}`);
+    console.log(`✅ handleOrgMembership: Processing org membership webhook for user ${data.public_user_data.user_id}, org ${data.organization.id}, role ${data.role}`);
 
     const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, {
       clerkId: data.public_user_data.user_id,
     });
     if (!user) {
-      console.error(`User not found for Clerk ID: ${data.public_user_data.user_id}`);
+      console.log(`⏳ handleOrgMembership: User ${data.public_user_data.user_id} not found yet, scheduling retry in 2 seconds...`);
+      // User doesn't exist yet (user.created webhook hasn't fired), schedule a retry
+      await ctx.scheduler.runAfter(2000, internal.clerk.handleOrgMembership, { data });
       return;
     }
 
