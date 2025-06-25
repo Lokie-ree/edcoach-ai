@@ -50,14 +50,17 @@ export default function TeacherDashboardPageContent({
     .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
     .slice(0, 3);
 
-  // Show tutorial for new teachers (created within 5 minutes)
+  // Show tutorial for new teachers (created within 5 minutes) who haven't completed it
   useEffect(() => {
     if (convexUser && teacherRecord) {
       const userCreatedAt = convexUser.createdAt;
       const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
       
-      // Show tutorial if user was created within the last 5 minutes
-      if (userCreatedAt > fiveMinutesAgo) {
+      // Check if tutorial was already shown/completed
+      const tutorialShown = localStorage.getItem(`teacher-tutorial-shown-${convexUser._id}`);
+      
+      // Show tutorial if user was created within the last 5 minutes AND hasn't seen tutorial
+      if (userCreatedAt > fiveMinutesAgo && !tutorialShown) {
         setShowTutorial(true);
       }
     }
@@ -65,10 +68,18 @@ export default function TeacherDashboardPageContent({
 
   const handleTutorialComplete = () => {
     setShowTutorial(false);
+    // Mark tutorial as completed
+    if (convexUser) {
+      localStorage.setItem(`teacher-tutorial-shown-${convexUser._id}`, 'true');
+    }
   };
 
   const handleTutorialSkip = () => {
     setShowTutorial(false);
+    // Mark tutorial as completed even if skipped
+    if (convexUser) {
+      localStorage.setItem(`teacher-tutorial-shown-${convexUser._id}`, 'true');
+    }
   };
 
   return (

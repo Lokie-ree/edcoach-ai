@@ -46,20 +46,19 @@ export const upsertUser = internalMutation({
     };
 
     if (existingUser === null) {
-      // For new user creation, we need to determine if this is an organization invitation
-      // Since organization invitations should create teachers, we default to "teacher"
-      // Only organization creators (who create the org) should be coaches
-      let defaultRole: "coach" | "teacher" = "teacher";
+      // NEW LOGIC: Default to "coach" for direct signups, "teacher" only for org invites
+      let defaultRole: "coach" | "teacher" = "coach";
       
-      // Check if this is an organization creator (they would have public metadata indicating this)
-      // Organization creators typically get processed through organizationCreated webhook separately
-      const isOrgCreator = data.public_metadata?.organizationCreator === true;
+      // Check if this user signup came from an organization invitation
+      // Organization invitations include organization info in the webhook data
+      const isFromOrgInvite = data.organization_memberships && data.organization_memberships.length > 0;
       
-      if (isOrgCreator) {
-        defaultRole = "coach";
-        console.log(`✅ upsertUser: Setting role to coach for organization creator: ${data.email_addresses[0]?.email_address}`);
-      } else {
+      if (isFromOrgInvite) {
+        defaultRole = "teacher";
         console.log(`✅ upsertUser: Setting role to teacher for invited user: ${data.email_addresses[0]?.email_address}`);
+      } else {
+        defaultRole = "coach";
+        console.log(`✅ upsertUser: Setting role to coach for direct signup: ${data.email_addresses[0]?.email_address}`);
       }
 
       const userId = await ctx.db.insert("users", {
