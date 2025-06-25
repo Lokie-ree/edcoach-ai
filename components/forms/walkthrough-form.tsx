@@ -181,6 +181,18 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
     setAILoading(true);
     try {
       const evidence = watch("evidenceSummary") || "";
+      
+      // Check if evidence is provided
+      if (!evidence.trim()) {
+        toast({ 
+          title: "Evidence Required", 
+          description: "Please provide evidence summary before generating AI feedback.", 
+          variant: "destructive" 
+        });
+        setAILoading(false);
+        return;
+      }
+      
       const { reinforcementIndicator: reinforcementCode, refinementIndicator: refinementCode } = methods.getValues();
       const reinforcementIndicator = getIndicatorByCode(reinforcementCode);
       const refinementIndicator = getIndicatorByCode(refinementCode);
@@ -536,7 +548,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
                     variant="secondary"
                     className="flex-1"
                     onClick={handleAIFeedback}
-                    disabled={aiLoading}
+                    disabled={aiLoading || !watch("evidenceSummary")?.trim()}
                   >
                     {aiLoading ? (
                       "Generating AI Feedback..."
