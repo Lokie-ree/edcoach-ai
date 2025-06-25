@@ -36,10 +36,11 @@ export const generateFeedback = action({
     });
     if (!user) throw new Error("User not found");
 
-    // Check AI usage limits (simplified - no subscription restrictions for now)
-    const usageCheck = await ctx.runQuery("users:checkAIUsageLimit" as any, {});
-    if (!usageCheck.canGenerate) {
-      throw new Error("AI generation temporarily unavailable. Please try again later.");
+    // Check AI usage limits based on user's plan
+    const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, {});
+    if (aiUsage.isOverLimit) {
+      const planName = aiUsage.plan === "coach_starter" ? "Coach Starter" : "Coach Pro";
+      throw new Error(`You've reached your monthly limit of ${aiUsage.limit} AI generations on the ${planName} plan. Please upgrade or wait until next month.`);
     }
 
     const indicator = args.indicator;

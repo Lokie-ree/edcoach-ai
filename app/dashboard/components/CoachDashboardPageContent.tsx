@@ -11,9 +11,11 @@ import { AIUsageBadge, AIUsageWarning } from "@/components/ui/ai-usage-badge";
 import CoachTutorial from "@/components/onboarding/coach-tutorial";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, ChartSpline, ClipboardPlus, Settings } from "lucide-react";
+import { Users, ChartSpline, ClipboardPlus, Settings, Lock } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 interface CoachDashboardPageContentProps {
   user: ClerkUser;
@@ -27,6 +29,9 @@ export default function CoachDashboardPageContent({
   clerkOrganizationId
 }: CoachDashboardPageContentProps) {
   const [showTutorial, setShowTutorial] = useState(false);
+
+  // Get AI usage to check if walkthrough creation should be disabled
+  const aiUsage = useQuery(api.plans.getAIUsageThisMonth);
 
   // Show tutorial for new coaches (created within last 5 minutes and first time on dashboard)
   useEffect(() => {
@@ -51,6 +56,10 @@ export default function CoachDashboardPageContent({
     setShowTutorial(false);
     localStorage.setItem(`coach-tutorial-shown-${convexUser._id}`, 'true');
   };
+
+  // Check if user can create new walkthroughs
+  const canCreateWalkthrough = !aiUsage?.isOverLimit;
+  const isProPlan = aiUsage?.plan === "coach_pro";
 
   return (
     <>
@@ -102,15 +111,27 @@ export default function CoachDashboardPageContent({
                 </Link>
 
                 {/* New Walkthrough */}
-                <Link href="/walkthrough/new">
+                {canCreateWalkthrough ? (
+                  <Link href="/walkthrough/new">
+                    <Button
+                      variant="outline"
+                      className="h-auto flex-col items-center p-4 space-y-2 w-full"
+                    >
+                      <ClipboardPlus className="h-6 w-6 text-primary" />
+                      <span className="text-sm font-medium">New Walkthrough</span>
+                    </Button>
+                  </Link>
+                ) : (
                   <Button
                     variant="outline"
-                    className="h-auto flex-col items-center p-4 space-y-2 w-full"
+                    disabled
+                    className="h-auto flex-col items-center p-4 space-y-2 w-full opacity-50 cursor-not-allowed"
+                    title={`Upgrade to ${isProPlan ? 'continue using' : 'Pro plan for more'} walkthroughs`}
                   >
-                    <ClipboardPlus className="h-6 w-6 text-primary" />
-                    <span className="text-sm font-medium">New Walkthrough</span>
+                    <Lock className="h-6 w-6 text-muted-foreground" />
+                    <span className="text-sm font-medium text-muted-foreground">Limit Reached</span>
                   </Button>
-                </Link>
+                )}
 
                 {/* Analytics */}
                 <Link href="/analytics">

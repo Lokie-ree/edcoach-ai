@@ -21,11 +21,19 @@ const Header = () => {
     user && isLoaded ? {} : "skip"
   );
 
+  // Get AI usage to check limits for coaches
+  const aiUsage = useQuery(
+    api.plans.getAIUsageThisMonth,
+    convexUser?.role === "coach" ? {} : "skip"
+  );
+
   // Define navigation links based on user role
   const getNavigationLinks = () => {
     if (!convexUser) return [];
 
     if (convexUser.role === "coach") {
+      const canCreateWalkthrough = !aiUsage?.isOverLimit;
+      
       return [
         {
           label: "Dashboard",
@@ -37,11 +45,12 @@ const Header = () => {
           icon: <Users size={16} />,
           href: "/teachers"
         },
-        {
+        // Conditionally include New Walkthrough based on limits
+        ...(canCreateWalkthrough ? [{
           label: "New Walkthrough",
           icon: <ClipboardPlus size={16} />,
           href: "/walkthrough/new"
-        },
+        }] : []),
         {
           label: "Analytics",
           icon: <ChartSpline size={16} />,

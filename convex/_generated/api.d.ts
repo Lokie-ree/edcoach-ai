@@ -24,6 +24,7 @@ import type * as http from "../http.js";
 import type * as indicatorQueries from "../indicatorQueries.js";
 import type * as migrations from "../migrations.js";
 import type * as onboarding from "../onboarding.js";
+import type * as plans from "../plans.js";
 import type * as rubricIndicators from "../rubricIndicators.js";
 import type * as rubrics from "../rubrics.js";
 import type * as teachers from "../teachers.js";
@@ -53,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   indicatorQueries: typeof indicatorQueries;
   migrations: typeof migrations;
   onboarding: typeof onboarding;
+  plans: typeof plans;
   rubricIndicators: typeof rubricIndicators;
   rubrics: typeof rubrics;
   teachers: typeof teachers;
