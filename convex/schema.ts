@@ -25,7 +25,7 @@ export default defineSchema({
     email: v.string(),
     subject: v.array(v.string()),
     gradeBand: v.string(),
-    status: v.union(v.literal("pending"), v.literal("active")),
+    status: v.union(v.literal("pending"), v.literal("active"), v.literal("needs_details")),
     createdAt: v.number(),
     // --- CRITICAL ADDITION FOR PERFORMANCE ---
     // Denormalize the organization ID to allow for efficient, multi-tenant queries.

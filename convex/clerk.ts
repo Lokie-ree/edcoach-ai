@@ -138,9 +138,25 @@ export const handleOrgMembership = internalMutation({
       role: targetRole,
     });
 
-    // If the user is now a teacher, try to link their pending teacher record
+    // If the user is now a teacher, handle teacher record creation/linking
     if (targetRole === "teacher") {
-      await ctx.runMutation(internal.teachers.internalFindAndLinkTeacher, { userId: user._id });
+      // First try to link any existing pending teacher record
+      const linkedTeacher = await ctx.runMutation(internal.teachers.internalFindAndLinkTeacher, { userId: user._id });
+      
+      // If no pending teacher record was found, auto-create one
+      if (!linkedTeacher) {
+        await ctx.db.insert("teachers", {
+          name: user.name,
+          email: user.email,
+          subject: [], // Empty - coach can fill later
+          gradeBand: "", // Empty - coach can fill later
+          status: "needs_details",
+          userId: user._id,
+          createdAt: Date.now(),
+          clerkOrganizationId: organizationId,
+        });
+        console.log(`Auto-created teacher record for ${user.email} (no pending record found)`);
+      }
     }
   },
 });
