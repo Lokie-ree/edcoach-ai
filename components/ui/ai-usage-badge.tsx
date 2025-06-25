@@ -84,11 +84,11 @@ export function AIUsageWarning() {
             )} />
             <div>
               <CardDescription className="text-sm mb-3">
-                {isOverLimit ? (
-                  <>
-                    <strong>Walkthrough Limit Reached:</strong> You've completed all {walkthroughsLimit} walkthroughs on the Coach Starter plan this month.
-                  </>
-                ) : (
+                                  {isOverLimit ? (
+                    <>
+                      <strong>Walkthrough Limit Reached:</strong> You&apos;ve completed all {walkthroughsLimit} walkthroughs on the Coach Starter plan this month.
+                    </>
+                  ) : (
                   <>
                     <strong>Few Walkthroughs Remaining:</strong> You have {walkthroughsRemaining} walkthroughs remaining this month.
                   </>

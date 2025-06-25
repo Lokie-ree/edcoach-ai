@@ -169,7 +169,7 @@ export default function BillingPage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            Have questions about which plan is right for you? We're here to help you choose the best option for your coaching needs.
+            Have questions about which plan is right for you? We&apos;re here to help you choose the best option for your coaching needs.
           </p>
           <Button variant="outline">
             Contact Support
