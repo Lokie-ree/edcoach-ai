@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAction, useQuery } from "convex/react";
+import { useAuth } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +39,7 @@ export function AIFeedbackGenerator({
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedFeedback, setGeneratedFeedback] = useState<string>("");
   
+  const { has } = useAuth();
   const generateFeedback = useAction(api.aiFeedback.generateFeedback);
   const usageInfo = useQuery(api.users.checkAIUsageLimit);
 
@@ -54,6 +56,29 @@ export function AIFeedbackGenerator({
 
     try {
       setIsGenerating(true);
+      
+      // Check for PAID Pro plan only - free users get starter plan by default
+      const hasProPlan = (has?.({ plan: "coach_pro" }) ?? false) ||
+                        (has?.({ permission: "coach_pro" }) ?? false) ||
+                        (has?.({ role: "coach_pro" }) ?? false);
+      
+      // Note: We don't check for starter plan because it's the free default
+      // All users without a paid Pro plan get starter plan benefits
+      
+      console.log("🔍 AI Feedback Generator plan check:", { 
+        hasProPlan,
+        finalPlan: hasProPlan ? "pro" : "starter_free",
+        checks: {
+          "plan:coach_pro": has?.({ plan: "coach_pro" }),
+          "permission:coach_pro": has?.({ permission: "coach_pro" }),
+          "role:coach_pro": has?.({ role: "coach_pro" }),
+          "plan:coach_starter": has?.({ plan: "coach_starter" }),
+          "permission:coach_starter": has?.({ permission: "coach_starter" }),
+          "role:coach_starter": has?.({ role: "coach_starter" }),
+          "role:admin": has?.({ role: "admin" }),
+        }
+      });
+      
       const feedback = await generateFeedback({
         evidence,
         indicator: {
@@ -66,6 +91,7 @@ export function AIFeedbackGenerator({
           student_centered_evidence: indicator.student_centered_evidence,
         },
         promptType,
+        hasProPlan,
       });
 
       setGeneratedFeedback(feedback);

@@ -1,0 +1,222 @@
+import { useState, useEffect } from 'react';
+import { useAuth, useUser } from '@clerk/nextjs';
+
+interface PlanDetectionResult {
+  isProPlan: boolean;
+  isStarterPlan: boolean;
+  planDetectionMethod: 'clerk_has' | 'user_metadata' | 'fallback' | 'loading' | 'error';
+  isLoading: boolean;
+  error: string | null;
+  debugInfo: {
+    clerkUserId: string | null | undefined;
+    userMetadata: unknown;
+    hasChecks: Record<string, boolean | undefined>;
+  };
+}
+
+export function usePlanDetection(): PlanDetectionResult {
+  const { has, userId } = useAuth();
+  const { user } = useUser();
+  
+  const [result, setResult] = useState<PlanDetectionResult>({
+    isProPlan: false,
+    isStarterPlan: false,
+    planDetectionMethod: 'loading',
+    isLoading: true,
+    error: null,
+    debugInfo: {
+      clerkUserId: undefined,
+      userMetadata: null,
+      hasChecks: {},
+    }
+  });
+
+  useEffect(() => {
+    if (!userId || !user) {
+      setResult(prev => ({
+        ...prev,
+        isLoading: true,
+        planDetectionMethod: 'loading'
+      }));
+      return;
+    }
+
+    detectPlan();
+  }, [userId, user, has]);
+
+  const detectPlan = () => {
+    try {
+      console.log('🔍 SIMPLIFIED Plan Detection: Personal billing only...');
+      
+      // METHOD 1: Check user metadata (most reliable for personal billing)
+      const userMetadataResult = checkUserMetadata();
+      
+      // METHOD 2: Try Clerk has() calls (may work for personal billing)
+      const clerkHasResult = checkClerkHas();
+      
+      // Determine final result (prioritize user metadata)
+      let finalResult: PlanDetectionResult;
+      
+      if (userMetadataResult.success) {
+        console.log('✅ Using user metadata for plan detection');
+        finalResult = {
+          isProPlan: userMetadataResult.isProPlan,
+          isStarterPlan: !userMetadataResult.isProPlan, // If not Pro, then Starter
+          planDetectionMethod: 'user_metadata',
+          isLoading: false,
+          error: null,
+          debugInfo: {
+            clerkUserId: userId,
+            userMetadata: userMetadataResult.metadata,
+            hasChecks: clerkHasResult.checks,
+          }
+        };
+      } else if (clerkHasResult.success) {
+        console.log('✅ Using Clerk has() for plan detection');
+        finalResult = {
+          isProPlan: clerkHasResult.isProPlan,
+          isStarterPlan: !clerkHasResult.isProPlan,
+          planDetectionMethod: 'clerk_has',
+          isLoading: false,
+          error: null,
+          debugInfo: {
+            clerkUserId: userId,
+            userMetadata: userMetadataResult.metadata,
+            hasChecks: clerkHasResult.checks,
+          }
+        };
+      } else {
+        console.log('⚠️ No plan detected, defaulting to Starter (free)');
+        finalResult = {
+          isProPlan: false,
+          isStarterPlan: true,
+          planDetectionMethod: 'fallback',
+          isLoading: false,
+          error: null,
+          debugInfo: {
+            clerkUserId: userId,
+            userMetadata: userMetadataResult.metadata,
+            hasChecks: clerkHasResult.checks,
+          }
+        };
+      }
+
+      console.log('🎯 SIMPLIFIED Plan Detection Result:', {
+        isProPlan: finalResult.isProPlan,
+        method: finalResult.planDetectionMethod,
+        userMetadata: userMetadataResult.metadata,
+        hasChecks: clerkHasResult.checks,
+      });
+      
+      setResult(finalResult);
+      
+    } catch (error) {
+      console.error('❌ Plan Detection Error:', error);
+      setResult(prev => ({
+        ...prev,
+        isLoading: false,
+        error: `Plan detection failed: ${error}`,
+        planDetectionMethod: 'error'
+      }));
+    }
+  };
+
+  const checkUserMetadata = () => {
+    console.log('👤 Checking user metadata for personal billing...');
+    
+    if (!user) {
+      return { success: false, isProPlan: false, metadata: null };
+    }
+
+    const metadata = {
+      publicMetadata: user.publicMetadata,
+      unsafeMetadata: user.unsafeMetadata,
+    };
+
+    // Check all possible locations for subscription info
+    const subscriptionSources = [
+      user.publicMetadata?.subscription,
+      user.publicMetadata?.plan,
+      user.unsafeMetadata?.subscription,
+      user.unsafeMetadata?.plan,
+    ];
+
+    // Check nested subscription objects
+    const userSubscription = user.publicMetadata?.subscription || user.unsafeMetadata?.subscription;
+    if (typeof userSubscription === 'object' && userSubscription) {
+      subscriptionSources.push(
+        (userSubscription as { plan: string }).plan,
+        (userSubscription as { product: string }).product,
+        (userSubscription as { name: string }).name,
+        (userSubscription as { type: string }).type
+      );
+    }
+
+    const validSubscriptions = subscriptionSources.filter(Boolean);
+    console.log('📋 Found subscription data:', validSubscriptions);
+
+    const isProPlan = validSubscriptions.some(sub => 
+      typeof sub === 'string' && (
+        sub.toLowerCase().includes('pro') ||
+        sub === 'coach_pro' ||
+        sub === 'Coach Pro' ||
+        sub === 'CoachPro'
+      )
+    );
+
+    return {
+      success: validSubscriptions.length > 0,
+      isProPlan,
+      metadata
+    };
+  };
+
+  const checkClerkHas = () => {
+    console.log('🔐 Checking Clerk has() for personal billing...');
+    
+    if (!has) {
+      return { success: false, isProPlan: false, checks: {} };
+    }
+
+    // Try various plan name variations
+    const planVariations = [
+      'coach_pro', 'coach_starter', 'pro', 'starter',
+      'Coach Pro', 'Coach Starter', 'CoachPro', 'CoachStarter',
+    ];
+
+    const checks: Record<string, boolean | undefined> = {};
+    let foundProPlan = false;
+
+    for (const planName of planVariations) {
+      try {
+        // Try plan, permission, and role checks
+        const planCheck = has({ plan: planName });
+        const permissionCheck = has({ permission: planName });
+        const roleCheck = has({ role: planName });
+        
+        checks[`plan:${planName}`] = planCheck;
+        checks[`permission:${planName}`] = permissionCheck;
+        checks[`role:${planName}`] = roleCheck;
+
+        if (planCheck || permissionCheck || roleCheck) {
+          console.log(`✅ Found subscription via has(): ${planName}`);
+          if (planName.toLowerCase().includes('pro')) {
+            foundProPlan = true;
+          }
+        }
+      } catch (error) {
+        console.warn(`has() check failed for ${planName}:`, error);
+      }
+    }
+
+    const hasAnyPlan = Object.values(checks).some(Boolean);
+
+    return {
+      success: hasAnyPlan,
+      isProPlan: foundProPlan,
+      checks
+    };
+  };
+
+  return result;
+} 

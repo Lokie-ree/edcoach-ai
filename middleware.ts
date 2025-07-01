@@ -11,15 +11,24 @@ const isProtectedRoute = createRouteMatcher([
   '/org(.*)'
 ]);
 
+const isCoachRoute = createRouteMatcher([
+  '/dashboard(.*)',
+  '/analytics(.*)', 
+  '/teachers(.*)',
+  '/walkthrough(.*)',
+  '/org(.*)'
+]);
+
 const isPublicRoute = createRouteMatcher([
   '/',
   '/sign-in(.*)',
   '/sign-up(.*)',
-  '/onboarding(.*)'
+  '/onboarding(.*)',
+  '/billing(.*)'
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth();
+  const { userId, has } = await auth();
   const url = req.nextUrl.clone();
 
   // If user is not authenticated and trying to access protected route
@@ -37,6 +46,13 @@ export default clerkMiddleware(async (auth, req) => {
   // Protect the route if it's a protected route
   if (isProtectedRoute(req)) {
     await auth.protect();
+  }
+
+  // Skip subscription checks in middleware - handle in components with personal billing detection
+  // Organization context in middleware may interfere with personal billing detection
+  if (userId && isCoachRoute(req)) {
+    console.log('🏠 Middleware: Skipping billing checks - will be handled by personal plan detection in components');
+    // Let components handle personal billing detection using usePlanDetection hook
   }
 });
 

@@ -14,15 +14,10 @@ export default defineSchema({
     createdAt: v.number(),
     onboardingComplete: v.optional(v.boolean()),
     externalId: v.optional(v.string()),
-    // Subscription fields (all optional to maintain compatibility)
-    subscriptionPlan: v.optional(v.union(v.literal("coach_starter"), v.literal("coach_pro"))),
-    subscriptionStatus: v.optional(v.union(v.literal("active"), v.literal("canceled"), v.literal("past_due"))),
-    subscriptionId: v.optional(v.string()),
-    currentPeriodEnd: v.optional(v.number()),
+    // Note: Subscription data is managed by Clerk Billing, no longer stored locally
   })
     .index("by_clerk_id", ["clerkId"])
-    .index("by_organization", ["clerkOrganizationId"])
-    .index("by_subscription", ["subscriptionPlan", "subscriptionStatus"]),
+    .index("by_organization", ["clerkOrganizationId"]),
 
   // Teacher records (app-specific data, linked to users via email/userId)
   teachers: defineTable({

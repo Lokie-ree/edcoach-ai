@@ -67,25 +67,13 @@ http.route({
           console.log("✅ Successfully processed organizationMembership.deleted");
           break;
         
-        // Billing events (using string matching for potential future events)
+        // Note: Clerk Billing doesn't send webhooks - subscription state is managed by Clerk
+        
+        // Fallback for other events
         default: {
           const eventType = (event as any).type;
           if (eventType?.startsWith("billing.")) {
-            switch (eventType) {
-              case "billing.subscription.created":
-              case "billing.subscription.updated":
-                // TODO: Implement billing webhook handlers
-                console.log("Billing subscription change:", eventType);
-                break;
-                
-              case "billing.subscription.deleted":
-                // TODO: Implement billing webhook handlers  
-                console.log("Billing subscription cancelled:", eventType);
-                break;
-                
-              default:
-                console.log("Ignored billing webhook event", eventType);
-            }
+            console.log("Ignored billing webhook event", eventType);
           } else {
             console.log("⚠️ UNHANDLED WEBHOOK EVENT:", event.type);
             console.log("Event data:", JSON.stringify(event.data, null, 2));

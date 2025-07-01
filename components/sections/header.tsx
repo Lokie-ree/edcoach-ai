@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton, SignInButton, OrganizationSwitcher } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import MaxWidthWrapper from "@/components/layout/MaxWidthWrapper";
 import { Logo } from "@/components/logo";
@@ -102,6 +102,14 @@ const Header = () => {
 
           <div className="flex items-center space-x-4">
             <SignedIn>
+              <OrganizationSwitcher 
+                appearance={{
+                  elements: {
+                    organizationSwitcherTrigger: "border border-border hover:bg-accent/50",
+                    organizationSwitcherTriggerIcon: "text-muted-foreground",
+                  }
+                }}
+              />
               <UserButton 
                 afterSignOutUrl="/"
                 appearance={{

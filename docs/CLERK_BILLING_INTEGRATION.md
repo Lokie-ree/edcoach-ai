@@ -108,6 +108,7 @@ const hasPremiumAccess = has({ feature: 'premium_access' });
 ## 7. References
 - [Clerk Billing Overview](https://clerk.com/docs/billing/overview)
 - [Clerk Billing for B2C SaaS](https://clerk.com/docs/billing/b2c-saas?instant-redirect=true)
+- [Clerk Billing for B2B SaaS](https://clerk.com/docs/billing/b2b-saas?instant-redirect=true)
 - [Clerk Billing API Reference](https://clerk.com/docs/reference/backend/billing)
 - [Clerk Webhooks](https://clerk.com/docs/reference/backend/webhooks)
 

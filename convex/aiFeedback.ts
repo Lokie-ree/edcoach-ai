@@ -24,6 +24,7 @@ export const generateFeedback = action({
       student_centered_evidence: v.optional(v.string()),
     }),
     promptType: v.union(v.literal("reinforcement"), v.literal("refinement")),
+    hasProPlan: v.optional(v.boolean()),
   },
   returns: v.string(),
   handler: async (ctx, args) => {
@@ -36,8 +37,10 @@ export const generateFeedback = action({
     });
     if (!user) throw new Error("User not found");
 
-    // Check AI usage limits based on user's plan
-    const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, {});
+    // Check AI usage limits based on user's plan - NOW PASSING hasProPlan!
+    const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, {
+      hasProPlan: args.hasProPlan
+    });
     if (aiUsage.isOverLimit) {
       const planName = aiUsage.plan === "coach_starter" ? "Coach Starter" : "Coach Pro";
       throw new Error(`You've reached your monthly limit of ${aiUsage.limit} AI generations on the ${planName} plan. Please upgrade or wait until next month.`);

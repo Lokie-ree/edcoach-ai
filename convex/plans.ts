@@ -37,71 +37,35 @@ export const PLAN_CONFIG = {
 export type PlanType = keyof typeof PLAN_CONFIG;
 export type PlanFeatures = typeof PLAN_CONFIG[PlanType]['features'];
 
-/**
- * Get the user's current plan configuration
- * Safely defaults to coach_starter for existing coaches
- */
-export const getCurrentPlan = query({
-  args: {},
-  returns: v.object({
-    plan: v.union(v.literal("coach_starter"), v.literal("coach_pro")),
-    name: v.string(),
-    price: v.number(),
-    description: v.string(),
-    features: v.any(),
-    isActive: v.boolean(),
-  }),
-  handler: async (ctx) => {
-    const user = await getCurrentUser(ctx);
-    
-    // Teachers don't have plans
-    if (!user || user.role !== "coach") {
-      throw new Error("Only coaches have subscription plans");
-    }
-
-    // Default to coach_starter for existing users
-    const plan = user.subscriptionPlan || "coach_starter";
-    const planConfig = PLAN_CONFIG[plan];
-    
-    // Check if subscription is active (coach_starter is always "active")
-    const isActive = plan === "coach_starter" || user.subscriptionStatus === "active";
-    
-    return {
-      plan,
-      name: planConfig.name,
-      price: planConfig.price,
-      description: planConfig.description,
-      features: planConfig.features,
-      isActive,
-    };
-  },
-});
+// Note: getCurrentPlan removed - use Clerk's has() method in components instead
 
 /**
  * Get current month's AI usage for the user
- * Non-breaking: works with existing AI usage logs
+ * Now takes plan info from frontend (from Clerk's has() method)
  */
 export const getAIUsageThisMonth = query({
-  args: {},
+  args: {
+    hasProPlan: v.optional(v.boolean()),
+  },
   returns: v.object({
     count: v.number(),
     limit: v.number(),
     remaining: v.number(),
-    plan: v.union(v.literal("coach_starter"), v.literal("coach_pro")),
+    plan: v.string(),
     isOverLimit: v.boolean(),
     // Walkthrough counts (each walkthrough = 2 AI generations)
     walkthroughsUsed: v.number(),
     walkthroughsLimit: v.number(),
     walkthroughsRemaining: v.number(),
   }),
-  handler: async (ctx) => {
+  handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
     if (!user || user.role !== "coach") {
       throw new Error("Only coaches have AI usage tracking");
     }
 
-    // Get plan (default to coach_starter)
-    const plan = user.subscriptionPlan || "coach_starter";
+    // Determine plan from frontend Clerk check
+    const plan = args.hasProPlan ? "coach_pro" : "coach_starter";
     const limit = PLAN_CONFIG[plan].features.maxAIGenerations;
     
     // Get current month's AI generations

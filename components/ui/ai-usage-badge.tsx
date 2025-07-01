@@ -6,17 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Zap, Crown, AlertTriangle, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { usePlanDetection } from "@/lib/usePlanDetection";
 
 interface AIUsageBadgeProps {
   className?: string;
   showDetails?: boolean;
 }
 
-export function AIUsageBadge({ className, showDetails = false }: AIUsageBadgeProps) {
-  const aiUsage = useQuery(api.plans.getAIUsageThisMonth);
-  const currentPlan = useQuery(api.plans.getCurrentPlan);
-
-  if (!aiUsage || !currentPlan) {
+function ProUsageBadge({ className, showDetails }: AIUsageBadgeProps) {
+  const aiUsage = useQuery(api.plans.getAIUsageThisMonth, { hasProPlan: true });
+  
+  if (!aiUsage) {
     return (
       <Badge variant="secondary" className={cn("animate-pulse", className)}>
         <Zap className="w-3 h-3 mr-1" />
@@ -25,44 +25,86 @@ export function AIUsageBadge({ className, showDetails = false }: AIUsageBadgePro
     );
   }
 
-  const { walkthroughsUsed, walkthroughsLimit, walkthroughsRemaining, plan, isOverLimit } = aiUsage;
-  const isPro = plan === "coach_pro";
-  const isNearLimit = walkthroughsRemaining <= 2 && !isPro;
+  const { walkthroughsUsed, walkthroughsLimit } = aiUsage;
 
   return (
     <Badge 
-      variant={isPro ? "default" : isOverLimit ? "destructive" : isNearLimit ? "secondary" : "outline"}
+      variant="default"
       className={cn(
-        "transition-colors",
-        isPro && "bg-gradient-to-r from-purple-500 to-blue-500 text-white",
-        isNearLimit && !isPro && "bg-orange-500 text-white",
-        isOverLimit && !isPro && "bg-red-500 text-white",
+        "transition-colors bg-gradient-to-r from-purple-500 to-blue-500 text-white",
         className
       )}
     >
-      {isPro ? (
-        <>
-          <Crown className="w-3 h-3 mr-1" />
-          {showDetails ? `Pro - ${walkthroughsUsed}/${walkthroughsLimit} walkthroughs` : "Pro"}
-        </>
-      ) : (
-        <>
-          <Zap className="w-3 h-3 mr-1" />
-          {showDetails 
-            ? `${walkthroughsUsed}/${walkthroughsLimit} walkthroughs` 
-            : `${walkthroughsRemaining} left`
-          }
-        </>
-      )}
+      <Crown className="w-3 h-3 mr-1" />
+      {showDetails ? `Pro - ${walkthroughsUsed}/${walkthroughsLimit} walkthroughs` : "Pro"}
     </Badge>
   );
 }
 
-export function AIUsageWarning() {
-  const aiUsage = useQuery(api.plans.getAIUsageThisMonth);
-  const currentPlan = useQuery(api.plans.getCurrentPlan);
+function StarterUsageBadge({ className, showDetails }: AIUsageBadgeProps) {
+  const aiUsage = useQuery(api.plans.getAIUsageThisMonth, { hasProPlan: false });
+  
+  if (!aiUsage) {
+    return (
+      <Badge variant="secondary" className={cn("animate-pulse", className)}>
+        <Zap className="w-3 h-3 mr-1" />
+        Loading...
+      </Badge>
+    );
+  }
 
-  if (!aiUsage || !currentPlan || aiUsage.plan === "coach_pro") {
+  const { walkthroughsUsed, walkthroughsLimit, walkthroughsRemaining, isOverLimit } = aiUsage;
+  const isNearLimit = walkthroughsRemaining <= 2;
+
+  return (
+    <Badge 
+      variant={isOverLimit ? "destructive" : isNearLimit ? "secondary" : "outline"}
+      className={cn(
+        "transition-colors",
+        isNearLimit && "bg-orange-500 text-white",
+        isOverLimit && "bg-red-500 text-white",
+        className
+      )}
+    >
+      <Zap className="w-3 h-3 mr-1" />
+      {showDetails 
+        ? `${walkthroughsUsed}/${walkthroughsLimit} walkthroughs` 
+        : `${walkthroughsRemaining} left`
+      }
+    </Badge>
+  );
+}
+
+// Use the comprehensive personal plan detection hook
+function useProPlanDetection() {
+  const planDetection = usePlanDetection();
+  
+  console.log("🔍 AI Usage Badge plan check:", { 
+    isProPlan: planDetection.isProPlan,
+    isStarterPlan: planDetection.isStarterPlan,
+    planDetectionMethod: planDetection.planDetectionMethod,
+    isLoading: planDetection.isLoading,
+    finalPlan: planDetection.isProPlan ? "pro" : "starter_free"
+  });
+  
+  return planDetection.isProPlan;
+}
+
+export function AIUsageBadge({ className, showDetails = false }: AIUsageBadgeProps) {
+  const hasProPlan = useProPlanDetection();
+  
+  // Pro users get Pro badge, everyone else gets Starter (free) badge
+  if (hasProPlan) {
+    return <ProUsageBadge className={className} showDetails={showDetails} />;
+  } else {
+    return <StarterUsageBadge className={className} showDetails={showDetails} />;
+  }
+}
+
+function StarterUsageWarning() {
+  const aiUsage = useQuery(api.plans.getAIUsageThisMonth, { hasProPlan: false });
+
+  if (!aiUsage) {
     return null;
   }
   
@@ -84,11 +126,11 @@ export function AIUsageWarning() {
             )} />
             <div>
               <CardDescription className="text-sm mb-3">
-                                  {isOverLimit ? (
-                    <>
-                      <strong>Walkthrough Limit Reached:</strong> You&apos;ve completed all {walkthroughsLimit} walkthroughs on the Coach Starter plan this month.
-                    </>
-                  ) : (
+                {isOverLimit ? (
+                  <>
+                    <strong>Walkthrough Limit Reached:</strong> You&apos;ve completed all {walkthroughsLimit} walkthroughs on the Coach Starter plan this month.
+                  </>
+                ) : (
                   <>
                     <strong>Few Walkthroughs Remaining:</strong> You have {walkthroughsRemaining} walkthroughs remaining this month.
                   </>
@@ -108,6 +150,17 @@ export function AIUsageWarning() {
         </div>
       </Card>
     );
+  }
+  
+  return null;
+}
+
+export function AIUsageWarning() {
+  const hasProPlan = useProPlanDetection();
+  
+  // Only show warning to non-Pro users
+  if (!hasProPlan) {
+    return <StarterUsageWarning />;
   }
   
   return null;

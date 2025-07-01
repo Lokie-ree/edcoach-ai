@@ -3,7 +3,7 @@
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useAuth } from "@clerk/nextjs";
 import { walkthroughSchema } from "@/app/walkthrough/new/validation";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -175,6 +175,8 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
     }
   }, [draft, walkthroughId, reset, entryList]);
 
+  const { has } = useAuth();
+
   // Real AI feedback logic
   const generateFeedback = useAction(api.aiFeedback.generateFeedback);
   const handleAIFeedback = async () => {
@@ -207,6 +209,29 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
         if (typeof val === "object" && val !== null) return Object.values(val as Record<string, unknown>).join(", ");
         return (val as string) || "";
       };
+      
+      // Check for PAID Pro plan only - free users get starter plan by default
+      const hasProPlan = (has?.({ plan: "coach_pro" }) ?? false) ||
+                        (has?.({ permission: "coach_pro" }) ?? false) ||
+                        (has?.({ role: "coach_pro" }) ?? false);
+      
+      // Note: We don't check for starter plan because it's the free default
+      // All users without a paid Pro plan get starter plan benefits
+      
+      console.log("🔍 Walkthrough Form plan check:", { 
+        hasProPlan,
+        finalPlan: hasProPlan ? "pro" : "starter_free",
+        checks: {
+          "plan:coach_pro": has?.({ plan: "coach_pro" }),
+          "permission:coach_pro": has?.({ permission: "coach_pro" }),
+          "role:coach_pro": has?.({ role: "coach_pro" }),
+          "plan:coach_starter": has?.({ plan: "coach_starter" }),
+          "permission:coach_starter": has?.({ permission: "coach_starter" }),
+          "role:coach_starter": has?.({ role: "coach_starter" }),
+          "role:admin": has?.({ role: "admin" }),
+        }
+      });
+      
       const [reinforcement, refinement] = await Promise.all([
         generateFeedback({
           evidence,
@@ -220,6 +245,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
             student_centered_evidence: normalizeToString(reinforcementIndicator.student_centered_evidence),
           },
           promptType: "reinforcement",
+          hasProPlan,
         }),
         generateFeedback({
           evidence,
@@ -233,6 +259,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
             student_centered_evidence: normalizeToString(refinementIndicator.student_centered_evidence),
           },
           promptType: "refinement",
+          hasProPlan,
         }),
       ]);
       setValue("walkthroughEntries", [
