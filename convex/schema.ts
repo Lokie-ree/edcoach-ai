@@ -19,6 +19,21 @@ export default defineSchema({
     .index("by_clerk_id", ["clerkId"])
     .index("by_organization", ["clerkOrganizationId"]),
 
+  // NEW: Invitation system for teacher invites
+  invitations: defineTable({
+    coachId: v.id("users"), // The coach who sent the invite
+    teacherEmail: v.string(),
+    token: v.string(), // Unique invitation token
+    status: v.union(v.literal("pending"), v.literal("accepted"), v.literal("expired")),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+    acceptedAt: v.optional(v.number()),
+  })
+    .index("by_coach", ["coachId"])
+    .index("by_email", ["teacherEmail"])
+    .index("by_token", ["token"])
+    .index("by_status", ["status"]),
+
   // Teacher records (app-specific data, linked to users via email/userId)
   teachers: defineTable({
     userId: v.optional(v.id("users")), // null until they accept invite
@@ -28,15 +43,16 @@ export default defineSchema({
     gradeBand: v.string(),
     status: v.union(v.literal("pending"), v.literal("active"), v.literal("needs_details")),
     createdAt: v.number(),
-    // --- CRITICAL ADDITION FOR PERFORMANCE ---
-    // Denormalize the organization ID to allow for efficient, multi-tenant queries.
+    // NEW: Direct coach-teacher relationship
+    coachId: v.id("users"), // The coach who manages this teacher
+    // Keep clerkOrganizationId for backwards compatibility during migration
     clerkOrganizationId: v.optional(v.string()),
   })
     .index("by_user", ["userId"])
     .index("by_email", ["email"])
     .index("by_status", ["status"])
-    // --- CRITICAL ADDITION FOR PERFORMANCE ---
-    .index("by_organization", ["clerkOrganizationId"]),
+    .index("by_coach", ["coachId"]) // NEW: Efficient coach-based queries
+    .index("by_organization", ["clerkOrganizationId"]), // Keep for migration
 
   // Core walkthrough functionality
   walkthroughs: defineTable({
@@ -49,6 +65,7 @@ export default defineSchema({
     refinementIndicator: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
+    title: v.string(),
   })
     .index("by_observer", ["observerId"])
     .index("by_teacher", ["teacherId"])
@@ -133,4 +150,11 @@ export default defineSchema({
     .index("by_timestamp", ["timestamp"])
     .index("by_severity", ["severity"])
     .index("by_resource", ["resourceType", "resourceId"]),
+
+  aiFeedback: defineTable({
+    walkthroughId: v.id("walkthroughs"),
+    feedback: v.string(),
+    createdAt: v.number(),
+    // Add more fields as needed
+  }).index("by_walkthrough", ["walkthroughId"]),
 });

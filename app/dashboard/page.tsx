@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { api } from "@/convex/_generated/api";
 import { Loader2 } from "lucide-react";
-import { useUser, useOrganization } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import TeacherDashboardPageContent from "./components/TeacherDashboardPageContent";
@@ -13,7 +13,6 @@ import GridDistortion from "./components/GridDistortion";
 // Main Dashboard Component
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
-  const { organization } = useOrganization();
   const router = useRouter();
   
   // Get convex user data
@@ -30,7 +29,6 @@ export default function DashboardPage() {
       convexUser: convexUser ? {
         role: convexUser.role,
         onboardingComplete: convexUser.onboardingComplete,
-        clerkOrganizationId: convexUser.clerkOrganizationId
       } : "undefined"
     });
   }, [isLoaded, user, convexUser]);
@@ -43,9 +41,8 @@ export default function DashboardPage() {
     }
   }, [isLoaded, user, convexUser, router]);
 
-  // Determine user role and organization info
+  // Determine user role
   const userRole = convexUser?.role;
-  const clerkOrganizationId = organization?.id;
   
   // For teachers, get their teacher record
   const teacherRecord = useQuery(
@@ -132,10 +129,8 @@ export default function DashboardPage() {
         <CoachDashboardPageContent
           user={user}
           convexUser={convexUser}
-          clerkOrganizationId={clerkOrganizationId!}
         />
       )}
     </div>
   );
-
 }

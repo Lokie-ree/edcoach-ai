@@ -87,6 +87,43 @@ interface AnalyticsData {
   actionItems: ActionItem[];
 }
 
+// Type for getCoachAnalytics result
+interface CoachAnalyticsResult {
+  totalTeachers: number;
+  activeTeachers: number;
+  totalWalkthroughs: number;
+  totalFeedbackGenerated: number;
+  recentWalkthroughs: Array<{
+    _id: string;
+    title: string;
+    createdAt: number;
+    teacherName: string;
+    hasAiFeedback: boolean;
+  }>;
+}
+
+// Helper to map getCoachAnalytics result to AnalyticsData
+function mapCoachAnalyticsToAnalyticsData(data: CoachAnalyticsResult): AnalyticsData {
+  return {
+    totalTeachers: data.totalTeachers,
+    activeTeachers: data.activeTeachers,
+    totalWalkthroughs: data.totalWalkthroughs,
+    thisMonthWalkthroughs: 0, // Default or calculate if possible
+    completedWalkthroughs: 0, // Default or calculate if possible
+    draftWalkthroughs: 0, // Default or calculate if possible
+    completionRate: 0, // Default or calculate if possible
+    totalFeedbackInteractions: data.totalFeedbackGenerated ?? 0,
+    avgFeedbackPerTeacherPerMonth: 0, // Default or calculate if possible
+    reinforcementCount: 0, // Default or calculate if possible
+    refinementCount: 0, // Default or calculate if possible
+    topReinforcementIndicators: [],
+    topRefinementIndicators: [],
+    teacherProgress: [],
+    monthlyTrends: [],
+    actionItems: [],
+  };
+}
+
 // Overview Metrics Cards
 const OverviewMetrics = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
   if (!analytics) {
@@ -548,10 +585,11 @@ export default function AnalyticsDashboardPage() {
     );
 
   // Get analytics data for coach
-  const analytics = useQuery(
-    api.analytics.coachAnalytics,
+  const rawAnalytics = useQuery(
+    api.analytics.getCoachAnalytics,
     convexUser?.role === "coach" ? {} : "skip"
   );
+  const analytics = rawAnalytics ? mapCoachAnalyticsToAnalyticsData(rawAnalytics) : null;
 
   if (!clerkOrganizationId) {
     return <div className="flex items-center justify-center min-h-[400px] text-muted-foreground">

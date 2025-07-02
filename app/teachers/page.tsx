@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Users, GraduationCap, Pencil } from "lucide-react";
 import Link from "next/link";
-import { useUser, useOrganization, useClerk } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 import Modal from "@/components/mage-ui/modal";
@@ -73,7 +73,6 @@ export default function TeachersPage() {
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [isSettingActive, setIsSettingActive] = useState(false);
   const { user, isLoaded } = useUser();
-  const { organization } = useOrganization();
   const { setActive } = useClerk();
       const convexUser = useQuery(
       api.users.current,
@@ -85,7 +84,6 @@ export default function TeachersPage() {
     const trySetActiveOrg = async () => {
       if (
         convexUser?.clerkOrganizationId && 
-        !organization && 
         !isSettingActive &&
         setActive
       ) {
@@ -103,7 +101,7 @@ export default function TeachersPage() {
     };
 
     trySetActiveOrg();
-  }, [convexUser, organization, setActive, isSettingActive]);
+  }, [convexUser, setActive, isSettingActive]);
 
   // Fetch teachers for the current user's organization
   const teachers = useQuery(api.teachers.list);

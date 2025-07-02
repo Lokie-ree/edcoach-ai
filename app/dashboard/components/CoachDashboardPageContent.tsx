@@ -11,24 +11,23 @@ import { AIUsageBadge, AIUsageWarning } from "@/components/ui/ai-usage-badge";
 import CoachTutorial from "@/components/onboarding/coach-tutorial";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, ChartSpline, ClipboardPlus, Settings, Lock, Crown, ArrowRight } from "lucide-react";
+import { Users, ChartSpline, ClipboardPlus, Lock, Crown, ArrowRight, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { FeatureProtect } from "@/components/ui/feature-protect";
 import { usePlanDetection } from "@/lib/usePlanDetection";
+import { TeacherInvitationForm } from "@/components/forms/teacher-invitation-form";
 
 interface CoachDashboardPageContentProps {
   user: ClerkUser;
   convexUser: ConvexUser;
-  clerkOrganizationId: string;
 }
 
 export default function CoachDashboardPageContent({ 
   user, 
   convexUser,
-  clerkOrganizationId
 }: CoachDashboardPageContentProps) {
   const [showTutorial, setShowTutorial] = useState(false);
 
@@ -89,7 +88,7 @@ export default function CoachDashboardPageContent({
           rightContent={
             <div className="flex items-center gap-4">
               <AIUsageBadge showDetails />
-              <CoachDashboardHeaderStats organizationId={clerkOrganizationId} />
+              <CoachDashboardHeaderStats />
             </div>
           }
         />
@@ -164,6 +163,19 @@ export default function CoachDashboardPageContent({
                   </Button>
                 </Link>
 
+                {/* NEW: Invite Teacher - prominent placement for NON_ORG_APPROACH */}
+                <TeacherInvitationForm
+                  trigger={
+                    <Button
+                      variant="outline"
+                      className="h-auto flex-col items-center p-4 space-y-2 w-full border-green-300 bg-green-50 hover:bg-green-100 dark:border-green-700 dark:bg-green-950/20 dark:hover:bg-green-950/30"
+                    >
+                      <UserPlus className="h-6 w-6 text-green-600 dark:text-green-400" />
+                      <span className="text-sm font-medium text-green-700 dark:text-green-300">Invite Teacher</span>
+                    </Button>
+                  }
+                />
+
                 {/* New Walkthrough */}
                 {canCreateWalkthrough ? (
                   <Link href="/walkthrough/new">
@@ -197,30 +209,34 @@ export default function CoachDashboardPageContent({
                     <span className="text-sm font-medium">Analytics</span>
                   </Button>
                 </Link>
-
-                {/* Organization */}
-                <Link href="/org">
-                  <Button
-                    variant="outline"
-                    className="h-auto flex-col items-center p-4 space-y-2 w-full"
-                  >
-                    <Settings className="h-6 w-6 text-primary" />
-                    <span className="text-sm font-medium">Organization</span>
-                  </Button>
-                </Link>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Teacher Status Overview */}
-        <TeacherStatusOverview organizationId={clerkOrganizationId} />
+        {/* Dashboard Stats and Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Teacher Status Overview */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <TeacherStatusOverview />
+          </motion.div>
 
-        {/* Recent Feedback Highlights */}
-        <RecentFeedbackHighlights organizationId={clerkOrganizationId} />
+          {/* Recent Feedback Highlights */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <RecentFeedbackHighlights />
+          </motion.div>
+        </div>
       </div>
 
-      {/* Coach Tutorial Modal */}
+      {/* Coach Tutorial */}
       {showTutorial && (
         <CoachTutorial
           onComplete={handleTutorialComplete}

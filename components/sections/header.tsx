@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { SignedIn, SignedOut, UserButton, SignInButton, OrganizationSwitcher } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import MaxWidthWrapper from "@/components/layout/MaxWidthWrapper";
 import { Logo } from "@/components/logo";
 import { 
-  Home, Users, ChartSpline, BookOpen, BarChart, ClipboardPlus, Settings
+  Home, Users, ChartSpline, BookOpen, BarChart, ClipboardPlus
 } from "lucide-react";
 import { useQuery } from "convex/react";
 import { useUser } from "@clerk/nextjs";
@@ -55,11 +55,6 @@ const Header = () => {
           label: "Analytics",
           icon: <ChartSpline size={16} />,
           href: "/analytics"
-        },
-        {
-          label: "Organization",
-          icon: <Settings size={16} />,
-          href: "/org"
         }
       ];
     } else if (convexUser.role === "teacher") {
@@ -102,14 +97,6 @@ const Header = () => {
 
           <div className="flex items-center space-x-4">
             <SignedIn>
-              <OrganizationSwitcher 
-                appearance={{
-                  elements: {
-                    organizationSwitcherTrigger: "border border-border hover:bg-accent/50",
-                    organizationSwitcherTriggerIcon: "text-muted-foreground",
-                  }
-                }}
-              />
               <UserButton 
                 afterSignOutUrl="/"
                 appearance={{

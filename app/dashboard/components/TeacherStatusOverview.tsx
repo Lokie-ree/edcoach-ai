@@ -1,199 +1,182 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users } from "lucide-react";
-import { motion } from "framer-motion";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Users, UserPlus, AlertCircle, CheckCircle, Clock, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { TeacherInvitationForm } from "@/components/forms/teacher-invitation-form";
 
-interface TeacherStatusOverviewProps {
-  organizationId: string;
-}
+export default function TeacherStatusOverview() {
+  // UPDATED: Use coach-based teacher queries instead of organization-based
+  const teachers = useQuery(api.teachers.list);
+  const invitations = useQuery(api.invitations.listMyInvitations);
 
-// Status configuration constants
-const STATUS_THRESHOLDS = {
-  OVERDUE_DAYS: 30,
-  DUE_SOON_DAYS: 14,
-} as const;
-
-const STATUS_CONFIG = {
-  green: {
-    colors: 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20',
-    dot: 'bg-green-500',
-    text: 'text-green-700 dark:text-green-300',
-  },
-  yellow: {
-    colors: 'border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950/20',
-    dot: 'bg-yellow-500',
-    text: 'text-yellow-700 dark:text-yellow-300',
-  },
-  red: {
-    colors: 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20',
-    dot: 'bg-red-500',
-    text: 'text-red-700 dark:text-red-300',
-  },
-} as const;
-
-type StatusType = keyof typeof STATUS_CONFIG;
-
-interface TeacherStatus {
-  status: StatusType;
-  statusText: string;
-  statusDetail: string;
-}
-
-function calculateTeacherStatus(
-  teacherWalkthroughs: Array<{ status: string }>,
-  daysSinceLastWalkthrough: number | null
-): TeacherStatus {
-  if (daysSinceLastWalkthrough === null) {
-    return {
-      status: 'red',
-      statusText: 'No Observations',
-      statusDetail: 'Schedule first walkthrough',
-    };
-  }
-
-  const hasDraft = teacherWalkthroughs.some(w => w.status === "draft");
-  
-  if (hasDraft) {
-    return {
-      status: 'red',
-      statusText: 'Draft Pending',
-      statusDetail: 'Complete walkthrough draft',
-    };
-  }
-
-  if (daysSinceLastWalkthrough > STATUS_THRESHOLDS.OVERDUE_DAYS) {
-    return {
-      status: 'red',
-      statusText: 'Overdue',
-      statusDetail: `${daysSinceLastWalkthrough} days since last observation`,
-    };
-  }
-
-  if (daysSinceLastWalkthrough > STATUS_THRESHOLDS.DUE_SOON_DAYS) {
-    return {
-      status: 'yellow',
-      statusText: 'Due Soon',
-      statusDetail: `${daysSinceLastWalkthrough} days since last observation`,
-    };
-  }
-
-  return {
-    status: 'green',
-    statusText: 'On Track',
-    statusDetail: `${daysSinceLastWalkthrough} days since last observation`,
-  };
-}
-
-function calculateDaysSinceLastWalkthrough(walkthroughDate: number): number {
-  return Math.floor(
-    (new Date().setHours(0, 0, 0, 0) - new Date(walkthroughDate).setHours(0, 0, 0, 0)) /
-    (1000 * 60 * 60 * 24)
-  );
-}
-
-export default function TeacherStatusOverview({ organizationId }: TeacherStatusOverviewProps) {
-  // Fetch teachers directly
-  const teachers = useQuery(
-    api.teachers.list,
-    {}
-  );
-  
-  const walkthroughs = useQuery(
-    api.walkthroughs.listByOrg,
-    { clerkOrganizationId: organizationId }
-  );
-
-  // Only show active teachers
-  const activeTeachers = (teachers ?? []).filter(teacher => teacher.status === "active");
-  const safeWalkthroughs = walkthroughs ?? [];
-
+  if (teachers === undefined || invitations === undefined) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-    >
-      <Card className="bg-card border-border">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-foreground">Teacher Status Overview</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Quick visual priority system for your teachers
-          </p>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Your Teaching Team
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          {activeTeachers.length > 0 ? (
-            <div className="space-y-4">
-              {/* Legend */}
-              <div className="flex items-center gap-6 text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  <span className="text-muted-foreground">On Track</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                  <span className="text-muted-foreground">Needs Attention Soon</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <span className="text-muted-foreground">Immediate Action Required</span>
-                </div>
-              </div>
-              
-              {/* Teacher Status Cards */}
-              <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                {activeTeachers.map((teacher) => {
-                  const teacherWalkthroughs = safeWalkthroughs.filter(
-                    w => w.teacherId === teacher._id
-                  );
-                  const lastWalkthrough = teacherWalkthroughs
-                    .sort((a, b) => b.walkthroughDate - a.walkthroughDate)[0];
-                  
-                  const daysSinceLastWalkthrough = lastWalkthrough 
-                    ? calculateDaysSinceLastWalkthrough(lastWalkthrough.walkthroughDate)
-                    : null;
-
-                  const { status, statusText, statusDetail } = calculateTeacherStatus(
-                    teacherWalkthroughs,
-                    daysSinceLastWalkthrough
-                  );
-
-                  const config = STATUS_CONFIG[status];
-
-                  return (
-                    <div 
-                      key={teacher._id} 
-                      className={`p-4 border rounded-lg transition-colors hover:bg-accent/20 ${config.colors}`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-foreground">{teacher.name}</h4>
-                        <div className={`w-3 h-3 rounded-full ${config.dot}`}></div>
-                      </div>
-                      <div className="space-y-1">
-                        <p className={`text-sm font-medium ${config.text}`}>
-                          {statusText}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {statusDetail}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No teachers assigned yet</p>
-              <p className="text-sm">Add teachers to start conducting walkthroughs</p>
-            </div>
-          )}
+          <div className="flex items-center justify-center p-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
         </CardContent>
       </Card>
-    </motion.div>
+    );
+  }
+
+  // Combine teachers and pending invitations for comprehensive view
+  const activeTeachers = teachers.filter(t => t.status === "active");
+  const pendingTeachers = teachers.filter(t => t.status === "pending" || t.status === "needs_details");
+  const pendingInvitations = invitations.filter(i => i.status === "pending");
+
+  const totalTeamSize = teachers.length + pendingInvitations.length;
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "active":
+        return (
+          <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Active
+          </Badge>
+        );
+      case "pending":
+        return (
+          <Badge variant="secondary">
+            <Clock className="h-3 w-3 mr-1" />
+            Pending
+          </Badge>
+        );
+      case "needs_details":
+        return (
+          <Badge variant="outline" className="border-orange-300 text-orange-800 dark:border-orange-700 dark:text-orange-200">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            Setup Needed
+          </Badge>
+        );
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Your Teaching Team
+          </CardTitle>
+                <div className="flex items-center gap-2">
+            <Badge variant="outline">{totalTeamSize} Total</Badge>
+            <TeacherInvitationForm
+              trigger={
+                <Button size="sm" className="gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  Invite
+                </Button>
+              }
+            />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
+            <div className="text-2xl font-bold text-green-700 dark:text-green-300">
+              {activeTeachers.length}
+            </div>
+            <div className="text-sm text-green-600 dark:text-green-400">Active</div>
+          </div>
+          <div className="text-center p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
+            <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+              {pendingTeachers.length}
+            </div>
+            <div className="text-sm text-orange-600 dark:text-orange-400">Setup Needed</div>
+          </div>
+          <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+            <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+              {pendingInvitations.length}
+            </div>
+            <div className="text-sm text-blue-600 dark:text-blue-400">Invited</div>
+          </div>
+                </div>
+
+        {/* Teacher List */}
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-muted-foreground">Recent Activity</h4>
+          
+          {/* Active Teachers */}
+          {activeTeachers.slice(0, 3).map((teacher) => (
+            <div key={teacher._id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                  {teacher.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-medium text-sm">{teacher.name}</p>
+                  <p className="text-xs text-muted-foreground">{teacher.email}</p>
+                </div>
+              </div>
+              {getStatusBadge(teacher.status)}
+            </div>
+          ))}
+
+          {/* Pending Invitations */}
+          {pendingInvitations.slice(0, 2).map((invitation) => (
+            <div key={invitation._id} className="flex items-center justify-between p-3 bg-blue-50/50 dark:bg-blue-950/10 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                  {invitation.teacherEmail.charAt(0).toUpperCase()}
+                      </div>
+                <div>
+                  <p className="font-medium text-sm text-blue-900 dark:text-blue-100">
+                    Invitation Pending
+                        </p>
+                  <p className="text-xs text-blue-700 dark:text-blue-300">{invitation.teacherEmail}</p>
+                    </div>
+              </div>
+              <Badge variant="outline" className="border-blue-300 text-blue-800 dark:border-blue-700 dark:text-blue-200">
+                <Clock className="h-3 w-3 mr-1" />
+                Sent {Math.floor((Date.now() - invitation.createdAt) / (24 * 60 * 60 * 1000))}d ago
+              </Badge>
+            </div>
+          ))}
+
+          {/* Empty State */}
+          {totalTeamSize === 0 && (
+            <div className="text-center py-8">
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">No teachers yet</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Start building your coaching team by inviting teachers
+              </p>
+              <TeacherInvitationForm />
+            </div>
+          )}
+
+          {/* View All Link */}
+          {totalTeamSize > 0 && (
+            <div className="pt-2">
+              <Link href="/teachers">
+                <Button variant="outline" size="sm" className="w-full">
+                  View All Teachers
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+        </CardContent>
+      </Card>
   );
 } 

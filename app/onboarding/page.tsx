@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useUser, useOrganization, useClerk } from "@clerk/nextjs";
-import { useQuery, useAction, useMutation } from "convex/react";
+import { useUser } from "@clerk/nextjs";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,12 +13,9 @@ import { toast } from "sonner";
 
 export default function OnboardingPage() {
   const { user, isLoaded } = useUser();
-  const { organization } = useOrganization();
-  const { setActive } = useClerk();
   const router = useRouter();
 
   const [step, setStep] = useState<'role-detection' | 'organization' | 'complete'>('role-detection');
-  const [loading, setLoading] = useState(false);
   const [completingOnboarding, setCompletingOnboarding] = useState(false);
 
   // Get current user data
@@ -27,7 +24,6 @@ export default function OnboardingPage() {
     user && isLoaded ? {} : "skip"
   );
 
-  const createOrganization = useAction(api.onboarding.createCoachOrganization);
   const completeOnboarding = useMutation(api.onboarding.complete);
 
   // Handle redirect to dashboard after onboarding is complete
@@ -44,7 +40,7 @@ export default function OnboardingPage() {
 
   // Determine initial step based on user state
   useEffect(() => {
-    if (!convexUser || !isLoaded || loading || completingOnboarding) return;
+    if (!convexUser || !isLoaded || completingOnboarding) return;
 
     // If already onboarded, don't change step (let redirect effect handle it)
     if (convexUser.onboardingComplete) {
@@ -59,65 +55,9 @@ export default function OnboardingPage() {
 
     // Coach flow - check organization status
     if (convexUser.role === 'coach') {
-      if (!convexUser.clerkOrganizationId && !organization) {
-        setStep('organization');
-      } else if (convexUser.clerkOrganizationId || organization) {
-        setStep('complete');
-      }
+      setStep('complete');
     }
-  }, [convexUser, organization, isLoaded, loading, completingOnboarding]);
-
-  const handleCreateOrganization = async () => {
-    if (!user) return;
-    
-    setLoading(true);
-    setCompletingOnboarding(true);
-    
-    try {
-      const orgName = `${user.firstName || user.fullName || 'Coach'}'s Team`;
-      console.log('Creating organization with name:', orgName);
-      
-      const result = await createOrganization({
-        organizationName: orgName
-      });
-      
-      console.log('Organization creation result:', result);
-      
-      if (result.success && result.organizationId) {
-        console.log('Organization created successfully:', result.organizationId);
-        
-        // Set the newly created organization as active in Clerk
-        try {
-          console.log('Setting active organization...');
-          await new Promise(resolve => setTimeout(resolve, 500));
-          await setActive({ organization: result.organizationId });
-          console.log('Set active organization:', result.organizationId);
-        } catch (setActiveError) {
-          console.warn('Failed to set active organization, but continuing:', setActiveError);
-        }
-        
-        // Organization creation automatically completes onboarding in backend
-        console.log('Organization creation complete, showing success message');
-        toast.success("Welcome to EdCoach AI! Your coaching organization is ready.");
-        
-        // Wait a moment for backend to complete, then redirect
-        console.log('Waiting for backend to complete onboarding...');
-        setTimeout(() => {
-          console.log('Redirecting to dashboard');
-          router.replace('/dashboard');
-        }, 1500);
-        
-      } else {
-        throw new Error("Failed to create organization");
-      }
-    } catch (error) {
-      console.error('Failed to create organization:', error);
-      toast.error("Failed to create organization. Please try again.");
-      setCompletingOnboarding(false);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [convexUser, isLoaded, completingOnboarding]);
 
   const handleCompleteOnboarding = async () => {
     setCompletingOnboarding(true);
@@ -266,22 +206,11 @@ export default function OnboardingPage() {
                   </p>
                 </div>
                 <Button 
-                  onClick={handleCreateOrganization}
-                  disabled={loading}
+                  onClick={handleCompleteOnboarding}
                   className="w-full"
                   size="lg"
                 >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Creating Organization...
-                    </>
-                  ) : (
-                    <>
-                      <Building className="h-4 w-4 mr-2" />
-                      Create Organization
-                    </>
-                  )}
+                  Go to Dashboard
                 </Button>
               </CardContent>
             </Card>
@@ -310,10 +239,6 @@ export default function OnboardingPage() {
                     </div>
                     {convexUser.role === 'coach' && (
                       <>
-                        <div className="flex items-center gap-3 justify-center">
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                          <span>Organization created</span>
-                        </div>
                         <div className="flex items-center gap-3 justify-center">
                           <CheckCircle className="h-5 w-5 text-green-500" />
                           <span>Free Coach Starter plan activated</span>

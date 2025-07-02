@@ -1,6 +1,7 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
+import { getCurrentUserOrThrow, getCurrentUser } from "./auth";
 
 // Helper function to get current user
 async function getCurrentUserWithOrg(ctx: any) {
@@ -81,295 +82,293 @@ export const observerAnalytics = query({
   },
 });
 
-export const coachAnalytics = query({
+/**
+ * Get aggregated analytics for the current coach.
+ * NEW: Uses coach-based queries instead of organization-based queries.
+ */
+export const getCoachAnalytics = query({
   args: {},
   returns: v.object({
-    // Overview metrics
     totalTeachers: v.number(),
     activeTeachers: v.number(),
     totalWalkthroughs: v.number(),
-    thisMonthWalkthroughs: v.number(),
-    completedWalkthroughs: v.number(),
-    draftWalkthroughs: v.number(),
-    completionRate: v.number(),
-    
-    // Feedback metrics
-    totalFeedbackInteractions: v.number(),
-    avgFeedbackPerTeacherPerMonth: v.number(),
-    reinforcementCount: v.number(),
-    refinementCount: v.number(),
-    
-    // Indicator analysis
-    topReinforcementIndicators: v.array(v.object({
-      indicator: v.string(),
-      count: v.number(),
-    })),
-    topRefinementIndicators: v.array(v.object({
-      indicator: v.string(),
-      count: v.number(),
-    })),
-    
-    // Teacher progress data
-    teacherProgress: v.array(v.object({
-      teacherId: v.id("teachers"),
-      teacherName: v.string(),
-      totalWalkthroughs: v.number(),
-      completedWalkthroughs: v.number(),
-      draftWalkthroughs: v.number(),
-      lastObservation: v.optional(v.number()),
-      completionRate: v.number(),
-      recentFeedbackCount: v.number(),
-    })),
-    
-    // Monthly trends
-    monthlyTrends: v.array(v.object({
-      month: v.string(),
-      completed: v.number(),
-      draft: v.number(),
-      total: v.number(),
-    })),
-    
-    // Action items
-    actionItems: v.array(v.object({
-      type: v.string(),
-      priority: v.string(),
+    totalFeedbackGenerated: v.number(),
+    recentWalkthroughs: v.array(v.object({
+      _id: v.id("walkthroughs"),
       title: v.string(),
-      description: v.string(),
-      teacherId: v.optional(v.id("teachers")),
-      teacherName: v.optional(v.string()),
+      createdAt: v.number(),
+      teacherName: v.string(),
+      hasAiFeedback: v.boolean(),
     })),
   }),
   handler: async (ctx) => {
-    const user = await getCurrentUserWithOrg(ctx);
+    const user = await getCurrentUserOrThrow(ctx);
     
     if (user.role !== "coach") {
       throw new Error("Only coaches can view analytics");
     }
     
-    if (!user.clerkOrganizationId) {
-      // Return empty analytics for coaches without organizations
-      return {
-        totalTeachers: 0,
-        activeTeachers: 0,
-        totalWalkthroughs: 0,
-        thisMonthWalkthroughs: 0,
-        completedWalkthroughs: 0,
-        draftWalkthroughs: 0,
-        completionRate: 0,
-        totalFeedbackInteractions: 0,
-        avgFeedbackPerTeacherPerMonth: 0,
-        reinforcementCount: 0,
-        refinementCount: 0,
-        topReinforcementIndicators: [],
-        topRefinementIndicators: [],
-        teacherProgress: [],
-        monthlyTrends: [],
-        actionItems: [],
-      };
-    }
-    
-    // Get all users in this organization
-    const orgUsers = await ctx.db
-      .query("users")
-      .withIndex("by_organization", (q) => q.eq("clerkOrganizationId", user.clerkOrganizationId))
+    // NEW: Get teachers assigned to this specific coach
+    const teachers = await ctx.db
+      .query("teachers")
+      .withIndex("by_coach", (q) => q.eq("coachId", user._id))
       .collect();
-    const userIds = orgUsers.map((u) => u._id);
     
-    // Get teachers linked to these users OR pending teachers
-    const allTeachers = await ctx.db.query("teachers").collect();
-    const teachers = allTeachers.filter(teacher => {
-      // Include if teacher is linked to an org user
-      if (teacher.userId && userIds.includes(teacher.userId)) {
-        return true;
-      }
-      // Include if teacher is pending (no userId yet)
-      if (teacher.status === "pending" && !teacher.userId) {
-        return true;
-      }
-      return false;
-    });
-    
-    const totalTeachers = teachers.length;
     const teacherIds = teachers.map(t => t._id);
+    const totalTeachers = teachers.length;
+    const activeTeachers = teachers.filter(t => t.status === "active").length;
 
+    // Get all walkthroughs created by this coach's teachers
+    let totalWalkthroughs = 0;
+    let totalFeedbackGenerated = 0;
+    const recentWalkthroughs = [];
+
+    if (teacherIds.length > 0) {
     // Get all walkthroughs for these teachers
     const allWalkthroughs = await ctx.db
       .query("walkthroughs")
-      .filter((q) => q.or(...teacherIds.map(id => q.eq(q.field("teacherId"), id))))
       .collect();
 
-    // Basic metrics
-    const totalWalkthroughs = allWalkthroughs.length;
-    const completedWalkthroughs = allWalkthroughs.filter(w => w.status === "completed").length;
-    const draftWalkthroughs = allWalkthroughs.filter(w => w.status === "draft").length;
-    const completionRate = totalWalkthroughs > 0 ? Math.round((completedWalkthroughs / totalWalkthroughs) * 100) : 0;
+      // Filter walkthroughs for coach's teachers
+      const coachWalkthroughs = allWalkthroughs.filter(w => 
+        teacherIds.includes(w.teacherId)
+      );
+      
+      totalWalkthroughs = coachWalkthroughs.length;
 
-    // This month walkthroughs
-    const now = Date.now();
-    const currentDate = new Date(now);
-    const thisMonth = currentDate.getMonth();
-    const thisYear = currentDate.getFullYear();
-    const thisMonthWalkthroughs = allWalkthroughs.filter(w => {
-      const d = new Date(w.walkthroughDate);
-      return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
-    }).length;
-
-    // Get walkthrough entries for feedback analysis
-    const allEntries: any[] = [];
-    for (const walkthrough of allWalkthroughs) {
-      const entries = await ctx.db
-        .query("walkthroughEntries")
+      // Get recent walkthroughs (last 10)
+      const sortedWalkthroughs = coachWalkthroughs
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .slice(0, 10);
+      
+      for (const walkthrough of sortedWalkthroughs) {
+        const teacher = teachers.find(t => t._id === walkthrough.teacherId);
+        
+        // Check if this walkthrough has AI feedback
+        const aiFeedback = await ctx.db
+          .query("aiFeedback")
         .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", walkthrough._id))
+          .first();
+        
+        if (aiFeedback) {
+          totalFeedbackGenerated++;
+        }
+        
+        recentWalkthroughs.push({
+          _id: walkthrough._id,
+          title: walkthrough.title,
+          createdAt: walkthrough.createdAt,
+          teacherName: teacher?.name || "Unknown Teacher",
+          hasAiFeedback: !!aiFeedback,
+        });
+      }
+
+      // Count total feedback for all coach's walkthroughs
+      const allFeedback = await ctx.db
+        .query("aiFeedback")
         .collect();
-      allEntries.push(...entries);
+      
+      totalFeedbackGenerated = allFeedback.filter(feedback => 
+        coachWalkthroughs.some(w => w._id === feedback.walkthroughId)
+      ).length;
     }
-
-    const totalFeedbackInteractions = allEntries.length;
-    const avgFeedbackPerTeacherPerMonth = totalTeachers > 0 ? Math.round(totalFeedbackInteractions / totalTeachers) : 0;
-
-    // Indicator analysis
-    const reinforcementIndicators: Record<string, number> = {};
-    const refinementIndicators: Record<string, number> = {};
-    let reinforcementCount = 0;
-    let refinementCount = 0;
-
-    allWalkthroughs.forEach(w => {
-      if (w.reinforcementIndicator) {
-        reinforcementIndicators[w.reinforcementIndicator] = (reinforcementIndicators[w.reinforcementIndicator] || 0) + 1;
-        reinforcementCount++;
-      }
-      if (w.refinementIndicator) {
-        refinementIndicators[w.refinementIndicator] = (refinementIndicators[w.refinementIndicator] || 0) + 1;
-        refinementCount++;
-      }
-    });
-
-    const topReinforcementIndicators = Object.entries(reinforcementIndicators)
-      .sort(([, a]: [string, number], [, b]: [string, number]) => b - a)
-      .slice(0, 5)
-      .map(([indicator, count]) => ({ indicator, count: Number(count) }));
-
-    const topRefinementIndicators = Object.entries(refinementIndicators)
-      .sort(([, a]: [string, number], [, b]: [string, number]) => b - a)
-      .slice(0, 5)
-      .map(([indicator, count]) => ({ indicator, count: Number(count) }));
-
-    // Teacher progress analysis
-    const teacherProgress = await Promise.all(teachers.map(async (teacher) => {
-      const teacherWalkthroughs = allWalkthroughs.filter(w => w.teacherId === teacher._id);
-      const teacherCompleted = teacherWalkthroughs.filter(w => w.status === "completed").length;
-      const teacherDrafts = teacherWalkthroughs.filter(w => w.status === "draft").length;
-      const lastObservation = teacherWalkthroughs.length > 0 
-        ? Math.max(...teacherWalkthroughs.map(w => w.walkthroughDate)) 
-        : undefined;
-      // Get recent feedback count (last 30 days)
-      const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
-      const recentEntries = allEntries.filter(entry => {
-        const entryWalkthrough = allWalkthroughs.find(w => w._id === entry.walkthroughId);
-        return entryWalkthrough?.teacherId === teacher._id && entry.createdAt >= thirtyDaysAgo;
-      });
-      return {
-        teacherId: teacher._id,
-        teacherName: teacher.name,
-        totalWalkthroughs: teacherWalkthroughs.length,
-        completedWalkthroughs: teacherCompleted,
-        draftWalkthroughs: teacherDrafts,
-        lastObservation,
-        completionRate: teacherWalkthroughs.length > 0 ? Math.round((teacherCompleted / teacherWalkthroughs.length) * 100) : 0,
-        recentFeedbackCount: recentEntries.length,
-      };
-    }));
-
-    // Calculate active teachers (those with walkthroughs in last 60 days)
-    const sixtyDaysAgo = now - (60 * 24 * 60 * 60 * 1000);
-    const activeTeachers = teacherProgress.filter(tp => 
-      tp.lastObservation && tp.lastObservation >= sixtyDaysAgo
-    ).length;
-
-    // Monthly trends (last 6 months)
-    const monthlyTrends = [];
-    for (let i = 5; i >= 0; i--) {
-      const targetDate = new Date(thisYear, thisMonth - i, 1);
-      const monthWalkthroughs = allWalkthroughs.filter(w => {
-        const d = new Date(w.walkthroughDate);
-        return d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
-      });
-      monthlyTrends.push({
-        month: targetDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-        completed: monthWalkthroughs.filter(w => w.status === "completed").length,
-        draft: monthWalkthroughs.filter(w => w.status === "draft").length,
-        total: monthWalkthroughs.length,
-      });
-    }
-
-    // Generate action items
-    const actionItems: {
-      type: string;
-      priority: string;
-      title: string;
-      description: string;
-      teacherId?: Id<"teachers">;
-      teacherName?: string;
-    }[] = [];
-    
-    // Teachers with no recent observations
-    const staleTeachers = teacherProgress.filter(tp => 
-      !tp.lastObservation || tp.lastObservation < (now - (30 * 24 * 60 * 60 * 1000))
-    );
-    staleTeachers.forEach(teacher => {
-      actionItems.push({
-        type: "overdue_observation",
-        priority: "high",
-        title: "Schedule Observation",
-        description: `${teacher.teacherName} hasn't been observed in over 30 days`,
-        teacherId: teacher.teacherId as Id<"teachers">,
-        teacherName: teacher.teacherName,
-      });
-    });
-    
-    // Teachers with pending drafts
-    const teachersWithDrafts = teacherProgress.filter(tp => tp.draftWalkthroughs > 0);
-    teachersWithDrafts.forEach(teacher => {
-      actionItems.push({
-        type: "pending_draft",
-        priority: "medium",
-        title: "Complete Draft Walkthroughs",
-        description: `${teacher.teacherName} has ${teacher.draftWalkthroughs} draft walkthrough${teacher.draftWalkthroughs === 1 ? '' : 's'} pending`,
-        teacherId: teacher.teacherId as Id<"teachers">,
-        teacherName: teacher.teacherName,
-      });
-    });
-    
-    // Low feedback activity
-    const lowFeedbackTeachers = teacherProgress.filter(tp => tp.recentFeedbackCount < 2);
-    lowFeedbackTeachers.forEach(teacher => {
-      actionItems.push({
-        type: "low_feedback",
-        priority: "low",
-        title: "Increase Feedback Frequency",
-        description: `${teacher.teacherName} has received minimal feedback this month`,
-        teacherId: teacher.teacherId as Id<"teachers">,
-        teacherName: teacher.teacherName,
-      });
-    });
 
     return {
       totalTeachers,
       activeTeachers,
       totalWalkthroughs,
-      thisMonthWalkthroughs,
-      completedWalkthroughs,
-      draftWalkthroughs,
-      completionRate,
-      totalFeedbackInteractions,
-      avgFeedbackPerTeacherPerMonth,
-      reinforcementCount,
-      refinementCount,
-      topReinforcementIndicators,
-      topRefinementIndicators,
-      teacherProgress,
-      monthlyTrends,
-      actionItems,
+      totalFeedbackGenerated,
+      recentWalkthroughs,
+    };
+  },
+});
+
+/**
+ * Get detailed teacher analytics for a specific coach.
+ * NEW: Uses coach-based relationships instead of organization queries.
+ */
+export const getTeacherAnalytics = query({
+  args: {},
+  returns: v.array(v.object({
+    teacherId: v.id("teachers"),
+    teacherName: v.string(),
+    walkthroughCount: v.number(),
+    feedbackCount: v.number(),
+    lastActivity: v.optional(v.number()),
+    status: v.union(v.literal("active"), v.literal("pending"), v.literal("needs_details")),
+  })),
+  handler: async (ctx) => {
+    const user = await getCurrentUserOrThrow(ctx);
+    
+    if (user.role !== "coach") {
+      throw new Error("Only coaches can view teacher analytics");
+    }
+
+    // NEW: Get teachers assigned to this specific coach
+    const teachers = await ctx.db
+      .query("teachers")
+      .withIndex("by_coach", (q) => q.eq("coachId", user._id))
+      .collect();
+
+    const result = [];
+
+    for (const teacher of teachers) {
+      // Get walkthroughs for this teacher
+      const walkthroughs = await ctx.db
+        .query("walkthroughs")
+        .withIndex("by_teacher", (q) => q.eq("teacherId", teacher._id))
+        .collect();
+      
+      // Get feedback count for this teacher's walkthroughs
+      let feedbackCount = 0;
+      let lastActivity = undefined;
+      
+      if (walkthroughs.length > 0) {
+        const walkthroughIds = walkthroughs.map(w => w._id);
+        
+        // Get all feedback for this teacher's walkthroughs
+        const allFeedback = await ctx.db
+          .query("aiFeedback")
+          .collect();
+        
+        const teacherFeedback = allFeedback.filter(feedback => 
+          walkthroughIds.includes(feedback.walkthroughId)
+        );
+        
+        feedbackCount = teacherFeedback.length;
+        
+        // Find most recent activity (latest walkthrough)
+        const latestWalkthrough = walkthroughs
+          .sort((a, b) => b.createdAt - a.createdAt)[0];
+        lastActivity = latestWalkthrough?.createdAt;
+      }
+
+      result.push({
+        teacherId: teacher._id,
+        teacherName: teacher.name,
+        walkthroughCount: walkthroughs.length,
+        feedbackCount,
+        lastActivity,
+        status: teacher.status,
+      });
+    }
+
+    return result.sort((a, b) => b.walkthroughCount - a.walkthroughCount);
+  },
+});
+
+/**
+ * Get analytics specific to a teacher (for teacher dashboard).
+ */
+export const getMyTeacherAnalytics = query({
+  args: {},
+  returns: v.object({
+    totalWalkthroughs: v.number(),
+    totalFeedbackReceived: v.number(),
+    recentWalkthroughs: v.array(v.object({
+      _id: v.id("walkthroughs"),
+      title: v.string(),
+      createdAt: v.number(),
+      hasAiFeedback: v.boolean(),
+    })),
+  }),
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    
+    if (!user || user.role !== "teacher") {
+      return {
+        totalWalkthroughs: 0,
+        totalFeedbackReceived: 0,
+        recentWalkthroughs: [],
+      };
+    }
+
+    // Get teacher record for this user
+    const teacher = await ctx.db
+      .query("teachers")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .first();
+    
+    if (!teacher) {
+      return {
+        totalWalkthroughs: 0,
+        totalFeedbackReceived: 0,
+        recentWalkthroughs: [],
+      };
+    }
+
+    // Get walkthroughs for this teacher
+    const walkthroughs = await ctx.db
+      .query("walkthroughs")
+      .withIndex("by_teacher", (q) => q.eq("teacherId", teacher._id))
+      .collect();
+
+    // Get feedback count
+    let totalFeedbackReceived = 0;
+    const recentWalkthroughs = [];
+    
+    const sortedWalkthroughs = walkthroughs
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(0, 10);
+    
+    for (const walkthrough of sortedWalkthroughs) {
+      // Check if this walkthrough has AI feedback
+      const aiFeedback = await ctx.db
+        .query("aiFeedback")
+        .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", walkthrough._id))
+        .first();
+      
+      if (aiFeedback) {
+        totalFeedbackReceived++;
+      }
+      
+      recentWalkthroughs.push({
+        _id: walkthrough._id,
+        title: walkthrough.title,
+        createdAt: walkthrough.createdAt,
+        hasAiFeedback: !!aiFeedback,
+      });
+    }
+
+    return {
+      totalWalkthroughs: walkthroughs.length,
+      totalFeedbackReceived,
+      recentWalkthroughs,
+    };
+  },
+});
+
+// ===== LEGACY ORGANIZATION-BASED ANALYTICS (Deprecated) =====
+
+/**
+ * LEGACY: Get organization analytics.
+ * DEPRECATED: Use getCoachAnalytics instead for NON_ORG_APPROACH.
+ */
+export const getOrganizationAnalytics = query({
+  args: {},
+  returns: v.object({
+    totalTeachers: v.number(),
+    activeTeachers: v.number(),
+    totalWalkthroughs: v.number(),
+    totalFeedbackGenerated: v.number(),
+    recentWalkthroughs: v.array(v.object({
+      _id: v.id("walkthroughs"),
+      title: v.string(),
+      createdAt: v.number(),
+      teacherName: v.string(),
+      hasAiFeedback: v.boolean(),
+    })),
+  }),
+  handler: async (ctx) => {
+    console.log("⚠️ getOrganizationAnalytics: DEPRECATED - Use getCoachAnalytics instead");
+    
+    // Return empty data for deprecated organization-based approach
+    return {
+      totalTeachers: 0,
+      activeTeachers: 0,
+      totalWalkthroughs: 0,
+      totalFeedbackGenerated: 0,
+      recentWalkthroughs: [],
     };
   },
 }); 

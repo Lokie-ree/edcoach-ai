@@ -21,7 +21,7 @@ const organizationWebhookPayload = v.any();
 
 /**
  * Upserts a user from a Clerk webhook.
- * Called when a user is created or updated in Clerk.
+ * NEW: Simplified for NON_ORG_APPROACH - defaults to "coach" for direct signups.
  */
 export const upsertUser = internalMutation({
   args: { data: userWebhookPayload },
@@ -46,20 +46,11 @@ export const upsertUser = internalMutation({
     };
 
     if (existingUser === null) {
-      // NEW LOGIC: Default to "coach" for direct signups, "teacher" only for org invites
-      let defaultRole: "coach" | "teacher" = "coach";
+      // NEW: NON_ORG_APPROACH - Default to "coach" for direct signups
+      // Teacher role will be set during invitation acceptance process
+      const defaultRole: "coach" = "coach";
       
-      // Check if this user signup came from an organization invitation
-      // Organization invitations include organization info in the webhook data
-      const isFromOrgInvite = data.organization_memberships && data.organization_memberships.length > 0;
-      
-      if (isFromOrgInvite) {
-        defaultRole = "teacher";
-        console.log(`✅ upsertUser: Setting role to teacher for invited user: ${data.email_addresses[0]?.email_address}`);
-      } else {
-        defaultRole = "coach";
-        console.log(`✅ upsertUser: Setting role to coach for direct signup: ${data.email_addresses[0]?.email_address}`);
-      }
+      console.log(`✅ upsertUser: Setting role to coach for direct signup: ${data.email_addresses[0]?.email_address}`);
 
       const userId = await ctx.db.insert("users", {
         ...userAttributes,
@@ -67,7 +58,7 @@ export const upsertUser = internalMutation({
         preferences: {},
         createdAt: Date.now(),
         onboardingComplete: false,
-        // Don't set clerkOrganizationId here - let handleOrgMembership do it
+        // Remove clerkOrganizationId for NON_ORG_APPROACH
       });
       console.log(`✅ upsertUser: Created user ${userId} with role ${defaultRole}`);
     } else {
@@ -92,139 +83,56 @@ export const deleteUser = internalMutation({
   },
 });
 
+// ===== LEGACY ORGANIZATION HANDLERS (Keep for backwards compatibility) =====
+// These handlers are kept for existing organization-based data but won't be used in NON_ORG_APPROACH
+
 /**
- * Handles organization membership creation and updates from Clerk webhooks.
- * This is the central logic for assigning roles and linking users to organizations.
+ * LEGACY: Handles organization membership creation and updates from Clerk webhooks.
+ * NOTE: Not used in NON_ORG_APPROACH but kept for backwards compatibility.
  */
 export const handleOrgMembership = internalMutation({
   args: { data: orgMembershipWebhookPayload },
   handler: async (ctx, { data }) => {
-    console.log(`🔍 handleOrgMembership: Received full payload:`, JSON.stringify(data, null, 2));
+    console.log(`⚠️ handleOrgMembership: Organization-based logic not used in NON_ORG_APPROACH`);
+    console.log(`📋 Received org membership webhook but ignoring for NON_ORG_APPROACH`);
     
-    // Log each field we're trying to extract
-    console.log(`🔍 handleOrgMembership: user_id=${data?.public_user_data?.user_id}`);
-    console.log(`🔍 handleOrgMembership: org_id=${data?.organization?.id}`);
-    console.log(`🔍 handleOrgMembership: role=${data?.role}`);
+    // For backwards compatibility, we'll still log the event but take no action
+    if (data?.public_user_data?.user_id && data?.organization?.id) {
+      console.log(`📋 Would have processed: user ${data.public_user_data.user_id}, org ${data.organization.id}, role ${data.role}`);
+    }
     
-    // Safely extract fields we need from the webhook payload
-    if (!data?.public_user_data?.user_id || !data?.organization?.id || !data?.role) {
-      console.error("❌ handleOrgMembership: Invalid org membership webhook payload:", data);
-      return;
-    }
-
-    console.log(`✅ handleOrgMembership: Processing org membership webhook for user ${data.public_user_data.user_id}, org ${data.organization.id}, role ${data.role}`);
-
-    const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, {
-      clerkId: data.public_user_data.user_id,
-    });
-    if (!user) {
-      console.log(`⏳ handleOrgMembership: User ${data.public_user_data.user_id} not found yet, scheduling retry in 2 seconds...`);
-      // User doesn't exist yet (user.created webhook hasn't fired), schedule a retry
-      await ctx.scheduler.runAfter(2000, internal.clerk.handleOrgMembership, { data });
-      return;
-    }
-
-    const clerkRole = data.role;
-    const organizationId = data.organization.id;
-
-    // Map Clerk role to application role
-    const CLERK_TO_APP_ROLE_MAPPING: Record<string, AppRole> = {
-      "org:admin": "coach",
-      "org:member": "teacher",
-    };
-    const targetRole = CLERK_TO_APP_ROLE_MAPPING[clerkRole] || "teacher";
-    
-    console.log(`Processing org membership for ${user.email}: Clerk role=${clerkRole} → App role=${targetRole}`);
-
-    // Update user with org ID and new role
-    await ctx.db.patch(user._id, {
-      clerkOrganizationId: organizationId,
-      role: targetRole,
-    });
-
-    // If the user is now a teacher, handle teacher record creation/linking
-    if (targetRole === "teacher") {
-      console.log(`User ${user.email} has teacher role, checking for existing teacher record...`);
-      
-      // First try to link any existing pending teacher record
-      const linkedTeacher = await ctx.runMutation(internal.teachers.internalFindAndLinkTeacher, { userId: user._id });
-      
-      if (linkedTeacher) {
-        console.log(`Linked existing pending teacher record for ${user.email}`);
-      } else {
-        console.log(`No pending teacher record found for ${user.email}, creating new teacher record...`);
-        
-        try {
-          const teacherId = await ctx.db.insert("teachers", {
-            name: user.name,
-            email: user.email,
-            subject: [], // Empty - coach can fill later
-            gradeBand: "", // Empty - coach can fill later
-            status: "needs_details",
-            userId: user._id,
-            createdAt: Date.now(),
-            clerkOrganizationId: organizationId,
-          });
-          console.log(`✅ Successfully auto-created teacher record ${teacherId} for ${user.email} with status "needs_details"`);
-        } catch (error) {
-          console.error(`❌ Failed to create teacher record for ${user.email}:`, error);
-        }
-      }
-    } else {
-      console.log(`User ${user.email} has role ${targetRole}, skipping teacher record creation`);
-    }
+    // No action taken - teacher roles are managed through invitation system
   },
 });
 
 /**
- * Handles organization membership deletion from Clerk webhooks.
- * Removes the organization link from the user.
+ * LEGACY: Handles organization membership deletion from Clerk webhooks.
+ * NOTE: Not used in NON_ORG_APPROACH but kept for backwards compatibility.
  */
 export const handleOrgMembershipDeleted = internalMutation({
   args: { data: v.any() },
   handler: async (ctx, { data }) => {
-    // Safely extract fields we need from the webhook payload
-    if (!data?.public_user_data?.user_id) {
-      console.error("Invalid org membership deleted webhook payload:", data);
-      return;
-    }
-
-    const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, {
-      clerkId: data.public_user_data.user_id,
-    });
-    if (user) {
-      await ctx.db.patch(user._id, {
-        clerkOrganizationId: undefined,
-      });
+    console.log(`⚠️ handleOrgMembershipDeleted: Organization-based logic not used in NON_ORG_APPROACH`);
+    
+    // No action taken in NON_ORG_APPROACH
+    if (data?.public_user_data?.user_id) {
+      console.log(`📋 Would have removed org membership for user: ${data.public_user_data.user_id}`);
     }
   },
 });
 
 /**
- * Handles organization creation from Clerk webhooks.
- * Sets the organization creator as the admin and completes their onboarding.
+ * LEGACY: Handles organization creation from Clerk webhooks.
+ * NOTE: Not used in NON_ORG_APPROACH but kept for backwards compatibility.
  */
 export const handleOrganizationCreated = internalMutation({
   args: { data: organizationWebhookPayload },
   handler: async (ctx, { data }) => {
-    // Safely extract fields we need from the webhook payload
-    if (!data?.id || !data?.created_by) {
-      console.log("Organization created without creator or missing ID, skipping:", data?.id);
-      return;
-    }
+    console.log(`⚠️ handleOrganizationCreated: Organization-based logic not used in NON_ORG_APPROACH`);
     
-    const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, {
-      clerkId: data.created_by,
-    });
-    
-    if (user && !user.clerkOrganizationId) {
-      // Update user with organization ID and ensure they're a coach
-      await ctx.db.patch(user._id, {
-        clerkOrganizationId: data.id,
-        role: "coach", // Organization creators are always coaches
-        onboardingComplete: true,
-      });
-      console.log(`Set organization creator ${user.email} as coach for org ${data.id}`);
+    // No action taken in NON_ORG_APPROACH
+    if (data?.id && data?.created_by) {
+      console.log(`📋 Would have processed org creation: ${data.id} by ${data.created_by}`);
     }
   },
 });
