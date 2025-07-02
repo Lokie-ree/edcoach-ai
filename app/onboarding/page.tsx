@@ -33,7 +33,6 @@ export default function OnboardingPage() {
 
   const planDetection = usePlanDetection();
   const teachers = useConvexQuery(api.teachers.list) ?? [];
-  const aiUsage = useConvexQuery(api.plans.getAIUsageThisMonth, { hasProPlan: planDetection.isProPlan });
   const teacherLimit = planDetection.isProPlan ? 25 : 5;
   const teacherCount = teachers.length;
   const teacherProgress = Math.min((teacherCount / teacherLimit) * 100, 100);

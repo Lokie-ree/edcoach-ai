@@ -125,7 +125,7 @@ export default function TeacherTutorial({ onComplete, onSkip }: TeacherTutorialP
             </div>
             <h3 className="text-lg font-semibold mb-2">Your Growth Journey</h3>
             <p className="text-muted-foreground">
-              Track your professional development and see how your teaching practice evolves over time with your coach's support.
+              Track your professional development and see how your teaching practice evolves over time with your coach&apos;s support.
             </p>
           </div>
           <div className="bg-muted/50 rounded-lg p-4 space-y-2">

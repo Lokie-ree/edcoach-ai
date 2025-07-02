@@ -1,16 +1,23 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Users, BookOpen, MessageSquare, TrendingUp } from "lucide-react";
-import { motion } from "framer-motion";
+import { Sparkles } from "lucide-react";
+import { AIUsageBadge, AIUsageWarning } from "@/components/ui/ai-usage-badge";
+import QuickActionsPanel from "./QuickActionsPanel";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import type { AIUsage } from "@/components/ui/ai-usage-badge";
 
-export default function CoachDashboardHeaderStats() {
+interface CoachDashboardHeaderStatsProps {
+  aiUsage: AIUsage | undefined;
+  hasProPlan: boolean;
+}
+
+export default function CoachDashboardHeaderStats({ aiUsage, hasProPlan }: CoachDashboardHeaderStatsProps) {
   // UPDATED: Use coach-based analytics instead of organization-based
   const analytics = useQuery(api.analytics.getCoachAnalytics);
+  const [quickActionsOpen, setQuickActionsOpen] = useState(false);
 
   if (!analytics) {
     return (
@@ -21,79 +28,32 @@ export default function CoachDashboardHeaderStats() {
     );
   }
 
-  const stats = [
-    {
-      icon: Users,
-      label: "Teachers",
-      value: analytics.totalTeachers,
-      active: analytics.activeTeachers,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50 dark:bg-blue-950/20",
-    },
-    {
-      icon: BookOpen,
-      label: "Walkthroughs",
-      value: analytics.totalWalkthroughs,
-      color: "text-green-600",
-      bgColor: "bg-green-50 dark:bg-green-950/20",
-    },
-    {
-      icon: MessageSquare,
-      label: "AI Feedback",
-      value: analytics.totalFeedbackGenerated,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50 dark:bg-purple-950/20",
-    },
-  ];
 
   return (
-    <div className="flex items-center gap-2">
-      {stats.map((stat, index) => (
-        <motion.div
-          key={stat.label}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3, delay: index * 0.1 }}
+    <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full items-stretch md:items-center">
+      {/* Quick Actions Button - full width and above badges on mobile */}
+      <div className="order-1 md:order-3 w-full md:w-auto flex justify-end md:ml-2">
+        <button
+          className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-white font-medium shadow hover:bg-primary/90 transition w-full md:w-auto justify-center"
+          onClick={() => setQuickActionsOpen(true)}
         >
-          <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-sm">
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2">
-                <div className={`p-1.5 rounded-md ${stat.bgColor}`}>
-                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1">
-                    <span className="text-lg font-semibold text-foreground">
-                      {stat.value}
-                    </span>
-                    {stat.active !== undefined && (
-                      <Badge variant="secondary" className="text-xs px-1 py-0">
-                        {stat.active} active
-                      </Badge>
-                    )}
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {stat.label}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      ))}
-      
-      {/* Growth indicator */}
-      {analytics.totalWalkthroughs > 0 && (
-        <motion.div
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3, delay: 0.4 }}
-          className="flex items-center gap-1 text-green-600 dark:text-green-400"
-        >
-          <TrendingUp className="h-4 w-4" />
-          <span className="text-sm font-medium">Growing</span>
-        </motion.div>
-      )}
+          <Sparkles className="h-4 w-4" />
+          Quick Actions
+        </button>
+        <Dialog open={quickActionsOpen} onOpenChange={setQuickActionsOpen}>
+          <DialogContent className="max-w-lg w-full p-0 bg-transparent border-none shadow-none">
+            <DialogTitle>
+              <span className="sr-only">Quick Actions</span>
+            </DialogTitle>
+            <QuickActionsPanel />
+          </DialogContent>
+        </Dialog>
+      </div>
+      {/* AI Usage Badge and Upgrade Banner */}
+      <div className="order-2 md:order-2 flex flex-col items-stretch md:items-end gap-2 w-full md:min-w-[180px]">
+        <AIUsageBadge showDetails aiUsage={aiUsage} hasProPlan={hasProPlan} />
+        <AIUsageWarning />
+      </div>
     </div>
   );
 } 

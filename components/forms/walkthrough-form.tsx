@@ -73,7 +73,7 @@ type WalkthroughEntry = {
   aiFeedback: string;
 };
 
-export function WalkthroughForm({ walkthroughId, coachId: propCoachId, onCancel }: { walkthroughId?: Id<"walkthroughs">, coachId?: Id<"users">, onCancel?: () => void }) {
+export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkthroughId?: Id<"walkthroughs">, coachId?: Id<"users"> }) {
   const methods = useForm<WalkthroughFormData>({
     resolver: zodResolver(walkthroughSchema),
     defaultValues: {

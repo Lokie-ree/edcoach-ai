@@ -1,7 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { usePlanDetection } from "@/lib/usePlanDetection";
-import { useMemo } from "react";
 
 /**
  * Hook to check if the current coach can create a walkthrough based on plan and usage.

@@ -7,18 +7,18 @@ import { ConvexUser, ClerkUser } from "../types";
 import TeacherStatusOverview from "./TeacherStatusOverview";
 import RecentFeedbackHighlights from "./RecentFeedbackHighlights";
 import CoachDashboardHeaderStats from "./CoachDashboardHeaderStats";
-import { AIUsageBadge, AIUsageWarning } from "@/components/ui/ai-usage-badge";
+import { AIUsageWarning } from "@/components/ui/ai-usage-badge";
 import CoachTutorial from "@/components/onboarding/coach-tutorial";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, ChartSpline, ClipboardPlus, Lock, Crown, ArrowRight, UserPlus } from "lucide-react";
+import { Crown, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { FeatureProtect } from "@/components/ui/feature-protect";
 import { usePlanDetection } from "@/lib/usePlanDetection";
-import { TeacherInvitationForm } from "@/components/forms/teacher-invitation-form";
+
 
 interface CoachDashboardPageContentProps {
   user: ClerkUser;
@@ -65,10 +65,6 @@ export default function CoachDashboardPageContent({
   const planDetection = usePlanDetection();
   const hasProPlan = planDetection.isProPlan;
 
-  // Check if user can create new walkthroughs based on their actual plan
-  const currentAiUsage = hasProPlan ? aiUsage : starterAiUsage;
-  const canCreateWalkthrough = !currentAiUsage?.isOverLimit;
-  
   // Check if AI usage warning should be shown (same logic as StarterUsageWarning)
   const shouldShowAIWarning = starterAiUsage && 
     (starterAiUsage.walkthroughsRemaining <= 2 || starterAiUsage.isOverLimit);
@@ -86,10 +82,7 @@ export default function CoachDashboardPageContent({
           }
           gradient={true}
           rightContent={
-            <div className="flex items-center gap-4">
-              <AIUsageBadge showDetails />
-              <CoachDashboardHeaderStats />
-            </div>
+            <CoachDashboardHeaderStats aiUsage={aiUsage} hasProPlan={hasProPlan} />
           }
         />
 
@@ -136,83 +129,6 @@ export default function CoachDashboardPageContent({
             <div />
           </FeatureProtect>
         )}
-
-        {/* Quick Navigation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-foreground">Quick Navigation</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Access key coaching features and management tools
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Teachers */}
-                <Link href="/teachers">
-                  <Button
-                    variant="outline"
-                    className="h-auto flex-col items-center p-4 space-y-2 w-full"
-                  >
-                    <Users className="h-6 w-6 text-primary" />
-                    <span className="text-sm font-medium">Teachers</span>
-                  </Button>
-                </Link>
-
-                {/* NEW: Invite Teacher - prominent placement for NON_ORG_APPROACH */}
-                <TeacherInvitationForm
-                  trigger={
-                    <Button
-                      variant="outline"
-                      className="h-auto flex-col items-center p-4 space-y-2 w-full border-green-300 bg-green-50 hover:bg-green-100 dark:border-green-700 dark:bg-green-950/20 dark:hover:bg-green-950/30"
-                    >
-                      <UserPlus className="h-6 w-6 text-green-600 dark:text-green-400" />
-                      <span className="text-sm font-medium text-green-700 dark:text-green-300">Invite Teacher</span>
-                    </Button>
-                  }
-                />
-
-                {/* New Walkthrough */}
-                {canCreateWalkthrough ? (
-                  <Link href="/walkthrough/new">
-                    <Button
-                      variant="outline"
-                      className="h-auto flex-col items-center p-4 space-y-2 w-full"
-                    >
-                      <ClipboardPlus className="h-6 w-6 text-primary" />
-                      <span className="text-sm font-medium">New Walkthrough</span>
-                    </Button>
-                  </Link>
-                ) : (
-                  <Link href="/billing">
-                  <Button
-                    variant="outline"
-                      className="h-auto flex-col items-center p-4 space-y-2 w-full border-orange-300 bg-orange-50 hover:bg-orange-100 dark:border-orange-700 dark:bg-orange-950/20 dark:hover:bg-orange-950/30"
-                  >
-                      <Lock className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-                      <span className="text-sm font-medium text-orange-700 dark:text-orange-300">Upgrade to Create</span>
-                  </Button>
-                  </Link>
-                )}
-
-                {/* Analytics */}
-                <Link href="/analytics">
-                  <Button
-                    variant="outline"
-                    className="h-auto flex-col items-center p-4 space-y-2 w-full"
-                  >
-                    <ChartSpline className="h-6 w-6 text-primary" />
-                    <span className="text-sm font-medium">Analytics</span>
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
 
         {/* Dashboard Stats and Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
