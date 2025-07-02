@@ -1,5 +1,5 @@
 // convex/auth.ts
-import { QueryCtx, MutationCtx } from "./_generated/server";
+import { QueryCtx } from "./_generated/server";
 import { Doc } from "./_generated/dataModel";
 
 /**

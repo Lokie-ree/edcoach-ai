@@ -22,11 +22,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useAction } from "convex/react";
+import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { useState } from "react";
 import { UserPlus, Mail, Loader2 } from "lucide-react";
+import { useCanInviteTeacher } from "@/lib/usageEnforcer";
 
 const formSchema = z.object({
   teacherEmail: z.string().email("Please enter a valid email address"),
@@ -45,6 +46,10 @@ export function TeacherInvitationForm({
   const [open, setOpen] = useState(false);
   const sendInvitation = useAction(api.invitations.sendTeacherInvitation);
 
+  // Fetch current teacher list for the coach
+  const teachers = useQuery(api.teachers.list) ?? [];
+  const { allowed: canInviteTeacher, reason: inviteBlockReason } = useCanInviteTeacher(teachers.length);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,6 +61,13 @@ export function TeacherInvitationForm({
   const isLoading = form.formState.isSubmitting;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    // ENFORCE TEACHER LIMIT
+    if (!canInviteTeacher) {
+      toast.error("Teacher Limit Reached", {
+        description: inviteBlockReason || "You have reached your teacher limit. Upgrade to Coach Pro for more.",
+      });
+      return;
+    }
     try {
       const result = await sendInvitation({
         teacherEmail: values.teacherEmail,
@@ -104,6 +116,12 @@ export function TeacherInvitationForm({
             Send an invitation to a teacher to join your coaching team. They&apos;ll receive an email with instructions to get started.
           </DialogDescription>
         </DialogHeader>
+        {/* Show warning if at teacher limit */}
+        {!canInviteTeacher && (
+          <div className="mb-4 p-3 rounded bg-orange-50 text-orange-800 border border-orange-200">
+            {inviteBlockReason || "You have reached your teacher limit. Upgrade to Coach Pro for more."}
+          </div>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -156,7 +174,7 @@ export function TeacherInvitationForm({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading || !canInviteTeacher}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

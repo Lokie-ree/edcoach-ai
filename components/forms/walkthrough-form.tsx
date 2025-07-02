@@ -37,6 +37,8 @@ import {
 import { CalendarInput } from "@/components/ui/calendar-input";
 import { walkthroughFinalSchema } from "@/convex/validation/walkthroughFinalSchema";
 import { Sparkles } from "lucide-react";
+import { useCanCreateWalkthrough } from "@/lib/usageEnforcer";
+import { AIUsageWarning } from "@/components/ui/ai-usage-badge";
 
 // Types
 export type WalkthroughFormData = z.infer<typeof walkthroughSchema>;
@@ -71,7 +73,7 @@ type WalkthroughEntry = {
   aiFeedback: string;
 };
 
-export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkthroughId?: Id<"walkthroughs">, coachId?: Id<"users">, onCancel?: () => void }) {
+export function WalkthroughForm({ walkthroughId, coachId: propCoachId, onCancel }: { walkthroughId?: Id<"walkthroughs">, coachId?: Id<"users">, onCancel?: () => void }) {
   const methods = useForm<WalkthroughFormData>({
     resolver: zodResolver(walkthroughSchema),
     defaultValues: {
@@ -298,8 +300,19 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
     methods.setValue("walkthroughEntries", updatedEntries);
   };
 
+  const { allowed: canCreateWalkthrough, reason: walkthroughBlockReason } = useCanCreateWalkthrough();
+
   // Submit handler (finalize)
   const onSubmit = async (data: WalkthroughFormData) => {
+    // ENFORCE USAGE LIMITS
+    if (!canCreateWalkthrough) {
+      toast({
+        title: "Walkthrough Limit Reached",
+        description: walkthroughBlockReason || "You have reached your monthly walkthrough limit. Upgrade to Coach Pro for more.",
+        variant: "destructive",
+      });
+      return;
+    }
     try {
       setValue("status", "completed");
       await methods.trigger(); // ensure freshest form state
@@ -367,6 +380,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
     <FormProvider {...methods}>
       <Form {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
+          <AIUsageWarning />
           <Card className="max-w-2xl">
             <CardHeader>
               <CardTitle>{walkthroughId ? "Edit Walkthrough Draft" : "New Walkthrough"}</CardTitle>

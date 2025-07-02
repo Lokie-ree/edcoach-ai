@@ -3,19 +3,6 @@ import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 import { getCurrentUserOrThrow, getCurrentUser } from "./auth";
 
-// Helper function to get current user
-async function getCurrentUserWithOrg(ctx: any) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) throw new Error("Not authenticated");
-  
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
-    .unique();
-    
-  if (!user) throw new Error("User not found");
-  return user;
-}
 
 export const observerAnalytics = query({
   args: {
@@ -84,7 +71,7 @@ export const observerAnalytics = query({
 
 /**
  * Get aggregated analytics for the current coach.
- * NEW: Uses coach-based queries instead of organization-based queries.
+ * Coach-centric: All queries are based on direct coach-teacher relationships.
  */
 export const getCoachAnalytics = query({
   args: {},
@@ -103,57 +90,45 @@ export const getCoachAnalytics = query({
   }),
   handler: async (ctx) => {
     const user = await getCurrentUserOrThrow(ctx);
-    
     if (user.role !== "coach") {
       throw new Error("Only coaches can view analytics");
     }
-    
-    // NEW: Get teachers assigned to this specific coach
+    // Get teachers assigned to this specific coach
     const teachers = await ctx.db
       .query("teachers")
       .withIndex("by_coach", (q) => q.eq("coachId", user._id))
       .collect();
-    
     const teacherIds = teachers.map(t => t._id);
     const totalTeachers = teachers.length;
     const activeTeachers = teachers.filter(t => t.status === "active").length;
-
     // Get all walkthroughs created by this coach's teachers
     let totalWalkthroughs = 0;
     let totalFeedbackGenerated = 0;
     const recentWalkthroughs = [];
-
     if (teacherIds.length > 0) {
-    // Get all walkthroughs for these teachers
-    const allWalkthroughs = await ctx.db
-      .query("walkthroughs")
-      .collect();
-
+      // Get all walkthroughs for these teachers
+      const allWalkthroughs = await ctx.db
+        .query("walkthroughs")
+        .collect();
       // Filter walkthroughs for coach's teachers
       const coachWalkthroughs = allWalkthroughs.filter(w => 
         teacherIds.includes(w.teacherId)
       );
-      
       totalWalkthroughs = coachWalkthroughs.length;
-
       // Get recent walkthroughs (last 10)
       const sortedWalkthroughs = coachWalkthroughs
         .sort((a, b) => b.createdAt - a.createdAt)
         .slice(0, 10);
-      
       for (const walkthrough of sortedWalkthroughs) {
         const teacher = teachers.find(t => t._id === walkthrough.teacherId);
-        
         // Check if this walkthrough has AI feedback
         const aiFeedback = await ctx.db
           .query("aiFeedback")
-        .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", walkthrough._id))
+          .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", walkthrough._id))
           .first();
-        
         if (aiFeedback) {
           totalFeedbackGenerated++;
         }
-        
         recentWalkthroughs.push({
           _id: walkthrough._id,
           title: walkthrough.title,
@@ -162,17 +137,14 @@ export const getCoachAnalytics = query({
           hasAiFeedback: !!aiFeedback,
         });
       }
-
       // Count total feedback for all coach's walkthroughs
       const allFeedback = await ctx.db
         .query("aiFeedback")
         .collect();
-      
       totalFeedbackGenerated = allFeedback.filter(feedback => 
         coachWalkthroughs.some(w => w._id === feedback.walkthroughId)
       ).length;
     }
-
     return {
       totalTeachers,
       activeTeachers,
@@ -337,38 +309,3 @@ export const getMyTeacherAnalytics = query({
     };
   },
 });
-
-// ===== LEGACY ORGANIZATION-BASED ANALYTICS (Deprecated) =====
-
-/**
- * LEGACY: Get organization analytics.
- * DEPRECATED: Use getCoachAnalytics instead for NON_ORG_APPROACH.
- */
-export const getOrganizationAnalytics = query({
-  args: {},
-  returns: v.object({
-    totalTeachers: v.number(),
-    activeTeachers: v.number(),
-    totalWalkthroughs: v.number(),
-    totalFeedbackGenerated: v.number(),
-    recentWalkthroughs: v.array(v.object({
-      _id: v.id("walkthroughs"),
-      title: v.string(),
-      createdAt: v.number(),
-      teacherName: v.string(),
-      hasAiFeedback: v.boolean(),
-    })),
-  }),
-  handler: async (ctx) => {
-    console.log("⚠️ getOrganizationAnalytics: DEPRECATED - Use getCoachAnalytics instead");
-    
-    // Return empty data for deprecated organization-based approach
-    return {
-      totalTeachers: 0,
-      activeTeachers: 0,
-      totalWalkthroughs: 0,
-      totalFeedbackGenerated: 0,
-      recentWalkthroughs: [],
-    };
-  },
-}); 

@@ -33,6 +33,17 @@ export const createWalkthroughAndEntries = mutation({
     if (!teacher) throw new Error("Teacher not found");
     // Only the coach associated with this teacher can create walkthroughs
     // TODO: Add org-based permission check here if needed
+
+    // ENFORCE WALKTHROUGH LIMITS
+    // Backend cannot use Clerk's has(), so rely on aiUsage.plan
+    const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, {
+      hasProPlan: undefined // Let the query determine plan from user if possible
+    });
+    const isProPlan = aiUsage.plan === "coach_pro";
+    if (aiUsage.isOverLimit) {
+      throw new Error(`You have reached your monthly walkthrough limit (${aiUsage.walkthroughsLimit}) for the ${isProPlan ? "Coach Pro" : "Starter"} plan. Upgrade to Coach Pro for more.`);
+    }
+
     const now = Date.now();
     const walkthroughId = await ctx.db.insert("walkthroughs", {
       teacherId: args.teacherId,

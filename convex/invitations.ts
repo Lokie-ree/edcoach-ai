@@ -187,7 +187,14 @@ export const internalGetPendingInviteByEmail = internalQuery({
   returns: v.union(
     v.object({
       _id: v.id("invitations"),
+      _creationTime: v.number(),
+      coachId: v.id("users"),
+      teacherEmail: v.string(),
+      token: v.string(),
       status: v.union(v.literal("pending"), v.literal("accepted"), v.literal("expired")),
+      expiresAt: v.number(),
+      createdAt: v.number(),
+      acceptedAt: v.optional(v.number()),
     }),
     v.null()
   ),

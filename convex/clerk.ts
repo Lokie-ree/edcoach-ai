@@ -4,7 +4,6 @@ import { internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { Doc } from "./_generated/dataModel";
 
-type AppRole = "coach" | "teacher";
 
 // --- TYPE-SAFE WEBHOOK VALIDATORS ---
 
@@ -58,7 +57,6 @@ export const upsertUser = internalMutation({
         preferences: {},
         createdAt: Date.now(),
         onboardingComplete: false,
-        // Remove clerkOrganizationId for NON_ORG_APPROACH
       });
       console.log(`✅ upsertUser: Created user ${userId} with role ${defaultRole}`);
     } else {

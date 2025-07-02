@@ -10,6 +10,11 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, Users, Building, ArrowRight, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { toast } from "sonner";
+import { usePlanDetection } from "@/lib/usePlanDetection";
+import { AIUsageBadge, AIUsageWarning } from "@/components/ui/ai-usage-badge";
+import { useQuery as useConvexQuery } from "convex/react";
+import { Progress } from "@/components/ui/progress";
+import Link from "next/link";
 
 export default function OnboardingPage() {
   const { user, isLoaded } = useUser();
@@ -25,6 +30,15 @@ export default function OnboardingPage() {
   );
 
   const completeOnboarding = useMutation(api.onboarding.complete);
+
+  const planDetection = usePlanDetection();
+  const teachers = useConvexQuery(api.teachers.list) ?? [];
+  const aiUsage = useConvexQuery(api.plans.getAIUsageThisMonth, { hasProPlan: planDetection.isProPlan });
+  const teacherLimit = planDetection.isProPlan ? 25 : 5;
+  const teacherCount = teachers.length;
+  const teacherProgress = Math.min((teacherCount / teacherLimit) * 100, 100);
+  const isNearTeacherLimit = teacherLimit - teacherCount <= 1;
+  const isAtTeacherLimit = teacherCount >= teacherLimit;
 
   // Handle redirect to dashboard after onboarding is complete
   useEffect(() => {
@@ -115,6 +129,38 @@ export default function OnboardingPage() {
           description="Let's set up your coaching platform in just a few steps"
           gradient={true}
         />
+
+        {/* Plan and usage badges */}
+        <div className="flex flex-wrap items-center gap-4 mb-6">
+          <div>
+            <span className="font-medium mr-2">Current Plan:</span>
+            <AIUsageBadge showDetails />
+          </div>
+          {convexUser?.role === 'coach' && (
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Teachers:</span>
+              <span>{teacherCount} / {teacherLimit}</span>
+              <div className="w-32">
+                <Progress value={teacherProgress} />
+              </div>
+            </div>
+          )}
+        </div>
+        {/* Usage warnings and upgrade prompts */}
+        <AIUsageWarning />
+        {convexUser?.role === 'coach' && (isNearTeacherLimit || isAtTeacherLimit) && (
+          <div className={`mb-6 p-4 rounded border ${isAtTeacherLimit ? 'border-red-300 bg-red-50 text-red-800' : 'border-orange-200 bg-orange-50 text-orange-800'}`}>
+            {isAtTeacherLimit ? (
+              <>
+                <strong>Teacher Limit Reached:</strong> You have added all {teacherLimit} teachers allowed on your plan. <Link href="/billing" className="underline font-semibold">Upgrade to Coach Pro</Link> to add more.
+              </>
+            ) : (
+              <>
+                <strong>Few Teacher Slots Remaining:</strong> You have {teacherLimit - teacherCount} teacher slot{teacherLimit - teacherCount === 1 ? '' : 's'} left this month.
+              </>
+            )}
+          </div>
+        )}
 
         <div className="mt-8 space-y-6">
           {/* Progress Steps */}

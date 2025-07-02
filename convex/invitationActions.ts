@@ -3,8 +3,8 @@
 import { v } from "convex/values";
 import { action, ActionCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { resend } from "./sendEmails";
 import { Id } from "./_generated/dataModel";
+import { sendEmail } from "./sendEmails";
 
 // Helper to generate a unique invitation token (copied from invitations.ts)
 function generateInviteToken(): string {
@@ -50,6 +50,20 @@ export const sendTeacherInvitation = action({
 
     if (!coach || coach.role !== "coach") {
       throw new Error("Only coaches can send invitations");
+    }
+
+    // ENFORCE TEACHER LIMITS
+    // Count current teachers for this coach
+    const teachers = await ctx.runQuery(internal.teachers.internalListByCoach, { coachId: coach._id });
+    // Get plan (use aiUsage for consistency)
+    const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, { hasProPlan: undefined });
+    const isProPlan = aiUsage.plan === "coach_pro";
+    const maxTeachers = isProPlan ? 25 : 5;
+    if (teachers.length >= maxTeachers) {
+      return {
+        success: false,
+        message: `You have reached your teacher limit (${maxTeachers}) for the ${isProPlan ? "Coach Pro" : "Starter"} plan. Upgrade to Coach Pro for more.`,
+      };
     }
 
     // Check if there's already a pending invitation for this email from this coach
@@ -98,12 +112,11 @@ export const sendTeacherInvitation = action({
     }
 
     try {
-      await resend.sendEmail(
+      await sendEmail(
         ctx,
         senderEmail,
         args.teacherEmail,
         `${coach.name} has invited you to join EdCoach as a teacher`,
-        undefined,
         `
           <h2>You've been invited to EdCoach!</h2>
           <p>Hello ${args.teacherName},</p>

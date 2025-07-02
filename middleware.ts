@@ -48,11 +48,18 @@ export default clerkMiddleware(async (auth, req) => {
     await auth.protect();
   }
 
-  // Skip subscription checks in middleware - handle in components with personal billing detection
-  // Organization context in middleware may interfere with personal billing detection
+  // Subscription/plan enforcement for coach routes
   if (userId && isCoachRoute(req)) {
-    console.log('🏠 Middleware: Skipping billing checks - will be handled by personal plan detection in components');
-    // Let components handle personal billing detection using usePlanDetection hook
+    // Check plan/usage limits (client-side enforcement is primary, but add server-side for belt & suspenders)
+    // NOTE: This is a placeholder. In production, you would call a backend API or Convex action to check limits.
+    // For now, just pass and rely on client-side enforcement.
+    // Example:
+    // const overLimit = await checkLimits(userId);
+    // if (overLimit) {
+    //   url.pathname = '/billing';
+    //   url.searchParams.set('limit', overLimit);
+    //   return NextResponse.redirect(url);
+    // }
   }
 });
 

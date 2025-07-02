@@ -22,7 +22,7 @@ import {
   BarChart3,
   PieChart
 } from "lucide-react";
-import { useUser, useOrganization } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 
 // Define proper types based on Convex analytics return types
 interface IndicatorCount {
@@ -575,15 +575,11 @@ const ActionItems = ({ analytics }: { analytics: AnalyticsData | null | undefine
 
 export default function AnalyticsDashboardPage() {
   const { user, isLoaded } = useUser();
-  const { organization } = useOrganization();
-  const clerkOrganizationId = organization?.id;
-  
   // Get convex user data
-      const convexUser = useQuery(
-      api.users.current,
-      user && isLoaded ? {} : "skip"
-    );
-
+  const convexUser = useQuery(
+    api.users.current,
+    user && isLoaded ? {} : "skip"
+  );
   // Get analytics data for coach
   const rawAnalytics = useQuery(
     api.analytics.getCoachAnalytics,
@@ -591,16 +587,11 @@ export default function AnalyticsDashboardPage() {
   );
   const analytics = rawAnalytics ? mapCoachAnalyticsToAnalyticsData(rawAnalytics) : null;
 
-  if (!clerkOrganizationId) {
-    return <div className="flex items-center justify-center min-h-[400px] text-muted-foreground">
-      You are not in an organization.
-    </div>;
-  }
-
   if (!isLoaded || (user && convexUser === undefined)) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-<span className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full inline-block"></span>      </div>
+        <span className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full inline-block"></span>
+      </div>
     );
   }
 

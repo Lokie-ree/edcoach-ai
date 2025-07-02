@@ -1,6 +1,6 @@
 // convex/teachers.ts
 import { v } from "convex/values";
-import { internalMutation, query, mutation } from "./_generated/server";
+import { internalMutation, query, mutation, internalQuery } from "./_generated/server";
 import { Doc } from "./_generated/dataModel";
 import { getCurrentUser, getCurrentUserOrThrow } from "./auth";
 
@@ -276,5 +276,16 @@ export const internalFindAndLinkTeacher = internalMutation({
       console.log(`internalFindAndLinkTeacher: No pending teacher record found for ${user.email}`);
     }
     return teacherRecord;
+  },
+});
+
+export const internalListByCoach = internalQuery({
+  args: { coachId: v.id("users") },
+  returns: v.array(v.any()),
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("teachers")
+      .withIndex("by_coach", (q) => q.eq("coachId", args.coachId))
+      .collect();
   },
 });

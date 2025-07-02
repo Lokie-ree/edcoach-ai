@@ -17,7 +17,7 @@ export default function TeacherTutorial({ onComplete, onSkip }: TeacherTutorialP
   const steps = [
     {
       title: "Welcome to Your Teacher Dashboard",
-      description: "You&apos;re connected to your coach and ready to grow professionally!",
+      description: "You are connected to your coach and ready to grow professionally!",
       icon: BookOpen,
       content: (
         <div className="space-y-4">
@@ -27,13 +27,13 @@ export default function TeacherTutorial({ onComplete, onSkip }: TeacherTutorialP
             </div>
             <h3 className="text-lg font-semibold mb-2">Welcome to EdCoach AI!</h3>
             <p className="text-muted-foreground">
-              Your coach has added you to their organization. This is your space to track professional growth and receive personalized feedback.
+              Your coach has added you to their team. This is your space to track professional growth and receive personalized feedback.
             </p>
           </div>
           <div className="grid gap-2 text-sm">
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-500" />
-              <span>Connected to your coaching organization</span>
+              <span>Connected directly to your coach</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-500" />
@@ -87,7 +87,7 @@ export default function TeacherTutorial({ onComplete, onSkip }: TeacherTutorialP
             </div>
             <h3 className="text-lg font-semibold mb-2">Personalized Growth Insights</h3>
             <p className="text-muted-foreground">
-              Each walkthrough includes specific, actionable feedback tailored to your teaching practice.
+              Each walkthrough includes specific, actionable feedback tailored to your teaching practice from your coach.
             </p>
           </div>
           <div className="grid gap-3">
@@ -125,7 +125,7 @@ export default function TeacherTutorial({ onComplete, onSkip }: TeacherTutorialP
             </div>
             <h3 className="text-lg font-semibold mb-2">Your Growth Journey</h3>
             <p className="text-muted-foreground">
-              Track your professional development and see how your teaching practice evolves over time.
+              Track your professional development and see how your teaching practice evolves over time with your coach's support.
             </p>
           </div>
           <div className="bg-muted/50 rounded-lg p-4 space-y-2">

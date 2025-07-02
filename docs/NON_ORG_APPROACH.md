@@ -104,12 +104,12 @@ This structure simplifies the relationship to a direct link within your database
 **Pros:**
 
 *   **Maximum Simplicity and Speed:** This approach has fewer moving parts, reducing development and testing time. It directly addresses the core user needs for the MVP without the overhead of organization management.
-*   **Reduced Complexity:** You avoid the complexities of managing Clerk Organizations, their lifecycle, and the potential for orphaned organizations if a coach churns.
+*   **Reduced Complexity:** You avoid the complexities of managing organization structures, their lifecycle, and the potential for orphaned groups if a coach churns.
 *   **Lower Initial Cost:** While Clerk's pricing is based on Monthly Active Users (MAUs), simplifying the architecture can reduce development costs.
 *   **Focused on Core Value:** It allows the development team to concentrate on the AI feedback generation and the core user experience, which are the primary value propositions of EdCoach AI.
 
 **Cons:**
 
 *   **Scalability for Teams:** This model does not naturally scale to a scenario where a school wants a single subscription for multiple coaches. Each coach is an independent, billable user.
-*   **Future Migration Required:** As the platform grows to serve schools and districts, you will need to migrate to a multi-tenant model using something like Clerk Organizations. This will involve a data migration script to move from the simple `coachId` link to organization memberships.
+*   **Future Migration Required:** As the platform grows to serve schools and districts, you will need to migrate to a multi-tenant model. This will involve a data migration script to move from the simple `coachId` link to a more complex group or organization structure if needed.
 *   **Ownership Transfer is Manual:** If a coach leaves a school, transferring their "seat" (and their group of teachers) to a new coach would require manual intervention in the database.
