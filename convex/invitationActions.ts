@@ -4,7 +4,7 @@ import { v } from "convex/values";
 import { action, ActionCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
-import { sendEmail } from "./sendEmails";
+import { resend } from "./sendEmails";
 
 // Helper to generate a unique invitation token (copied from invitations.ts)
 function generateInviteToken(): string {
@@ -18,6 +18,8 @@ function generateInviteToken(): string {
 type SendTeacherInvitationArgs = {
   teacherEmail: string;
   teacherName: string;
+  subject?: string;
+  gradeBand?: string;
 };
 
 type SendTeacherInvitationResult = {
@@ -30,6 +32,8 @@ export const sendTeacherInvitation = action({
   args: {
     teacherEmail: v.string(),
     teacherName: v.string(),
+    subject: v.optional(v.string()),
+    gradeBand: v.optional(v.string()),
   },
   returns: v.object({
     success: v.boolean(),
@@ -38,7 +42,7 @@ export const sendTeacherInvitation = action({
   }),
   handler: async (
     ctx: ActionCtx,
-    args: SendTeacherInvitationArgs
+    args: { teacherEmail: string; teacherName: string; subject?: string; gradeBand?: string }
   ): Promise<SendTeacherInvitationResult> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
@@ -94,6 +98,8 @@ export const sendTeacherInvitation = action({
         teacherEmail: args.teacherEmail,
         token,
         expiresAt,
+        subject: args.subject,
+        gradeBand: args.gradeBand,
       }
     );
 
@@ -111,8 +117,16 @@ export const sendTeacherInvitation = action({
       };
     }
 
+    let extraDetails = "";
+    if (args.subject) {
+      extraDetails += `<p><b>Subject Area:</b> ${args.subject}</p>`;
+    }
+    if (args.gradeBand) {
+      extraDetails += `<p><b>Grade Band:</b> ${args.gradeBand}</p>`;
+    }
+
     try {
-      await sendEmail(
+      await resend.sendEmail(
         ctx,
         senderEmail,
         args.teacherEmail,
@@ -121,6 +135,7 @@ export const sendTeacherInvitation = action({
           <h2>You've been invited to EdCoach!</h2>
           <p>Hello ${args.teacherName},</p>
           <p><b>${coach.name}</b> has invited you to join their coaching team on EdCoach.</p>
+          ${extraDetails}
           <p>Click the link below to accept your invitation and get started:</p>
           <p><a href="${inviteUrl}">${inviteUrl}</a></p>
           <p>This link will expire in 7 days.</p>

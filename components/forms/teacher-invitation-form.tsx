@@ -28,16 +28,33 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { UserPlus, Mail, Loader2 } from "lucide-react";
 import { useCanInviteTeacher } from "@/lib/usageEnforcer";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const formSchema = z.object({
   teacherEmail: z.string().email("Please enter a valid email address"),
   teacherName: z.string().min(2, "Teacher name must be at least 2 characters"),
+  subject: z.string().optional(),
+  gradeBand: z.string().optional(),
 });
 
 interface TeacherInvitationFormProps {
   trigger?: React.ReactNode;
   onSuccess?: () => void;
 }
+
+const GRADE_BAND_OPTIONS = [
+  { value: "elementary", label: "Elementary" },
+  { value: "middle", label: "Middle" },
+  { value: "high", label: "High" },
+];
+const SUBJECT_OPTIONS = [
+  { value: "math", label: "Math" },
+  { value: "ela", label: "ELA" },
+  { value: "science", label: "Science" },
+  { value: "social studies", label: "Social Studies" },
+  { value: "electives", label: "Electives" },
+  { value: "sped", label: "SPED" },
+];
 
 export function TeacherInvitationForm({ 
   trigger, 
@@ -55,6 +72,8 @@ export function TeacherInvitationForm({
     defaultValues: {
       teacherEmail: "",
       teacherName: "",
+      subject: "",
+      gradeBand: "",
     },
   });
 
@@ -72,6 +91,8 @@ export function TeacherInvitationForm({
       const result = await sendInvitation({
         teacherEmail: values.teacherEmail,
         teacherName: values.teacherName,
+        subject: values.subject,
+        gradeBand: values.gradeBand,
       });
 
       if (result.success) {
@@ -160,6 +181,68 @@ export function TeacherInvitationForm({
                   </FormControl>
                   <FormDescription>
                     The teacher&apos;s email address where they&apos;ll receive the invitation
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="subject"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subject Area (optional)</FormLabel>
+                  <FormControl>
+                    <Select
+                      value={field.value || ""}
+                      onValueChange={field.onChange}
+                      disabled={isLoading}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select subject area" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SUBJECT_OPTIONS.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormDescription>
+                    The subject area this teacher will cover (optional)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gradeBand"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Grade Band (optional)</FormLabel>
+                  <FormControl>
+                    <Select
+                      value={field.value || ""}
+                      onValueChange={field.onChange}
+                      disabled={isLoading}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select grade band" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {GRADE_BAND_OPTIONS.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormDescription>
+                    The grade band this teacher will serve (optional)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

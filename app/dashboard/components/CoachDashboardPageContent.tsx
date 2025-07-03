@@ -31,9 +31,11 @@ export default function CoachDashboardPageContent({
 }: CoachDashboardPageContentProps) {
   const [showTutorial, setShowTutorial] = useState(false);
 
-  // Get AI usage - we'll let the server-side middleware handle plan detection
-  const aiUsage = useQuery(api.plans.getAIUsageThisMonth, { hasProPlan: true }); // Server will determine actual plan
-  
+  // Use personal plan detection instead of organization-level checks
+  const planDetection = usePlanDetection();
+  const hasProPlan = planDetection.isProPlan;
+  // Get AI usage for the correct plan
+  const aiUsage = useQuery(api.plans.getAIUsageThisMonth, { hasProPlan });
   // Get AI usage for starter users to check if warning should be shown
   const starterAiUsage = useQuery(api.plans.getAIUsageThisMonth, { hasProPlan: false });
 
@@ -60,10 +62,6 @@ export default function CoachDashboardPageContent({
     setShowTutorial(false);
     localStorage.setItem(`coach-tutorial-shown-${convexUser._id}`, 'true');
   };
-
-  // Use personal plan detection instead of organization-level checks
-  const planDetection = usePlanDetection();
-  const hasProPlan = planDetection.isProPlan;
 
   // Check if AI usage warning should be shown (same logic as StarterUsageWarning)
   const shouldShowAIWarning = starterAiUsage && 

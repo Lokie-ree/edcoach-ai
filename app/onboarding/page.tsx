@@ -16,11 +16,12 @@ import { useQuery as useConvexQuery } from "convex/react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 
+
 export default function OnboardingPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
 
-  const [step, setStep] = useState<'role-detection' | 'organization' | 'complete'>('role-detection');
+  const [step, setStep] = useState<'role-detection' | 'coaching-setup' | 'complete'>('role-detection');
   const [completingOnboarding, setCompletingOnboarding] = useState(false);
 
   // Get current user data
@@ -171,11 +172,11 @@ export default function OnboardingPage() {
               <span className="text-sm font-medium">Role Setup</span>
             </div>
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            <div className={`flex items-center space-x-2 ${step === 'organization' ? 'text-primary' : 'text-muted-foreground'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'organization' ? 'bg-primary text-white' : step === 'complete' ? 'bg-green-500 text-white' : 'bg-muted'}`}>
+            <div className={`flex items-center space-x-2 ${step === 'coaching-setup' ? 'text-primary' : 'text-muted-foreground'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'coaching-setup' ? 'bg-primary text-white' : step === 'complete' ? 'bg-green-500 text-white' : 'bg-muted'}`}>
                 {step === 'complete' ? <CheckCircle className="h-4 w-4" /> : '2'}
               </div>
-              <span className="text-sm font-medium">Organization</span>
+              <span className="text-sm font-medium">Coaching Setup</span>
             </div>
           </div>
 
@@ -185,10 +186,10 @@ export default function OnboardingPage() {
               <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2">
                   <Users className="h-6 w-6" />
-                  You&#39;re Set Up as a Coach
+                  You&apos;re Set Up as a Coach
                 </CardTitle>
                 <CardDescription>
-                  We&#39;ve detected that you&#39;re signing up as an instructional coach. You&#39;ll be able to:
+                  We&apos;ve detected that you&apos;re signing up as an instructional coach. You&apos;ll be able to:
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -216,7 +217,7 @@ export default function OnboardingPage() {
                   </p>
                 </div>
                 <Button 
-                  onClick={() => setStep('organization')} 
+                  onClick={() => setStep('coaching-setup')} 
                   className="w-full"
                   size="lg"
                 >
@@ -226,28 +227,27 @@ export default function OnboardingPage() {
             </Card>
           )}
 
-          {step === 'organization' && (
+          {step === 'coaching-setup' && (
             <Card className="mx-auto max-w-2xl">
               <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2">
                   <Building className="h-6 w-6" />
-                  Create Your Organization
+                  Set Up Your Coaching
                 </CardTitle>
                 <CardDescription>
-                  Set up your coaching organization to manage your teacher team
+                  Set up your coaching dashboard to manage your teacher relationships
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="text-center space-y-4">
                   <div className="text-lg font-medium">
-                    Your organization will be named: 
+                    Your coaching dashboard will be named:
                     <span className="text-primary font-semibold block mt-1">
-                      {user.firstName || user.fullName || 'Coach'}&#39;s Team
+                      {user.firstName || user.fullName || 'Coach'}&apos;s Coaching
                     </span>
                   </div>
                   <p className="text-muted-foreground">
-                    This will be your coaching workspace where you can invite teachers, 
-                    conduct walkthroughs, and manage feedback.
+                    This will be your personal coaching space where you can invite teachers directly, conduct walkthroughs, and manage feedback.
                   </p>
                 </div>
                 <Button 
@@ -270,8 +270,8 @@ export default function OnboardingPage() {
                 </CardTitle>
                 <CardDescription>
                   {convexUser.role === 'teacher' 
-                    ? "You&#39;re all set up as a teacher. Your coach can now conduct walkthroughs and provide feedback."
-                    : "Your coaching organization is ready. You can now invite teachers and start conducting walkthroughs."
+                    ? "You're all set up as a teacher. Your coach can now conduct walkthroughs and provide feedback."
+                    : "Your coaching setup is ready. You can now invite teachers and start conducting walkthroughs."
                   }
                 </CardDescription>
               </CardHeader>

@@ -28,6 +28,8 @@ export default defineSchema({
     expiresAt: v.number(),
     createdAt: v.number(),
     acceptedAt: v.optional(v.number()),
+    subject: v.optional(v.string()), // Coach-suggested subject area
+    gradeBand: v.optional(v.string()), // Coach-suggested grade band
   })
     .index("by_coach", ["coachId"])
     .index("by_email", ["teacherEmail"])

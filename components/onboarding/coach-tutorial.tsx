@@ -17,7 +17,7 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
   const steps = [
     {
       title: "Welcome to Your Coach Dashboard",
-      description: "Your coaching team is now set up! Let&apos;s walk through the key features.",
+      description: "Your coaching team is now set up! Now, we will walk through the key features.",
       icon: Users,
       content: (
         <div className="space-y-4">

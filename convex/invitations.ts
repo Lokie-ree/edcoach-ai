@@ -99,6 +99,8 @@ export const listMyInvitations = query({
     acceptedAt: v.optional(v.number()),
     coachId: v.optional(v.id("users")),
     token: v.optional(v.string()),
+    subject: v.optional(v.string()),
+    gradeBand: v.optional(v.string()),
   })),
   handler: async (ctx) => {
     const user = await getCurrentUserOrThrow(ctx);
@@ -127,6 +129,8 @@ export const getInvitationByToken = query({
       coachName: v.optional(v.string()),
       status: v.optional(v.union(v.literal("pending"), v.literal("accepted"), v.literal("expired"))),
       isExpired: v.optional(v.boolean()),
+      subject: v.optional(v.string()),
+      gradeBand: v.optional(v.string()),
     }),
     v.null()
   ),
@@ -153,6 +157,8 @@ export const getInvitationByToken = query({
       coachName: coach.name,
       status: invitation.status,
       isExpired,
+      subject: invitation.subject,
+      gradeBand: invitation.gradeBand,
     };
   },
 });
@@ -165,6 +171,8 @@ export const internalCreateInvitation = internalMutation({
     teacherEmail: v.string(),
     token: v.string(),
     expiresAt: v.number(),
+    subject: v.optional(v.string()),
+    gradeBand: v.optional(v.string()),
   },
   returns: v.id("invitations"),
   handler: async (ctx, args) => {
@@ -175,6 +183,8 @@ export const internalCreateInvitation = internalMutation({
       status: "pending",
       expiresAt: args.expiresAt,
       createdAt: Date.now(),
+      subject: args.subject,
+      gradeBand: args.gradeBand,
     });
   },
 });
@@ -195,6 +205,8 @@ export const internalGetPendingInviteByEmail = internalQuery({
       expiresAt: v.number(),
       createdAt: v.number(),
       acceptedAt: v.optional(v.number()),
+      subject: v.optional(v.string()),
+      gradeBand: v.optional(v.string()),
     }),
     v.null()
   ),
@@ -220,4 +232,4 @@ export const internalUpdateInvitationStatus = internalMutation({
   },
 });
 
-export { sendTeacherInvitation } from "./invitationActions"; 
+export { sendTeacherInvitation } from "./invitationActions";

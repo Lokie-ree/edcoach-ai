@@ -9,6 +9,7 @@ import QuickActionsPanel from "./QuickActionsPanel";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import type { AIUsage } from "@/components/ui/ai-usage-badge";
 
+
 interface CoachDashboardHeaderStatsProps {
   aiUsage: AIUsage | undefined;
   hasProPlan: boolean;
@@ -27,7 +28,6 @@ export default function CoachDashboardHeaderStats({ aiUsage, hasProPlan }: Coach
       </div>
     );
   }
-
 
   return (
     <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full items-stretch md:items-center">

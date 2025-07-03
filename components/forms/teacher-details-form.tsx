@@ -57,19 +57,23 @@ type TeacherDetailsFormProps = {
     isUserRecord?: boolean;
     userId?: string; // Add userId field for when it's a teacher record
   };
+  initialSubject?: string;
+  initialGradeBand?: string;
 };
 
 export default function TeacherDetailsForm({ 
   onSuccess, 
   createTeacherFromUser, 
   updateTeacher, 
-  teacher 
+  teacher,
+  initialSubject = "",
+  initialGradeBand = ""
 }: TeacherDetailsFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      gradeBand: teacher?.gradeBand || "",
-      subject: teacher?.subject?.[0] || "", // Take first subject if multiple exist
+      gradeBand: teacher?.gradeBand || initialGradeBand || "",
+      subject: teacher?.subject?.[0] || initialSubject || "",
     },
   });
 
