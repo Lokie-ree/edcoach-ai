@@ -11,7 +11,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Users, GraduationCap, Pencil } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 import Modal from "@/components/mage-ui/modal";
@@ -70,11 +69,6 @@ const GridDistortion = () => {
 
 export default function TeachersPage() {
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
-  const { user, isLoaded } = useUser();
-  const convexUser = useQuery(
-    api.users.current,
-    user && isLoaded ? {} : "skip"
-  );
 
   // Fetch teachers for the current coach
   const teachers = useQuery(api.teachers.list);
