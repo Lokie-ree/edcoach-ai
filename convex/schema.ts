@@ -159,4 +159,11 @@ export default defineSchema({
     createdAt: v.number(),
     // Add more fields as needed
   }).index("by_walkthrough", ["walkthroughId"]),
+
+  // Caches AI feedback results to reduce duplicate OpenAI calls and save costs
+  aiFeedbackCache: defineTable({
+    promptHash: v.string(), // hash of the full prompt (evidence + indicators)
+    result: v.any(),        // the AI feedback result (object or string)
+    createdAt: v.number(),  // timestamp for TTL/expiry
+  }).index("by_promptHash", ["promptHash"]),
 });

@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, Clock, UserCheck, Mail, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { useUser } from "@clerk/nextjs";
+import { useUser, SignInButton } from "@clerk/nextjs";
 
 export default function InvitePage() {
   const searchParams = useSearchParams();
@@ -196,9 +196,11 @@ export default function InvitePage() {
             <p className="text-sm text-muted-foreground">
               Please sign in with the same email address that received this invitation.
             </p>
-            <Button onClick={() => router.push("/sign-in")}>
-              Sign In to Accept
-            </Button>
+            <SignInButton mode="modal">
+              <Button>
+                Sign In to Accept
+              </Button>
+            </SignInButton>
           </CardContent>
         </Card>
       </div>

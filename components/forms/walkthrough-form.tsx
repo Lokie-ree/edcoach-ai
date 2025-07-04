@@ -180,7 +180,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
   const { has } = useAuth();
 
   // Real AI feedback logic
-  const generateFeedback = useAction(api.aiFeedback.generateFeedback);
+  const generateConsolidatedFeedback = useAction(api.aiFeedback.generateConsolidatedFeedback);
   const handleAIFeedback = async () => {
     setAILoading(true);
     try {
@@ -234,46 +234,39 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
         }
       });
       
-      const [reinforcement, refinement] = await Promise.all([
-        generateFeedback({
-          evidence,
-          indicator: {
-            indicator_name: reinforcementIndicator.indicator_name,
-            indicator_code: reinforcementIndicator.indicator_code,
-            overview: normalizeToString(reinforcementIndicator.overview),
-            key_terms: normalizeToString(reinforcementIndicator.key_terms),
-            effective_practice: normalizeToString(reinforcementIndicator.effective_practice),
-            development_evidence: normalizeToString(reinforcementIndicator.development_evidence),
-            student_centered_evidence: normalizeToString(reinforcementIndicator.student_centered_evidence),
-          },
-          promptType: "reinforcement",
-          hasProPlan,
-        }),
-        generateFeedback({
-          evidence,
-          indicator: {
-            indicator_name: refinementIndicator.indicator_name,
-            indicator_code: refinementIndicator.indicator_code,
-            overview: normalizeToString(refinementIndicator.overview),
-            key_terms: normalizeToString(refinementIndicator.key_terms),
-            effective_practice: normalizeToString(refinementIndicator.effective_practice),
-            development_evidence: normalizeToString(refinementIndicator.development_evidence),
-            student_centered_evidence: normalizeToString(refinementIndicator.student_centered_evidence),
-          },
-          promptType: "refinement",
-          hasProPlan,
-        }),
-      ]);
+      // Use consolidated feedback generation (1 API call instead of 2)
+      const feedbackResult = await generateConsolidatedFeedback({
+        evidence,
+        reinforcementIndicator: {
+          indicator_name: reinforcementIndicator.indicator_name,
+          indicator_code: reinforcementIndicator.indicator_code,
+          overview: normalizeToString(reinforcementIndicator.overview),
+          key_terms: normalizeToString(reinforcementIndicator.key_terms),
+          effective_practice: normalizeToString(reinforcementIndicator.effective_practice),
+          development_evidence: normalizeToString(reinforcementIndicator.development_evidence),
+          student_centered_evidence: normalizeToString(reinforcementIndicator.student_centered_evidence),
+        },
+        refinementIndicator: {
+          indicator_name: refinementIndicator.indicator_name,
+          indicator_code: refinementIndicator.indicator_code,
+          overview: normalizeToString(refinementIndicator.overview),
+          key_terms: normalizeToString(refinementIndicator.key_terms),
+          effective_practice: normalizeToString(refinementIndicator.effective_practice),
+          development_evidence: normalizeToString(refinementIndicator.development_evidence),
+          student_centered_evidence: normalizeToString(refinementIndicator.student_centered_evidence),
+        },
+        hasProPlan,
+      });
       setValue("walkthroughEntries", [
         {
           indicatorAcronym: reinforcementCode,
           type: "reinforcement" as const,
-          aiFeedback: reinforcement,
+          aiFeedback: feedbackResult.reinforcement,
         },
         {
           indicatorAcronym: refinementCode,
           type: "refinement" as const,
-          aiFeedback: refinement,
+          aiFeedback: feedbackResult.refinement,
         },
       ]);
       setFeedbackGenerated(true);
