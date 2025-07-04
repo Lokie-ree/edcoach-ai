@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Users, GraduationCap, Pencil } from "lucide-react";
-import Link from "next/link";
-import { useUser, useClerk } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 import Modal from "@/components/mage-ui/modal";
@@ -71,44 +70,16 @@ const GridDistortion = () => {
 
 export default function TeachersPage() {
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
-  const [isSettingActive, setIsSettingActive] = useState(false);
   const { user, isLoaded } = useUser();
-  const { setActive } = useClerk();
-      const convexUser = useQuery(
-      api.users.current,
-      user && isLoaded ? {} : "skip"
-    );
+  const convexUser = useQuery(
+    api.users.current,
+    user && isLoaded ? {} : "skip"
+  );
 
-  // Try to set active organization if user has one but it's not active
-  useEffect(() => {
-    const trySetActiveOrg = async () => {
-      if (
-        convexUser?.clerkOrganizationId && 
-        !isSettingActive &&
-        setActive
-      ) {
-        console.log('User has organization ID but no active org, attempting to set active:', convexUser.clerkOrganizationId);
-        setIsSettingActive(true);
-        try {
-          await setActive({ organization: convexUser.clerkOrganizationId });
-          console.log('Successfully set active organization from Convex record');
-        } catch (error) {
-          console.warn('Failed to set active organization:', error);
-        } finally {
-          setIsSettingActive(false);
-        }
-      }
-    };
-
-    trySetActiveOrg();
-  }, [convexUser, setActive, isSettingActive]);
-
-  // Fetch teachers for the current user's organization
+  // Fetch teachers for the current coach
   const teachers = useQuery(api.teachers.list);
   const createTeacherFromUser = useMutation(api.teachers.createFromUser);
   const updateTeacher = useMutation(api.teachers.update);
-
-
 
   return (
     <div className="space-y-6 relative">
@@ -136,14 +107,7 @@ export default function TeachersPage() {
             <div>
               <CardTitle className="text-foreground">Teacher Overview</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Summary of your teaching staff • 
-                <Link href="/org" className="text-primary hover:underline ml-1">
-                  Manage teachers in Organization Settings
-                </Link>
-                <br />
-                <span className="text-xs text-muted-foreground/80 mt-1 block">
-                  New members automatically get teacher role. To remove a teacher, use Organization Settings.
-                </span>
+                Summary of your teaching staff
               </p>
             </div>
           </CardHeader>
@@ -187,8 +151,6 @@ export default function TeachersPage() {
         </Card>
       </motion.div>
 
-
-
       {/* Edit Teacher Details Modal */}
       <Modal
         isOpen={!!editingTeacher}
@@ -214,8 +176,6 @@ export default function TeachersPage() {
           />
         )}
       </Modal>
-
-
 
       {/* Teachers List with Animation */}
       <motion.div
@@ -302,7 +262,7 @@ export default function TeachersPage() {
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No teachers in your organization yet</p>
+                <p>No teachers yet</p>
                 <p className="text-sm">Click &quot;Invite Teachers&quot; to get started</p>
               </div>
             )}
