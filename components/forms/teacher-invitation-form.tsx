@@ -22,7 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useAction, useQuery } from "convex/react";
+import { useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -63,9 +63,8 @@ export function TeacherInvitationForm({
   const [open, setOpen] = useState(false);
   const sendInvitation = useAction(api.invitations.sendTeacherInvitation);
 
-  // Fetch current teacher list for the coach
-  const teachers = useQuery(api.teachers.list) ?? [];
-  const { allowed: canInviteTeacher, reason: inviteBlockReason } = useCanInviteTeacher(teachers.length);
+  // Use the updated teacher limit checker
+  const { allowed: canInviteTeacher, reason: inviteBlockReason, teacherUsage } = useCanInviteTeacher();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -137,12 +136,28 @@ export function TeacherInvitationForm({
             Send an invitation to a teacher to join your coaching team. They&apos;ll receive an email with instructions to get started.
           </DialogDescription>
         </DialogHeader>
+        
+        {/* Show current usage and warning if at limit */}
+        {teacherUsage && (
+          <div className="mb-4 p-3 rounded bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-950/20 dark:text-blue-200 dark:border-blue-800">
+            <div className="text-sm">
+              <strong>Teacher Usage:</strong> {teacherUsage.teacherCount} of {teacherUsage.teacherLimit} used
+            </div>
+            {teacherUsage.teachersRemaining > 0 && (
+              <div className="text-xs mt-1">
+                {teacherUsage.teachersRemaining} teacher{teacherUsage.teachersRemaining === 1 ? '' : 's'} remaining
+              </div>
+            )}
+          </div>
+        )}
+        
         {/* Show warning if at teacher limit */}
         {!canInviteTeacher && (
-          <div className="mb-4 p-3 rounded bg-orange-50 text-orange-800 border border-orange-200">
+          <div className="mb-4 p-3 rounded bg-orange-50 text-orange-800 border border-orange-200 dark:bg-orange-950/20 dark:text-orange-200 dark:border-orange-800">
             {inviteBlockReason || "You have reached your teacher limit. Upgrade to Coach Pro for more."}
           </div>
         )}
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -186,6 +201,7 @@ export function TeacherInvitationForm({
                 </FormItem>
               )}
             />
+            
             <FormField
               control={form.control}
               name="subject"
@@ -217,6 +233,7 @@ export function TeacherInvitationForm({
                 </FormItem>
               )}
             />
+            
             <FormField
               control={form.control}
               name="gradeBand"
@@ -248,7 +265,8 @@ export function TeacherInvitationForm({
                 </FormItem>
               )}
             />
-            <div className="flex justify-end space-x-2 pt-4">
+            
+            <div className="flex justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"

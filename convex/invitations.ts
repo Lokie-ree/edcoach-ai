@@ -53,10 +53,8 @@ export const acceptInvitation = mutation({
       };
     }
 
-    // Update user role to teacher if not already
-    if (user.role !== "teacher") {
-      await ctx.db.patch(user._id, { role: "teacher" });
-    }
+    // Update user role to teacher (always set, regardless of previous role)
+    await ctx.db.patch(user._id, { role: "teacher" });
 
     // Create teacher record
     await ctx.db.insert("teachers", {

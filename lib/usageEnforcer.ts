@@ -22,19 +22,21 @@ export function useCanCreateWalkthrough() {
 
 /**
  * Hook to check if the current coach can invite another teacher based on plan and teacher count.
- * Returns { allowed: boolean, reason?: string }
- * @param currentTeacherCount - number of teachers currently managed by the coach
+ * Uses the new teacher usage query for accurate limits.
+ * Returns { allowed: boolean, reason?: string, teacherUsage?: object }
  */
-export function useCanInviteTeacher(currentTeacherCount: number) {
+export function useCanInviteTeacher() {
   const planDetection = usePlanDetection();
-  const plan = planDetection.isProPlan ? "coach_pro" : "coach_starter";
-  const maxTeachers = plan === "coach_pro" ? 25 : 5;
+  const teacherUsage = useQuery(api.plans.getTeacherUsage, { hasProPlan: planDetection.isProPlan });
 
-  const allowed = currentTeacherCount < maxTeachers;
+  // If loading, allow by default (UI should show spinner)
+  if (!teacherUsage) return { allowed: true, reason: undefined };
+
+  const allowed = !teacherUsage.isOverLimit;
   const reason = allowed ? undefined :
-    `You have reached your teacher limit (${maxTeachers}) for the ${planDetection.isProPlan ? "Coach Pro" : "Starter"} plan. Upgrade to Coach Pro for more.`;
+    `You have reached your teacher limit (${teacherUsage.teacherLimit}) for the ${planDetection.isProPlan ? "Coach Pro" : "Coach Starter"} plan. Upgrade to Coach Pro for more.`;
 
-  return { allowed, reason };
+  return { allowed, reason, teacherUsage };
 }
 
 /**
@@ -42,7 +44,8 @@ export function useCanInviteTeacher(currentTeacherCount: number) {
  * Checks if a coach can create a walkthrough based on plan and usage
  */
 export function canCreateWalkthroughBackend({ plan, walkthroughsUsed }: { plan: "coach_pro" | "coach_starter"; walkthroughsUsed: number }) {
-  const max = plan === "coach_pro" ? 100 : 15;
+  // Use the same limits from PLAN_CONFIG
+  const max = plan === "coach_pro" ? 50 : 10; // 100/50 AI generations = 50/10 walkthroughs
   return walkthroughsUsed < max;
 }
 
@@ -51,6 +54,7 @@ export function canCreateWalkthroughBackend({ plan, walkthroughsUsed }: { plan: 
  * Checks if a coach can invite a teacher based on plan and teacher count
  */
 export function canInviteTeacherBackend({ plan, teacherCount }: { plan: "coach_pro" | "coach_starter"; teacherCount: number }) {
-  const max = plan === "coach_pro" ? 25 : 5;
+  // Use the same limits from PLAN_CONFIG
+  const max = plan === "coach_pro" ? 15 : 3;
   return teacherCount < max;
 } 

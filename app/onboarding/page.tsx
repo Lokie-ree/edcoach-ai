@@ -15,6 +15,7 @@ import { AIUsageBadge, AIUsageWarning } from "@/components/ui/ai-usage-badge";
 import { useQuery as useConvexQuery } from "convex/react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
+import TeacherTutorial from "@/components/onboarding/teacher-tutorial";
 
 
 export default function OnboardingPage() {
@@ -23,6 +24,7 @@ export default function OnboardingPage() {
 
   const [step, setStep] = useState<'role-detection' | 'coaching-setup' | 'complete'>('role-detection');
   const [completingOnboarding, setCompletingOnboarding] = useState(false);
+  const [showTeacherTutorial, setShowTeacherTutorial] = useState(false);
 
   // Get current user data
   const convexUser = useQuery(
@@ -55,21 +57,14 @@ export default function OnboardingPage() {
   // Determine initial step based on user state
   useEffect(() => {
     if (!convexUser || !isLoaded || completingOnboarding) return;
-
-    // If already onboarded, don't change step (let redirect effect handle it)
-    if (convexUser.onboardingComplete) {
+    if (convexUser.onboardingComplete) return;
+    if (convexUser.role === "teacher") {
+      setShowTeacherTutorial(true);
+      setStep("complete");
       return;
     }
-
-    // If user has pending teacher record, they're a teacher - complete immediately
-    if (convexUser.role === 'teacher') {
-      setStep('complete');
-      return;
-    }
-
-    // Coach flow - check organization status
-    if (convexUser.role === 'coach') {
-      setStep('complete');
+    if (convexUser.role === "coach") {
+      setStep("role-detection");
     }
   }, [convexUser, isLoaded, completingOnboarding]);
 
@@ -121,12 +116,35 @@ export default function OnboardingPage() {
     );
   }
 
+  if (showTeacherTutorial && convexUser?.role === "teacher" && !convexUser.onboardingComplete) {
+    return (
+      <TeacherTutorial
+        onComplete={async () => {
+          setShowTeacherTutorial(false);
+          setCompletingOnboarding(true);
+          await completeOnboarding({});
+          setCompletingOnboarding(false);
+          router.replace("/dashboard");
+        }}
+        onSkip={async () => {
+          setShowTeacherTutorial(false);
+          setCompletingOnboarding(true);
+          await completeOnboarding({});
+          setCompletingOnboarding(false);
+          router.replace("/dashboard");
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
       <div className="container max-w-4xl mx-auto px-4 py-8">
         <PageHeader
-          title="Welcome to EdCoach AI"
-          description="Let's set up your coaching platform in just a few steps"
+          title={convexUser?.role === "teacher" ? "Welcome to EdCoach AI" : "Welcome to EdCoach AI"}
+          description={convexUser?.role === "teacher"
+            ? "You're all set up as a teacher. Your coach can now conduct walkthroughs and provide feedback."
+            : "Let's set up your coaching platform in just a few steps"}
           gradient={true}
         />
 

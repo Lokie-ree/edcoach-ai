@@ -6,30 +6,28 @@ import { getCurrentUser } from "./auth";
 export const PLAN_CONFIG = {
   coach_starter: {
     name: "Coach Starter",
-    price: 0,
-    description: "Perfect for individual coaches getting started",
+    description: "Perfect for new coaches getting started",
     features: {
-      maxAIGenerations: 30, // 15 walkthroughs per month
-      maxOrganizations: 1,
-      maxTeachers: 5,
-      analyticsDepth: 30, // days
+      maxAIGenerations: 20, // 10 walkthroughs per month
+      maxTeachers: 3,
+      analyticsDepth: 30,
       exportEnabled: false,
+      bulkInvitationsEnabled: false,
       prioritySupport: false,
-      earlyAccess: false,
+      advancedAnalytics: false,
     },
   },
   coach_pro: {
     name: "Coach Pro", 
-    price: 39,
-    description: "For coaches serious about scaling their impact",
+    description: "For coaches ready to scale their impact",
     features: {
-      maxAIGenerations: 200, // 100 walkthroughs per month
-      maxOrganizations: 3,
-      maxTeachers: 25,
-      analyticsDepth: 180, // days
+      maxAIGenerations: 100, // 50 walkthroughs per month
+      maxTeachers: 15,
+      analyticsDepth: 90, // days
       exportEnabled: true,
+      bulkInvitationsEnabled: true,
       prioritySupport: true,
-      earlyAccess: true,
+      advancedAnalytics: true, // Enable advanced analytics for Pro
     },
   },
 } as const;
@@ -96,6 +94,85 @@ export const getAIUsageThisMonth = query({
       walkthroughsUsed,
       walkthroughsLimit,
       walkthroughsRemaining,
+    };
+  },
+});
+
+/**
+ * Get current teacher usage and limits for the user
+ */
+export const getTeacherUsage = query({
+  args: {
+    hasProPlan: v.optional(v.boolean()),
+  },
+  returns: v.object({
+    teacherCount: v.number(),
+    teacherLimit: v.number(),
+    teachersRemaining: v.number(),
+    isOverLimit: v.boolean(),
+    plan: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user || user.role !== "coach") {
+      throw new Error("Only coaches can check teacher limits");
+    }
+
+    // Determine plan from frontend Clerk check
+    const plan = args.hasProPlan ? "coach_pro" : "coach_starter";
+    const limit = PLAN_CONFIG[plan].features.maxTeachers;
+    
+    // Get current teacher count
+    const teachers = await ctx.db
+      .query("teachers")
+      .withIndex("by_coach", (q) => q.eq("coachId", user._id))
+      .collect();
+    
+    const teacherCount = teachers.length;
+    const teachersRemaining = Math.max(0, limit - teacherCount);
+    
+    return {
+      teacherCount,
+      teacherLimit: limit,
+      teachersRemaining,
+      isOverLimit: teacherCount >= limit,
+      plan,
+    };
+  },
+});
+
+/**
+ * Get plan features for the current user
+ */
+export const getPlanFeatures = query({
+  args: {
+    hasProPlan: v.optional(v.boolean()),
+  },
+  returns: v.object({
+    plan: v.string(),
+    exportEnabled: v.boolean(),
+    bulkInvitationsEnabled: v.boolean(),
+    prioritySupport: v.boolean(),
+    advancedAnalytics: v.boolean(),
+    analyticsDepth: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user || user.role !== "coach") {
+      throw new Error("Only coaches can check plan features");
+    }
+
+    // Determine plan from frontend Clerk check
+    const plan = args.hasProPlan ? "coach_pro" : "coach_starter";
+    const features = PLAN_CONFIG[plan].features;
+    
+    return {
+      plan,
+      exportEnabled: features.exportEnabled,
+      bulkInvitationsEnabled: features.bulkInvitationsEnabled,
+      prioritySupport: features.prioritySupport,
+      advancedAnalytics: features.advancedAnalytics,
+      analyticsDepth: features.analyticsDepth,
     };
   },
 }); 

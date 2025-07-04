@@ -5,6 +5,7 @@ import { action, ActionCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import { resend } from "./sendEmails";
+import { PLAN_CONFIG } from "./plans"; // Import the plan configuration
 
 // Helper to generate a unique invitation token (copied from invitations.ts)
 function generateInviteToken(): string {
@@ -56,17 +57,19 @@ export const sendTeacherInvitation = action({
       throw new Error("Only coaches can send invitations");
     }
 
-    // ENFORCE TEACHER LIMITS
-    // Count current teachers for this coach
+    // ENFORCE TEACHER LIMITS - Use PLAN_CONFIG instead of hardcoded values
     const teachers = await ctx.runQuery(internal.teachers.internalListByCoach, { coachId: coach._id });
-    // Get plan (use aiUsage for consistency)
+    
+    // Get plan (try to determine from Clerk, fallback to checking teacher usage patterns)
     const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, { hasProPlan: undefined });
     const isProPlan = aiUsage.plan === "coach_pro";
-    const maxTeachers = isProPlan ? 25 : 5;
+    const plan = isProPlan ? "coach_pro" : "coach_starter";
+    const maxTeachers = PLAN_CONFIG[plan].features.maxTeachers;
+    
     if (teachers.length >= maxTeachers) {
       return {
         success: false,
-        message: `You have reached your teacher limit (${maxTeachers}) for the ${isProPlan ? "Coach Pro" : "Starter"} plan. Upgrade to Coach Pro for more.`,
+        message: `You have reached your teacher limit (${maxTeachers}) for the ${PLAN_CONFIG[plan].name} plan. Upgrade to Coach Pro for more.`,
       };
     }
 
