@@ -28,8 +28,20 @@ export function AIUsageBadge({ className, showDetails = false, aiUsage: propAiUs
   const planDetection = usePlanDetection();
   const fallbackHasProPlan = planDetection.isProPlan;
   const hasProPlan = propHasProPlan !== undefined ? propHasProPlan : fallbackHasProPlan;
-  const fallbackAiUsage = useQuery(api.plans.getAIUsageThisMonth, { hasProPlan });
+  
+  // CHECK USER ROLE FIRST - only query AI usage for coaches
+  const user = useQuery(api.users.current);
+  const fallbackAiUsage = useQuery(
+    api.plans.getAIUsageThisMonth, 
+    user?.role === "coach" ? { hasProPlan } : "skip"
+  );
+  
   const aiUsage = propAiUsage !== undefined ? propAiUsage : fallbackAiUsage;
+
+  // If user is not a coach, don't show AI usage badge
+  if (user && user.role !== "coach") {
+    return null;
+  }
 
   if (hasProPlan) {
     // Pro badge
@@ -87,9 +99,15 @@ export function AIUsageBadge({ className, showDetails = false, aiUsage: propAiUs
 }
 
 function StarterUsageWarning() {
-  const aiUsage = useQuery(api.plans.getAIUsageThisMonth, { hasProPlan: false });
+  // CHECK USER ROLE FIRST - only show warning to coaches
+  const user = useQuery(api.users.current);
+  const aiUsage = useQuery(
+    api.plans.getAIUsageThisMonth, 
+    user?.role === "coach" ? { hasProPlan: false } : "skip"
+  );
 
-  if (!aiUsage) {
+  // Don't show warning to non-coaches
+  if (!user || user.role !== "coach" || !aiUsage) {
     return null;
   }
   
@@ -143,6 +161,14 @@ function StarterUsageWarning() {
 export function AIUsageWarning() {
   const planDetection = usePlanDetection();
   const hasProPlan = planDetection.isProPlan;
+  
+  // CHECK USER ROLE FIRST - only show warning to coaches
+  const user = useQuery(api.users.current);
+  
+  if (!user || user.role !== "coach") {
+    return null;
+  }
+  
   // Only show warning to non-Pro users
   if (!hasProPlan) {
     return <StarterUsageWarning />;

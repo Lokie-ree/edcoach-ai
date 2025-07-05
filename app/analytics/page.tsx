@@ -99,7 +99,6 @@ interface CoachAnalyticsResult {
   totalFeedbackGenerated: number;
   recentWalkthroughs: Array<{
     _id: string;
-    title: string;
     createdAt: number;
     teacherName: string;
     hasAiFeedback: boolean;

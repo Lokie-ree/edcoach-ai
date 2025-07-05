@@ -9,7 +9,6 @@ export const createWalkthroughAndEntries = mutation({
     evidenceSummary: v.string(),
     reinforcementIndicator: v.string(),
     refinementIndicator: v.string(),
-    title: v.string(),
     walkthroughEntries: v.array(
       v.object({
         indicatorAcronym: v.string(),
@@ -35,6 +34,9 @@ export const createWalkthroughAndEntries = mutation({
     // TODO: Add org-based permission check here if needed
 
     // ENFORCE WALKTHROUGH LIMITS
+    if (user.role !== "coach") {
+      throw new Error("Only coaches can create walkthroughs");
+    }
     // Backend cannot use Clerk's has(), so rely on aiUsage.plan
     const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, {
       hasProPlan: undefined // Let the query determine plan from user if possible
@@ -53,7 +55,6 @@ export const createWalkthroughAndEntries = mutation({
       evidenceSummary: args.evidenceSummary,
       reinforcementIndicator: args.reinforcementIndicator,
       refinementIndicator: args.refinementIndicator,
-      title: args.title,
       createdAt: now,
       updatedAt: now,
     });
@@ -79,7 +80,6 @@ export const updateWalkthroughAndEntries = mutation({
     evidenceSummary: v.string(),
     reinforcementIndicator: v.string(),
     refinementIndicator: v.string(),
-    title: v.string(),
     walkthroughEntries: v.array(
       v.object({
         indicatorAcronym: v.string(),
@@ -117,7 +117,6 @@ export const updateWalkthroughAndEntries = mutation({
       evidenceSummary: args.evidenceSummary,
       reinforcementIndicator: args.reinforcementIndicator,
       refinementIndicator: args.refinementIndicator,
-      title: args.title,
       updatedAt: now,
     });
     // Remove old entries

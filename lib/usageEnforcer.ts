@@ -1,23 +1,20 @@
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
-import { usePlanDetection } from "@/lib/usePlanDetection";
 
 /**
  * Hook to check if the current coach can create a walkthrough based on plan and usage.
  * Returns { allowed: boolean, reason?: string }
  */
 export function useCanCreateWalkthrough() {
-  const planDetection = usePlanDetection();
-  const aiUsage = useQuery(api.plans.getAIUsageThisMonth, { hasProPlan: planDetection.isProPlan });
-
-  // If loading, allow by default (UI should show spinner)
-  if (!aiUsage) return { allowed: true, reason: undefined };
-
-  const allowed = !aiUsage.isOverLimit;
-  const reason = allowed ? undefined :
-    `You have reached your monthly walkthrough limit (${aiUsage.walkthroughsLimit}). Upgrade to Coach Pro for more.`;
-
-  return { allowed, reason };
+  const user = useQuery(api.users.current);
+  
+  if (!user) return { allowed: true };
+  
+  if (user.role !== "coach") {
+    return { allowed: false, reason: "Only coaches can create walkthroughs" };
+  }
+  
+  return { allowed: true };
 }
 
 /**
@@ -26,17 +23,30 @@ export function useCanCreateWalkthrough() {
  * Returns { allowed: boolean, reason?: string, teacherUsage?: object }
  */
 export function useCanInviteTeacher() {
-  const planDetection = usePlanDetection();
-  const teacherUsage = useQuery(api.plans.getTeacherUsage, { hasProPlan: planDetection.isProPlan });
-
-  // If loading, allow by default (UI should show spinner)
-  if (!teacherUsage) return { allowed: true, reason: undefined };
-
-  const allowed = !teacherUsage.isOverLimit;
-  const reason = allowed ? undefined :
-    `You have reached your teacher limit (${teacherUsage.teacherLimit}) for the ${planDetection.isProPlan ? "Coach Pro" : "Coach Starter"} plan. Upgrade to Coach Pro for more.`;
-
-  return { allowed, reason, teacherUsage };
+  const user = useQuery(api.users.current);
+  const teachers = useQuery(api.teachers.list);
+  
+  if (!user || !teachers) return { allowed: true };
+  
+  if (user.role !== "coach") {
+    return { allowed: false, reason: "Only coaches can invite teachers" };
+  }
+  
+  // Simple limit check - 3 for free, 15 for pro
+  const limit = 3;
+  const allowed = teachers.length < limit;
+  
+  return { 
+    allowed, 
+    reason: allowed ? undefined : `Teacher limit reached (${limit})`,
+    teacherUsage: {
+      teacherCount: teachers.length,
+      teacherLimit: limit,
+      teachersRemaining: Math.max(0, limit - teachers.length),
+      isOverLimit: teachers.length >= limit,
+      plan: "coach_starter"
+    }
+  };
 }
 
 /**

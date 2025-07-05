@@ -335,7 +335,6 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
           teacherId: data.teacherId as Id<"teachers">,
           walkthroughDate,
           status: "completed",
-          title: data.title,
           reinforcementIndicator: data.reinforcementIndicator,
           refinementIndicator: data.refinementIndicator,
           evidenceSummary: data.evidenceSummary,
@@ -347,7 +346,6 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
           teacherId: data.teacherId as Id<"teachers">,
           walkthroughDate,
           status: "completed",
-          title: data.title,
           reinforcementIndicator: data.reinforcementIndicator,
           refinementIndicator: data.refinementIndicator,
           evidenceSummary: data.evidenceSummary,
@@ -426,26 +424,6 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
                           <CalendarInput
                             date={field.value instanceof Date ? field.value : undefined}
                             setDate={field.onChange}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="mt-4">
-                  <FormField
-                    control={methods.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Walkthrough Title</FormLabel>
-                        <FormControl>
-                          <input
-                            type="text"
-                            className="w-full border rounded px-3 py-2"
-                            placeholder="Enter walkthrough title"
-                            {...field}
                           />
                         </FormControl>
                         <FormMessage />

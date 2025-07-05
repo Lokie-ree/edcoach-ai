@@ -61,7 +61,8 @@ export function TeacherInvitationForm({
   onSuccess 
 }: TeacherInvitationFormProps) {
   const [open, setOpen] = useState(false);
-  const sendInvitation = useAction(api.invitations.sendTeacherInvitation);
+  // Updated to use the new simplified action
+  const sendInvitation = useAction(api.invitations.inviteTeacher);
 
   // Use the updated teacher limit checker
   const { allowed: canInviteTeacher, reason: inviteBlockReason, teacherUsage } = useCanInviteTeacher();
@@ -266,7 +267,7 @@ export function TeacherInvitationForm({
               )}
             />
             
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end space-x-2">
               <Button
                 type="button"
                 variant="outline"
@@ -294,4 +295,4 @@ export function TeacherInvitationForm({
       </DialogContent>
     </Dialog>
   );
-} 
+}

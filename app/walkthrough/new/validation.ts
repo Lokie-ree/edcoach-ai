@@ -69,7 +69,6 @@ export const walkthroughSchema = z.object({
   teacherId: z.string().min(1, "Teacher selection is required"),
   walkthroughDate: z.union([z.number(), z.string(), z.date()]),
   status: z.enum(["draft", "completed"]),
-  title: z.string().min(1, { message: "Title is required" }),
   evidenceSummary: z.string().min(1, { message: "Evidence summary is required" }),
   reinforcementIndicator: z.string().min(1, "Reinforcement indicator is required"),
   refinementIndicator: z.string().min(1, "Refinement indicator is required"),

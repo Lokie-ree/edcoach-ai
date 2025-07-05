@@ -82,7 +82,6 @@ export default function RecentFeedbackHighlights() {
                     <BookOpen className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <p className="font-medium text-sm">{walkthrough.title}</p>
                     <p className="text-xs text-muted-foreground">
                       by {walkthrough.teacherName}
                     </p>

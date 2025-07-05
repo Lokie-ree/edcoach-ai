@@ -21,7 +21,7 @@ const Header = () => {
     user && isLoaded ? {} : "skip"
   );
 
-  // Get AI usage to check limits for coaches
+  // ONLY get AI usage for coaches
   const aiUsage = useQuery(
     api.plans.getAIUsageThisMonth,
     convexUser?.role === "coach" ? {} : "skip"

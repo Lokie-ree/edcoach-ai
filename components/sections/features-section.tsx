@@ -41,7 +41,7 @@ export default function FeaturesSection() {
     <Section
       id="features"
       spacing="compact"
-      className="relative bg-gradient-to-b from-white to-indigo-50/20 dark:from-zinc-950 dark:to-indigo-950/10"
+      className="relative"
     >
       <div className="mx-auto max-w-4xl px-6">
         <motion.div

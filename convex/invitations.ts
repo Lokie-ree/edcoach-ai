@@ -1,27 +1,104 @@
-// Remove 'use node'; and all Node.js/Resend logic from this file
-// Only keep queries, mutations, and internal functions here
-// Import sendTeacherInvitation from './invitationActions' and re-export it
-
 import { v } from "convex/values";
-import { query, mutation, internalMutation, internalQuery } from "./_generated/server";
+import { query, mutation, action, internalMutation, internalQuery } from "./_generated/server";
 import { getCurrentUserOrThrow } from "./auth";
+import { internal } from "./_generated/api";
 
-/**
- * Accept a teacher invitation
- */
-export const acceptInvitation = mutation({
+// SINGLE function to handle invitations
+export const inviteTeacher = action({
   args: {
-    token: v.string(),
+    teacherEmail: v.string(),
+    teacherName: v.string(),
+    subject: v.optional(v.string()),
+    gradeBand: v.optional(v.string()),
   },
   returns: v.object({
-    success: v.optional(v.boolean()),
-    message: v.optional(v.string()),
-    coachName: v.optional(v.string()),
+    success: v.boolean(),
+    message: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    // Get coach from users table
+    const coach = await ctx.runQuery(internal.users.internalGetUserByClerkId, {
+      clerkId: identity.subject,
+    });
+
+    if (!coach || coach.role !== "coach") {
+      return { success: false, message: "Only coaches can send invitations" };
+    }
+
+    // Check if invitation already exists
+    const existingInvite = await ctx.runQuery(internal.invitations.getByEmail, {
+      email: args.teacherEmail,
+      coachId: coach._id,
+    });
+
+    if (existingInvite) {
+      return { success: false, message: "Invitation already sent to this email" };
+    }
+
+    // Create invitation with simple token
+    const token = `invite_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+
+    await ctx.runMutation(internal.invitations.create, {
+      coachId: coach._id,
+      teacherEmail: args.teacherEmail,
+      token,
+      expiresAt,
+      subject: args.subject,
+      gradeBand: args.gradeBand,
+    });
+
+    // Send email using simple fetch (no Resend component needed)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const inviteUrl = `${appUrl}/invite?token=${token}`;
+
+    try {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: process.env.RESEND_SENDER_EMAIL,
+          to: args.teacherEmail,
+          subject: `${coach.name} has invited you to join EdCoach`,
+          html: `
+            <h2>You've been invited to EdCoach!</h2>
+            <p>Hello ${args.teacherName},</p>
+            <p><b>${coach.name}</b> has invited you to join their coaching team.</p>
+            <p><a href="${inviteUrl}">Accept Invitation</a></p>
+            <p>This link expires in 7 days.</p>
+          `,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to send email: ${response.statusText}`);
+      }
+
+      return { success: true, message: "Invitation sent successfully!" };
+    } catch (error) {
+      console.error("Email sending failed:", error);
+      return { success: false, message: "Failed to send invitation email" };
+    }
+  },
+});
+
+// SINGLE function to accept invitations
+export const acceptInvitation = mutation({
+  args: { token: v.string() },
+  returns: v.object({
+    success: v.boolean(),
+    message: v.string(),
   }),
   handler: async (ctx, args) => {
     const user = await getCurrentUserOrThrow(ctx);
     
-    // Find the invitation by token
+    // Get invitation
     const invitation = await ctx.db
       .query("invitations")
       .withIndex("by_token", (q) => q.eq("token", args.token))
@@ -29,52 +106,64 @@ export const acceptInvitation = mutation({
       .first();
 
     if (!invitation) {
-      return {
-        success: false,
-        message: "Invalid or expired invitation",
-      };
+      return { success: false, message: "Invalid or expired invitation" };
     }
 
-    // Check if invitation has expired
     if (invitation.expiresAt < Date.now()) {
       await ctx.db.patch(invitation._id, { status: "expired" });
-      return {
-        success: false,
-        message: "This invitation has expired",
+      return { success: false, message: "Invitation has expired" };
+    }
+
+    // Email validation
+    if (user.email.toLowerCase() !== invitation.teacherEmail.toLowerCase()) {
+      return { 
+        success: false, 
+        message: "Please sign in with the email that received the invitation" 
       };
     }
 
-    // Get the coach who sent the invitation
+    // Get coach
     const coach = await ctx.db.get(invitation.coachId);
     if (!coach) {
-      return {
-        success: false,
-        message: "Coach not found",
-      };
+      return { success: false, message: "Coach not found" };
     }
 
-    // Update user role to teacher (always set, regardless of previous role)
+    // Update user role to teacher (if not already)
     await ctx.db.patch(user._id, { role: "teacher" });
 
-    // Check if teacher record already exists for this user
+    // Check if teacher record already exists
     let teacherRecord = await ctx.db
       .query("teachers")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
       .first();
 
     if (!teacherRecord) {
-      // Create teacher record if it doesn't exist
-      const teacherId = await ctx.db.insert("teachers", {
-        userId: user._id,
-        name: user.name,
-        email: user.email,
-        subject: [], // Will be filled out during onboarding
-        gradeBand: "", // Will be filled out during onboarding
-        status: "needs_details",
-        coachId: invitation.coachId,
-        createdAt: Date.now(),
-      });
-      teacherRecord = await ctx.db.get(teacherId);
+      // Check if there's a pending teacher record by email (from old system)
+      const pendingTeacher = await ctx.db
+        .query("teachers")
+        .withIndex("by_email", (q) => q.eq("email", user.email))
+        .filter(q => q.eq(q.field("status"), "pending"))
+        .first();
+
+      if (pendingTeacher) {
+        // Link existing pending teacher record
+        await ctx.db.patch(pendingTeacher._id, {
+          userId: user._id,
+          status: "needs_details", // Will be updated during onboarding
+        });
+      } else {
+        // Create new teacher record with needs_details status (matches onboarding expectation)
+        await ctx.db.insert("teachers", {
+          userId: user._id,
+          name: user.name,
+          email: user.email,
+          subject: invitation.subject ? [invitation.subject] : [],
+          gradeBand: invitation.gradeBand || "",
+          status: "needs_details", // Changed from "active" to "needs_details"
+          coachId: invitation.coachId,
+          createdAt: Date.now(),
+        });
+      }
     }
 
     // Mark invitation as accepted
@@ -83,64 +172,22 @@ export const acceptInvitation = mutation({
       acceptedAt: Date.now(),
     });
 
-    // Set onboardingComplete to true only after teacher record is created
-    await ctx.db.patch(user._id, { onboardingComplete: true });
+    // Set onboardingComplete to false so they go through onboarding
+    await ctx.db.patch(user._id, { onboardingComplete: false });
 
-    return {
-      success: true,
-      message: "Welcome to the team!",
-      coachName: coach.name,
-    };
+    return { success: true, message: "Welcome to the team!" };
   },
 });
 
-/**
- * List invitations sent by the current coach
- */
-export const listMyInvitations = query({
-  args: {},
-  returns: v.array(v.object({
-    _id: v.optional(v.id("invitations")),
-    _creationTime: v.optional(v.float64()),
-    teacherEmail: v.optional(v.string()),
-    status: v.optional(v.union(v.literal("pending"), v.literal("accepted"), v.literal("expired"))),
-    createdAt: v.optional(v.number()),
-    expiresAt: v.optional(v.number()),
-    acceptedAt: v.optional(v.number()),
-    coachId: v.optional(v.id("users")),
-    token: v.optional(v.string()),
-    subject: v.optional(v.string()),
-    gradeBand: v.optional(v.string()),
-  })),
-  handler: async (ctx) => {
-    const user = await getCurrentUserOrThrow(ctx);
-    
-    if (user.role !== "coach") {
-      throw new Error("Only coaches can view invitations");
-    }
-
-    return await ctx.db
-      .query("invitations")
-      .withIndex("by_coach", (q) => q.eq("coachId", user._id))
-      .order("desc")
-      .collect();
-  },
-});
-
-/**
- * Get invitation details by token (for the invite acceptance page)
- */
+// Simplified queries
 export const getInvitationByToken = query({
   args: { token: v.string() },
   returns: v.union(
     v.object({
-      _id: v.optional(v.id("invitations")),
-      teacherEmail: v.optional(v.string()),
-      coachName: v.optional(v.string()),
-      status: v.optional(v.union(v.literal("pending"), v.literal("accepted"), v.literal("expired"))),
-      isExpired: v.optional(v.boolean()),
-      subject: v.optional(v.string()),
-      gradeBand: v.optional(v.string()),
+      teacherEmail: v.string(),
+      coachName: v.string(),
+      status: v.string(),
+      isExpired: v.boolean(),
     }),
     v.null()
   ),
@@ -150,32 +197,54 @@ export const getInvitationByToken = query({
       .withIndex("by_token", (q) => q.eq("token", args.token))
       .first();
 
-    if (!invitation) {
-      return null;
-    }
+    if (!invitation) return null;
 
     const coach = await ctx.db.get(invitation.coachId);
-    if (!coach) {
-      return null;
-    }
-
-    const isExpired = invitation.expiresAt < Date.now();
+    if (!coach) return null;
 
     return {
-      _id: invitation._id,
       teacherEmail: invitation.teacherEmail,
       coachName: coach.name,
       status: invitation.status,
-      isExpired,
-      subject: invitation.subject,
-      gradeBand: invitation.gradeBand,
+      isExpired: invitation.expiresAt < Date.now(),
     };
   },
 });
 
-// ===== INTERNAL FUNCTIONS =====
+export const listMyInvitations = query({
+  args: {},
+  returns: v.array(v.object({
+    _id: v.id("invitations"),
+    teacherEmail: v.string(),
+    status: v.string(),
+    createdAt: v.number(),
+    acceptedAt: v.optional(v.number()),
+  })),
+  handler: async (ctx) => {
+    const user = await getCurrentUserOrThrow(ctx);
+    if (user.role !== "coach") {
+      throw new Error("Only coaches can view invitations");
+    }
 
-export const internalCreateInvitation = internalMutation({
+    const invitations = await ctx.db
+      .query("invitations")
+      .withIndex("by_coach", (q) => q.eq("coachId", user._id))
+      .order("desc")
+      .collect();
+
+    // Map to only return the fields specified in the validator
+    return invitations.map(invitation => ({
+      _id: invitation._id,
+      teacherEmail: invitation.teacherEmail,
+      status: invitation.status,
+      createdAt: invitation.createdAt,
+      acceptedAt: invitation.acceptedAt,
+    }));
+  },
+});
+
+// Internal functions
+export const create = internalMutation({
   args: {
     coachId: v.id("users"),
     teacherEmail: v.string(),
@@ -199,47 +268,33 @@ export const internalCreateInvitation = internalMutation({
   },
 });
 
-export const internalGetPendingInviteByEmail = internalQuery({
+// FIX: Map the returned object to match the validator
+export const getByEmail = internalQuery({
   args: {
+    email: v.string(),
     coachId: v.id("users"),
-    teacherEmail: v.string(),
   },
-  returns: v.union(
-    v.object({
-      _id: v.id("invitations"),
-      _creationTime: v.number(),
-      coachId: v.id("users"),
-      teacherEmail: v.string(),
-      token: v.string(),
-      status: v.union(v.literal("pending"), v.literal("accepted"), v.literal("expired")),
-      expiresAt: v.number(),
-      createdAt: v.number(),
-      acceptedAt: v.optional(v.number()),
-      subject: v.optional(v.string()),
-      gradeBand: v.optional(v.string()),
-    }),
-    v.null()
-  ),
+  returns: v.union(v.object({
+    _id: v.id("invitations"),
+    status: v.string(),
+  }), v.null()),
   handler: async (ctx, args) => {
-    return await ctx.db
+    const invitation = await ctx.db
       .query("invitations")
-      .withIndex("by_email", (q) => q.eq("teacherEmail", args.teacherEmail))
+      .withIndex("by_email", (q) => q.eq("teacherEmail", args.email))
       .filter((q) => q.eq(q.field("coachId"), args.coachId))
       .filter((q) => q.eq(q.field("status"), "pending"))
       .first();
+
+    // Return null if no invitation found
+    if (!invitation) {
+      return null;
+    }
+
+    // Map to only return the fields specified in the validator
+    return {
+      _id: invitation._id,
+      status: invitation.status,
+    };
   },
 });
-
-export const internalUpdateInvitationStatus = internalMutation({
-  args: {
-    invitationId: v.id("invitations"),
-    status: v.union(v.literal("pending"), v.literal("accepted"), v.literal("expired")),
-  },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.invitationId, { status: args.status });
-    return null;
-  },
-});
-
-export { sendTeacherInvitation } from "./invitationActions";

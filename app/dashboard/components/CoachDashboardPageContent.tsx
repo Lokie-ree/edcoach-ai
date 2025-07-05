@@ -35,9 +35,9 @@ export default function CoachDashboardPageContent({
   const planDetection = usePlanDetection();
   const hasProPlan = planDetection.isProPlan;
   // Get AI usage for the correct plan
-  const aiUsage = useQuery(api.plans.getAIUsageThisMonth, { hasProPlan });
+  const aiUsage = useQuery(api.plans.getAIUsageThisMonth, convexUser?.role === "coach" ? { hasProPlan } : "skip");
   // Get AI usage for starter users to check if warning should be shown
-  const starterAiUsage = useQuery(api.plans.getAIUsageThisMonth, { hasProPlan: false });
+  const starterAiUsage = useQuery(api.plans.getAIUsageThisMonth, convexUser?.role === "coach" ? { hasProPlan: false } : "skip");
 
   // Show tutorial for new coaches (created within last 5 minutes and first time on dashboard)
   useEffect(() => {

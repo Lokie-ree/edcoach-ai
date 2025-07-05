@@ -59,9 +59,9 @@ export const upsertUser = internalMutation({
 
         if (pendingInvitation) {
           defaultRole = "teacher";
-          console.log(`✅ upsertUser: Found pending invitation, setting role to teacher for: ${email}`);
+          console.log(`✅ upsertUser: Found pending invitation ${pendingInvitation._id}, setting role to teacher for: ${email}`);
         } else {
-          console.log(`✅ upsertUser: No pending invitation, setting role to coach for: ${email}`);
+          console.log(`✅ upsertUser: No pending invitation found, setting role to coach for: ${email}`);
         }
       }
 
@@ -72,10 +72,10 @@ export const upsertUser = internalMutation({
         createdAt: Date.now(),
         onboardingComplete: false,
       });
-      console.log(`✅ upsertUser: Created user ${userId} with role ${defaultRole}`);
+      console.log(`✅ upsertUser: Created user ${userId} with role ${defaultRole}, email: ${email}`);
     } else {
       await ctx.db.patch(existingUser._id, userAttributes);
-      console.log(`✅ upsertUser: Updated existing user ${existingUser._id}`);
+      console.log(`✅ upsertUser: Updated existing user ${existingUser._id}, email: ${email}`);
     }
   },
 });

@@ -6,37 +6,6 @@ import OpenAI from "openai";
 import { internal } from "./_generated/api";
 import crypto from "crypto";
 
-// Helper: Compute SHA-256 hash of a string
-function hashPrompt(prompt: string): string {
-  return crypto.createHash("sha256").update(prompt).digest("hex");
-}
-
-// Helper: Check cache for a prompt hash
-async function getCachedFeedback(ctx: any, promptHash: string) {
-  return await ctx.db
-    .query("aiFeedbackCache")
-    .withIndex("by_promptHash", (q: any) => q.eq("promptHash", promptHash))
-    .first();
-}
-
-// Helper: Store feedback in cache
-async function setCachedFeedback(ctx: any, promptHash: string, result: any) {
-  await ctx.db.insert("aiFeedbackCache", {
-    promptHash,
-    result,
-    createdAt: Date.now(),
-  });
-}
-
-// Helper: Check if a prompt is cached
-async function checkIfCached(ctx: any, prompt: string): Promise<boolean> {
-  const promptHash = hashPrompt(prompt);
-  const cached = await ctx.db
-    .query("aiFeedbackCache")
-    .withIndex("by_promptHash", (q: any) => q.eq("promptHash", promptHash))
-    .first();
-  return !!cached;
-}
 
 export const generateFeedback = action({
   args: {
@@ -122,29 +91,6 @@ Instructions:
 - Limit to 1-2 sentences
 `;
 
-    // Caching logic
-    const promptHash = hashPrompt(prompt);
-    const cached = await getCachedFeedback(ctx, promptHash);
-    if (cached) {
-      // Log usage as cache hit
-      await ctx.runMutation(internal.aiFeedbackMutations.logTokenUsage, {
-        userId: user._id,
-        action: "generateFeedback",
-        model: "gpt-4o-mini",
-        promptTokens: 0,
-        completionTokens: 0,
-        totalTokens: 0,
-        cost: 0,
-        isCached: true,
-        timestamp: Date.now(),
-        metadata: {
-          promptType: args.promptType,
-          indicatorCode: indicator.indicator_code,
-        },
-      });
-      return cached.result;
-    }
-
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     
     try {
@@ -166,7 +112,6 @@ Instructions:
       // Pricing for gpt-4o-mini: Input $0.15/M, Output $0.60/M
       const PROMPT_COST_PER_1K = 0.00015;
       const COMPLETION_COST_PER_1K = 0.00060;
-      const isCached = await checkIfCached(ctx, prompt);
       const promptCost = promptTokens * PROMPT_COST_PER_1K / 1000;
       const completionCost = completionTokens * COMPLETION_COST_PER_1K / 1000;
       const totalCost = promptCost + completionCost;
@@ -180,7 +125,7 @@ Instructions:
         completionTokens,
         totalTokens,
         cost: totalCost,
-        isCached,
+        isCached: false,
         timestamp: Date.now(),
         metadata: {
           promptType: args.promptType,
@@ -194,7 +139,6 @@ Instructions:
         cost: totalCost,
       });
 
-      await setCachedFeedback(ctx, promptHash, content);
       return content;
     } catch (error) {
       console.error("OpenAI API error:", error);
@@ -292,29 +236,6 @@ Return the response as JSON with two keys:
 *   Explicitly (but naturally) incorporates language and concepts from the detailed LER indicator information provided.
 *   Highly actionable suggestions.`;
 
-    // Caching logic
-    const promptHash = hashPrompt(prompt);
-    const cached = await getCachedFeedback(ctx, promptHash);
-    if (cached) {
-      // Log usage as cache hit
-      await ctx.runMutation(internal.aiFeedbackMutations.logTokenUsage, {
-        userId: user._id,
-        action: "generateConsolidatedFeedback",
-        model: "gpt-4o-mini",
-        promptTokens: 0,
-        completionTokens: 0,
-        totalTokens: 0,
-        cost: 0,
-        isCached: true,
-        timestamp: Date.now(),
-        metadata: {
-          reinforcementIndicator: args.reinforcementIndicator.indicator_code,
-          refinementIndicator: args.refinementIndicator.indicator_code,
-        },
-      });
-      return cached.result;
-    }
-
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     try {
       const response = await openai.chat.completions.create({
@@ -342,7 +263,6 @@ Return the response as JSON with two keys:
       const totalTokens = response.usage?.total_tokens ?? 0;
       const PROMPT_COST_PER_1K = 0.00015;
       const COMPLETION_COST_PER_1K = 0.00060;
-      const isCached = await checkIfCached(ctx, prompt);
       const promptCost = promptTokens * PROMPT_COST_PER_1K / 1000;
       const completionCost = completionTokens * COMPLETION_COST_PER_1K / 1000;
       const totalCost = promptCost + completionCost;
@@ -354,7 +274,7 @@ Return the response as JSON with two keys:
         completionTokens,
         totalTokens,
         cost: totalCost,
-        isCached,
+        isCached: false,
         timestamp: Date.now(),
         metadata: {
           reinforcementIndicator: args.reinforcementIndicator.indicator_code,
@@ -364,10 +284,6 @@ Return the response as JSON with two keys:
       await ctx.runMutation(internal.aiFeedbackMutations.checkCostAlerts, {
         userId: user._id,
         cost: totalCost,
-      });
-      await setCachedFeedback(ctx, promptHash, {
-        reinforcement: parsedResponse.reinforcement,
-        refinement: parsedResponse.refinement,
       });
       return {
         reinforcement: parsedResponse.reinforcement,

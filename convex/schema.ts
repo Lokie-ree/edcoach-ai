@@ -67,7 +67,6 @@ export default defineSchema({
     refinementIndicator: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
-    title: v.string(),
   })
     .index("by_observer", ["observerId"])
     .index("by_teacher", ["teacherId"])

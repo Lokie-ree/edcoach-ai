@@ -82,7 +82,6 @@ export const getCoachAnalytics = query({
     totalFeedbackGenerated: v.number(),
     recentWalkthroughs: v.array(v.object({
       _id: v.id("walkthroughs"),
-      title: v.string(),
       createdAt: v.number(),
       teacherName: v.string(),
       hasAiFeedback: v.boolean(),
@@ -131,7 +130,6 @@ export const getCoachAnalytics = query({
         }
         recentWalkthroughs.push({
           _id: walkthrough._id,
-          title: walkthrough.title,
           createdAt: walkthrough.createdAt,
           teacherName: teacher?.name || "Unknown Teacher",
           hasAiFeedback: !!aiFeedback,
@@ -239,7 +237,6 @@ export const getMyTeacherAnalytics = query({
     totalFeedbackReceived: v.number(),
     recentWalkthroughs: v.array(v.object({
       _id: v.id("walkthroughs"),
-      title: v.string(),
       createdAt: v.number(),
       hasAiFeedback: v.boolean(),
     })),
@@ -296,7 +293,6 @@ export const getMyTeacherAnalytics = query({
       
       recentWalkthroughs.push({
         _id: walkthrough._id,
-        title: walkthrough.title,
         createdAt: walkthrough.createdAt,
         hasAiFeedback: !!aiFeedback,
       });
