@@ -31,7 +31,8 @@ export const upsertUser = internalMutation({
       return;
     }
 
-    console.log(`🔍 upsertUser: Processing user ${data.id} with email ${data.email_addresses[0]?.email_address}`);
+    const email = data.email_addresses[0]?.email_address;
+    console.log(`🔍 upsertUser: Processing user ${data.id} with email ${email}`);
 
     const existingUser = await ctx.runQuery(internal.users.internalGetUserByClerkId, {
       clerkId: data.id,
@@ -40,16 +41,29 @@ export const upsertUser = internalMutation({
     const userAttributes = {
       clerkId: data.id,
       name: `${data.first_name ?? ""} ${data.last_name ?? ""}`.trim(),
-      email: data.email_addresses[0]?.email_address || "",
+      email: email || "",
       imageUrl: data.image_url,
     };
 
     if (existingUser === null) {
-      // NEW: NON_ORG_APPROACH - Default to "coach" for direct signups
-      // Teacher role will be set during invitation acceptance process
-      const defaultRole: "coach" = "coach";
+      // NEW: Check for pending invitation to determine role
+      let defaultRole: "coach" | "teacher" = "coach";
       
-      console.log(`✅ upsertUser: Setting role to coach for direct signup: ${data.email_addresses[0]?.email_address}`);
+      if (email) {
+        // Check if there's a pending invitation for this email
+        const pendingInvitation = await ctx.db
+          .query("invitations")
+          .withIndex("by_email", (q) => q.eq("teacherEmail", email))
+          .filter((q) => q.eq(q.field("status"), "pending"))
+          .first();
+
+        if (pendingInvitation) {
+          defaultRole = "teacher";
+          console.log(`✅ upsertUser: Found pending invitation, setting role to teacher for: ${email}`);
+        } else {
+          console.log(`✅ upsertUser: No pending invitation, setting role to coach for: ${email}`);
+        }
+      }
 
       const userId = await ctx.db.insert("users", {
         ...userAttributes,
@@ -65,6 +79,7 @@ export const upsertUser = internalMutation({
     }
   },
 });
+
 
 /**
  * Deletes a user from a Clerk webhook.

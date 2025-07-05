@@ -1,8 +1,8 @@
 # EdCoach AI: Technical PRD & Implementation Guide
 **Version**: 2.0 (Consolidated)  
 **Status**: MVP Implementation Complete, Future Feature Planning  
-**Target Launch**: July 28th, 2024  
-**Last Updated**: January 2025
+**Target Launch**: July 28th, 2025  
+**Last Updated**: July 2, 2025
 
 ---
 
@@ -13,7 +13,7 @@ EdCoach AI is an AI-powered instructional coaching platform for K-12 schools foc
 
 ### 1.2 Current Implementation Status
 - **Authentication & Onboarding**: ✅ Complete - Clerk integration with role-based flows
-- **Subscription Management**: ✅ Complete - Two-plan system (coach_starter free, coach_pro paid)
+- **Subscription Management**: ✅ Complete - Two-plan system (Coach Starter $7/mo, Coach Pro $15/mo, managed via Clerk Billing)
 - **Teacher Invitation System**: ✅ Complete - Email-based invitations with direct relationship
 - **Walkthrough Capture**: ✅ Complete - Mobile-first with indicator selection
 - **AI Feedback Generation**: ✅ Complete - OpenAI integration with LER rubric alignment
@@ -25,7 +25,7 @@ EdCoach AI is an AI-powered instructional coaching platform for K-12 schools foc
 - **Backend**: Convex (real-time database, functions, schema)
 - **Authentication**: Clerk (user management, role-based access)
 - **AI Integration**: OpenAI GPT-4.1 Mini (feedback generation)
-- **Billing**: Clerk Billing (subscription management)
+- **Billing**: Clerk Billing (subscription management, feature flags)
 - **Email**: Convex Resend Component (invitation system)
 
 ---
@@ -34,7 +34,7 @@ EdCoach AI is an AI-powered instructional coaching platform for K-12 schools foc
 
 ### 2.1 Coach (Primary User)
 - **Role**: `coach` in user.role field
-- **Subscription**: Required (coach_starter free or coach_pro paid)
+- **Subscription**: Required (Coach Starter $7/mo or Coach Pro $15/mo)
 - **Capabilities**: 
   - Manage direct teacher relationships
   - Conduct walkthroughs with indicator selection
@@ -90,35 +90,23 @@ walkthroughs: {
 ```
 
 ### 3.2 Subscription Plans (Current Implementation)
-```typescript
-const PLAN_CONFIG = {
-  coach_starter: {
-    price: 0,
-    features: {
-      maxAIGenerations: 30,
-      maxTeachers: 5,
-      analyticsDepth: 30,
-      exportEnabled: false,
-    }
-  },
-  coach_pro: {
-    price: 39,
-    features: {
-      maxAIGenerations: 200,
-      maxTeachers: 25,
-      analyticsDepth: 180,
-      exportEnabled: true,
-      prioritySupport: true,
-    }
-  }
-}
-```
+
+> **Note:** Pricing and feature flags are managed in Clerk Billing. Usage limits and feature gating are enforced in-app, not via Clerk.
+
+| Plan           | Price      | Teachers | Walkthroughs/mo | Analytics         | Retention | Bulk Invites | Export | Priority Support |
+|----------------|------------|----------|-----------------|-------------------|-----------|--------------|--------|------------------|
+| Coach Starter  | $7/month   | 3        | 10              | Basic             | 30 days   | No           | No     | No               |
+| Coach Pro      | $15/month  | 15       | 50              | Advanced (charts) | 90 days   | Yes          | Yes    | Yes              |
+
+- All plan upgrades/downgrades and annual discounts are managed in Clerk Billing.
+- Pricing is not stored in code.
+- Feature flags (e.g., `advanced_analytics`, `bulk_invitations`, `feedback_export`, `priority_support`) are set in Clerk and checked in-app.
+- Usage limits (teachers, walkthroughs) are enforced in Convex and the frontend.
 
 ### 3.3 AI Integration Architecture
 **Current Prompt Structure** (from PROMPTITERATION_V1.md):
 
 You are EdCoach AI, an expert instructional coaching assistant. Your mission is to generate concise, actionable, and rubric-aligned feedback for K-12 teachers in Louisiana, based on brief informal classroom walkthroughs. The feedback must be deeply rooted in the provided Louisiana Educator Rubric (LER) indicators, their detailed explanations, key terms, evidence of student-centered learning, and the observer's notes. Maintain a supportive, encouraging, and growth-oriented coaching tone. The output should be 3-4 sentences total.
-
 
 **Enhanced Context Integration** (from AI_FEEDBACK_REVISION.md):
 - LER indicator details with full descriptions
@@ -127,11 +115,11 @@ You are EdCoach AI, an expert instructional coaching assistant. Your mission is 
 - Student-centered learning behaviors
 - Observer's notes integration
 
-### 3.4 AI Usage Tracking & Limits
-- **Current**: 2 AI generations per walkthrough (reinforcement + refinement)
-- **Tracking**: `aiUsageLogs` table with monthly aggregation
-- **Enforcement**: Real-time checks before AI generation
-- **Reset**: Monthly (calendar month basis)
+### 3.4 Usage Tracking & Limits
+- **Coach Starter**: 3 teachers, 10 walkthroughs/month, 30-day analytics retention
+- **Coach Pro**: 15 teachers, 50 walkthroughs/month, 90-day analytics retention, bulk invites, export, priority support
+- All usage limits are enforced in-app (Convex/backend + frontend), not by Clerk
+- Feature flags are checked via Clerk's `has({ feature: ... })` or plan in-app
 
 ---
 
