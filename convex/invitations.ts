@@ -56,23 +56,35 @@ export const acceptInvitation = mutation({
     // Update user role to teacher (always set, regardless of previous role)
     await ctx.db.patch(user._id, { role: "teacher" });
 
-    // Create teacher record
-    await ctx.db.insert("teachers", {
-      userId: user._id,
-      name: user.name,
-      email: user.email,
-      subject: [], // Will be filled out during onboarding
-      gradeBand: "", // Will be filled out during onboarding
-      status: "needs_details",
-      coachId: invitation.coachId,
-      createdAt: Date.now(),
-    });
+    // Check if teacher record already exists for this user
+    let teacherRecord = await ctx.db
+      .query("teachers")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .first();
+
+    if (!teacherRecord) {
+      // Create teacher record if it doesn't exist
+      const teacherId = await ctx.db.insert("teachers", {
+        userId: user._id,
+        name: user.name,
+        email: user.email,
+        subject: [], // Will be filled out during onboarding
+        gradeBand: "", // Will be filled out during onboarding
+        status: "needs_details",
+        coachId: invitation.coachId,
+        createdAt: Date.now(),
+      });
+      teacherRecord = await ctx.db.get(teacherId);
+    }
 
     // Mark invitation as accepted
     await ctx.db.patch(invitation._id, {
       status: "accepted",
       acceptedAt: Date.now(),
     });
+
+    // Set onboardingComplete to true only after teacher record is created
+    await ctx.db.patch(user._id, { onboardingComplete: true });
 
     return {
       success: true,

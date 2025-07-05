@@ -28,10 +28,14 @@ async function setCachedFeedback(ctx: any, promptHash: string, result: any) {
   });
 }
 
-// Helper stub for caching logic (replace with real implementation)
-async function checkIfCached(prompt: string): Promise<boolean> {
-  // TODO: Implement actual cache check
-  return false;
+// Helper: Check if a prompt is cached
+async function checkIfCached(ctx: any, prompt: string): Promise<boolean> {
+  const promptHash = hashPrompt(prompt);
+  const cached = await ctx.db
+    .query("aiFeedbackCache")
+    .withIndex("by_promptHash", (q: any) => q.eq("promptHash", promptHash))
+    .first();
+  return !!cached;
 }
 
 export const generateFeedback = action({
@@ -60,13 +64,15 @@ export const generateFeedback = action({
     });
     if (!user) throw new Error("User not found");
 
-    // Check AI usage limits based on user's plan - NOW PASSING hasProPlan!
-    const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, {
-      hasProPlan: args.hasProPlan
-    });
-    if (aiUsage.isOverLimit) {
-      const planName = aiUsage.plan === "coach_starter" ? "Coach Starter" : "Coach Pro";
-      throw new Error(`You've reached your monthly limit of ${aiUsage.limit} AI generations on the ${planName} plan. Please upgrade or wait until next month.`);
+    if (user.role === "coach") {
+      // Check AI usage limits based on user's plan - NOW PASSING hasProPlan!
+      const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, {
+        hasProPlan: args.hasProPlan
+      });
+      if (aiUsage.isOverLimit) {
+        const planName = aiUsage.plan === "coach_starter" ? "Coach Starter" : "Coach Pro";
+        throw new Error(`You've reached your monthly limit of ${aiUsage.limit} AI generations on the ${planName} plan. Please upgrade or wait until next month.`);
+      }
     }
 
     const indicator = args.indicator;
@@ -160,7 +166,7 @@ Instructions:
       // Pricing for gpt-4o-mini: Input $0.15/M, Output $0.60/M
       const PROMPT_COST_PER_1K = 0.00015;
       const COMPLETION_COST_PER_1K = 0.00060;
-      const isCached = await checkIfCached(prompt);
+      const isCached = await checkIfCached(ctx, prompt);
       const promptCost = promptTokens * PROMPT_COST_PER_1K / 1000;
       const completionCost = completionTokens * COMPLETION_COST_PER_1K / 1000;
       const totalCost = promptCost + completionCost;
@@ -230,10 +236,14 @@ export const generateConsolidatedFeedback = action({
     if (!identity) throw new Error("Not authenticated");
     const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, { clerkId: identity.subject });
     if (!user) throw new Error("User not found");
-    const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, { hasProPlan: args.hasProPlan });
-    if (aiUsage.isOverLimit) {
-      const planName = aiUsage.plan === "coach_starter" ? "Coach Starter" : "Coach Pro";
-      throw new Error(`You've reached your monthly limit of ${aiUsage.limit} AI generations on the ${planName} plan. Please upgrade or wait until next month.`);
+
+    if (user.role === "coach") {
+      // Check AI usage limits based on user's plan - NOW PASSING hasProPlan!
+      const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, { hasProPlan: args.hasProPlan });
+      if (aiUsage.isOverLimit) {
+        const planName = aiUsage.plan === "coach_starter" ? "Coach Starter" : "Coach Pro";
+        throw new Error(`You've reached your monthly limit of ${aiUsage.limit} AI generations on the ${planName} plan. Please upgrade or wait until next month.`);
+      }
     }
 
     // Build the single efficient prompt
@@ -332,7 +342,7 @@ Return the response as JSON with two keys:
       const totalTokens = response.usage?.total_tokens ?? 0;
       const PROMPT_COST_PER_1K = 0.00015;
       const COMPLETION_COST_PER_1K = 0.00060;
-      const isCached = await checkIfCached(prompt);
+      const isCached = await checkIfCached(ctx, prompt);
       const promptCost = promptTokens * PROMPT_COST_PER_1K / 1000;
       const completionCost = completionTokens * COMPLETION_COST_PER_1K / 1000;
       const totalCost = promptCost + completionCost;

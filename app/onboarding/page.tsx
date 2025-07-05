@@ -104,6 +104,15 @@ export default function OnboardingPage() {
     );
   }
 
+  if (convexUser?.onboardingComplete) {
+    // Show a spinner while redirecting to dashboard
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   // Show loading if completing onboarding
   if (completingOnboarding) {
     return (
@@ -150,10 +159,12 @@ export default function OnboardingPage() {
 
         {/* Plan and usage badges */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
-          <div>
-            <span className="font-medium mr-2">Current Plan:</span>
-            <AIUsageBadge showDetails />
-          </div>
+          {convexUser?.role === 'coach' && (
+            <div>
+              <span className="font-medium mr-2">Current Plan:</span>
+              <AIUsageBadge showDetails />
+            </div>
+          )}
           {convexUser?.role === 'coach' && (
             <div className="flex items-center gap-2">
               <span className="font-medium">Teachers:</span>
