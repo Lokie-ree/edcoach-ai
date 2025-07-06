@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/select";
 import { CalendarInput } from "@/components/ui/calendar-input";
 import { walkthroughFinalSchema } from "@/convex/validation/walkthroughFinalSchema";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Loader2 } from "lucide-react";
 import { useCanCreateWalkthrough } from "@/lib/usageEnforcer";
 import { AIUsageWarning } from "@/components/ui/ai-usage-badge";
 
@@ -598,7 +598,14 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
                     className="flex-1"
                     disabled={isSubmitting || !((watch("walkthroughEntries")?.find(e => e.type === "reinforcement")?.aiFeedback) && (watch("walkthroughEntries")?.find(e => e.type === "refinement")?.aiFeedback))}
                   >
-                    {isSubmitting ? "Submitting..." : "Submit"}
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      "Submit"
+                    )}
                   </Button>
                 )}
               </div>

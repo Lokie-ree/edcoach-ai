@@ -96,7 +96,37 @@ export const acceptInvitation = mutation({
     message: v.string(),
   }),
   handler: async (ctx, args) => {
-    const user = await getCurrentUserOrThrow(ctx);
+    // Get identity from Clerk
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return { success: false, message: "Not authenticated" };
+    }
+
+    // Check if user exists in database, create if not
+    let user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) {
+      // Create user since they don't exist yet
+      const userId = await ctx.db.insert("users", {
+        clerkId: identity.subject,
+        name: identity.name || "User",
+        email: identity.email || "",
+        role: "teacher", // They're accepting a teacher invitation
+        imageUrl: identity.pictureUrl,
+        preferences: {},
+        createdAt: Date.now(),
+        onboardingComplete: false,
+      });
+
+      // Get the newly created user
+      user = await ctx.db.get(userId);
+      if (!user) {
+        return { success: false, message: "Failed to create user record" };
+      }
+    }
     
     // Get invitation
     const invitation = await ctx.db

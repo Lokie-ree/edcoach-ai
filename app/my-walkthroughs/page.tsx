@@ -12,7 +12,8 @@ import {
   Clock, 
   Search,
   Award,
-  Target
+  Target,
+  User
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -33,16 +34,27 @@ export default function MyWalkthroughsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  // Get teacher record for current user
+  // Get teacher record for current user if they're a teacher
   const teacherRecord = useQuery(
     api.teachers.getMyRecord,
     convexUser?.role === "teacher" ? {} : "skip"
   );
 
-  // Get walkthroughs for this teacher
-  const walkthroughs = useQuery(
+  // Get teachers list for coach to display teacher names
+  const teachers = useQuery(
+    api.teachers.list,
+    convexUser?.role === "coach" ? {} : "skip"
+  );
+
+  // Get walkthroughs based on user role
+  const teacherWalkthroughs = useQuery(
     api.walkthroughs.listByTeacher,
-    teacherRecord ? { teacherId: teacherRecord._id } : "skip"
+    convexUser?.role === "teacher" && teacherRecord ? { teacherId: teacherRecord._id } : "skip"
+  );
+
+  const coachWalkthroughs = useQuery(
+    api.walkthroughs.listByCoach,
+    convexUser?.role === "coach" ? {} : "skip"
   );
 
   if (!isLoaded || (user && convexUser === undefined)) {
@@ -57,23 +69,33 @@ export default function MyWalkthroughsPage() {
     return null;
   }
 
-  if (convexUser.role !== "teacher") {
+  if (convexUser.role !== "teacher" && convexUser.role !== "coach") {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
-        <p>This page is only available for teachers.</p>
+        <p>This page is only available for teachers and coaches.</p>
       </div>
     );
   }
 
-  const safeWalkthroughs = walkthroughs ?? [];
+  const walkthroughs = convexUser.role === "coach" ? (coachWalkthroughs ?? []) : (teacherWalkthroughs ?? []);
+  const isCoach = convexUser.role === "coach";
   
+  // Helper function to get teacher name
+  const getTeacherName = (teacherId: string) => {
+    if (!isCoach) return null;
+    const teacher = teachers?.find(t => t._id === teacherId);
+    return teacher?.name || "Unknown Teacher";
+  };
+
   // Filter walkthroughs
-  const filteredWalkthroughs = safeWalkthroughs.filter(walkthrough => {
+  const filteredWalkthroughs = walkthroughs.filter(walkthrough => {
+    const teacherName = getTeacherName(walkthrough.teacherId);
     const matchesSearch = !searchTerm || 
       walkthrough.evidenceSummary.toLowerCase().includes(searchTerm.toLowerCase()) ||
       walkthrough.reinforcementIndicator.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      walkthrough.refinementIndicator.toLowerCase().includes(searchTerm.toLowerCase());
+      walkthrough.refinementIndicator.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (teacherName && teacherName.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesStatus = statusFilter === "all" || walkthrough.status === statusFilter;
     
@@ -87,8 +109,8 @@ export default function MyWalkthroughsPage() {
     <div className="space-y-6">
       {/* Header */}
       <PageHeader
-        title="My Walkthroughs"
-        description="View and track all your classroom observation walkthroughs"
+        title={isCoach ? "All Walkthroughs" : "My Walkthroughs"}
+        description={isCoach ? "View and track all walkthroughs for your teachers" : "View and track all your classroom observation walkthroughs"}
       />
 
       {/* Filters */}
@@ -134,7 +156,7 @@ export default function MyWalkthroughsPage() {
               <p className="text-muted-foreground">
                 {searchTerm || statusFilter !== "all" 
                   ? "Try adjusting your search or filter criteria."
-                  : "Your coach will schedule walkthroughs soon."}
+                  : isCoach ? "You have not created any walkthroughs for your teachers yet." : "Your coach will schedule walkthroughs soon."}
               </p>
             </CardContent>
           </Card>
@@ -168,6 +190,12 @@ export default function MyWalkthroughsPage() {
                           <Calendar className="h-4 w-4 mr-1" />
                           {new Date(walkthrough.walkthroughDate).toLocaleDateString()}
                         </div>
+                        {isCoach && (
+                          <div className="flex items-center text-xs text-muted-foreground ml-4">
+                            <User className="h-4 w-4 mr-1" />
+                            {getTeacherName(walkthrough.teacherId)}
+                          </div>
+                        )}
                       </div>
                       
                       <h3 className="font-medium text-lg">

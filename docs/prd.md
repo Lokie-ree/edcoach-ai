@@ -98,8 +98,7 @@ walkthroughs: {
 | Coach Starter  | $7/month   | 3        | 10              | Basic             | 30 days   | No           | No     | No               |
 | Coach Pro      | $15/month  | 15       | 50              | Advanced (charts) | 90 days   | Yes          | Yes    | Yes              |
 
-- All plan upgrades/downgrades and annual discounts are managed in Clerk Billing.
-- Pricing is not stored in code.
+- All plans are managed via Clerk Billing. Pricing is not stored in code.
 - Feature flags (e.g., `advanced_analytics`, `bulk_invitations`, `feedback_export`, `priority_support`) are set in Clerk and checked in-app.
 - Usage limits (teachers, walkthroughs) are enforced in Convex and the frontend.
 
@@ -306,18 +305,14 @@ You are EdCoach AI, an expert instructional coaching assistant. Your mission is 
 ## 6. Business Model & Monetization
 
 ### 6.1 Current Plan Structure
-**Coach Starter (Free)**
-- 15 walkthroughs/month (30 AI generations)
-- 5 teachers maximum
-- 30-day analytics
-- Basic support
+| Plan           | Price      | Teachers | Walkthroughs/mo | Analytics         | Retention | Bulk Invites | Export | Priority Support |
+|----------------|------------|----------|-----------------|-------------------|-----------|--------------|--------|------------------|
+| Coach Starter  | $7/month   | 3        | 10              | Basic             | 30 days   | No           | No     | No               |
+| Coach Pro      | $15/month  | 15       | 50              | Advanced (charts) | 90 days   | Yes          | Yes    | Yes              |
 
-**Coach Pro ($39/month)**
-- 100 walkthroughs/month (200 AI generations)
-- 25 teachers maximum
-- 6-month analytics
-- Export capabilities
-- Priority support
+- All plans are managed via Clerk Billing. Pricing is not stored in code.
+- Feature flags (e.g., `advanced_analytics`, `bulk_invitations`, `feedback_export`, `priority_support`) are set in Clerk and checked in-app.
+- Usage limits (teachers, walkthroughs) are enforced in Convex and the frontend.
 
 ### 6.2 Future Plan Considerations
 **Enterprise/District Plans**
@@ -329,9 +324,9 @@ You are EdCoach AI, an expert instructional coaching assistant. Your mission is 
 
 ### 6.3 Revenue Projections
 - **Target**: 1,000 active coaches by end of year
-- **Conversion Rate**: 30% free-to-paid conversion
-- **Average Revenue**: $25/month per coach (blended)
-- **Projected ARR**: $300,000 by year-end
+- **Average Plan Mix**: 60% Starter ($7), 40% Pro ($15)
+- **Weighted Average Revenue**: $10.20/month per coach
+- **Projected ARR**: $122,400 by year-end
 
 ---
 
@@ -476,7 +471,7 @@ await resend.sendEmail(
 
 ### 13.1 MVP Features ✅
 - [x] User authentication and onboarding
-- [x] Subscription management (2 plans)
+- [x] Subscription management (2 plans: Coach Starter $7/mo, Coach Pro $15/mo)
 - [x] Teacher invitation system
 - [x] Walkthrough capture and management
 - [x] AI feedback generation
