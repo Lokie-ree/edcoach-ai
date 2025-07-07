@@ -47,6 +47,8 @@ export default function FAQSection() {
             >
               <button
                 onClick={() => toggleQuestion(index)}
+                aria-expanded={openIndex === index}
+                aria-controls={`faq-panel-${index}`}
                 className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
               >
                 <span className="font-semibold text-gray-900 dark:text-gray-100">
@@ -62,6 +64,7 @@ export default function FAQSection() {
               <AnimatePresence>
                 {openIndex === index && (
                   <motion.div
+                    id={`faq-panel-${index}`}
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
@@ -84,12 +87,6 @@ export default function FAQSection() {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="mt-12 text-center"
         >
-          <a
-            href={faq.support_link.href}
-            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium transition-colors"
-          >
-            {faq.support_link.label} →
-          </a>
         </motion.div>
       </div>
     </Section>

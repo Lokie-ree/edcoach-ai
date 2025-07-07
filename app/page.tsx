@@ -7,23 +7,22 @@ import Pricing from "@/components/sections/pricing";
 import TestimonialsSection from "@/components/sections/testimonials-section";
 import FAQSection from "@/components/sections/faq-section";
 import Footer from "@/components/sections/footer";
-import Script from "next/script";
 import CTASection from "@/components/sections/cta-section";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-
-
+import { useEffect, useState } from "react";
+import WaitlistModal from "@/components/waitlist-modal";
 
 export default function Home() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
-      const convexUser = useQuery(
-      api.users.current,
-      user && isLoaded ? {} : "skip"
-    );
+  const convexUser = useQuery(
+    api.users.current,
+    user && isLoaded ? {} : "skip"
+  );
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
 
   // Handle redirect for authenticated users
   useEffect(() => {
@@ -76,46 +75,15 @@ export default function Home() {
   // Only show landing page for unauthenticated users
   return (
     <>
-      <Script id="organization-schema" type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          name: "EdCoach AI",
-          url: "https://edcoachai.com",
-          logo: "https://edcoachai.com/logo.png",
-          sameAs: [
-            "https://twitter.com/edcoachai",
-            "https://linkedin.com/company/edcoachai",
-            "https://facebook.com/edcoachai",
-          ],
-          description:
-            "EdCoach AI empowers school leaders and coaches with real-time, rubric-aligned feedback suggestions.",
-        })}
-      </Script>
-      <Script id="product-schema" type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Product",
-          name: "EdCoach AI Platform",
-          description:
-            "AI-powered instructional coaching platform that helps education leaders provide better feedback faster.",
-          image: "https://edcoachai.com/product-image.jpg",
-          offers: {
-            "@type": "Offer",
-            price: "29.99",
-            priceCurrency: "USD",
-            availability: "https://schema.org/InStock",
-          },
-        })}
-      </Script>
-      <HeroSection />
+      <HeroSection onWaitlistClick={() => setWaitlistOpen(true)} />
       <FeaturesSection />
       <HowItWorksSection />
-      <Pricing />
+      <Pricing onWaitlistClick={() => setWaitlistOpen(true)} />
       <TestimonialsSection />
       <FAQSection />
-      <CTASection />
+      <CTASection onWaitlistClick={() => setWaitlistOpen(true)} />
       <Footer />
+      <WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
     </>
   );
 } 

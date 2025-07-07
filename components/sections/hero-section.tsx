@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useRef } from "react";
-import Link from "next/link";
 import {
   ArrowRight,
   ClipboardList,
@@ -14,7 +13,7 @@ import landingContent from "@/data/landing-content.json";
 import { Logo } from "@/components/logo";
 import { Section } from "@/components/ui/section";
 
-export default function HeroSection() {
+export default function HeroSection({ onWaitlistClick }: { onWaitlistClick: () => void }) {
   const heroRef = useRef<HTMLDivElement>(null);
   const { hero } = landingContent;
 
@@ -149,22 +148,10 @@ export default function HeroSection() {
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg group"
-                  asChild
+                  onClick={onWaitlistClick}
                 >
-                  <Link href={hero.cta_primary.href}>
-                    <span>{hero.cta_primary.label}</span>
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition-all duration-300"
-                  asChild
-                >
-                  <Link href={hero.cta_secondary.href}>
-                    <span>{hero.cta_secondary.label}</span>
-                  </Link>
+                  <span>{hero.cta_primary.label}</span>
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </motion.div>
 

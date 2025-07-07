@@ -8,12 +8,24 @@ export default defineSchema({
     name: v.string(),
     email: v.string(),
     role: v.union(v.literal("coach"), v.literal("teacher")),
-    clerkOrganizationId: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     preferences: v.optional(v.any()),
     createdAt: v.number(),
+    clerkOrganizationId: v.optional(v.string()),
     onboardingComplete: v.optional(v.boolean()),
-    externalId: v.optional(v.string()),
+    // Subscription fields (synced from Clerk Billing webhooks)
+    plan: v.union(v.literal("coach_starter"), v.literal("coach_pro")),
+    subscriptionStatus: v.union(
+      v.literal("active"),
+      v.literal("past_due"),
+      v.literal("canceled"),
+      v.literal("incomplete"),
+      v.literal("trialing"),
+      v.literal("unpaid")
+    ),
+    subscriptionId: v.optional(v.string()),
+    subscriptionStartedAt: v.optional(v.number()),
+    subscriptionEndedAt: v.optional(v.number()),
     // Note: Subscription data is managed by Clerk Billing, no longer stored locally
   })
     .index("by_clerk_id", ["clerkId"])

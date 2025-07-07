@@ -17,7 +17,18 @@ export const vUser = v.object({
   preferences: v.optional(v.any()),
   createdAt: v.number(),
   onboardingComplete: v.optional(v.boolean()),
-  externalId: v.optional(v.string()),
+  plan: v.union(v.literal("coach_starter"), v.literal("coach_pro")),
+  subscriptionStatus: v.union(
+    v.literal("active"),
+    v.literal("past_due"),
+    v.literal("canceled"),
+    v.literal("incomplete"),
+    v.literal("trialing"),
+    v.literal("unpaid")
+  ),
+  subscriptionId: v.optional(v.string()),
+  subscriptionStartedAt: v.optional(v.number()),
+  subscriptionEndedAt: v.optional(v.number()),
 });
 
 /**
@@ -71,6 +82,11 @@ export const createOrSyncFromClerk = mutation({
       preferences: {},
       createdAt: Date.now(),
       onboardingComplete: false,
+      plan: "coach_starter",
+      subscriptionStatus: "active",
+      subscriptionId: undefined,
+      subscriptionStartedAt: Date.now(),
+      subscriptionEndedAt: undefined,
     });
 
     return { 

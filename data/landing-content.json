@@ -13,8 +13,8 @@
   }, 
   "hero": {
     "tagline": "LEADS/LER Ready!",
-    "headline": "AI-Powered Coaching for Frequent, Actionable Feedback Between Formal Evaluations",
-    "sub_headline": "Designed for K-12 leaders and coaches to streamline informal walkthroughs, generate rubric-aligned feedback, and foster continuous teacher growth—without replacing your formal evaluation system.",
+    "headline": "AI-Powered Coaching for Frequent, Actionable Feedback in K-12 Schools",
+    "sub_headline": "Designed for K-12 leaders and coaches to streamline informal walkthroughs, generate real-time, rubric-aligned feedback, and foster continuous teacher growth—without replacing your formal evaluation system.",
     "cta_primary": {"label": "Join the Early Access Waitlist", "href": "#waitlist"},
     "cta_secondary": {"label": "Learn More", "href": "#features"},
 
@@ -31,17 +31,17 @@
       {
         "icon": "BotMessageSquare",
         "title": "AI Feedback for Walkthroughs",
-        "description": "Generate concise, actionable feedback suggestions aligned to LER/LEADS or your custom rubric. Edit and finalize before sharing."
+        "description": "Generate concise, actionable, rubric-aligned feedback suggestions in real time. Edit and finalize before sharing."
       },
       {
-        "icon": "FileCog",
-        "title": "Draft & Finalize Observations",
-        "description": "Save walkthroughs as drafts, finalize when ready, and ensure feedback is always accurate and actionable."
+        "icon": "Send",
+        "title": "Instant Feedback Delivery",
+        "description": "Share feedback with teachers immediately after walkthroughs—no waiting, no drafts."
       },
       {
         "icon": "UserCheck",
         "title": "Teacher Feedback Portal",
-        "description": "Teachers access all their feedback—informal and formal—in a secure, easy-to-read feed."
+        "description": "Teachers access all of their feedback in a secure, easy-to-read feed."
       },
       {
         "icon": "LineChart",
@@ -57,13 +57,13 @@
         "id": 1,
         "icon": "ClipboardList",
         "title": "Quick Informal Walkthroughs",
-        "description": "Select a teacher, choose 1-3 focus indicators, and jot down evidence—all in under 10 minutes. Save as draft and finalize when ready."
+        "description": "Select a teacher, choose 1-3 focus indicators, and jot down evidence—all in under 10 minutes."
       },
       {
         "id": 2,
         "icon": "Sparkles",
-        "title": "AI Feedback in Seconds",
-        "description": "Instantly get AI-suggested feedback based on your notes and rubric. Edit and finalize before sharing with teachers."
+        "title": "Real-Time AI Feedback",
+        "description": "Instantly get AI-suggested, rubric-aligned feedback based on your notes and rubric. Edit and share with teachers in seconds."
       },
       {
         "id": 3,
@@ -78,49 +78,66 @@
     "sub_headline": "Simple plans for individual coaches and small teams. No hidden fees, no surprise overages.",
     "tiers": [
       {
-        "name": "Coach Starter (Free)",
+        "name": "Coach Free",
         "price": "$0/mo",
-        "price_description": "For new users and small teams. Up to 5 teachers. 20 AI feedback generations per month.",
+        "price_description": "For individuals getting started. Support 1 teacher and try AI-powered walkthroughs.",
         "features": [
-          "Supports up to 5 Teachers",
-          "Up to 20 AI Feedback Generations per Month",
-          "Standard Rubrics (LEADS, LER)",
-          "AI Feedback Generation",
-          "Observation Logs",
-          "Basic Trend View",
-          "Standard Support",
-          "14-Day Trial for New Users"
+          "Support up to 1 teacher",
+          "Complete up to 3 walkthroughs per month",
+          "LEADS, LER, & NIET Alignment",
+          "AI powered reinforcements/refinements",
+          "Coach and teacher role-based dashboards",
+          "Basic analytics and trends"
         ],
         "cta": {"label": "Start Free", "href": "#waitlist"},
         "highlight": false
       },
       {
-        "name": "Coach Basic",
-        "price": "$9/mo",
-        "price_description": "For coaches needing more feedback and analytics. Up to 5 teachers, 100 AI feedback generations per month.",
+        "name": "Coach Starter",
+        "price": "$7/mo",
+        "price_description": "For coaches ready to support a small team. More walkthroughs, more insights.",
         "features": [
-          "All Coach Starter Features",
-          "Up to 100 AI Feedback Generations per Month",
-          "Enhanced Analytics",
-          "Priority Support"
+          "Support up to 3 teachers",
+          "Complete up to 10 walkthroughs per month",
+          "LEADS, LER, & NIET Alignment",
+          "AI powered reinforcements/refinements",
+          "Coach and teacher role-based dashboards",
+          "Basic analytics and trends",
+          "Standard Email Support"
         ],
-        "cta": {"label": "Upgrade to Basic", "href": "#waitlist"},
-        "highlight": false
+        "cta": {"label": "Upgrade to Starter", "href": "#waitlist"},
+        "highlight": true
       },
       {
         "name": "Coach Pro",
-        "price": "$19/mo",
-        "price_description": "For power users. Up to 5 teachers, 300 AI feedback generations per month, advanced analytics, and early access to new features.",
+        "price": "TBD",
+        "price_description": "For coaches ready to scale their impact. Advanced analytics, more teachers, and premium support.",
         "features": [
-          "All Coach Basic Features",
-          "Up to 300 AI Feedback Generations per Month",
-          "Advanced Analytics (Group Trends, Comparisons)",
-          "Early Access to New Features (e.g., Data Export)"
+          "Support up to 15 teachers",
+          "Complete up to 100 walkthroughs per month",
+          "LEADS, LER, & NIET Alignment",
+          "AI powered reinforcements/refinements",
+          "Coach and teacher role-based dashboards",
+          "Advanced analytics and trends",
+          "Download feedback as PDF",
+          "Bulk teacher invitations",
+          "Priority email support"
         ],
-        "cta": {"label": "Go Pro", "href": "#waitlist"},
-        "highlight": true
+        "cta": {"label": "Join Waitlist for Pro", "href": "#waitlist"},
+        "highlight": false,
+        "disabled": true
       }
     ]
+  },
+  "pro_features_coming_soon": {
+    "headline": "Pro Features Coming Soon",
+    "features": [
+      "Download Feedback as PDF",
+      "Invite Multiple Teachers at Once",
+      "In-Depth Progress Insights",
+      "Priority Email Support"
+    ],
+    "cta": {"label": "Join Waitlist for Pro", "href": "#waitlist"}
   },
   "testimonials": {
     "headline": "What Educational Leaders & Teachers Are Saying",
@@ -181,34 +198,37 @@
       },
       {
         "question": "How do teachers access their feedback?",
-        "answer": "Teachers have a secure portal to view all feedback interactions, both informal and formal, in a clear, organized feed."
-      },
-      {
-        "question": "Can I save and finalize walkthroughs later?",
-        "answer": "Yes! You can save walkthroughs and observations as drafts and finalize them when you're ready to share feedback."
-      },
-      {
-        "question": "Is EdCoach AI mobile-friendly and does it work offline?",
-        "answer": "Absolutely. EdCoach AI is designed for mobile use in classrooms and supports offline completion with automatic sync when reconnected."
+        "answer": "Teachers have a secure portal to view all feedback interactions in a clear, organized feed."
       },
       {
         "question": "How secure is our school's data?",
         "answer": "Extremely. We use industry-leading partners (Convex & Clerk) for encrypted storage, secure authentication (MFA available), and adhere to strict data privacy protocols designed for education."
       },
       {
-        "question": "What integrations are available?",
-        "answer": "We are actively developing integrations with systems like Google Classroom, Clever, and Apple School Manager. District partners often get early access."
-      },
-      {
-        "question": "Is there a free trial or pilot program?",
-        "answer": "We plan to offer trials and pilot programs. Join the waitlist to be the first to know about availability and receive early access opportunities!"
-      },
-      {
         "question": "How does role-based access work?",
         "answer": "Principals, coaches, and teachers each have access to the features and data relevant to their role, ensuring privacy and clarity for everyone."
+      },
+      {
+        "question": "What are the usage limits for each plan?",
+        "answer": "Each plan has clear limits on the number of teachers you can support and walkthroughs you can complete per month. Upgrade prompts and usage tracking help you stay on top of your plan."
+      },
+      {
+        "question": "How does EdCoach AI ensure feedback is rubric-aligned?",
+        "answer": "Our AI is trained on the Louisiana Educator Rubric (LER), LEADS, and NIET frameworks, ensuring all feedback is aligned to your district's standards and best practices."
+      },
+      {
+        "question": "How fast is feedback generated?",
+        "answer": "Feedback is generated in real time—usually within a few seconds—so you can deliver actionable insights immediately after each walkthrough."
+      },
+      {
+        "question": "How long is my data retained?",
+        "answer": "Analytics and feedback are retained for 30 days on the Starter plan and 90 days on the Pro plan, helping you track growth over time."
+      },
+      {
+        "question": "What advanced features are available in the Pro plan?",
+        "answer": "Coach Pro includes bulk teacher invitations, advanced analytics, feedback export as PDF, and priority support."
       }
-    ],
-    "support_link": {"label": "See All FAQs", "href": "/support"}
+    ]
   },
   "cta": {
     "headline": "Ready to Make Every Coaching Moment Count?",

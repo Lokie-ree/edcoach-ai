@@ -1,7 +1,6 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
-import type { WebhookEvent } from "@clerk/backend";
 import { Webhook } from "svix";
 
 
@@ -68,6 +67,31 @@ http.route({
           console.log("✅ Successfully processed organizationMembership.deleted");
           break;
         
+        // Billing/Subscription events (NEW)
+        case "subscription.created":
+        case "subscription.updated":
+        case "subscription.active":
+        case "subscription.past_due":
+        case "subscriptionItem.created":
+        case "subscriptionItem.updated":
+        case "subscriptionItem.active":
+        case "subscriptionItem.canceled":
+        case "subscriptionItem.upcoming":
+        case "subscriptionItem.ended":
+        case "subscriptionItem.abandoned":
+        case "subscriptionItem.incomplete":
+        case "subscriptionItem.past_due":
+        case "paymentAttempt.created":
+        case "paymentAttempt.updated": {
+          console.log(`Processing billing event: ${event.type}`);
+          await ctx.runMutation(internal.billing.handleSubscriptionEvent, {
+            eventType: event.type,
+            data: event.data,
+          });
+          console.log(`✅ Successfully processed billing event: ${event.type}`);
+          break;
+        }
+        
         // Note: Clerk Billing doesn't send webhooks - subscription state is managed by Clerk
         
         // Fallback for other events
@@ -91,7 +115,7 @@ http.route({
   }),
 });
 
-async function validateRequest(req: Request): Promise<WebhookEvent | null> {
+async function validateRequest(req: Request): Promise<any> {
   const payloadString = await req.text();
   const svixHeaders = {
     "svix-id": req.headers.get("svix-id")!,
@@ -100,7 +124,7 @@ async function validateRequest(req: Request): Promise<WebhookEvent | null> {
   };
   const wh = new Webhook(process.env.CLERK_WEBHOOK_SECRET!);
   try {
-    return wh.verify(payloadString, svixHeaders) as unknown as WebhookEvent;
+    return wh.verify(payloadString, svixHeaders);
   } catch (error) {
     console.error("Error verifying webhook event", error);
     return null;

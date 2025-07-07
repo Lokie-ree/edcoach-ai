@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://edcoachai.com",
+    canonical: "https://edcoachai.org",
   },
   icons: {
     icon: "/logo.png",
@@ -78,12 +78,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${oswald.className} antialiased`}>
-        <ClerkProvider 
-          afterSignOutUrl="/"
-          dynamic
-        >
+    <ClerkProvider
+      appearance={{
+        cssLayerName: 'clerk',
+      }}
+    >
+      <html lang="en" suppressHydrationWarning>
+        <body className={`${oswald.className} antialiased`}>
           <ConvexClientProvider>
             <ThemeProvider
               attribute="class"
@@ -96,9 +97,9 @@ export default function RootLayout({
               </AppLayout>
             </ThemeProvider>
           </ConvexClientProvider>
-        </ClerkProvider>
-        <Toaster />
-      </body>
-    </html>
+          <Toaster />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

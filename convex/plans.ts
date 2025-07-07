@@ -8,7 +8,7 @@ export const PLAN_CONFIG = {
     name: "Coach Starter",
     description: "Perfect for new coaches getting started",
     features: {
-      maxAIGenerations: 20, // 10 walkthroughs per month
+      maxAIGenerations: 10, // 10 walkthroughs per month
       maxTeachers: 3,
       analyticsDepth: 30,
       exportEnabled: false,

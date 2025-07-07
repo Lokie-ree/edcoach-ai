@@ -71,6 +71,11 @@ export const upsertUser = internalMutation({
         preferences: {},
         createdAt: Date.now(),
         onboardingComplete: false,
+        plan: "coach_starter",
+        subscriptionStatus: "active",
+        subscriptionId: undefined,
+        subscriptionStartedAt: Date.now(),
+        subscriptionEndedAt: undefined,
       });
       console.log(`✅ upsertUser: Created user ${userId} with role ${defaultRole}, email: ${email}`);
     } else {

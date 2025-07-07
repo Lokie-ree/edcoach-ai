@@ -119,6 +119,11 @@ export const acceptInvitation = mutation({
         preferences: {},
         createdAt: Date.now(),
         onboardingComplete: false,
+        plan: "coach_starter",
+        subscriptionStatus: "active",
+        subscriptionId: undefined,
+        subscriptionStartedAt: Date.now(),
+        subscriptionEndedAt: undefined,
       });
 
       // Get the newly created user

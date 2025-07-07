@@ -1,6 +1,3 @@
-"use client"
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Check } from 'lucide-react'
 import { Section } from '@/components/ui/section'
@@ -19,7 +16,7 @@ const getGradientColors = (index: number) => {
   return gradients[index % gradients.length]
 }
 
-export default function Pricing() {
+export default function Pricing({ onWaitlistClick }: { onWaitlistClick: () => void }) {
     const { pricing } = landingContent;
     
     return (
@@ -64,11 +61,15 @@ export default function Pricing() {
                             >
                                 <Card className={`group p-6 rounded-xl shadow-sm h-full relative overflow-hidden transition-all duration-300 hover:shadow-lg ${tier.highlight ? 'border-2 border-indigo-500' : ''}`}>
                                     {tier.highlight && (
-                                        <span className="absolute top-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-1.5 rounded-full text-sm font-medium shadow-lg">
+                                        <span className="absolute top-3 right-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-1.5 rounded-full text-sm font-medium shadow-lg z-10">
                                             Most Popular
                                         </span>
                                     )}
-                                    
+                                    {tier.disabled && (
+                                        <span className="absolute top-3 right-3 bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-medium shadow-lg z-10">
+                                            Join Waitlist
+                                        </span>
+                                    )}
                                     <div className="flex flex-col h-full">
                                         <div className="mb-8">
                                             <h3 className="text-2xl font-semibold mb-3">{tier.name}</h3>
@@ -87,20 +88,6 @@ export default function Pricing() {
                                                     </li>
                                                 ))}
                                             </ul>
-                                        </div>
-
-                                        <div className="mt-8">
-                                            <Button 
-                                                asChild 
-                                                className={`w-full transition-all duration-300 ${
-                                                    tier.highlight 
-                                                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700' 
-                                                        : 'bg-white dark:bg-zinc-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/50'
-                                                }`}
-                                                variant={tier.highlight ? 'default' : 'outline'}
-                                            >
-                                                <Link href={tier.cta.href}>{tier.cta.label}</Link>
-                                            </Button>
                                         </div>
                                     </div>
 
@@ -121,6 +108,16 @@ export default function Pricing() {
                             </motion.div>
                         )
                     })}
+                </div>
+
+                {/* Single Join Waitlist button below pricing grid */}
+                <div className="flex justify-center mt-10">
+                  <button
+                    className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-3 text-md font-medium text-white shadow hover:opacity-90 transition-opacity"
+                    onClick={onWaitlistClick}
+                  >
+                    Join Waitlist
+                  </button>
                 </div>
             </div>
         </Section>
