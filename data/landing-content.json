@@ -8,14 +8,14 @@
       {"label": "Pricing", "href": "#pricing"},
       {"label": "FAQ", "href": "#faq"},
       {"label": "Login", "href": "/login"},
-      {"label": "Join Waitlist", "href": "#waitlist", "is_primary": true}
+      {"label": "Get Started For Free", "href": "#get-started", "is_primary": true}
     ]
   }, 
   "hero": {
     "tagline": "LEADS/LER Ready!",
     "headline": "AI-Powered Coaching for Frequent, Actionable Feedback in K-12 Schools",
     "sub_headline": "Designed for K-12 leaders and coaches to streamline informal walkthroughs, generate real-time, rubric-aligned feedback, and foster continuous teacher growth—without replacing your formal evaluation system.",
-    "cta_primary": {"label": "Join the Early Access Waitlist", "href": "#waitlist"},
+    "cta_primary": {"label": "Get Started For Free", "href": "#get-started"},
     "cta_secondary": {"label": "Learn More", "href": "#features"},
 
     "image_description": "Illustration: Coach using EdCoach AI on a tablet, providing feedback to a teacher, with subtle background elements suggesting growth charts and student success pathways."
@@ -75,55 +75,60 @@
   },
   "pricing": {
     "headline": "Fair, Transparent Pricing for Every Coach",
-    "sub_headline": "Simple plans for individual coaches and small teams. No hidden fees, no surprise overages.",
+    "sub_headline": "Start free and upgrade when you're ready. No hidden fees, no surprise overages.",
     "tiers": [
       {
         "name": "Coach Free",
         "price": "$0/mo",
-        "price_description": "For individuals getting started. Support 1 teacher and try AI-powered walkthroughs.",
+        "price_description": "Perfect for getting started. Support 1 teacher and experience AI-powered walkthroughs.",
         "features": [
           "Support up to 1 teacher",
           "Complete up to 3 walkthroughs per month",
           "LEADS, LER, & NIET Alignment",
           "AI powered reinforcements/refinements",
           "Coach and teacher role-based dashboards",
-          "Basic analytics and trends"
+          "Basic feedback list view",
+          "14-day data retention",
+          "Email support (72-hour response)"
         ],
-        "cta": {"label": "Start Free", "href": "#waitlist"},
-        "highlight": false
+        "cta": {"label": "Get Started For Free", "href": "#get-started"},
+        "highlight": true
       },
       {
         "name": "Coach Starter",
         "price": "$7/mo",
-        "price_description": "For coaches ready to support a small team. More walkthroughs, more insights.",
+        "price_description": "For coaches ready to support a small team. More teachers, more walkthroughs, enhanced analytics.",
         "features": [
-          "Support up to 3 teachers",
-          "Complete up to 10 walkthroughs per month",
+          "Support up to 5 teachers",
+          "Complete up to 15 walkthroughs per month",
           "LEADS, LER, & NIET Alignment",
           "AI powered reinforcements/refinements",
           "Coach and teacher role-based dashboards",
-          "Basic analytics and trends",
-          "Standard Email Support"
+          "Enhanced analytics with usage charts",
+          "90-day data retention",
+          "Bulk teacher invitations",
+          "Priority email support (24-hour response)"
         ],
-        "cta": {"label": "Upgrade to Starter", "href": "#waitlist"},
-        "highlight": true
+        "cta": {"label": "Get Started For Free", "href": "#get-started"},
+        "highlight": false
       },
       {
         "name": "Coach Pro",
-        "price": "TBD",
+        "price": "Coming Soon",
         "price_description": "For coaches ready to scale their impact. Advanced analytics, more teachers, and premium support.",
         "features": [
           "Support up to 15 teachers",
-          "Complete up to 100 walkthroughs per month",
+          "Complete up to 50 walkthroughs per month",
           "LEADS, LER, & NIET Alignment",
           "AI powered reinforcements/refinements",
           "Coach and teacher role-based dashboards",
           "Advanced analytics and trends",
+          "90-day data retention",
           "Download feedback as PDF",
           "Bulk teacher invitations",
           "Priority email support"
         ],
-        "cta": {"label": "Join Waitlist for Pro", "href": "#waitlist"},
+        "cta": {"label": "Get Started For Free", "href": "#get-started"},
         "highlight": false,
         "disabled": true
       }
@@ -133,11 +138,12 @@
     "headline": "Pro Features Coming Soon",
     "features": [
       "Download Feedback as PDF",
-      "Invite Multiple Teachers at Once",
+      "Advanced Analytics Dashboard",
       "In-Depth Progress Insights",
+      "Support for 15+ Teachers",
       "Priority Email Support"
     ],
-    "cta": {"label": "Join Waitlist for Pro", "href": "#waitlist"}
+    "cta": {"label": "Get Started For Free", "href": "#get-started"}
   },
   "testimonials": {
     "headline": "What Educational Leaders & Teachers Are Saying",
@@ -232,8 +238,8 @@
   },
   "cta": {
     "headline": "Ready to Make Every Coaching Moment Count?",
-    "sub_headline": "Free up valuable time, deliver consistently impactful feedback, and foster a thriving culture of growth in your school or district. Join the waitlist for early access.",
-    "cta": {"label": "Get Early Access to EdCoach AI", "href": "#waitlist"}
+    "sub_headline": "Start free today! Free up valuable time, deliver consistently impactful feedback, and foster a thriving culture of growth in your school or district.",
+    "cta": {"label": "Get Started For Free", "href": "#get-started"}
   },
   "footer": {
     "logo_placeholder": "EdCoach AI Logo",

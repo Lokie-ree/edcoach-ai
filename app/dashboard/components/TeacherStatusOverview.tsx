@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, UserPlus, AlertCircle, CheckCircle, Clock, Loader2 } from "lucide-react";
-import Link from "next/link";
 import { TeacherInvitationForm } from "@/components/forms/teacher-invitation-form";
 
 export default function TeacherStatusOverview() {
@@ -76,7 +75,7 @@ export default function TeacherStatusOverview() {
             <Users className="h-5 w-5" />
             Your Teaching Team
           </CardTitle>
-                <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Badge variant="outline">{totalTeamSize} Total</Badge>
             <TeacherInvitationForm
               trigger={
@@ -110,11 +109,11 @@ export default function TeacherStatusOverview() {
             </div>
             <div className="text-sm text-blue-600 dark:text-blue-400">Invited</div>
           </div>
-                </div>
+        </div>
 
         {/* Teacher List */}
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-muted-foreground">Recent Activity</h4>
+          <h4 className="text-sm font-medium text-muted-foreground">Team Members</h4>
           
           {/* Active Teachers */}
           {activeTeachers.slice(0, 3).map((teacher) => (
@@ -138,13 +137,13 @@ export default function TeacherStatusOverview() {
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
                   {invitation.teacherEmail.charAt(0).toUpperCase()}
-                      </div>
+                </div>
                 <div>
                   <p className="font-medium text-sm text-blue-900 dark:text-blue-100">
                     Invitation Pending
-                        </p>
+                  </p>
                   <p className="text-xs text-blue-700 dark:text-blue-300">{invitation.teacherEmail}</p>
-                    </div>
+                </div>
               </div>
               <Badge variant="outline" className="border-blue-300 text-blue-800 dark:border-blue-700 dark:text-blue-200">
                 <Clock className="h-3 w-3 mr-1" />
@@ -164,19 +163,8 @@ export default function TeacherStatusOverview() {
               <TeacherInvitationForm />
             </div>
           )}
-
-          {/* View All Link */}
-          {totalTeamSize > 0 && (
-            <div className="pt-2">
-              <Link href="/teachers">
-                <Button variant="outline" size="sm" className="w-full">
-                  View All Teachers
-                </Button>
-              </Link>
-            </div>
-          )}
         </div>
-        </CardContent>
-      </Card>
+      </CardContent>
+    </Card>
   );
 } 

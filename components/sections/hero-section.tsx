@@ -106,11 +106,11 @@ export default function HeroSection() {
                 className="w-fit"
               >
                 <div className="rounded-full flex w-fit items-center gap-2 border border-indigo-200 bg-white/80 p-1 pr-3 shadow-sm backdrop-blur-sm dark:border-indigo-800 dark:bg-zinc-900/80">
-                  <span className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 rounded-full px-2 py-1 text-xs font-medium">
-                    New
+                  <span className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 rounded-full px-2 py-1 text-xs font-medium">
+                    Free
                   </span>
                   <span className="text-xs">
-                    Join the waitlist for early access
+                    Start free today - no credit card required
                   </span>
                   <span className="block h-4 w-px bg-gray-300 dark:bg-gray-700"></span>
                   <ArrowRight className="size-4 text-indigo-600 dark:text-indigo-400" />

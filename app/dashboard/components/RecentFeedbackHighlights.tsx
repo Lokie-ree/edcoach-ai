@@ -40,17 +40,9 @@ export default function RecentFeedbackHighlights() {
             <MessageSquare className="h-5 w-5" />
             Recent Feedback
           </CardTitle>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">
-              {analytics.totalFeedbackGenerated} Total
-            </Badge>
-            <Link href="/analytics">
-              <Button size="sm" variant="outline" className="gap-2">
-                <TrendingUp className="h-4 w-4" />
-                View Analytics
-              </Button>
-            </Link>
-          </div>
+          <Badge variant="outline">
+            {analytics.totalFeedbackGenerated} Total Generated
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -82,8 +74,11 @@ export default function RecentFeedbackHighlights() {
                     <BookOpen className="h-4 w-4 text-white" />
                   </div>
                   <div>
+                    <p className="text-sm font-medium text-foreground">
+                      {walkthrough.teacherName}
+                    </p>
                     <p className="text-xs text-muted-foreground">
-                      by {walkthrough.teacherName}
+                      {formatDistanceToNow(walkthrough.createdAt, { addSuffix: true })}
                     </p>
                   </div>
                 </div>
@@ -96,7 +91,7 @@ export default function RecentFeedbackHighlights() {
                   ) : (
                     <Badge variant="outline">
                       <Calendar className="h-3 w-3 mr-1" />
-                      {formatDistanceToNow(walkthrough.createdAt, { addSuffix: true })}
+                      Pending
                     </Badge>
                   )}
                 </div>
@@ -113,17 +108,6 @@ export default function RecentFeedbackHighlights() {
                 <Button>
                   <BookOpen className="mr-2 h-4 w-4" />
                   Create First Walkthrough
-                </Button>
-              </Link>
-            </div>
-          )}
-
-          {/* View All Link */}
-          {analytics.recentWalkthroughs.length > 0 && (
-            <div className="pt-2">
-              <Link href="/my-walkthroughs">
-                <Button variant="outline" size="sm" className="w-full">
-                  View All Walkthroughs
                 </Button>
               </Link>
             </div>

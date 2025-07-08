@@ -102,7 +102,7 @@ Instructions:
 
     try {
       const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4.1-mini-2025-04-14",
         messages: [{ role: "system", content: prompt }],
         max_tokens: 200,
         temperature: 0.2,
@@ -127,7 +127,7 @@ Instructions:
       await ctx.runMutation(internal.aiFeedbackMutations.logTokenUsage, {
         userId: user._id,
         action: "generateFeedback",
-        model: "gpt-4o-mini",
+        model: "gpt-4.1-mini",
         promptTokens,
         completionTokens,
         totalTokens,
@@ -259,10 +259,10 @@ Return the response as JSON with two keys:
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     try {
       const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4.1-mini-2025-04-14",
         messages: [{ role: "system", content: prompt }],
         max_tokens: 300,
-        temperature: 0.2,
+        temperature: 0.4,
         top_p: 0.95,
         response_format: { type: "json_object" },
       });
@@ -289,7 +289,7 @@ Return the response as JSON with two keys:
       await ctx.runMutation(internal.aiFeedbackMutations.logTokenUsage, {
         userId: user._id,
         action: "generateConsolidatedFeedback",
-        model: "gpt-4o-mini",
+        model: "gpt-4.1-mini",
         promptTokens,
         completionTokens,
         totalTokens,
