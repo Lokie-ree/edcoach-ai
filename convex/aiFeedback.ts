@@ -4,8 +4,6 @@ import { action } from "./_generated/server";
 import { v } from "convex/values";
 import OpenAI from "openai";
 import { internal } from "./_generated/api";
-import crypto from "crypto";
-
 
 export const generateFeedback = action({
   args: {
@@ -21,26 +19,35 @@ export const generateFeedback = action({
     }),
     promptType: v.union(v.literal("reinforcement"), v.literal("refinement")),
     hasProPlan: v.optional(v.boolean()),
+    hasStarterPlan: v.optional(v.boolean()),
   },
   returns: v.string(),
   handler: async (ctx, args) => {
     // Get user and check authentication
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
-    
-    const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, { 
-      clerkId: identity.subject 
+
+    const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, {
+      clerkId: identity.subject,
     });
     if (!user) throw new Error("User not found");
 
     if (user.role === "coach") {
-      // Check AI usage limits based on user's plan - NOW PASSING hasProPlan!
+      // Check AI usage limits based on user's plan - NOW PASSING hasProPlan and hasStarterPlan!
       const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, {
-        hasProPlan: args.hasProPlan
+        hasProPlan: args.hasProPlan,
+        hasStarterPlan: args.hasStarterPlan,
       });
       if (aiUsage.isOverLimit) {
-        const planName = aiUsage.plan === "coach_starter" ? "Coach Starter" : "Coach Pro";
-        throw new Error(`You've reached your monthly limit of ${aiUsage.limit} AI generations on the ${planName} plan. Please upgrade or wait until next month.`);
+        const planName =
+          aiUsage.plan === "free"
+            ? "Coach Free"
+            : aiUsage.plan === "coach_starter"
+              ? "Coach Starter"
+              : "Coach Pro";
+        throw new Error(
+          `You've reached your monthly limit of ${aiUsage.limit} AI generations on the ${planName} plan. Please upgrade or wait until next month.`,
+        );
       }
     }
 
@@ -54,10 +61,10 @@ You are an expert instructional coaching assistant. Your mission is to generate 
 
 Rubric Indicator Details:
 - Name/Code: "${indicator.indicator_name}" (${indicator.indicator_code})
-- Full Description: "${indicator.overview || ''}"
-- Key Terms: "${indicator.key_terms || ''}"
-- Explanation/Possible Evidence of Effective Practice: "${indicator.effective_practice || ''}"
-- Evidence of Student-Centered Learning: "${indicator.student_centered_evidence || ''}"
+- Full Description: "${indicator.overview || ""}"
+- Key Terms: "${indicator.key_terms || ""}"
+- Explanation/Possible Evidence of Effective Practice: "${indicator.effective_practice || ""}"
+- Evidence of Student-Centered Learning: "${indicator.student_centered_evidence || ""}"
 
 Observer's Notes:
 "${args.evidence}"
@@ -74,10 +81,10 @@ You are an expert instructional coaching assistant. Your mission is to generate 
 
 Rubric Indicator Details:
 - Name/Code: "${indicator.indicator_name}" (${indicator.indicator_code})
-- Full Description: "${indicator.overview || ''}"
-- Key Terms: "${indicator.key_terms || ''}"
-- Explanation/Possible Evidence for Development: "${indicator.development_evidence || ''}"
-- Evidence of Student-Centered Learning: "${indicator.student_centered_evidence || ''}"
+- Full Description: "${indicator.overview || ""}"
+- Key Terms: "${indicator.key_terms || ""}"
+- Explanation/Possible Evidence for Development: "${indicator.development_evidence || ""}"
+- Evidence of Student-Centered Learning: "${indicator.student_centered_evidence || ""}"
 
 Observer's Notes:
 "${args.evidence}"
@@ -92,7 +99,7 @@ Instructions:
 `;
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    
+
     try {
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
@@ -108,12 +115,12 @@ Instructions:
       const promptTokens = response.usage?.prompt_tokens ?? 0;
       const completionTokens = response.usage?.completion_tokens ?? 0;
       const totalTokens = response.usage?.total_tokens ?? 0;
-      
+
       // Pricing for gpt-4o-mini: Input $0.15/M, Output $0.60/M
       const PROMPT_COST_PER_1K = 0.00015;
-      const COMPLETION_COST_PER_1K = 0.00060;
-      const promptCost = promptTokens * PROMPT_COST_PER_1K / 1000;
-      const completionCost = completionTokens * COMPLETION_COST_PER_1K / 1000;
+      const COMPLETION_COST_PER_1K = 0.0006;
+      const promptCost = (promptTokens * PROMPT_COST_PER_1K) / 1000;
+      const completionCost = (completionTokens * COMPLETION_COST_PER_1K) / 1000;
       const totalCost = promptCost + completionCost;
 
       // Log usage - this counts towards monthly limit
@@ -169,6 +176,7 @@ export const generateConsolidatedFeedback = action({
       student_centered_evidence: v.optional(v.string()),
     }),
     hasProPlan: v.optional(v.boolean()),
+    hasStarterPlan: v.optional(v.boolean()),
   },
   returns: v.object({
     reinforcement: v.string(),
@@ -178,15 +186,27 @@ export const generateConsolidatedFeedback = action({
     // Auth and usage checks (reuse from generateFeedback)
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
-    const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, { clerkId: identity.subject });
+    const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, {
+      clerkId: identity.subject,
+    });
     if (!user) throw new Error("User not found");
 
     if (user.role === "coach") {
-      // Check AI usage limits based on user's plan - NOW PASSING hasProPlan!
-      const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, { hasProPlan: args.hasProPlan });
+      // Check AI usage limits based on user's plan - NOW PASSING hasProPlan and hasStarterPlan!
+      const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, {
+        hasProPlan: args.hasProPlan,
+        hasStarterPlan: args.hasStarterPlan,
+      });
       if (aiUsage.isOverLimit) {
-        const planName = aiUsage.plan === "coach_starter" ? "Coach Starter" : "Coach Pro";
-        throw new Error(`You've reached your monthly limit of ${aiUsage.limit} AI generations on the ${planName} plan. Please upgrade or wait until next month.`);
+        const planName =
+          aiUsage.plan === "free"
+            ? "Coach Free"
+            : aiUsage.plan === "coach_starter"
+              ? "Coach Starter"
+              : "Coach Pro";
+        throw new Error(
+          `You've reached your monthly limit of ${aiUsage.limit} AI generations on the ${planName} plan. Please upgrade or wait until next month.`,
+        );
       }
     }
 
@@ -199,17 +219,17 @@ export const generateConsolidatedFeedback = action({
 
 *   **LER Reinforcement Indicator Details:**
     *   **Name/Code:** "${args.reinforcementIndicator.indicator_name}" (${args.reinforcementIndicator.indicator_code})
-    *   **Full Description:** "${args.reinforcementIndicator.overview || ''}"
-    *   **Key Terms:** "${args.reinforcementIndicator.key_terms || ''}"
-    *   **Explanation/Possible Evidence of Effective Practice:** "${args.reinforcementIndicator.effective_practice || ''}"
-    *   **Evidence of Student-Centered Learning:** "${args.reinforcementIndicator.student_centered_evidence || ''}"
+    *   **Full Description:** "${args.reinforcementIndicator.overview || ""}"
+    *   **Key Terms:** "${args.reinforcementIndicator.key_terms || ""}"
+    *   **Explanation/Possible Evidence of Effective Practice:** "${args.reinforcementIndicator.effective_practice || ""}"
+    *   **Evidence of Student-Centered Learning:** "${args.reinforcementIndicator.student_centered_evidence || ""}"
 
 *   **LER Refinement Indicator Details:**
     *   **Name/Code:** "${args.refinementIndicator.indicator_name}" (${args.refinementIndicator.indicator_code})
-    *   **Full Description:** "${args.refinementIndicator.overview || ''}"
-    *   **Key Terms:** "${args.refinementIndicator.key_terms || ''}"
-    *   **Explanation/Possible Evidence for Development:** "${args.refinementIndicator.development_evidence || ''}"
-    *   **Evidence of Student-Centered Learning:** "${args.refinementIndicator.student_centered_evidence || ''}"
+    *   **Full Description:** "${args.refinementIndicator.overview || ""}"
+    *   **Key Terms:** "${args.refinementIndicator.key_terms || ""}"
+    *   **Explanation/Possible Evidence for Development:** "${args.refinementIndicator.development_evidence || ""}"
+    *   **Evidence of Student-Centered Learning:** "${args.refinementIndicator.student_centered_evidence || ""}"
 
 **TASK:**
 
@@ -262,9 +282,9 @@ Return the response as JSON with two keys:
       const completionTokens = response.usage?.completion_tokens ?? 0;
       const totalTokens = response.usage?.total_tokens ?? 0;
       const PROMPT_COST_PER_1K = 0.00015;
-      const COMPLETION_COST_PER_1K = 0.00060;
-      const promptCost = promptTokens * PROMPT_COST_PER_1K / 1000;
-      const completionCost = completionTokens * COMPLETION_COST_PER_1K / 1000;
+      const COMPLETION_COST_PER_1K = 0.0006;
+      const promptCost = (promptTokens * PROMPT_COST_PER_1K) / 1000;
+      const completionCost = (completionTokens * COMPLETION_COST_PER_1K) / 1000;
       const totalCost = promptCost + completionCost;
       await ctx.runMutation(internal.aiFeedbackMutations.logTokenUsage, {
         userId: user._id,
@@ -295,4 +315,3 @@ Return the response as JSON with two keys:
     }
   },
 });
-

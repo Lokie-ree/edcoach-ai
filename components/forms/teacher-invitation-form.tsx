@@ -15,7 +15,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -28,7 +27,13 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { UserPlus, Mail, Loader2 } from "lucide-react";
 import { useCanInviteTeacher } from "@/lib/usageEnforcer";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const formSchema = z.object({
   teacherEmail: z.string().email("Please enter a valid email address"),
@@ -56,16 +61,20 @@ const SUBJECT_OPTIONS = [
   { value: "sped", label: "SPED" },
 ];
 
-export function TeacherInvitationForm({ 
-  trigger, 
-  onSuccess 
+export function TeacherInvitationForm({
+  trigger,
+  onSuccess,
 }: TeacherInvitationFormProps) {
   const [open, setOpen] = useState(false);
   // Updated to use the new simplified action
   const sendInvitation = useAction(api.invitations.inviteTeacher);
 
   // Use the updated teacher limit checker
-  const { allowed: canInviteTeacher, reason: inviteBlockReason, teacherUsage } = useCanInviteTeacher();
+  const {
+    allowed: canInviteTeacher,
+    reason: inviteBlockReason,
+    teacherUsage,
+  } = useCanInviteTeacher();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -83,7 +92,9 @@ export function TeacherInvitationForm({
     // ENFORCE TEACHER LIMIT
     if (!canInviteTeacher) {
       toast.error("Teacher Limit Reached", {
-        description: inviteBlockReason || "You have reached your teacher limit. Upgrade to Coach Pro for more.",
+        description:
+          inviteBlockReason ||
+          "You have reached your teacher limit. Upgrade to Coach Pro for more.",
       });
       return;
     }
@@ -124,9 +135,7 @@ export function TeacherInvitationForm({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || defaultTrigger}
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -134,31 +143,35 @@ export function TeacherInvitationForm({
             Invite Teacher
           </DialogTitle>
           <DialogDescription>
-            Send an invitation to a teacher to join your coaching team. They&apos;ll receive an email with instructions to get started.
+            Send an invitation to a teacher to join your coaching team.
+            They&apos;ll receive an email with instructions to get started.
           </DialogDescription>
         </DialogHeader>
-        
+
         {/* Show current usage and warning if at limit */}
         {teacherUsage && (
           <div className="mb-4 p-3 rounded bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-950/20 dark:text-blue-200 dark:border-blue-800">
             <div className="text-sm">
-              <strong>Teacher Usage:</strong> {teacherUsage.teacherCount} of {teacherUsage.teacherLimit} used
+              <strong>Teacher Usage:</strong> {teacherUsage.teacherCount} of{" "}
+              {teacherUsage.teacherLimit} used
             </div>
             {teacherUsage.teachersRemaining > 0 && (
               <div className="text-xs mt-1">
-                {teacherUsage.teachersRemaining} teacher{teacherUsage.teachersRemaining === 1 ? '' : 's'} remaining
+                {teacherUsage.teachersRemaining} teacher
+                {teacherUsage.teachersRemaining === 1 ? "" : "s"} remaining
               </div>
             )}
           </div>
         )}
-        
+
         {/* Show warning if at teacher limit */}
         {!canInviteTeacher && (
           <div className="mb-4 p-3 rounded bg-orange-50 text-orange-800 border border-orange-200 dark:bg-orange-950/20 dark:text-orange-200 dark:border-orange-800">
-            {inviteBlockReason || "You have reached your teacher limit. Upgrade to Coach Pro for more."}
+            {inviteBlockReason ||
+              "You have reached your teacher limit. Upgrade to Coach Pro for more."}
           </div>
         )}
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -168,15 +181,13 @@ export function TeacherInvitationForm({
                 <FormItem>
                   <FormLabel>Teacher Name</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="e.g., Sarah Johnson" 
+                    <Input
+                      placeholder="e.g., Sarah Johnson"
                       {...field}
                       disabled={isLoading}
                     />
                   </FormControl>
-                  <FormDescription>
-                    The full name of the teacher you&apos;re inviting
-                  </FormDescription>
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -188,21 +199,18 @@ export function TeacherInvitationForm({
                 <FormItem>
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
-                    <Input 
+                    <Input
                       type="email"
-                      placeholder="teacher@school.edu" 
+                      placeholder="teacher@school.edu"
                       {...field}
                       disabled={isLoading}
                     />
                   </FormControl>
-                  <FormDescription>
-                    The teacher&apos;s email address where they&apos;ll receive the invitation
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="subject"
@@ -219,7 +227,7 @@ export function TeacherInvitationForm({
                         <SelectValue placeholder="Select subject area" />
                       </SelectTrigger>
                       <SelectContent>
-                        {SUBJECT_OPTIONS.map(option => (
+                        {SUBJECT_OPTIONS.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
                           </SelectItem>
@@ -227,14 +235,11 @@ export function TeacherInvitationForm({
                       </SelectContent>
                     </Select>
                   </FormControl>
-                  <FormDescription>
-                    The subject area this teacher will cover (optional)
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="gradeBand"
@@ -251,7 +256,7 @@ export function TeacherInvitationForm({
                         <SelectValue placeholder="Select grade band" />
                       </SelectTrigger>
                       <SelectContent>
-                        {GRADE_BAND_OPTIONS.map(option => (
+                        {GRADE_BAND_OPTIONS.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
                           </SelectItem>
@@ -259,15 +264,12 @@ export function TeacherInvitationForm({
                       </SelectContent>
                     </Select>
                   </FormControl>
-                  <FormDescription>
-                    The grade band this teacher will serve (optional)
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
-            <div className="flex justify-end space-x-2">
+
+            <div className="flex justify-center space-x-2">
               <Button
                 type="button"
                 variant="outline"
@@ -284,7 +286,7 @@ export function TeacherInvitationForm({
                   </>
                 ) : (
                   <>
-                    <Mail className="mr-2 h-4 w-4" />
+                    <Mail className=" h-4 w-4" />
                     Send Invitation
                   </>
                 )}

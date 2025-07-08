@@ -1,9 +1,8 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Zap, Crown, AlertTriangle, ArrowRight } from "lucide-react";
+import { Zap, Crown, AlertTriangle, ArrowRight, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePlanDetection } from "@/lib/usePlanDetection";
@@ -13,7 +12,16 @@ export interface AIUsage {
   walkthroughsLimit: number;
   walkthroughsRemaining: number;
   isOverLimit: boolean;
+  plan: string;
   // Add any other fields as needed
+}
+
+export interface TeacherUsage {
+  teacherCount: number;
+  teacherLimit: number;
+  teachersRemaining: number;
+  isOverLimit: boolean;
+  plan: string;
 }
 
 interface AIUsageBadgeProps {
@@ -21,21 +29,115 @@ interface AIUsageBadgeProps {
   showDetails?: boolean;
   aiUsage?: AIUsage;
   hasProPlan?: boolean;
+  hasStarterPlan?: boolean;
 }
 
-export function AIUsageBadge({ className, showDetails = false, aiUsage: propAiUsage, hasProPlan: propHasProPlan }: AIUsageBadgeProps) {
+interface TeacherUsageBadgeProps {
+  className?: string;
+  showDetails?: boolean;
+  teacherUsage?: TeacherUsage;
+  hasProPlan?: boolean;
+  hasStarterPlan?: boolean;
+}
+
+export function TeacherUsageBadge({
+  className,
+  showDetails = false,
+  teacherUsage: propTeacherUsage,
+  hasProPlan: propHasProPlan,
+  hasStarterPlan: propHasStarterPlan,
+}: TeacherUsageBadgeProps) {
   // Always call hooks at the top
   const planDetection = usePlanDetection();
   const fallbackHasProPlan = planDetection.isProPlan;
-  const hasProPlan = propHasProPlan !== undefined ? propHasProPlan : fallbackHasProPlan;
-  
+  const fallbackHasStarterPlan = planDetection.isStarterPlan;
+  const hasProPlan =
+    propHasProPlan !== undefined ? propHasProPlan : fallbackHasProPlan;
+  const hasStarterPlan =
+    propHasStarterPlan !== undefined
+      ? propHasStarterPlan
+      : fallbackHasStarterPlan;
+
+  // CHECK USER ROLE FIRST - only query teacher usage for coaches
+  const user = useQuery(api.users.current);
+  const fallbackTeacherUsage = useQuery(
+    api.plans.getTeacherUsage,
+    user?.role === "coach" ? { hasProPlan, hasStarterPlan } : "skip",
+  );
+
+  const teacherUsage =
+    propTeacherUsage !== undefined ? propTeacherUsage : fallbackTeacherUsage;
+
+  // If user is not a coach, don't show teacher usage badge
+  if (user && user.role !== "coach") {
+    return null;
+  }
+
+  if (!teacherUsage) {
+    return (
+      <Badge variant="secondary" className={cn("animate-pulse", className)}>
+        <Users className="w-3 h-3 mr-1" />
+        Loading...
+      </Badge>
+    );
+  }
+
+  const { teacherCount, teacherLimit, teachersRemaining, isOverLimit } =
+    teacherUsage;
+  const isNearLimit = teachersRemaining <= 1 && teacherLimit > 1;
+
+  // Determine plan name for display
+  let planName = "Free";
+  if (hasProPlan) planName = "Pro";
+  else if (hasStarterPlan) planName = "Starter";
+
+  return (
+    <Badge
+      variant={
+        isOverLimit ? "destructive" : isNearLimit ? "secondary" : "outline"
+      }
+      className={cn(
+        "transition-colors",
+        hasProPlan && "bg-gradient-to-r from-purple-500 to-blue-500 text-white",
+        isNearLimit && !hasProPlan && "bg-orange-500 text-white",
+        isOverLimit && "bg-red-500 text-white",
+        className,
+      )}
+    >
+      {hasProPlan && <Crown className="w-3 h-3 mr-1" />}
+      {!hasProPlan && <Users className="w-3 h-3 mr-1" />}
+      {showDetails
+        ? `${planName} - ${teacherCount}/${teacherLimit} teachers`
+        : `${teacherCount}/${teacherLimit} teachers`}
+    </Badge>
+  );
+}
+
+export function AIUsageBadge({
+  className,
+  showDetails = false,
+  aiUsage: propAiUsage,
+  hasProPlan: propHasProPlan,
+  hasStarterPlan: propHasStarterPlan,
+}: AIUsageBadgeProps) {
+  // Always call hooks at the top
+  const planDetection = usePlanDetection();
+  const fallbackHasProPlan = planDetection.isProPlan;
+  const fallbackHasStarterPlan = planDetection.isStarterPlan;
+  const hasProPlan =
+    propHasProPlan !== undefined ? propHasProPlan : fallbackHasProPlan;
+  const hasStarterPlan =
+    propHasStarterPlan !== undefined
+      ? propHasStarterPlan
+      : fallbackHasStarterPlan;
+
   // CHECK USER ROLE FIRST - only query AI usage for coaches
   const user = useQuery(api.users.current);
   const fallbackAiUsage = useQuery(
-    api.plans.getAIUsageThisMonth, 
-    user?.role === "coach" ? { hasProPlan } : "skip"
+    api.plans.getAIUsageThisMonth,
+    user?.role === "coach" ? { hasProPlan, hasStarterPlan } : "skip",
   );
-  
+
   const aiUsage = propAiUsage !== undefined ? propAiUsage : fallbackAiUsage;
 
   // If user is not a coach, don't show AI usage badge
@@ -43,135 +145,160 @@ export function AIUsageBadge({ className, showDetails = false, aiUsage: propAiUs
     return null;
   }
 
-  if (hasProPlan) {
-    // Pro badge
-    if (!aiUsage) {
-      return (
-        <Badge variant="secondary" className={cn("animate-pulse", className)}>
-          <Zap className="w-3 h-3 mr-1" />
-          Loading...
-        </Badge>
-      );
-    }
-    const { walkthroughsUsed, walkthroughsLimit } = aiUsage;
+  if (!aiUsage) {
     return (
-      <Badge 
-        variant="default"
-        className={cn(
-          "transition-colors bg-gradient-to-r from-purple-500 to-blue-500 text-white",
-          className
-        )}
-      >
-        <Crown className="w-3 h-3 mr-1" />
-        {showDetails ? `Pro - ${walkthroughsUsed}/${walkthroughsLimit} walkthroughs` : "Pro"}
-      </Badge>
-    );
-  } else {
-    // Starter badge
-    if (!aiUsage) {
-      return (
-        <Badge variant="secondary" className={cn("animate-pulse", className)}>
-          <Zap className="w-3 h-3 mr-1" />
-          Loading...
-        </Badge>
-      );
-    }
-    const { walkthroughsUsed, walkthroughsLimit, walkthroughsRemaining, isOverLimit } = aiUsage;
-    const isNearLimit = walkthroughsRemaining <= 2;
-    return (
-      <Badge 
-        variant={isOverLimit ? "destructive" : isNearLimit ? "secondary" : "outline"}
-        className={cn(
-          "transition-colors",
-          isNearLimit && "bg-orange-500 text-white",
-          isOverLimit && "bg-red-500 text-white",
-          className
-        )}
-      >
+      <Badge variant="secondary" className={cn("animate-pulse", className)}>
         <Zap className="w-3 h-3 mr-1" />
-        {showDetails 
-          ? `${walkthroughsUsed}/${walkthroughsLimit} walkthroughs` 
-          : `${walkthroughsRemaining} left`
-        }
+        Loading...
       </Badge>
     );
   }
+
+  const {
+    walkthroughsUsed,
+    walkthroughsLimit,
+    walkthroughsRemaining,
+    isOverLimit,
+  } = aiUsage;
+  const isNearLimit = walkthroughsRemaining <= 1 && walkthroughsLimit > 1;
+
+  // Determine plan name for display
+  let planName = "Free";
+  if (hasProPlan) planName = "Pro";
+  else if (hasStarterPlan) planName = "Starter";
+
+  return (
+    <Badge
+      variant={
+        isOverLimit ? "destructive" : isNearLimit ? "secondary" : "outline"
+      }
+      className={cn(
+        "transition-colors",
+        hasProPlan && "bg-gradient-to-r from-purple-500 to-blue-500 text-white",
+        isNearLimit && !hasProPlan && "bg-orange-500 text-white",
+        isOverLimit && "bg-red-500 text-white",
+        className,
+      )}
+    >
+      {hasProPlan && <Crown className="w-3 h-3 mr-1" />}
+      {!hasProPlan && <Zap className="w-3 h-3 mr-1" />}
+      {showDetails
+        ? `${planName} - ${walkthroughsUsed}/${walkthroughsLimit} walkthroughs`
+        : `${walkthroughsUsed}/${walkthroughsLimit} walkthroughs`}
+    </Badge>
+  );
 }
 
-function StarterUsageWarning() {
+function CombinedUsageWarning() {
+  const planDetection = usePlanDetection();
+  const hasProPlan = planDetection.isProPlan;
+  const hasStarterPlan = planDetection.isStarterPlan;
+
   // CHECK USER ROLE FIRST - only show warning to coaches
   const user = useQuery(api.users.current);
   const aiUsage = useQuery(
-    api.plans.getAIUsageThisMonth, 
-    user?.role === "coach" ? { hasProPlan: false } : "skip"
+    api.plans.getAIUsageThisMonth,
+    user?.role === "coach" ? { hasProPlan, hasStarterPlan } : "skip",
+  );
+  const teacherUsage = useQuery(
+    api.plans.getTeacherUsage,
+    user?.role === "coach" ? { hasProPlan, hasStarterPlan } : "skip",
   );
 
-  // Don't show warning to non-coaches
-  if (!user || user.role !== "coach" || !aiUsage) {
+  // Don't show warning to non-coaches or Pro users
+  if (!user || user.role !== "coach" || hasProPlan) {
     return null;
   }
-  
-  const { walkthroughsRemaining, walkthroughsLimit, isOverLimit } = aiUsage;
-  
-  // Show warning when close to limit or over limit
-  if (walkthroughsRemaining <= 2 || isOverLimit) {
-    return (
-      <Card className={cn(
-        "mb-6 border-l-4",
-        isOverLimit ? "border-l-red-500 bg-red-50 dark:bg-red-950/20" : 
-        "border-l-orange-500 bg-orange-50 dark:bg-orange-950/20"
-      )}>
-        <div className="flex items-start justify-between p-4">
-          <div className="flex items-start">
-            <AlertTriangle className={cn(
-              "h-5 w-5 mt-0.5 mr-3",
-              isOverLimit ? "text-red-600" : "text-orange-600"
-            )} />
-            <div>
-              <CardDescription className="text-sm mb-3">
-                {isOverLimit ? (
-                  <>
-                    <strong>Walkthrough Limit Reached:</strong> You&apos;ve completed all {walkthroughsLimit} walkthroughs on the Coach Starter plan this month.
-                  </>
-                ) : (
-                  <>
-                    <strong>Few Walkthroughs Remaining:</strong> You have {walkthroughsRemaining} walkthroughs remaining this month.
-                  </>
-                )}
-              </CardDescription>
-              <Link href="/billing">
-                <Button size="sm" className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
-                  Upgrade to Coach Pro
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-          <div className="text-right text-xs text-muted-foreground">
-            Pro: 100 walkthroughs/month
-          </div>
-        </div>
-      </Card>
-    );
+
+  if (!aiUsage || !teacherUsage) {
+    return null;
   }
-  
-  return null;
+
+  const {
+    walkthroughsRemaining,
+    walkthroughsLimit,
+    isOverLimit: aiOverLimit,
+  } = aiUsage;
+  const {
+    teachersRemaining,
+    teacherLimit,
+    isOverLimit: teacherOverLimit,
+    teacherCount,
+  } = teacherUsage;
+  const planName = hasStarterPlan ? "Coach Starter" : "Coach Free";
+
+  // Show warning when close to limit or over limit for either usage type
+  const showWalkthroughWarning = walkthroughsRemaining <= 1 || aiOverLimit;
+  const showTeacherWarning = teachersRemaining <= 0 || teacherOverLimit;
+
+  if (!showWalkthroughWarning && !showTeacherWarning) {
+    return null;
+  }
+
+  const isOverLimit = aiOverLimit || teacherOverLimit;
+
+  return (
+    <div
+      className={cn(
+        "mb-4 flex items-center justify-between p-3 rounded-lg border",
+        isOverLimit
+          ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20"
+          : "border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950/20",
+      )}
+    >
+      <div className="flex items-center gap-3">
+        <AlertTriangle
+          className={cn(
+            "h-4 w-4 flex-shrink-0",
+            isOverLimit ? "text-red-600" : "text-orange-600",
+          )}
+        />
+        <div className="text-sm">
+          {showWalkthroughWarning && showTeacherWarning ? (
+            <>
+              <span className="font-medium">Usage limits reached:</span>{" "}
+              {walkthroughsRemaining} walkthroughs and {teachersRemaining}{" "}
+              teacher slots remaining on {planName}.
+            </>
+          ) : showWalkthroughWarning ? (
+            <>
+              {aiOverLimit ? (
+                <>
+                  <span className="font-medium">
+                    Walkthrough limit reached:
+                  </span>{" "}
+                  {walkthroughsLimit} walkthroughs used on {planName}.
+                </>
+              ) : (
+                <>
+                  <span className="font-medium">
+                    Few walkthroughs remaining:
+                  </span>{" "}
+                  {walkthroughsRemaining} left this month on {planName}.
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <span className="font-medium">Teacher limit reached:</span>{" "}
+              {teacherCount}/{teacherLimit} teachers on {planName}.
+            </>
+          )}
+          {hasStarterPlan
+            ? " Upgrade to Pro for 50 walkthroughs/month and 15 teachers."
+            : " Upgrade for more walkthroughs and teachers."}
+        </div>
+      </div>
+      <Link href="/billing">
+        <Button size="sm" variant="outline" className="ml-4 flex-shrink-0">
+          Upgrade
+          <ArrowRight className="ml-1 h-3 w-3" />
+        </Button>
+      </Link>
+    </div>
+  );
 }
 
 export function AIUsageWarning() {
-  const planDetection = usePlanDetection();
-  const hasProPlan = planDetection.isProPlan;
-  
-  // CHECK USER ROLE FIRST - only show warning to coaches
-  const user = useQuery(api.users.current);
-  
-  if (!user || user.role !== "coach") {
-    return null;
-  }
-  
-  // Only show warning to non-Pro users
-  if (!hasProPlan) {
-    return <StarterUsageWarning />;
-  }
-  return null;
-} 
+  return <CombinedUsageWarning />;
+}

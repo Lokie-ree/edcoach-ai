@@ -13,7 +13,7 @@ import landingContent from "@/data/landing-content.json";
 import { Logo } from "@/components/logo";
 import { Section } from "@/components/ui/section";
 
-export default function HeroSection({ onWaitlistClick }: { onWaitlistClick: () => void }) {
+export default function HeroSection() {
   const heroRef = useRef<HTMLDivElement>(null);
   const { hero } = landingContent;
 
@@ -148,7 +148,6 @@ export default function HeroSection({ onWaitlistClick }: { onWaitlistClick: () =
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg group"
-                  onClick={onWaitlistClick}
                 >
                   <span>{hero.cta_primary.label}</span>
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

@@ -1,11 +1,21 @@
 // convex/teachers.ts
 import { v } from "convex/values";
-import { internalMutation, query, mutation, internalQuery } from "./_generated/server";
+import {
+  internalMutation,
+  query,
+  mutation,
+  internalQuery,
+} from "./_generated/server";
 import { Doc } from "./_generated/dataModel";
 import { getCurrentUser, getCurrentUserOrThrow } from "./auth";
+import { api } from "./_generated/api";
 
 // Reusable authorization helper for mutations
-async function _ensureIsCoachForTeacher(ctx: any, user: Doc<"users">, teacher: Doc<"teachers">) {
+async function _ensureIsCoachForTeacher(
+  ctx: any,
+  user: Doc<"users">,
+  teacher: Doc<"teachers">,
+) {
   if (user.role !== "coach") {
     throw new Error("Action requires coach permissions.");
   }
@@ -34,15 +44,17 @@ export const list = query({
       .collect();
 
     // Transform teachers to include user status for needs_details handling
-    const result = await Promise.all(teachers.map(async (teacher) => {
-      if (teacher.userId) {
-        // Teacher has a linked user account
-        return { ...teacher, isUserRecord: false };
-      } else {
-        // Teacher is still pending (no user account yet)
-        return { ...teacher, isUserRecord: false };
-      }
-    }));
+    const result = await Promise.all(
+      teachers.map(async (teacher) => {
+        if (teacher.userId) {
+          // Teacher has a linked user account
+          return { ...teacher, isUserRecord: false };
+        } else {
+          // Teacher is still pending (no user account yet)
+          return { ...teacher, isUserRecord: false };
+        }
+      }),
+    );
 
     return result;
   },
@@ -62,12 +74,16 @@ export const getMyRecord = query({
       email: v.string(),
       subject: v.array(v.string()),
       gradeBand: v.string(),
-      status: v.union(v.literal("active"), v.literal("pending"), v.literal("needs_details")),
+      status: v.union(
+        v.literal("active"),
+        v.literal("pending"),
+        v.literal("needs_details"),
+      ),
       userId: v.optional(v.id("users")),
       createdAt: v.optional(v.number()),
       coachId: v.id("users"), // NEW: coachId instead of clerkOrganizationId
       clerkOrganizationId: v.optional(v.string()), // Keep for migration compatibility
-    })
+    }),
   ),
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
@@ -75,7 +91,7 @@ export const getMyRecord = query({
 
     return await ctx.db
       .query("teachers")
-      .withIndex("by_user", q => q.eq("userId", user._id))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .first();
   },
 });
@@ -101,6 +117,21 @@ export const create = mutation({
       throw new Error("Only coaches can create teachers.");
     }
 
+    // Check teacher usage limit using the new system
+    const teachers = await ctx.db
+      .query("teachers")
+      .withIndex("by_coach", (q) => q.eq("coachId", coachUser._id))
+      .filter((q) => q.neq(q.field("status"), "pending"))
+      .collect();
+
+    // Basic limit check - assume free plan (1 teacher) for backend enforcement
+    const basicLimit = 1; // Free plan limit
+    if (teachers.length >= basicLimit) {
+      throw new Error(
+        `You have reached your teacher limit (${basicLimit}) for your plan. Upgrade for more.`,
+      );
+    }
+
     // NEW: Create teacher with direct coach relationship
     const teacherId = await ctx.db.insert("teachers", {
       ...args,
@@ -108,6 +139,7 @@ export const create = mutation({
       coachId: coachUser._id, // NEW: Direct coach relationship
       createdAt: Date.now(),
     });
+    // Note: No need to track usage in old system since we're using direct teacher counting now
 
     return { success: true, teacherId };
   },
@@ -144,7 +176,7 @@ export const createFromUser = mutation({
     // Check if teacher record already exists for this user
     const existingTeacher = await ctx.db
       .query("teachers")
-      .withIndex("by_user", q => q.eq("userId", args.userId))
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .first();
 
     // NEW: Verify that the teacher is assigned to this coach
@@ -154,7 +186,9 @@ export const createFromUser = mutation({
 
     if (existingTeacher) {
       // Update existing teacher record
-      console.log(`Updating existing teacher record ${existingTeacher._id} for user ${args.userId}`);
+      console.log(
+        `Updating existing teacher record ${existingTeacher._id} for user ${args.userId}`,
+      );
       await ctx.db.patch(existingTeacher._id, {
         subject: args.subject,
         gradeBand: args.gradeBand,
@@ -242,38 +276,52 @@ export const internalFindAndLinkTeacher = internalMutation({
       email: v.string(),
       subject: v.array(v.string()),
       gradeBand: v.string(),
-      status: v.union(v.literal("active"), v.literal("pending"), v.literal("needs_details")),
+      status: v.union(
+        v.literal("active"),
+        v.literal("pending"),
+        v.literal("needs_details"),
+      ),
       userId: v.optional(v.id("users")),
       createdAt: v.optional(v.number()),
       coachId: v.id("users"), // NEW: coachId instead of clerkOrganizationId
       clerkOrganizationId: v.optional(v.string()), // Keep for migration compatibility
-    })
+    }),
   ),
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
     if (!user || !user.email) {
-      console.log(`internalFindAndLinkTeacher: User not found or no email for userId ${args.userId}`);
+      console.log(
+        `internalFindAndLinkTeacher: User not found or no email for userId ${args.userId}`,
+      );
       return null;
     }
 
-    console.log(`internalFindAndLinkTeacher: Looking for pending teacher record for email ${user.email}`);
-    
-    // NEW: Look for teacher records based on email and pending status
+    console.log(
+      `internalFindAndLinkTeacher: Looking for teacher record with needs_details status for email ${user.email}`,
+    );
+
+    // NEW: Look for teacher records based on email and needs_details status (from invitation acceptance)
     const teacherRecord = await ctx.db
       .query("teachers")
       .withIndex("by_email", (q) => q.eq("email", user.email!))
-      .filter(q => q.eq(q.field("status"), "pending"))
+      .filter((q) => q.eq(q.field("status"), "needs_details"))
       .first();
 
     if (teacherRecord) {
-      console.log(`internalFindAndLinkTeacher: Found pending teacher record ${teacherRecord._id}, linking to user ${user._id}`);
+      console.log(
+        `internalFindAndLinkTeacher: Found teacher record ${teacherRecord._id} with needs_details status, linking to user ${user._id}`,
+      );
       await ctx.db.patch(teacherRecord._id, {
         userId: user._id,
         status: "active",
       });
-      console.log(`internalFindAndLinkTeacher: Successfully linked and activated teacher record`);
+      console.log(
+        `internalFindAndLinkTeacher: Successfully linked and activated teacher record`,
+      );
     } else {
-      console.log(`internalFindAndLinkTeacher: No pending teacher record found for ${user.email}`);
+      console.log(
+        `internalFindAndLinkTeacher: No teacher record with needs_details status found for ${user.email}`,
+      );
     }
     return teacherRecord;
   },

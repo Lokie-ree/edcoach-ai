@@ -21,7 +21,7 @@ export const ensureStarterPlan = action({
     // For now, we'll rely on frontend checks and default behavior
     // In a future implementation, you could use Clerk's backend API to assign plans
     // Example: const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
-    
+
     return {
       success: true,
       message: "User defaults to starter plan - no action needed",
@@ -50,12 +50,12 @@ export const getCurrentPlanLimits = action({
     // Note: In actions, we can't directly use has() method
     // This would need to be called from the frontend and passed to other functions
     // For now, we'll keep the logic in the frontend components
-    
-    // Default to starter plan limits
+
+    // Default to free plan limits
     return {
-      walkthroughLimit: 15,
-      teacherLimit: 5,
-      plan: "coach_starter",
+      walkthroughLimit: 3,
+      teacherLimit: 1,
+      plan: "free",
       hasProFeatures: false,
     };
   },
@@ -73,7 +73,8 @@ export const handleSubscriptionEvent = internalMutation({
 
     // Extract Clerk user ID and subscription info from event data
     // Clerk billing events typically include a user or customer ID
-    const clerkUserId = data?.user?.id || data?.userId || data?.customer_id || data?.customerId;
+    const clerkUserId =
+      data?.user?.id || data?.userId || data?.customer_id || data?.customerId;
     if (!clerkUserId) {
       console.warn(`[Billing] No Clerk user ID found in event data, skipping.`);
       return;
@@ -84,7 +85,9 @@ export const handleSubscriptionEvent = internalMutation({
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkUserId))
       .first();
     if (!user) {
-      console.warn(`[Billing] No user found for Clerk ID ${clerkUserId}, skipping.`);
+      console.warn(
+        `[Billing] No user found for Clerk ID ${clerkUserId}, skipping.`,
+      );
       return;
     }
 
@@ -99,14 +102,21 @@ export const handleSubscriptionEvent = internalMutation({
       case "subscription.updated":
       case "subscription.active": {
         // Determine plan from event data (assume plan/product name is present)
-        const planName = data?.plan?.name || data?.plan || data?.product?.name || data?.product || "coach_starter";
+        const planName =
+          data?.plan?.name ||
+          data?.plan ||
+          data?.product?.name ||
+          data?.product ||
+          "coach_starter";
         const plan = planName.includes("pro") ? "coach_pro" : "coach_starter";
         const status = data?.status || "active";
         await updateUser({
           plan,
           subscriptionStatus: status,
           subscriptionId: data?.id || data?.subscription_id || null,
-          subscriptionStartedAt: data?.start_date ? Date.parse(data.start_date) : Date.now(),
+          subscriptionStartedAt: data?.start_date
+            ? Date.parse(data.start_date)
+            : Date.now(),
           subscriptionEndedAt: null,
         });
         break;

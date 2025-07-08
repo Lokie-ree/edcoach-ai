@@ -29,6 +29,7 @@ import type * as plans from "../plans.js";
 import type * as rubricIndicators from "../rubricIndicators.js";
 import type * as rubrics from "../rubrics.js";
 import type * as teachers from "../teachers.js";
+import type * as usage from "../usage.js";
 import type * as users from "../users.js";
 import type * as validation_walkthroughDraftSchema from "../validation/walkthroughDraftSchema.js";
 import type * as validation_walkthroughFinalSchema from "../validation/walkthroughFinalSchema.js";
@@ -60,6 +61,7 @@ declare const fullApi: ApiFromModules<{
   rubricIndicators: typeof rubricIndicators;
   rubrics: typeof rubrics;
   teachers: typeof teachers;
+  usage: typeof usage;
   users: typeof users;
   "validation/walkthroughDraftSchema": typeof validation_walkthroughDraftSchema;
   "validation/walkthroughFinalSchema": typeof validation_walkthroughFinalSchema;

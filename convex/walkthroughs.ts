@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 
 export const createWalkthroughAndEntries = mutation({
   args: {
@@ -14,7 +15,7 @@ export const createWalkthroughAndEntries = mutation({
         indicatorAcronym: v.string(),
         type: v.union(v.literal("reinforcement"), v.literal("refinement")),
         aiFeedback: v.optional(v.string()),
-      })
+      }),
     ),
   },
   returns: v.id("walkthroughs"),
@@ -37,13 +38,14 @@ export const createWalkthroughAndEntries = mutation({
     if (user.role !== "coach") {
       throw new Error("Only coaches can create walkthroughs");
     }
-    // Backend cannot use Clerk's has(), so rely on aiUsage.plan
-    const aiUsage = await ctx.runQuery("plans:getAIUsageThisMonth" as any, {
-      hasProPlan: undefined // Let the query determine plan from user if possible
+    // Check walkthrough usage limit
+    const usageCheck = await ctx.runQuery(api.usage.checkUsageLimit, {
+      type: "walkthrough",
     });
-    const isProPlan = aiUsage.plan === "coach_pro";
-    if (aiUsage.isOverLimit) {
-      throw new Error(`You have reached your monthly walkthrough limit (${aiUsage.walkthroughsLimit}) for the ${isProPlan ? "Coach Pro" : "Starter"} plan. Upgrade to Coach Pro for more.`);
+    if (!usageCheck.canPerformAction) {
+      throw new Error(
+        `You have reached your monthly walkthrough limit (${usageCheck.limit}) for your plan. Upgrade for more.`,
+      );
     }
 
     const now = Date.now();
@@ -58,6 +60,8 @@ export const createWalkthroughAndEntries = mutation({
       createdAt: now,
       updatedAt: now,
     });
+    // Increment usage after successful creation
+    await ctx.runMutation(api.usage.trackUsage, { type: "walkthrough" });
     for (const entry of args.walkthroughEntries) {
       await ctx.db.insert("walkthroughEntries", {
         walkthroughId,
@@ -85,7 +89,7 @@ export const updateWalkthroughAndEntries = mutation({
         indicatorAcronym: v.string(),
         type: v.union(v.literal("reinforcement"), v.literal("refinement")),
         aiFeedback: v.optional(v.string()),
-      })
+      }),
     ),
   },
   returns: v.null(),
@@ -122,7 +126,9 @@ export const updateWalkthroughAndEntries = mutation({
     // Remove old entries
     const oldEntries = await ctx.db
       .query("walkthroughEntries")
-      .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", args.walkthroughId))
+      .withIndex("by_walkthrough", (q) =>
+        q.eq("walkthroughId", args.walkthroughId),
+      )
       .collect();
     for (const entry of oldEntries) {
       await ctx.db.delete(entry._id);
@@ -156,7 +162,7 @@ export const listDraftWalkthroughs = query({
       refinementIndicator: v.string(),
       createdAt: v.number(),
       updatedAt: v.number(),
-    })
+    }),
   ),
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -194,7 +200,7 @@ export const listByCoach = query({
       refinementIndicator: v.string(),
       createdAt: v.number(),
       updatedAt: v.number(),
-    })
+    }),
   ),
   handler: async (ctx, args) => {
     // TODO: Filter by organization membership if needed
@@ -220,7 +226,7 @@ export const listByTeacher = query({
       refinementIndicator: v.string(),
       createdAt: v.number(),
       updatedAt: v.number(),
-    })
+    }),
   ),
   handler: async (ctx, args) => {
     return await ctx.db
@@ -249,7 +255,7 @@ export const getById = query({
       createdAt: v.number(),
       updatedAt: v.number(),
     }),
-    v.null()
+    v.null(),
   ),
   handler: async (ctx, args) => {
     return await ctx.db.get(args.walkthroughId);
@@ -271,40 +277,44 @@ export const listByOrg = query({
       refinementIndicator: v.string(),
       createdAt: v.number(),
       updatedAt: v.number(),
-    })
+    }),
   ),
   handler: async (ctx, args) => {
     // If no organization ID provided, return empty array
     if (!args.clerkOrganizationId) {
       return [];
     }
-    
+
     // Get all users in the org
     const users = await ctx.db
       .query("users")
-      .withIndex("by_organization", (q) => q.eq("clerkOrganizationId", args.clerkOrganizationId))
+      .withIndex("by_organization", (q) =>
+        q.eq("clerkOrganizationId", args.clerkOrganizationId),
+      )
       .collect();
     const userIds = users.map((u) => u._id);
-    
+
     if (userIds.length === 0) {
       return [];
     }
-    
+
     // Get all teachers for these users
     const teachers = await ctx.db
       .query("teachers")
       .filter((q) => q.or(...userIds.map((id) => q.eq(q.field("userId"), id))))
       .collect();
     const teacherIds = teachers.map((t) => t._id);
-    
+
     if (teacherIds.length === 0) {
       return [];
     }
-    
+
     // Get all walkthroughs for these teachers
     return await ctx.db
       .query("walkthroughs")
-      .filter((q) => q.or(...teacherIds.map((id) => q.eq(q.field("teacherId"), id))))
+      .filter((q) =>
+        q.or(...teacherIds.map((id) => q.eq(q.field("teacherId"), id))),
+      )
       .collect();
   },
-}); 
+});

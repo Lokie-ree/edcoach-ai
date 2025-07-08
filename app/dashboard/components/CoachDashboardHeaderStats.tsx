@@ -4,21 +4,36 @@ import React, { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Sparkles } from "lucide-react";
-import { AIUsageBadge, AIUsageWarning } from "@/components/ui/ai-usage-badge";
+import {
+  AIUsageBadge,
+  TeacherUsageBadge,
+} from "@/components/ui/ai-usage-badge";
 import QuickActionsPanel from "./QuickActionsPanel";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import type { AIUsage } from "@/components/ui/ai-usage-badge";
-
+import { usePlanDetection } from "@/lib/usePlanDetection";
 
 interface CoachDashboardHeaderStatsProps {
-  aiUsage: AIUsage | undefined;
-  hasProPlan: boolean;
+  aiUsage?: AIUsage | undefined;
+  hasProPlan?: boolean;
+  hasStarterPlan?: boolean;
 }
 
-export default function CoachDashboardHeaderStats({ aiUsage, hasProPlan }: CoachDashboardHeaderStatsProps) {
+export default function CoachDashboardHeaderStats({
+  aiUsage,
+  hasProPlan,
+  hasStarterPlan,
+}: CoachDashboardHeaderStatsProps) {
   // UPDATED: Use coach-based analytics instead of organization-based
   const analytics = useQuery(api.analytics.getCoachAnalytics);
   const [quickActionsOpen, setQuickActionsOpen] = useState(false);
+
+  // Use plan detection if props are not provided
+  const planDetection = usePlanDetection();
+  const finalHasProPlan =
+    hasProPlan !== undefined ? hasProPlan : planDetection.isProPlan;
+  const finalHasStarterPlan =
+    hasStarterPlan !== undefined ? hasStarterPlan : planDetection.isStarterPlan;
 
   if (!analytics) {
     return (
@@ -49,11 +64,22 @@ export default function CoachDashboardHeaderStats({ aiUsage, hasProPlan }: Coach
           </DialogContent>
         </Dialog>
       </div>
-      {/* AI Usage Badge and Upgrade Banner */}
-      <div className="order-2 md:order-2 flex flex-col items-stretch md:items-end gap-2 w-full md:min-w-[180px]">
-        <AIUsageBadge showDetails aiUsage={aiUsage} hasProPlan={hasProPlan} />
-        <AIUsageWarning />
+      {/* Usage Badges */}
+      <div className="order-2 md:order-2 flex flex-col items-stretch md:items-end gap-2 w-full md:min-w-[200px]">
+        <div className="flex gap-2 flex-wrap justify-end">
+          <TeacherUsageBadge
+            showDetails
+            hasProPlan={finalHasProPlan}
+            hasStarterPlan={finalHasStarterPlan}
+          />
+          <AIUsageBadge
+            showDetails
+            aiUsage={aiUsage}
+            hasProPlan={finalHasProPlan}
+            hasStarterPlan={finalHasStarterPlan}
+          />
+        </div>
       </div>
     </div>
   );
-} 
+}

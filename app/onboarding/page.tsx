@@ -5,9 +5,21 @@ import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Users, Building, ArrowRight, Loader2 } from "lucide-react";
+import {
+  CheckCircle,
+  Users,
+  Building,
+  ArrowRight,
+  Loader2,
+} from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { toast } from "sonner";
 import { usePlanDetection } from "@/lib/usePlanDetection";
@@ -17,26 +29,31 @@ import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import TeacherTutorial from "@/components/onboarding/teacher-tutorial";
 
-
 export default function OnboardingPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
 
-  const [step, setStep] = useState<'role-detection' | 'coaching-setup' | 'complete'>('role-detection');
+  const [step, setStep] = useState<
+    "role-detection" | "coaching-setup" | "complete"
+  >("role-detection");
   const [completingOnboarding, setCompletingOnboarding] = useState(false);
   const [showTeacherTutorial, setShowTeacherTutorial] = useState(false);
 
   // Get current user data
   const convexUser = useQuery(
     api.users.current,
-    user && isLoaded ? {} : "skip"
+    user && isLoaded ? {} : "skip",
   );
 
   const completeOnboarding = useMutation(api.onboarding.complete);
 
   const planDetection = usePlanDetection();
   const teachers = useConvexQuery(api.teachers.list) ?? [];
-  const teacherLimit = planDetection.isProPlan ? 25 : 5;
+  const teacherLimit = planDetection.isProPlan
+    ? 15 // Pro: 15 teachers
+    : planDetection.isStarterPlan
+      ? 5 // Starter: 5 teachers
+      : 1; // Free: 1 teacher
   const teacherCount = teachers.length;
   const teacherProgress = Math.min((teacherCount / teacherLimit) * 100, 100);
   const isNearTeacherLimit = teacherLimit - teacherCount <= 1;
@@ -48,7 +65,7 @@ export default function OnboardingPage() {
       console.log("Onboarding complete, redirecting to dashboard");
       // Small delay to prevent immediate redirect during state changes
       const timer = setTimeout(() => {
-        router.replace('/dashboard');
+        router.replace("/dashboard");
       }, 500);
       return () => clearTimeout(timer);
     }
@@ -70,19 +87,19 @@ export default function OnboardingPage() {
 
   const handleCompleteOnboarding = async () => {
     setCompletingOnboarding(true);
-    
+
     try {
       console.log("Completing onboarding for user:", convexUser?.role);
       await completeOnboarding({});
       console.log("Onboarding completed successfully");
       toast.success("Welcome to EdCoach AI!");
-      
+
       // Small delay then redirect
       setTimeout(() => {
-        router.replace('/dashboard');
+        router.replace("/dashboard");
       }, 1000);
     } catch (error) {
-      console.error('Failed to complete onboarding:', error);
+      console.error("Failed to complete onboarding:", error);
       toast.error("Failed to complete setup. Please try again.");
       setCompletingOnboarding(false);
     }
@@ -125,7 +142,11 @@ export default function OnboardingPage() {
     );
   }
 
-  if (showTeacherTutorial && convexUser?.role === "teacher" && !convexUser.onboardingComplete) {
+  if (
+    showTeacherTutorial &&
+    convexUser?.role === "teacher" &&
+    !convexUser.onboardingComplete
+  ) {
     return (
       <TeacherTutorial
         onComplete={async () => {
@@ -150,25 +171,33 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
       <div className="container max-w-4xl mx-auto px-4 py-8">
         <PageHeader
-          title={convexUser?.role === "teacher" ? "Welcome to EdCoach AI" : "Welcome to EdCoach AI"}
-          description={convexUser?.role === "teacher"
-            ? "You're all set up as a teacher. Your coach can now conduct walkthroughs and provide feedback."
-            : "Let's set up your coaching platform in just a few steps"}
+          title={
+            convexUser?.role === "teacher"
+              ? "Welcome to EdCoach AI"
+              : "Welcome to EdCoach AI"
+          }
+          description={
+            convexUser?.role === "teacher"
+              ? "You're all set up as a teacher. Your coach can now conduct walkthroughs and provide feedback."
+              : "Let's set up your coaching platform in just a few steps"
+          }
           gradient={true}
         />
 
         {/* Plan and usage badges */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
-          {convexUser?.role === 'coach' && (
+          {convexUser?.role === "coach" && (
             <div>
               <span className="font-medium mr-2">Current Plan:</span>
               <AIUsageBadge showDetails />
             </div>
           )}
-          {convexUser?.role === 'coach' && (
+          {convexUser?.role === "coach" && (
             <div className="flex items-center gap-2">
               <span className="font-medium">Teachers:</span>
-              <span>{teacherCount} / {teacherLimit}</span>
+              <span>
+                {teacherCount} / {teacherLimit}
+              </span>
               <div className="w-32">
                 <Progress value={teacherProgress} />
               </div>
@@ -177,40 +206,63 @@ export default function OnboardingPage() {
         </div>
         {/* Usage warnings and upgrade prompts */}
         <AIUsageWarning />
-        {convexUser?.role === 'coach' && (isNearTeacherLimit || isAtTeacherLimit) && (
-          <div className={`mb-6 p-4 rounded border ${isAtTeacherLimit ? 'border-red-300 bg-red-50 text-red-800' : 'border-orange-200 bg-orange-50 text-orange-800'}`}>
-            {isAtTeacherLimit ? (
-              <>
-                <strong>Teacher Limit Reached:</strong> You have added all {teacherLimit} teachers allowed on your plan. <Link href="/billing" className="underline font-semibold">Upgrade to Coach Pro</Link> to add more.
-              </>
-            ) : (
-              <>
-                <strong>Few Teacher Slots Remaining:</strong> You have {teacherLimit - teacherCount} teacher slot{teacherLimit - teacherCount === 1 ? '' : 's'} left this month.
-              </>
-            )}
-          </div>
-        )}
+        {convexUser?.role === "coach" &&
+          (isNearTeacherLimit || isAtTeacherLimit) && (
+            <div
+              className={`mb-6 p-4 rounded border ${isAtTeacherLimit ? "border-red-300 bg-red-50 text-red-800" : "border-orange-200 bg-orange-50 text-orange-800"}`}
+            >
+              {isAtTeacherLimit ? (
+                <>
+                  <strong>Teacher Limit Reached:</strong> You have added all{" "}
+                  {teacherLimit} teachers allowed on your plan.{" "}
+                  <Link href="/billing" className="underline font-semibold">
+                    Upgrade to Coach Pro
+                  </Link>{" "}
+                  to add more.
+                </>
+              ) : (
+                <>
+                  <strong>Few Teacher Slots Remaining:</strong> You have{" "}
+                  {teacherLimit - teacherCount} teacher slot
+                  {teacherLimit - teacherCount === 1 ? "" : "s"} left this
+                  month.
+                </>
+              )}
+            </div>
+          )}
 
         <div className="mt-8 space-y-6">
           {/* Progress Steps */}
           <div className="flex items-center justify-center space-x-4 mb-8">
-            <div className={`flex items-center space-x-2 ${step === 'role-detection' ? 'text-primary' : 'text-muted-foreground'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'role-detection' ? 'bg-primary text-white' : 'bg-muted'}`}>
+            <div
+              className={`flex items-center space-x-2 ${step === "role-detection" ? "text-primary" : "text-muted-foreground"}`}
+            >
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${step === "role-detection" ? "bg-primary text-white" : "bg-muted"}`}
+              >
                 1
               </div>
               <span className="text-sm font-medium">Role Setup</span>
             </div>
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            <div className={`flex items-center space-x-2 ${step === 'coaching-setup' ? 'text-primary' : 'text-muted-foreground'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 'coaching-setup' ? 'bg-primary text-white' : step === 'complete' ? 'bg-green-500 text-white' : 'bg-muted'}`}>
-                {step === 'complete' ? <CheckCircle className="h-4 w-4" /> : '2'}
+            <div
+              className={`flex items-center space-x-2 ${step === "coaching-setup" ? "text-primary" : "text-muted-foreground"}`}
+            >
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${step === "coaching-setup" ? "bg-primary text-white" : step === "complete" ? "bg-green-500 text-white" : "bg-muted"}`}
+              >
+                {step === "complete" ? (
+                  <CheckCircle className="h-4 w-4" />
+                ) : (
+                  "2"
+                )}
               </div>
               <span className="text-sm font-medium">Coaching Setup</span>
             </div>
           </div>
 
           {/* Step Content */}
-          {step === 'role-detection' && (
+          {step === "role-detection" && (
             <Card className="mx-auto max-w-2xl">
               <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2">
@@ -218,7 +270,8 @@ export default function OnboardingPage() {
                   You&apos;re Set Up as a Coach
                 </CardTitle>
                 <CardDescription>
-                  We&apos;ve detected that you&apos;re signing up as an instructional coach. You&apos;ll be able to:
+                  We&apos;ve detected that you&apos;re signing up as an
+                  instructional coach. You&apos;ll be able to:
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -242,11 +295,14 @@ export default function OnboardingPage() {
                 </div>
                 <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
                   <p className="text-sm text-blue-800 dark:text-blue-200">
-                    <strong>Free Coach Starter Plan</strong> - Start with up to 5 teachers and 20 AI feedback generations per month. Upgrade anytime when you need more.
+                    <strong>Coach Free Plan</strong> - Start with 1 teacher and
+                    3 walkthroughs per month. Upgrade to Coach Starter
+                    ($7/month) for 5 teachers and 15 walkthroughs, or Coach Pro
+                    for even more.
                   </p>
                 </div>
-                <Button 
-                  onClick={() => setStep('coaching-setup')} 
+                <Button
+                  onClick={() => setStep("coaching-setup")}
                   className="w-full"
                   size="lg"
                 >
@@ -256,7 +312,7 @@ export default function OnboardingPage() {
             </Card>
           )}
 
-          {step === 'coaching-setup' && (
+          {step === "coaching-setup" && (
             <Card className="mx-auto max-w-2xl">
               <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2">
@@ -264,7 +320,8 @@ export default function OnboardingPage() {
                   Set Up Your Coaching
                 </CardTitle>
                 <CardDescription>
-                  Set up your coaching dashboard to manage your teacher relationships
+                  Set up your coaching dashboard to manage your teacher
+                  relationships
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -272,14 +329,17 @@ export default function OnboardingPage() {
                   <div className="text-lg font-medium">
                     Your coaching dashboard will be named:
                     <span className="text-primary font-semibold block mt-1">
-                      {user.firstName || user.fullName || 'Coach'}&apos;s Coaching
+                      {user.firstName || user.fullName || "Coach"}&apos;s
+                      Coaching
                     </span>
                   </div>
                   <p className="text-muted-foreground">
-                    This will be your personal coaching space where you can invite teachers directly, conduct walkthroughs, and manage feedback.
+                    This will be your personal coaching space where you can
+                    invite teachers directly, conduct walkthroughs, and manage
+                    feedback.
                   </p>
                 </div>
-                <Button 
+                <Button
                   onClick={handleCompleteOnboarding}
                   className="w-full"
                   size="lg"
@@ -290,7 +350,7 @@ export default function OnboardingPage() {
             </Card>
           )}
 
-          {step === 'complete' && (
+          {step === "complete" && (
             <Card className="mx-auto max-w-2xl">
               <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2">
@@ -298,10 +358,9 @@ export default function OnboardingPage() {
                   Welcome to EdCoach AI!
                 </CardTitle>
                 <CardDescription>
-                  {convexUser.role === 'teacher' 
+                  {convexUser.role === "teacher"
                     ? "You're all set up as a teacher. Your coach can now conduct walkthroughs and provide feedback."
-                    : "Your coaching setup is ready. You can now invite teachers and start conducting walkthroughs."
-                  }
+                    : "Your coaching setup is ready. You can now invite teachers and start conducting walkthroughs."}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -311,7 +370,7 @@ export default function OnboardingPage() {
                       <CheckCircle className="h-5 w-5 text-green-500" />
                       <span>Account setup complete</span>
                     </div>
-                    {convexUser.role === 'coach' && (
+                    {convexUser.role === "coach" && (
                       <>
                         <div className="flex items-center gap-3 justify-center">
                           <CheckCircle className="h-5 w-5 text-green-500" />
@@ -321,7 +380,7 @@ export default function OnboardingPage() {
                     )}
                   </div>
                 </div>
-                <Button 
+                <Button
                   onClick={handleCompleteOnboarding}
                   className="w-full"
                   size="lg"
@@ -335,4 +394,4 @@ export default function OnboardingPage() {
       </div>
     </div>
   );
-} 
+}

@@ -4,24 +4,37 @@ import { getCurrentUser } from "./auth";
 
 // Plan configuration - centralized and type-safe
 export const PLAN_CONFIG = {
-  coach_starter: {
-    name: "Coach Starter",
-    description: "Perfect for new coaches getting started",
+  free: {
+    name: "Coach Free",
+    description: "Get started with EdCoach AI for free",
     features: {
-      maxAIGenerations: 10, // 10 walkthroughs per month
-      maxTeachers: 3,
-      analyticsDepth: 30,
+      maxAIGenerations: 6, // 3 walkthroughs per month (2 AI generations each)
+      maxTeachers: 1,
+      analyticsDepth: 14, // days
       exportEnabled: false,
       bulkInvitationsEnabled: false,
       prioritySupport: false,
       advancedAnalytics: false,
     },
   },
+  coach_starter: {
+    name: "Coach Starter",
+    description: "Perfect for new coaches getting started",
+    features: {
+      maxAIGenerations: 30, // 15 walkthroughs per month (2 AI generations each)
+      maxTeachers: 5,
+      analyticsDepth: 90, // days
+      exportEnabled: false,
+      bulkInvitationsEnabled: true,
+      prioritySupport: false,
+      advancedAnalytics: false,
+    },
+  },
   coach_pro: {
-    name: "Coach Pro", 
+    name: "Coach Pro",
     description: "For coaches ready to scale their impact",
     features: {
-      maxAIGenerations: 100, // 50 walkthroughs per month
+      maxAIGenerations: 100, // 50 walkthroughs per month (2 AI generations each)
       maxTeachers: 15,
       analyticsDepth: 90, // days
       exportEnabled: true,
@@ -33,7 +46,7 @@ export const PLAN_CONFIG = {
 } as const;
 
 export type PlanType = keyof typeof PLAN_CONFIG;
-export type PlanFeatures = typeof PLAN_CONFIG[PlanType]['features'];
+export type PlanFeatures = (typeof PLAN_CONFIG)[PlanType]["features"];
 
 // Note: getCurrentPlan removed - use Clerk's has() method in components instead
 
@@ -44,6 +57,7 @@ export type PlanFeatures = typeof PLAN_CONFIG[PlanType]['features'];
 export const getAIUsageThisMonth = query({
   args: {
     hasProPlan: v.optional(v.boolean()),
+    hasStarterPlan: v.optional(v.boolean()),
   },
   returns: v.object({
     count: v.number(),
@@ -63,36 +77,44 @@ export const getAIUsageThisMonth = query({
     }
 
     // Determine plan from frontend Clerk check
-    const plan = args.hasProPlan ? "coach_pro" : "coach_starter";
-    const limit = PLAN_CONFIG[plan].features.maxAIGenerations;
-    
-    // Get current month's AI generations
-    const now = Date.now();
-    const startOfMonth = new Date(new Date(now).getFullYear(), new Date(now).getMonth(), 1).getTime();
-    
-    const generations = await ctx.db
-      .query("aiUsageLogs")
-      .withIndex("by_user_and_month", (q) => 
-        q.eq("userId", user._id).gte("timestamp", startOfMonth)
-      )
-      .collect();
-    
-    const count = generations.length;
-    const remaining = Math.max(0, limit - count);
-    
-    // Calculate walkthrough equivalents (2 AI generations = 1 walkthrough)
-    const walkthroughsUsed = Math.floor(count / 2);
-    const walkthroughsLimit = Math.floor(limit / 2);
-    const walkthroughsRemaining = Math.floor(remaining / 2);
-    
+    const plan = args.hasProPlan
+      ? "coach_pro"
+      : args.hasStarterPlan
+        ? "coach_starter"
+        : "free";
+    const aiGenerationLimit = PLAN_CONFIG[plan].features.maxAIGenerations;
+    const walkthroughLimit = Math.floor(aiGenerationLimit / 2);
+
+    // Get walkthrough usage from the user's monthlyUsage field (old system)
+    const usage = user.monthlyUsage || { walkthroughs: 0, teachersActive: 0 };
+
+    // Reset usage if it's a new month
+    const now = new Date();
+    const resetDate = (usage as any).resetDate
+      ? new Date((usage as any).resetDate)
+      : new Date();
+    const isNewMonth =
+      now.getMonth() !== resetDate.getMonth() ||
+      now.getFullYear() !== resetDate.getFullYear();
+
+    const walkthroughsUsed = isNewMonth ? 0 : usage.walkthroughs;
+    const walkthroughsRemaining = Math.max(
+      0,
+      walkthroughLimit - walkthroughsUsed,
+    );
+
+    // Convert to AI generation equivalents for backward compatibility
+    const count = walkthroughsUsed * 2;
+    const remaining = walkthroughsRemaining * 2;
+
     return {
       count,
-      limit,
+      limit: aiGenerationLimit,
       remaining,
       plan,
-      isOverLimit: count >= limit,
+      isOverLimit: walkthroughsUsed >= walkthroughLimit,
       walkthroughsUsed,
-      walkthroughsLimit,
+      walkthroughsLimit: walkthroughLimit,
       walkthroughsRemaining,
     };
   },
@@ -104,6 +126,7 @@ export const getAIUsageThisMonth = query({
 export const getTeacherUsage = query({
   args: {
     hasProPlan: v.optional(v.boolean()),
+    hasStarterPlan: v.optional(v.boolean()),
   },
   returns: v.object({
     teacherCount: v.number(),
@@ -119,18 +142,24 @@ export const getTeacherUsage = query({
     }
 
     // Determine plan from frontend Clerk check
-    const plan = args.hasProPlan ? "coach_pro" : "coach_starter";
+    const plan = args.hasProPlan
+      ? "coach_pro"
+      : args.hasStarterPlan
+        ? "coach_starter"
+        : "free";
     const limit = PLAN_CONFIG[plan].features.maxTeachers;
-    
-    // Get current teacher count
+
+    // Get current teacher count - only count teachers who have accepted invitations
+    // "pending" teachers are just placeholders and shouldn't count toward limits
     const teachers = await ctx.db
       .query("teachers")
       .withIndex("by_coach", (q) => q.eq("coachId", user._id))
+      .filter((q) => q.neq(q.field("status"), "pending"))
       .collect();
-    
+
     const teacherCount = teachers.length;
     const teachersRemaining = Math.max(0, limit - teacherCount);
-    
+
     return {
       teacherCount,
       teacherLimit: limit,
@@ -147,6 +176,7 @@ export const getTeacherUsage = query({
 export const getPlanFeatures = query({
   args: {
     hasProPlan: v.optional(v.boolean()),
+    hasStarterPlan: v.optional(v.boolean()),
   },
   returns: v.object({
     plan: v.string(),
@@ -163,9 +193,13 @@ export const getPlanFeatures = query({
     }
 
     // Determine plan from frontend Clerk check
-    const plan = args.hasProPlan ? "coach_pro" : "coach_starter";
+    const plan = args.hasProPlan
+      ? "coach_pro"
+      : args.hasStarterPlan
+        ? "coach_starter"
+        : "free";
     const features = PLAN_CONFIG[plan].features;
-    
+
     return {
       plan,
       exportEnabled: features.exportEnabled,
@@ -175,4 +209,4 @@ export const getPlanFeatures = query({
       analyticsDepth: features.analyticsDepth,
     };
   },
-}); 
+});

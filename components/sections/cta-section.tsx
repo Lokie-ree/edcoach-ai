@@ -2,7 +2,7 @@ import { NeonGradientCard } from "@/components/magicui/neon-gradient-card";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import ctaData from "@/data/landing-content.json";
 
-export default function CTASection({ onWaitlistClick }: { onWaitlistClick: () => void }) {
+export default function CTASection() {
   const { headline, sub_headline, cta } = ctaData.cta;
 
   return (
@@ -21,10 +21,7 @@ export default function CTASection({ onWaitlistClick }: { onWaitlistClick: () =>
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
               {sub_headline}
             </p>
-            <button
-              className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-blue-600 to-violet-600 px-8 py-3 text-md font-medium text-white shadow hover:opacity-90 transition-opacity"
-              onClick={onWaitlistClick}
-            >
+            <button className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-blue-600 to-violet-600 px-8 py-3 text-md font-medium text-white shadow hover:opacity-90 transition-opacity">
               {cta.label}
             </button>
           </div>

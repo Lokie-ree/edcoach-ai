@@ -12,22 +12,20 @@ import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import WaitlistModal from "@/components/waitlist-modal";
+import { useEffect } from "react";
 
 export default function Home() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
   const convexUser = useQuery(
     api.users.current,
-    user && isLoaded ? {} : "skip"
+    user && isLoaded ? {} : "skip",
   );
-  const [waitlistOpen, setWaitlistOpen] = useState(false);
 
   // Handle redirect for authenticated users
   useEffect(() => {
     if (!isLoaded) return;
-    
+
     // Only redirect if user is authenticated and we have user data
     if (user && convexUser !== undefined) {
       if (convexUser) {
@@ -75,15 +73,14 @@ export default function Home() {
   // Only show landing page for unauthenticated users
   return (
     <>
-      <HeroSection onWaitlistClick={() => setWaitlistOpen(true)} />
+      <HeroSection />
       <FeaturesSection />
       <HowItWorksSection />
-      <Pricing onWaitlistClick={() => setWaitlistOpen(true)} />
+      <Pricing />
       <TestimonialsSection />
       <FAQSection />
-      <CTASection onWaitlistClick={() => setWaitlistOpen(true)} />
+      <CTASection />
       <Footer />
-      <WaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
     </>
   );
-} 
+}

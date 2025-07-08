@@ -14,7 +14,7 @@ export default defineSchema({
     clerkOrganizationId: v.optional(v.string()),
     onboardingComplete: v.optional(v.boolean()),
     // Subscription fields (synced from Clerk Billing webhooks)
-    plan: v.union(v.literal("coach_starter"), v.literal("coach_pro")),
+    plan: v.union(v.literal("free"), v.literal("coach_starter"), v.literal("coach_pro")),
     subscriptionStatus: v.union(
       v.literal("active"),
       v.literal("past_due"),
@@ -27,6 +27,12 @@ export default defineSchema({
     subscriptionStartedAt: v.optional(v.number()),
     subscriptionEndedAt: v.optional(v.number()),
     // Note: Subscription data is managed by Clerk Billing, no longer stored locally
+    monthlyUsage: v.optional(v.object({
+      walkthroughs: v.number(),
+      teachersActive: v.number(),
+      resetDate: v.string(), // ISO string
+    })),
+    freeTrialStarted: v.optional(v.string()),
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_organization", ["clerkOrganizationId"]),

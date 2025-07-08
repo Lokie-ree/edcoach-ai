@@ -3,7 +3,6 @@ import { v } from "convex/values";
 import { query, internalQuery, mutation } from "./_generated/server";
 import { getCurrentUser } from "./auth";
 
-
 // Reusable validator for the user object to avoid repetition
 export const vUser = v.object({
   _id: v.id("users"),
@@ -17,18 +16,30 @@ export const vUser = v.object({
   preferences: v.optional(v.any()),
   createdAt: v.number(),
   onboardingComplete: v.optional(v.boolean()),
-  plan: v.union(v.literal("coach_starter"), v.literal("coach_pro")),
+  plan: v.union(
+    v.literal("free"),
+    v.literal("coach_starter"),
+    v.literal("coach_pro"),
+  ),
   subscriptionStatus: v.union(
     v.literal("active"),
     v.literal("past_due"),
     v.literal("canceled"),
     v.literal("incomplete"),
     v.literal("trialing"),
-    v.literal("unpaid")
+    v.literal("unpaid"),
   ),
   subscriptionId: v.optional(v.string()),
   subscriptionStartedAt: v.optional(v.number()),
   subscriptionEndedAt: v.optional(v.number()),
+  monthlyUsage: v.optional(
+    v.object({
+      walkthroughs: v.number(),
+      teachersActive: v.number(),
+      resetDate: v.string(), // ISO string
+    }),
+  ),
+  freeTrialStarted: v.optional(v.string()),
 });
 
 /**
@@ -65,10 +76,10 @@ export const createOrSyncFromClerk = mutation({
       .unique();
 
     if (existingUser) {
-      return { 
-        success: true, 
+      return {
+        success: true,
         userId: existingUser._id,
-        message: "User already exists" 
+        message: "User already exists",
       };
     }
 
@@ -82,17 +93,17 @@ export const createOrSyncFromClerk = mutation({
       preferences: {},
       createdAt: Date.now(),
       onboardingComplete: false,
-      plan: "coach_starter",
+      plan: "free", // New coaches start on the free plan
       subscriptionStatus: "active",
       subscriptionId: undefined,
       subscriptionStartedAt: Date.now(),
       subscriptionEndedAt: undefined,
     });
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       userId,
-      message: "User created successfully" 
+      message: "User created successfully",
     };
   },
 });
@@ -128,12 +139,18 @@ export const getById = query({
       currentUser.clerkOrganizationId === targetUser.clerkOrganizationId;
 
     // Allow access if any condition is met
-    if (isRequestingSelf || isCoachViewingOrgMember || isTeacherViewingOrgMember) {
+    if (
+      isRequestingSelf ||
+      isCoachViewingOrgMember ||
+      isTeacherViewingOrgMember
+    ) {
       return targetUser;
     }
 
     // If no "allow" conditions are met, deny access
-    throw new Error("Unauthorized: You do not have permission to view this user's data.");
+    throw new Error(
+      "Unauthorized: You do not have permission to view this user's data.",
+    );
   },
 });
 

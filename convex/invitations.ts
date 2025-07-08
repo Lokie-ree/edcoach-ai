@@ -1,7 +1,13 @@
 import { v } from "convex/values";
-import { query, mutation, action, internalMutation, internalQuery } from "./_generated/server";
+import {
+  query,
+  mutation,
+  action,
+  internalMutation,
+  internalQuery,
+} from "./_generated/server";
 import { getCurrentUserOrThrow } from "./auth";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 
 // SINGLE function to handle invitations
 export const inviteTeacher = action({
@@ -15,7 +21,15 @@ export const inviteTeacher = action({
     success: v.boolean(),
     message: v.string(),
   }),
-  handler: async (ctx, args) => {
+  handler: async (
+    ctx,
+    args: {
+      teacherEmail: string;
+      teacherName: string;
+      subject?: string;
+      gradeBand?: string;
+    },
+  ): Promise<{ success: boolean; message: string }> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
@@ -35,7 +49,29 @@ export const inviteTeacher = action({
     });
 
     if (existingInvite) {
-      return { success: false, message: "Invitation already sent to this email" };
+      return {
+        success: false,
+        message: "Invitation already sent to this email",
+      };
+    }
+
+    // Check teacher usage limit using the new system
+    // Get teachers assigned to this coach (excluding pending ones)
+    const teachers = await ctx.runQuery(internal.teachers.internalListByCoach, {
+      coachId: coach._id,
+    });
+
+    // Filter out pending teachers (they don't count toward limits)
+    const activeTeachers = teachers.filter((t) => t.status !== "pending");
+
+    // Basic limit check - assume free plan (1 teacher) for backend enforcement
+    // Frontend will do proper plan-based checking with actual plan detection
+    const basicLimit = 1; // Free plan limit
+    if (activeTeachers.length >= basicLimit) {
+      return {
+        success: false,
+        message: `You have reached your teacher limit (${basicLimit}) for your plan. Upgrade for more.`,
+      };
     }
 
     // Create invitation with simple token
@@ -50,6 +86,7 @@ export const inviteTeacher = action({
       subject: args.subject,
       gradeBand: args.gradeBand,
     });
+    // Note: No need to track usage in old system since we're using direct teacher counting now
 
     // Send email using simple fetch (no Resend component needed)
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -59,7 +96,7 @@ export const inviteTeacher = action({
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -119,7 +156,7 @@ export const acceptInvitation = mutation({
         preferences: {},
         createdAt: Date.now(),
         onboardingComplete: false,
-        plan: "coach_starter",
+        plan: "free", // Teachers don't need paid plans
         subscriptionStatus: "active",
         subscriptionId: undefined,
         subscriptionStartedAt: Date.now(),
@@ -132,7 +169,7 @@ export const acceptInvitation = mutation({
         return { success: false, message: "Failed to create user record" };
       }
     }
-    
+
     // Get invitation
     const invitation = await ctx.db
       .query("invitations")
@@ -151,9 +188,9 @@ export const acceptInvitation = mutation({
 
     // Email validation
     if (user.email.toLowerCase() !== invitation.teacherEmail.toLowerCase()) {
-      return { 
-        success: false, 
-        message: "Please sign in with the email that received the invitation" 
+      return {
+        success: false,
+        message: "Please sign in with the email that received the invitation",
       };
     }
 
@@ -177,7 +214,7 @@ export const acceptInvitation = mutation({
       const pendingTeacher = await ctx.db
         .query("teachers")
         .withIndex("by_email", (q) => q.eq("email", user.email))
-        .filter(q => q.eq(q.field("status"), "pending"))
+        .filter((q) => q.eq(q.field("status"), "pending"))
         .first();
 
       if (pendingTeacher) {
@@ -224,7 +261,7 @@ export const getInvitationByToken = query({
       status: v.string(),
       isExpired: v.boolean(),
     }),
-    v.null()
+    v.null(),
   ),
   handler: async (ctx, args) => {
     const invitation = await ctx.db
@@ -248,13 +285,15 @@ export const getInvitationByToken = query({
 
 export const listMyInvitations = query({
   args: {},
-  returns: v.array(v.object({
-    _id: v.id("invitations"),
-    teacherEmail: v.string(),
-    status: v.string(),
-    createdAt: v.number(),
-    acceptedAt: v.optional(v.number()),
-  })),
+  returns: v.array(
+    v.object({
+      _id: v.id("invitations"),
+      teacherEmail: v.string(),
+      status: v.string(),
+      createdAt: v.number(),
+      acceptedAt: v.optional(v.number()),
+    }),
+  ),
   handler: async (ctx) => {
     const user = await getCurrentUserOrThrow(ctx);
     if (user.role !== "coach") {
@@ -268,7 +307,7 @@ export const listMyInvitations = query({
       .collect();
 
     // Map to only return the fields specified in the validator
-    return invitations.map(invitation => ({
+    return invitations.map((invitation) => ({
       _id: invitation._id,
       teacherEmail: invitation.teacherEmail,
       status: invitation.status,
@@ -309,10 +348,13 @@ export const getByEmail = internalQuery({
     email: v.string(),
     coachId: v.id("users"),
   },
-  returns: v.union(v.object({
-    _id: v.id("invitations"),
-    status: v.string(),
-  }), v.null()),
+  returns: v.union(
+    v.object({
+      _id: v.id("invitations"),
+      status: v.string(),
+    }),
+    v.null(),
+  ),
   handler: async (ctx, args) => {
     const invitation = await ctx.db
       .query("invitations")

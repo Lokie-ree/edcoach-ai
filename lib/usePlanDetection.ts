@@ -1,10 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useAuth, useUser } from '@clerk/nextjs';
+import { useState, useEffect, useCallback } from "react";
+import { useAuth, useUser } from "@clerk/nextjs";
 
 interface PlanDetectionResult {
   isProPlan: boolean;
   isStarterPlan: boolean;
-  planDetectionMethod: 'clerk_has' | 'user_metadata' | 'fallback' | 'loading' | 'error';
+  isFreePlan: boolean;
+  planDetectionMethod:
+    | "clerk_has"
+    | "user_metadata"
+    | "fallback"
+    | "loading"
+    | "error";
   isLoading: boolean;
   error: string | null;
   debugInfo: {
@@ -17,25 +23,31 @@ interface PlanDetectionResult {
 export function usePlanDetection(): PlanDetectionResult {
   const { has, userId } = useAuth();
   const { user } = useUser();
-  
+
   const [result, setResult] = useState<PlanDetectionResult>({
     isProPlan: false,
     isStarterPlan: false,
-    planDetectionMethod: 'loading',
+    isFreePlan: false,
+    planDetectionMethod: "loading",
     isLoading: true,
     error: null,
     debugInfo: {
       clerkUserId: undefined,
       userMetadata: null,
       hasChecks: {},
-    }
+    },
   });
 
   const detectPlan = useCallback(() => {
     const checkUserMetadata = () => {
-      console.log('👤 Checking user metadata for personal billing...');
+      console.log("👤 Checking user metadata for personal billing...");
       if (!user) {
-        return { success: false, isProPlan: false, metadata: null };
+        return {
+          success: false,
+          isProPlan: false,
+          isStarterPlan: false,
+          metadata: null,
+        };
       }
       const metadata = {
         publicMetadata: user.publicMetadata,
@@ -49,44 +61,69 @@ export function usePlanDetection(): PlanDetectionResult {
         user.unsafeMetadata?.plan,
       ];
       // Check nested subscription objects
-      const userSubscription = user.publicMetadata?.subscription || user.unsafeMetadata?.subscription;
-      if (typeof userSubscription === 'object' && userSubscription) {
+      const userSubscription =
+        user.publicMetadata?.subscription || user.unsafeMetadata?.subscription;
+      if (typeof userSubscription === "object" && userSubscription) {
         subscriptionSources.push(
           (userSubscription as { plan: string }).plan,
           (userSubscription as { product: string }).product,
           (userSubscription as { name: string }).name,
-          (userSubscription as { type: string }).type
+          (userSubscription as { type: string }).type,
         );
       }
       const validSubscriptions = subscriptionSources.filter(Boolean);
-      console.log('📋 Found subscription data:', validSubscriptions);
-      const isProPlan = validSubscriptions.some(sub => 
-        typeof sub === 'string' && (
-          sub.toLowerCase().includes('pro') ||
-          sub === 'coach_pro' ||
-          sub === 'Coach Pro' ||
-          sub === 'CoachPro'
-        )
+      console.log("📋 Found subscription data:", validSubscriptions);
+
+      const isProPlan = validSubscriptions.some(
+        (sub) =>
+          typeof sub === "string" &&
+          (sub.toLowerCase().includes("pro") ||
+            sub === "coach_pro" ||
+            sub === "Coach Pro" ||
+            sub === "CoachPro"),
       );
+
+      const isStarterPlan = validSubscriptions.some(
+        (sub) =>
+          typeof sub === "string" &&
+          (sub.toLowerCase().includes("starter") ||
+            sub === "coach_starter" ||
+            sub === "Coach Starter" ||
+            sub === "CoachStarter"),
+      );
+
       return {
         success: validSubscriptions.length > 0,
         isProPlan,
-        metadata
+        isStarterPlan,
+        metadata,
       };
     };
 
     const checkClerkHas = () => {
-      console.log('🔐 Checking Clerk has() for personal billing...');
+      console.log("🔐 Checking Clerk has() for personal billing...");
       if (!has) {
-        return { success: false, isProPlan: false, checks: {} };
+        return {
+          success: false,
+          isProPlan: false,
+          isStarterPlan: false,
+          checks: {},
+        };
       }
       // Try various plan name variations
       const planVariations = [
-        'coach_pro', 'coach_starter', 'pro', 'starter',
-        'Coach Pro', 'Coach Starter', 'CoachPro', 'CoachStarter',
+        "coach_pro",
+        "coach_starter",
+        "pro",
+        "starter",
+        "Coach Pro",
+        "Coach Starter",
+        "CoachPro",
+        "CoachStarter",
       ];
       const checks: Record<string, boolean | undefined> = {};
       let foundProPlan = false;
+      let foundStarterPlan = false;
       for (const planName of planVariations) {
         try {
           // Try plan, permission, and role checks
@@ -98,8 +135,10 @@ export function usePlanDetection(): PlanDetectionResult {
           checks[`role:${planName}`] = roleCheck;
           if (planCheck || permissionCheck || roleCheck) {
             console.log(`✅ Found subscription via has(): ${planName}`);
-            if (planName.toLowerCase().includes('pro')) {
+            if (planName.toLowerCase().includes("pro")) {
               foundProPlan = true;
+            } else if (planName.toLowerCase().includes("starter")) {
+              foundStarterPlan = true;
             }
           }
         } catch (error) {
@@ -110,12 +149,13 @@ export function usePlanDetection(): PlanDetectionResult {
       return {
         success: hasAnyPlan,
         isProPlan: foundProPlan,
-        checks
+        isStarterPlan: foundStarterPlan,
+        checks,
       };
     };
 
     try {
-      console.log('🔍 SIMPLIFIED Plan Detection: Personal billing only...');
+      console.log("🔍 SIMPLIFIED Plan Detection: Personal billing only...");
       // METHOD 1: Check user metadata (most reliable for personal billing)
       const userMetadataResult = checkUserMetadata();
       // METHOD 2: Try Clerk has() calls (may work for personal billing)
@@ -123,49 +163,54 @@ export function usePlanDetection(): PlanDetectionResult {
       // Determine final result (prioritize user metadata)
       let finalResult: PlanDetectionResult;
       if (userMetadataResult.success) {
-        console.log('✅ Using user metadata for plan detection');
+        console.log("✅ Using user metadata for plan detection");
         finalResult = {
           isProPlan: userMetadataResult.isProPlan,
-          isStarterPlan: !userMetadataResult.isProPlan, // If not Pro, then Starter
-          planDetectionMethod: 'user_metadata',
+          isStarterPlan: userMetadataResult.isStarterPlan,
+          isFreePlan:
+            !userMetadataResult.isProPlan && !userMetadataResult.isStarterPlan,
+          planDetectionMethod: "user_metadata",
           isLoading: false,
           error: null,
           debugInfo: {
             clerkUserId: userId,
             userMetadata: userMetadataResult.metadata,
             hasChecks: clerkHasResult.checks,
-          }
+          },
         };
       } else if (clerkHasResult.success) {
-        console.log('✅ Using Clerk has() for plan detection');
+        console.log("✅ Using Clerk has() for plan detection");
         finalResult = {
           isProPlan: clerkHasResult.isProPlan,
-          isStarterPlan: !clerkHasResult.isProPlan,
-          planDetectionMethod: 'clerk_has',
+          isStarterPlan: clerkHasResult.isStarterPlan,
+          isFreePlan:
+            !clerkHasResult.isProPlan && !clerkHasResult.isStarterPlan,
+          planDetectionMethod: "clerk_has",
           isLoading: false,
           error: null,
           debugInfo: {
             clerkUserId: userId,
             userMetadata: userMetadataResult.metadata,
             hasChecks: clerkHasResult.checks,
-          }
+          },
         };
       } else {
-        console.log('⚠️ No plan detected, defaulting to Starter (free)');
+        console.log("⚠️ No plan detected, defaulting to Free plan");
         finalResult = {
           isProPlan: false,
-          isStarterPlan: true,
-          planDetectionMethod: 'fallback',
+          isStarterPlan: false,
+          isFreePlan: true,
+          planDetectionMethod: "fallback",
           isLoading: false,
           error: null,
           debugInfo: {
             clerkUserId: userId,
             userMetadata: userMetadataResult.metadata,
             hasChecks: clerkHasResult.checks,
-          }
+          },
         };
       }
-      console.log('🎯 SIMPLIFIED Plan Detection Result:', {
+      console.log("🎯 SIMPLIFIED Plan Detection Result:", {
         isProPlan: finalResult.isProPlan,
         method: finalResult.planDetectionMethod,
         userMetadata: userMetadataResult.metadata,
@@ -173,22 +218,22 @@ export function usePlanDetection(): PlanDetectionResult {
       });
       setResult(finalResult);
     } catch (error) {
-      console.error('❌ Plan Detection Error:', error);
-      setResult(prev => ({
+      console.error("❌ Plan Detection Error:", error);
+      setResult((prev) => ({
         ...prev,
         isLoading: false,
         error: `Plan detection failed: ${error}`,
-        planDetectionMethod: 'error'
+        planDetectionMethod: "error",
       }));
     }
   }, [user, userId, has]);
 
   useEffect(() => {
     if (!userId || !user) {
-      setResult(prev => ({
+      setResult((prev) => ({
         ...prev,
         isLoading: true,
-        planDetectionMethod: 'loading'
+        planDetectionMethod: "loading",
       }));
       return;
     }
@@ -197,4 +242,4 @@ export function usePlanDetection(): PlanDetectionResult {
   }, [userId, user, has, detectPlan]);
 
   return result;
-} 
+}
