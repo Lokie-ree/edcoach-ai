@@ -180,7 +180,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
   const { has } = useAuth();
 
   // Real AI feedback logic
-  const generateConsolidatedFeedback = useAction(api.aiFeedback.generateConsolidatedFeedback);
+  const generateAIFeedback = useAction(api.aiFeedback.generateAIFeedback);
   const handleAIFeedback = async () => {
     setAILoading(true);
     try {
@@ -234,9 +234,10 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
         }
       });
       
-      // Use consolidated feedback generation (1 API call instead of 2)
-      const feedbackResult = await generateConsolidatedFeedback({
+      // Use optimized AI feedback generation (single API call for both feedback types)
+      const feedbackResult = await generateAIFeedback({
         evidence,
+        mode: "both",
         reinforcementIndicator: {
           indicator_name: reinforcementIndicator.indicator_name,
           indicator_code: reinforcementIndicator.indicator_code,
@@ -256,7 +257,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
           student_centered_evidence: normalizeToString(refinementIndicator.student_centered_evidence),
         },
         hasProPlan,
-      });
+      }) as { reinforcement: string; refinement: string };
       setValue("walkthroughEntries", [
         {
           indicatorAcronym: reinforcementCode,
@@ -328,6 +329,17 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
         });
         return;
       }
+
+      // Check for PAID Pro plan only - free users get starter plan by default
+      const hasProPlan = (has?.({ plan: "coach_pro" }) ?? false) ||
+                        (has?.({ permission: "coach_pro" }) ?? false) ||
+                        (has?.({ role: "coach_pro" }) ?? false);
+      
+      console.log("🔍 Walkthrough submission plan check:", { 
+        hasProPlan,
+        finalPlan: hasProPlan ? "pro" : "starter_free",
+      });
+
       if (walkthroughId && draft) {
         // Update and finalize existing draft
         await updateWalkthrough({
@@ -350,6 +362,7 @@ export function WalkthroughForm({ walkthroughId, coachId: propCoachId }: { walkt
           refinementIndicator: data.refinementIndicator,
           evidenceSummary: data.evidenceSummary,
           walkthroughEntries: entries,
+          hasProPlan,
         });
       }
       toast({

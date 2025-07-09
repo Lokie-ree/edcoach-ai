@@ -168,7 +168,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen">
       <div className="container max-w-4xl mx-auto px-4 py-8">
         <PageHeader
           title={

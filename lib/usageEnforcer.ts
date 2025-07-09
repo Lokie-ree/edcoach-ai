@@ -8,14 +8,35 @@ import { usePlanDetection } from "./usePlanDetection";
  */
 export function useCanCreateWalkthrough() {
   const user = useQuery(api.users.current);
+  const planDetection = usePlanDetection();
 
-  if (!user) return { allowed: true };
+  // Use the walkthrough usage query from plans module with proper plan detection
+  const walkthroughUsage = useQuery(
+    api.plans.getAIUsageThisMonth,
+    user && user.role === "coach" && !planDetection.isLoading
+      ? {
+          hasProPlan: planDetection.isProPlan,
+          hasStarterPlan: planDetection.isStarterPlan,
+        }
+      : "skip",
+  );
+
+  if (!user || planDetection.isLoading) return { allowed: true };
 
   if (user.role !== "coach") {
     return { allowed: false, reason: "Only coaches can create walkthroughs" };
   }
 
-  return { allowed: true };
+  if (!walkthroughUsage) return { allowed: true };
+
+  const allowed = !walkthroughUsage.isOverLimit;
+
+  return {
+    allowed,
+    reason: allowed
+      ? undefined
+      : `Walkthrough limit reached (${walkthroughUsage.walkthroughsLimit})`,
+  };
 }
 
 /**

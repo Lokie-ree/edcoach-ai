@@ -16,6 +16,8 @@ export const inviteTeacher = action({
     teacherName: v.string(),
     subject: v.optional(v.string()),
     gradeBand: v.optional(v.string()),
+    hasProPlan: v.optional(v.boolean()),
+    hasStarterPlan: v.optional(v.boolean()),
   },
   returns: v.object({
     success: v.boolean(),
@@ -28,6 +30,8 @@ export const inviteTeacher = action({
       teacherName: string;
       subject?: string;
       gradeBand?: string;
+      hasProPlan?: boolean;
+      hasStarterPlan?: boolean;
     },
   ): Promise<{ success: boolean; message: string }> => {
     const identity = await ctx.auth.getUserIdentity();
@@ -55,22 +59,16 @@ export const inviteTeacher = action({
       };
     }
 
-    // Check teacher usage limit using the new system
-    // Get teachers assigned to this coach (excluding pending ones)
-    const teachers = await ctx.runQuery(internal.teachers.internalListByCoach, {
-      coachId: coach._id,
+    // Check teacher usage limit using proper plan detection
+    const teacherUsage = await ctx.runQuery(api.plans.getTeacherUsage, {
+      hasProPlan: args.hasProPlan,
+      hasStarterPlan: args.hasStarterPlan,
     });
 
-    // Filter out pending teachers (they don't count toward limits)
-    const activeTeachers = teachers.filter((t) => t.status !== "pending");
-
-    // Basic limit check - assume free plan (1 teacher) for backend enforcement
-    // Frontend will do proper plan-based checking with actual plan detection
-    const basicLimit = 1; // Free plan limit
-    if (activeTeachers.length >= basicLimit) {
+    if (teacherUsage.isOverLimit) {
       return {
         success: false,
-        message: `You have reached your teacher limit (${basicLimit}) for your plan. Upgrade for more.`,
+        message: `You have reached your teacher limit (${teacherUsage.teacherLimit}) for your plan. Upgrade for more.`,
       };
     }
 

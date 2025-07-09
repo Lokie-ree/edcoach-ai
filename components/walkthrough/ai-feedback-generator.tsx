@@ -40,7 +40,7 @@ export function AIFeedbackGenerator({
   const [generatedFeedback, setGeneratedFeedback] = useState<string>("");
   
   const { has } = useAuth();
-  const generateFeedback = useAction(api.aiFeedback.generateFeedback);
+  const generateAIFeedback = useAction(api.aiFeedback.generateAIFeedback);
   const usageInfo = useQuery(api.users.checkAIUsageLimit);
 
   const handleGenerate = async () => {
@@ -79,9 +79,10 @@ export function AIFeedbackGenerator({
         }
       });
       
-      const feedback = await generateFeedback({
+      const feedback = await generateAIFeedback({
         evidence,
-        indicator: {
+        mode: promptType,
+        [promptType === "reinforcement" ? "reinforcementIndicator" : "refinementIndicator"]: {
           indicator_name: indicator.indicator_name,
           indicator_code: indicator.indicator_code,
           overview: indicator.overview,
@@ -90,9 +91,8 @@ export function AIFeedbackGenerator({
           development_evidence: indicator.development_evidence,
           student_centered_evidence: indicator.student_centered_evidence,
         },
-        promptType,
         hasProPlan,
-      });
+      }) as string;
 
       setGeneratedFeedback(feedback);
       onFeedbackGenerated(feedback);

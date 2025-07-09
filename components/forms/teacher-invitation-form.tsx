@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { UserPlus, Mail, Loader2 } from "lucide-react";
 import { useCanInviteTeacher } from "@/lib/usageEnforcer";
+import { useAuth } from "@clerk/nextjs";
 import {
   Select,
   SelectContent,
@@ -66,6 +67,7 @@ export function TeacherInvitationForm({
   onSuccess,
 }: TeacherInvitationFormProps) {
   const [open, setOpen] = useState(false);
+  const { has } = useAuth();
   // Updated to use the new simplified action
   const sendInvitation = useAction(api.invitations.inviteTeacher);
 
@@ -99,11 +101,22 @@ export function TeacherInvitationForm({
       return;
     }
     try {
+      // Check for PAID Pro plan only - free users get starter plan by default
+      const hasProPlan = (has?.({ plan: "coach_pro" }) ?? false) ||
+                        (has?.({ permission: "coach_pro" }) ?? false) ||
+                        (has?.({ role: "coach_pro" }) ?? false);
+      
+      console.log("🔍 Teacher invitation plan check:", { 
+        hasProPlan,
+        finalPlan: hasProPlan ? "pro" : "starter_free",
+      });
+
       const result = await sendInvitation({
         teacherEmail: values.teacherEmail,
         teacherName: values.teacherName,
         subject: values.subject,
         gradeBand: values.gradeBand,
+        hasProPlan,
       });
 
       if (result.success) {

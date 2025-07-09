@@ -17,6 +17,8 @@ export const createWalkthroughAndEntries = mutation({
         aiFeedback: v.optional(v.string()),
       }),
     ),
+    hasProPlan: v.optional(v.boolean()),
+    hasStarterPlan: v.optional(v.boolean()),
   },
   returns: v.id("walkthroughs"),
   handler: async (ctx, args) => {
@@ -38,13 +40,14 @@ export const createWalkthroughAndEntries = mutation({
     if (user.role !== "coach") {
       throw new Error("Only coaches can create walkthroughs");
     }
-    // Check walkthrough usage limit
-    const usageCheck = await ctx.runQuery(api.usage.checkUsageLimit, {
-      type: "walkthrough",
+    // Check walkthrough usage limit using proper plan detection
+    const usageCheck = await ctx.runQuery(api.plans.getAIUsageThisMonth, {
+      hasProPlan: args.hasProPlan,
+      hasStarterPlan: args.hasStarterPlan,
     });
-    if (!usageCheck.canPerformAction) {
+    if (usageCheck.isOverLimit) {
       throw new Error(
-        `You have reached your monthly walkthrough limit (${usageCheck.limit}) for your plan. Upgrade for more.`,
+        `You have reached your monthly walkthrough limit (${usageCheck.walkthroughsLimit}) for your plan. Upgrade for more.`,
       );
     }
 

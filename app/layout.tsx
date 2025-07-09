@@ -6,6 +6,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 import AppLayout from "@/components/layout/AppLayout";
+import { dark } from "@clerk/themes";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -81,6 +82,7 @@ export default function RootLayout({
     <ClerkProvider
       appearance={{
         cssLayerName: 'clerk',
+        baseTheme: dark,
       }}
     >
       <html lang="en" suppressHydrationWarning>

@@ -39,12 +39,10 @@ export const upsertUser = internalMutation({
       `🔍 upsertUser: Processing user ${data.id} with email ${email}`,
     );
 
-    const existingUser = await ctx.runQuery(
-      internal.users.internalGetUserByClerkId,
-      {
-        clerkId: data.id,
-      },
-    );
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", data.id))
+      .unique();
 
     const userAttributes = {
       clerkId: data.id,
@@ -137,9 +135,10 @@ export const upsertUser = internalMutation({
 export const deleteUser = internalMutation({
   args: { clerkUserId: v.string() },
   handler: async (ctx, { clerkUserId }) => {
-    const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, {
-      clerkId: clerkUserId,
-    });
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkUserId))
+      .unique();
     if (user !== null) {
       await ctx.db.delete(user._id);
     }
@@ -213,3 +212,5 @@ export const handleOrganizationCreated = internalMutation({
     }
   },
 });
+
+
