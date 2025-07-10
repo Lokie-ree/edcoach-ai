@@ -6,7 +6,7 @@ import HowItWorksSection from "@/components/sections/HowItWorks";
 import Pricing from "@/components/sections/pricing";
 import TestimonialsSection from "@/components/sections/Testimonials";
 import FAQSection from "@/components/sections/Faq";
-import Footer from "@/components/sections/footer";
+import Footer from "@/components/sections/Footer";
 import CTASection from "@/components/sections/Cta";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
