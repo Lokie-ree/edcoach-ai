@@ -15,7 +15,6 @@
   "dependencies": {
     "@clerk/backend": "^2.3.1",
     "@clerk/clerk-react": "^5.32.3",
-    "@clerk/clerk-sdk-node": "^5.1.6",
     "@clerk/nextjs": "^6.23.2",
     "@clerk/themes": "^2.2.55",
     "@convex-dev/resend": "0.1.2-beta.2",
