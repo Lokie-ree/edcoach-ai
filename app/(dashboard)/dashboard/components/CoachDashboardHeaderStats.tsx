@@ -8,7 +8,7 @@ import {
   AIUsageBadge,
   TeacherUsageBadge,
 } from "@/components/ui/ai-usage-badge";
-import QuickActionsPanel from "./QuickActionsPanel";
+import QuickActionsPanel from "@/app/(dashboard)/dashboard/components/QuickActionsPanel";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import type { AIUsage } from "@/components/ui/ai-usage-badge";
 import { usePlanDetection } from "@/lib/usePlanDetection";

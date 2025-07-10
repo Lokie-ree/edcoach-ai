@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { ConvexUser, ClerkUser } from "../types";
-import TeacherStatusOverview from "./TeacherStatusOverview";
-import RecentFeedbackHighlights from "./RecentFeedbackHighlights";
+import { ConvexUser, ClerkUser } from "@/app/(dashboard)/dashboard/components/types";
+import TeacherStatusOverview from "@/app/(dashboard)/dashboard/components/TeacherStatusOverview";
+import RecentFeedbackHighlights from "@/app/(dashboard)/dashboard/components/RecentFeedbackHighlights";
 import { AIUsageWarning } from "@/components/ui/ai-usage-badge";
-import CoachTutorial from "@/components/onboarding/coach-tutorial";
+import CoachTutorial from "@/app/onboarding/components/coach-tutorial";
 import { motion } from "framer-motion";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";

@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import InvitePageContent from "./InvitePageContent";
+import InvitePageContent from "./components/InvitePageContent";
 
 export default function InvitePage() {
   return (

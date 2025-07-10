@@ -6,9 +6,9 @@ import { Loader2 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import TeacherDashboardPageContent from "./components/TeacherDashboardPageContent";
-import CoachDashboardPageContent from "./components/CoachDashboardPageContent";
-import GridDistortion from "./components/GridDistortion";
+import TeacherDashboardPageContent from "@/app/(dashboard)/dashboard/components/TeacherDashboardPageContent";
+import CoachDashboardPageContent from "@/app/(dashboard)/dashboard/components/CoachDashboardPageContent";
+import GridDistortion from "@/app/(dashboard)/dashboard/components/GridDistortion";
 
 // Main Dashboard Component
 export default function DashboardPage() {

@@ -20,8 +20,8 @@ import { useQuery } from "convex/react";
 import { getIndicatorName } from "@/lib/indicator-utils";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { ConvexUser, TeacherRecord, ClerkUser } from "../types";
-import TeacherTutorial from "@/components/onboarding/teacher-tutorial";
+import { ConvexUser, TeacherRecord, ClerkUser } from "@/app/(dashboard)/dashboard/components/types";
+import TeacherTutorial from "@/app/onboarding/components/teacher-tutorial";
 import { Button } from "@/components/ui/button";
 
 interface TeacherDashboardPageContentProps {

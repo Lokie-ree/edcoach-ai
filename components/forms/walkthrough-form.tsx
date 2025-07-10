@@ -4,7 +4,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useUser, useAuth } from "@clerk/nextjs";
-import { walkthroughSchema } from "@/app/walkthrough/new/validation";
+import { walkthroughSchema } from "@/app/(dashboard)/walkthrough/new/validation";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
