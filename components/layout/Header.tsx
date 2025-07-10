@@ -4,7 +4,7 @@ import Link from "next/link";
 import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import MaxWidthWrapper from "@/components/layout/MaxWidthWrapper";
-import { Logo } from "@/components/logo";
+import { Logo } from "@/components/shared/logo";
 
 const Header = () => {
   return (

@@ -305,3 +305,414 @@ export const getMyTeacherAnalytics = query({
     };
   },
 });
+
+/**
+ * Get comprehensive analytics for the current coach.
+ * Returns all data needed by the analytics dashboard frontend.
+ */
+export const getComprehensiveCoachAnalytics = query({
+  args: {},
+  returns: v.object({
+    // Overview metrics
+    totalTeachers: v.number(),
+    activeTeachers: v.number(),
+    totalWalkthroughs: v.number(),
+    thisMonthWalkthroughs: v.number(),
+    completedWalkthroughs: v.number(),
+    draftWalkthroughs: v.number(),
+    totalAiFeedbackGenerated: v.number(),
+    
+    // Feedback metrics
+    totalFeedbackInteractions: v.number(),
+    teachersWithRecentActivity: v.number(),
+    reinforcementCount: v.number(),
+    refinementCount: v.number(),
+    
+    // Quick insights for basic plan
+    topStrengths: v.array(v.object({
+      indicator: v.string(),
+      indicatorName: v.string(),
+      count: v.number(),
+    })),
+    topGrowthAreas: v.array(v.object({
+      indicator: v.string(),
+      indicatorName: v.string(),
+      count: v.number(),
+    })),
+    
+    // Pro analytics features
+    domainPerformance: v.array(v.object({
+      domain: v.string(),
+      reinforcementCount: v.number(),
+      refinementCount: v.number(),
+      totalCount: v.number(),
+      strengthPercentage: v.number(),
+    })),
+    teacherProgressMatrix: v.array(v.object({
+      teacherId: v.string(),
+      teacherName: v.string(),
+      domainScores: v.array(v.object({
+        domain: v.string(),
+        status: v.union(v.literal("strength"), v.literal("developing"), v.literal("needs_focus")),
+        reinforcementCount: v.number(),
+        refinementCount: v.number(),
+      })),
+      lastObservation: v.optional(v.number()),
+    })),
+    coachingInsights: v.array(v.object({
+      type: v.string(),
+      title: v.string(),
+      description: v.string(),
+      priority: v.union(v.literal("high"), v.literal("medium"), v.literal("low")),
+    })),
+    
+    // Teacher progress data
+    teacherProgress: v.array(v.object({
+      teacherId: v.string(),
+      teacherName: v.string(),
+      totalWalkthroughs: v.number(),
+      completedWalkthroughs: v.number(),
+      draftWalkthroughs: v.number(),
+      lastObservation: v.optional(v.number()),
+      completionRate: v.number(),
+      recentFeedbackCount: v.number(),
+    })),
+    
+    // Monthly trends
+    monthlyTrends: v.array(v.object({
+      month: v.string(),
+      completed: v.number(),
+      draft: v.number(),
+      total: v.number(),
+    })),
+    
+
+  }),
+  handler: async (ctx) => {
+    const user = await getCurrentUserOrThrow(ctx);
+    if (user.role !== "coach") {
+      throw new Error("Only coaches can view analytics");
+    }
+
+    // Get teachers assigned to this specific coach
+    const teachers = await ctx.db
+      .query("teachers")
+      .withIndex("by_coach", (q) => q.eq("coachId", user._id))
+      .collect();
+    
+    const teacherIds = teachers.map(t => t._id);
+    const totalTeachers = teachers.length;
+    const activeTeachers = teachers.filter(t => t.status === "active").length;
+
+    // Get all walkthroughs for coach's teachers
+    const allWalkthroughs = await ctx.db
+      .query("walkthroughs")
+      .collect();
+    
+    const coachWalkthroughs = allWalkthroughs.filter(w => 
+      teacherIds.includes(w.teacherId)
+    );
+
+    // Basic walkthrough metrics
+    const totalWalkthroughs = coachWalkthroughs.length;
+    const completedWalkthroughs = coachWalkthroughs.filter(w => w.status === "completed").length;
+    const draftWalkthroughs = coachWalkthroughs.filter(w => w.status === "draft").length;
+
+    // This month's walkthroughs
+    const now = new Date();
+    const thisMonth = now.getMonth();
+    const thisYear = now.getFullYear();
+    const thisMonthWalkthroughs = coachWalkthroughs.filter(w => {
+      const walkDate = new Date(w.walkthroughDate);
+      return walkDate.getMonth() === thisMonth && walkDate.getFullYear() === thisYear;
+    }).length;
+
+    // Get all AI feedback for coach's walkthroughs
+    const allAiFeedback = await ctx.db
+      .query("aiFeedback")
+      .collect();
+    
+    const coachFeedback = allAiFeedback.filter(feedback => 
+      coachWalkthroughs.some(w => w._id === feedback.walkthroughId)
+    );
+
+    const totalFeedbackInteractions = coachFeedback.length;
+    const totalAiFeedbackGenerated = totalFeedbackInteractions;
+    
+    // Calculate teachers with recent activity (last 30 days)
+    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    const teachersWithRecentActivity = teachers.filter(teacher => {
+      const teacherWalkthroughs = coachWalkthroughs.filter(w => w.teacherId === teacher._id);
+      return teacherWalkthroughs.some(w => w.createdAt > thirtyDaysAgo);
+    }).length;
+
+    // Get all indicators to map codes to names and domains
+    const allIndicators = await ctx.db.query("rubricIndicators").collect();
+    const indicatorMap = allIndicators.reduce((map, ind) => {
+      map[ind.indicator_code] = {
+        name: ind.indicator_name,
+        domain: ind.domain
+      };
+      return map;
+    }, {} as Record<string, { name: string; domain: string }>);
+
+    // Indicator analysis
+    const reinforcementCounts: Record<string, number> = {};
+    const refinementCounts: Record<string, number> = {};
+    let reinforcementCount = 0;
+    let refinementCount = 0;
+
+    coachWalkthroughs.forEach(w => {
+      if (w.reinforcementIndicator) {
+        reinforcementCounts[w.reinforcementIndicator] = (reinforcementCounts[w.reinforcementIndicator] || 0) + 1;
+        reinforcementCount++;
+      }
+      if (w.refinementIndicator) {
+        refinementCounts[w.refinementIndicator] = (refinementCounts[w.refinementIndicator] || 0) + 1;
+        refinementCount++;
+      }
+    });
+
+    // Quick insights for basic plan
+    const topStrengths = Object.entries(reinforcementCounts)
+      .map(([indicator, count]) => ({
+        indicator,
+        indicatorName: indicatorMap[indicator]?.name || indicator,
+        count
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+
+    const topGrowthAreas = Object.entries(refinementCounts)
+      .map(([indicator, count]) => ({
+        indicator,
+        indicatorName: indicatorMap[indicator]?.name || indicator,
+        count
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+
+    // Domain performance analysis
+    const domainCounts: Record<string, { reinforcement: number; refinement: number }> = {};
+    
+    // Initialize domain counts (use ALL CAPS to match database values)
+    const domains = ["INSTRUCTION", "PLANNING", "ENVIRONMENT", "PROFESSIONALISM"];
+    domains.forEach(domain => {
+      domainCounts[domain] = { reinforcement: 0, refinement: 0 };
+    });
+
+    // Count by domain
+    coachWalkthroughs.forEach(w => {
+      if (w.reinforcementIndicator && indicatorMap[w.reinforcementIndicator]) {
+        const domain = indicatorMap[w.reinforcementIndicator].domain;
+        domainCounts[domain].reinforcement++;
+      }
+      if (w.refinementIndicator && indicatorMap[w.refinementIndicator]) {
+        const domain = indicatorMap[w.refinementIndicator].domain;
+        domainCounts[domain].refinement++;
+      }
+    });
+
+    const domainPerformance = domains.map(domain => {
+      const reinforcementCount = domainCounts[domain].reinforcement;
+      const refinementCount = domainCounts[domain].refinement;
+      const totalCount = reinforcementCount + refinementCount;
+      const strengthPercentage = totalCount > 0 ? Math.round((reinforcementCount / totalCount) * 100) : 0;
+      
+      return {
+        domain,
+        reinforcementCount,
+        refinementCount,
+        totalCount,
+        strengthPercentage,
+      };
+    });
+
+    // Teacher progress matrix for heatmap
+    const teacherProgressMatrix = teachers.map(teacher => {
+      const teacherWalkthroughs = coachWalkthroughs.filter(w => w.teacherId === teacher._id);
+      const lastObservation = teacherWalkthroughs.length > 0 ? 
+        Math.max(...teacherWalkthroughs.map(w => w.createdAt)) : undefined;
+
+      // Calculate domain scores for this teacher
+      const teacherDomainCounts: Record<string, { reinforcement: number; refinement: number }> = {};
+      domains.forEach(domain => {
+        teacherDomainCounts[domain] = { reinforcement: 0, refinement: 0 };
+      });
+
+      teacherWalkthroughs.forEach(w => {
+        if (w.reinforcementIndicator && indicatorMap[w.reinforcementIndicator]) {
+          const domain = indicatorMap[w.reinforcementIndicator].domain;
+          teacherDomainCounts[domain].reinforcement++;
+        }
+        if (w.refinementIndicator && indicatorMap[w.refinementIndicator]) {
+          const domain = indicatorMap[w.refinementIndicator].domain;
+          teacherDomainCounts[domain].refinement++;
+        }
+      });
+
+      const domainScores = domains.map(domain => {
+        const reinforcementCount = teacherDomainCounts[domain].reinforcement;
+        const refinementCount = teacherDomainCounts[domain].refinement;
+        const total = reinforcementCount + refinementCount;
+        
+        let status: "strength" | "developing" | "needs_focus";
+        if (total === 0) {
+          status = "developing"; // No data yet
+        } else if (reinforcementCount > refinementCount) {
+          status = "strength";
+        } else if (reinforcementCount === refinementCount) {
+          status = "developing";
+        } else {
+          status = "needs_focus";
+        }
+
+        return {
+          domain,
+          status,
+          reinforcementCount,
+          refinementCount,
+        };
+      });
+
+      return {
+        teacherId: teacher._id,
+        teacherName: teacher.name,
+        domainScores,
+        lastObservation,
+      };
+    });
+
+    // Coaching insights
+    const coachingInsights = [];
+    
+    // Identify team-wide domain weaknesses
+    const weakDomains = domainPerformance
+      .filter(dp => dp.totalCount > 0 && dp.strengthPercentage < 40)
+      .sort((a, b) => a.strengthPercentage - b.strengthPercentage);
+
+    if (weakDomains.length > 0) {
+      coachingInsights.push({
+        type: "team_weakness",
+        title: `Team Focus Area: ${weakDomains[0].domain}`,
+        description: `Only ${weakDomains[0].strengthPercentage}% of feedback in ${weakDomains[0].domain} shows strengths. Consider team PD.`,
+        priority: "high" as const,
+      });
+    }
+
+    // Identify teachers needing attention
+    const inactiveTeachers = teacherProgressMatrix.filter(tp => 
+      !tp.lastObservation || tp.lastObservation < (Date.now() - 21 * 24 * 60 * 60 * 1000)
+    );
+
+    if (inactiveTeachers.length > 0) {
+      coachingInsights.push({
+        type: "inactive_teachers",
+        title: "Schedule Follow-up Observations",
+        description: `${inactiveTeachers.length} teacher${inactiveTeachers.length > 1 ? 's have' : ' has'} not been observed recently.`,
+        priority: "medium" as const,
+      });
+    }
+
+    // Success pattern analysis
+    const strongDomains = domainPerformance
+      .filter(dp => dp.totalCount > 0 && dp.strengthPercentage > 70)
+      .sort((a, b) => b.strengthPercentage - a.strengthPercentage);
+
+    if (strongDomains.length > 0) {
+      coachingInsights.push({
+        type: "team_strength",
+        title: `Team Strength: ${strongDomains[0].domain}`,
+        description: `${strongDomains[0].strengthPercentage}% strength rate. Consider peer mentoring opportunities.`,
+        priority: "low" as const,
+      });
+    }
+
+    // Teacher progress data
+    const teacherProgress = [];
+    for (const teacher of teachers) {
+      const teacherWalkthroughs = coachWalkthroughs.filter(w => w.teacherId === teacher._id);
+      const teacherCompleted = teacherWalkthroughs.filter(w => w.status === "completed").length;
+      const teacherDraft = teacherWalkthroughs.filter(w => w.status === "draft").length;
+      const teacherCompletionRate = teacherWalkthroughs.length > 0 ? 
+        Math.round((teacherCompleted / teacherWalkthroughs.length) * 100) : 0;
+      
+      const lastObservation = teacherWalkthroughs.length > 0 ? 
+        Math.max(...teacherWalkthroughs.map(w => w.createdAt)) : undefined;
+      
+      const teacherFeedbackCount = coachFeedback.filter(feedback => 
+        teacherWalkthroughs.some(w => w._id === feedback.walkthroughId)
+      ).length;
+
+      teacherProgress.push({
+        teacherId: teacher._id,
+        teacherName: teacher.name,
+        totalWalkthroughs: teacherWalkthroughs.length,
+        completedWalkthroughs: teacherCompleted,
+        draftWalkthroughs: teacherDraft,
+        lastObservation,
+        completionRate: teacherCompletionRate,
+        recentFeedbackCount: teacherFeedbackCount,
+      });
+    }
+
+    // Monthly trends (last 6 months)
+    const monthlyTrends = [];
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const month = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      const monthNumber = date.getMonth();
+      const year = date.getFullYear();
+      
+      const monthWalkthroughs = coachWalkthroughs.filter(w => {
+        const walkDate = new Date(w.walkthroughDate);
+        return walkDate.getMonth() === monthNumber && walkDate.getFullYear() === year;
+      });
+      
+      const completed = monthWalkthroughs.filter(w => w.status === "completed").length;
+      const draft = monthWalkthroughs.filter(w => w.status === "draft").length;
+      
+      monthlyTrends.push({
+        month,
+        completed,
+        draft,
+        total: completed + draft,
+      });
+    }
+
+
+
+          return {
+        // Overview metrics
+        totalTeachers,
+        activeTeachers,
+        totalWalkthroughs,
+        thisMonthWalkthroughs,
+        completedWalkthroughs,
+        draftWalkthroughs,
+        totalAiFeedbackGenerated,
+        
+        // Feedback metrics
+        totalFeedbackInteractions,
+        teachersWithRecentActivity,
+        reinforcementCount,
+        refinementCount,
+        
+        // Quick insights for basic plan
+        topStrengths,
+        topGrowthAreas,
+        
+        // Pro analytics features
+        domainPerformance,
+        teacherProgressMatrix,
+        coachingInsights,
+        
+        // Teacher progress data
+        teacherProgress,
+        
+        // Monthly trends
+        monthlyTrends,
+      };
+  },
+});

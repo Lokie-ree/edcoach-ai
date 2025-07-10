@@ -1,4 +1,4 @@
-import Header from "@/components/sections/header";
+import Header from "@/components/layout/header";
 import MaxWidthWrapper from "@/components/layout/MaxWidthWrapper";
 
 export default function AppLayout({

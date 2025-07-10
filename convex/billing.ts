@@ -3,33 +3,6 @@ import { v } from "convex/values";
 import { action, internalMutation } from "./_generated/server";
 
 /**
- * Auto-assign starter plan to new users
- * This should be called during onboarding or when needed
- */
-export const ensureStarterPlan = action({
-  args: {},
-  returns: v.object({
-    success: v.boolean(),
-    message: v.string(),
-  }),
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    // For now, we'll rely on frontend checks and default behavior
-    // In a future implementation, you could use Clerk's backend API to assign plans
-    // Example: const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
-
-    return {
-      success: true,
-      message: "User defaults to starter plan - no action needed",
-    };
-  },
-});
-
-/**
  * Get user's current plan limits based on Clerk billing subscription
  * This action can access Clerk's auth context and check plan features
  */

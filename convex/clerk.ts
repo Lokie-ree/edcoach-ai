@@ -1,8 +1,6 @@
 // convex/clerk.ts
 import { v } from "convex/values";
 import { internalMutation } from "./_generated/server";
-import { internal } from "./_generated/api";
-import { Doc } from "./_generated/dataModel";
 
 // --- TYPE-SAFE WEBHOOK VALIDATORS ---
 

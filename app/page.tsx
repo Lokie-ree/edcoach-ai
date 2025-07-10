@@ -1,13 +1,13 @@
 "use client";
 
-import HeroSection from "@/components/sections/hero-section";
-import FeaturesSection from "@/components/sections/features-section";
-import HowItWorksSection from "@/components/sections/how-it-works-section";
+import HeroSection from "@/components/sections/Hero";
+import FeaturesSection from "@/components/sections/Features";
+import HowItWorksSection from "@/components/sections/HowItWorks";
 import Pricing from "@/components/sections/pricing";
 import TestimonialsSection from "@/components/sections/testimonials-section";
-import FAQSection from "@/components/sections/faq-section";
+import FAQSection from "@/components/sections/Faq";
 import Footer from "@/components/sections/footer";
-import CTASection from "@/components/sections/cta-section";
+import CTASection from "@/components/sections/Cta";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";

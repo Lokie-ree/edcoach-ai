@@ -4,9 +4,7 @@ import React from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getIndicatorName } from "@/lib/indicator-utils";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { motion } from "framer-motion";
 import { 
@@ -14,11 +12,7 @@ import {
   Calendar, 
   Target, 
   MessageSquare, 
-  AlertCircle,
-  Clock,
   TrendingUp,
-  CheckCircle2,
-  FileText,
   ArrowRight,
   BarChart3,
   PieChart,
@@ -31,7 +25,35 @@ import Link from "next/link";
 // Define proper types based on Convex analytics return types
 interface IndicatorCount {
   indicator: string;
+  indicatorName: string;
   count: number;
+}
+
+interface DomainPerformance {
+  domain: string;
+  reinforcementCount: number;
+  refinementCount: number;
+  totalCount: number;
+  strengthPercentage: number;
+}
+
+interface TeacherProgressMatrix {
+  teacherId: string;
+  teacherName: string;
+  domainScores: Array<{
+    domain: string;
+    status: "strength" | "developing" | "needs_focus";
+    reinforcementCount: number;
+    refinementCount: number;
+  }>;
+  lastObservation?: number;
+}
+
+interface CoachingInsight {
+  type: string;
+  title: string;
+  description: string;
+  priority: "high" | "medium" | "low";
 }
 
 interface TeacherProgress {
@@ -52,15 +74,6 @@ interface MonthlyTrend {
   total: number;
 }
 
-interface ActionItem {
-  type: string;
-  priority: string;
-  title: string;
-  description: string;
-  teacherId?: string;
-  teacherName?: string;
-}
-
 interface AnalyticsData {
   // Overview metrics
   totalTeachers: number;
@@ -69,63 +82,32 @@ interface AnalyticsData {
   thisMonthWalkthroughs: number;
   completedWalkthroughs: number;
   draftWalkthroughs: number;
-  completionRate: number;
+  totalAiFeedbackGenerated: number;
   
   // Feedback metrics
   totalFeedbackInteractions: number;
-  avgFeedbackPerTeacherPerMonth: number;
+  teachersWithRecentActivity: number;
   reinforcementCount: number;
   refinementCount: number;
   
-  // Indicator analysis
-  topReinforcementIndicators: IndicatorCount[];
-  topRefinementIndicators: IndicatorCount[];
+  // Quick insights for basic plan
+  topStrengths: IndicatorCount[];
+  topGrowthAreas: IndicatorCount[];
   
-  // Teacher progress data
+  // Pro analytics features
+  domainPerformance: DomainPerformance[];
+  teacherProgressMatrix: TeacherProgressMatrix[];
+  coachingInsights: CoachingInsight[];
+  
+  // Teacher progress data (legacy - keeping for now)
   teacherProgress: TeacherProgress[];
   
-  // Monthly trends
+  // Monthly trends (legacy - keeping for now)
   monthlyTrends: MonthlyTrend[];
-  
-  // Action items
-  actionItems: ActionItem[];
 }
 
-// Type for getCoachAnalytics result
-interface CoachAnalyticsResult {
-  totalTeachers: number;
-  activeTeachers: number;
-  totalWalkthroughs: number;
-  totalFeedbackGenerated: number;
-  recentWalkthroughs: Array<{
-    _id: string;
-    createdAt: number;
-    teacherName: string;
-    hasAiFeedback: boolean;
-  }>;
-}
-
-// Helper to map getCoachAnalytics result to AnalyticsData
-function mapCoachAnalyticsToAnalyticsData(data: CoachAnalyticsResult): AnalyticsData {
-  return {
-    totalTeachers: data.totalTeachers,
-    activeTeachers: data.activeTeachers,
-    totalWalkthroughs: data.totalWalkthroughs,
-    thisMonthWalkthroughs: 0, // Default or calculate if possible
-    completedWalkthroughs: 0, // Default or calculate if possible
-    draftWalkthroughs: 0, // Default or calculate if possible
-    completionRate: 0, // Default or calculate if possible
-    totalFeedbackInteractions: data.totalFeedbackGenerated ?? 0,
-    avgFeedbackPerTeacherPerMonth: 0, // Default or calculate if possible
-    reinforcementCount: 0, // Default or calculate if possible
-    refinementCount: 0, // Default or calculate if possible
-    topReinforcementIndicators: [],
-    topRefinementIndicators: [],
-    teacherProgress: [],
-    monthlyTrends: [],
-    actionItems: [],
-  };
-}
+// The new comprehensive analytics function returns data in the correct format
+// so we don't need any mapping - we can use AnalyticsData directly
 
 // Overview Metrics Cards
 const OverviewMetrics = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
@@ -163,16 +145,16 @@ const OverviewMetrics = ({ analytics }: { analytics: AnalyticsData | null | unde
       color: "text-blue-600",
     },
     {
-      title: "Completion Rate",
-      value: `${analytics.completionRate}%`,
-      subtitle: "Walkthroughs completed",
+      title: "AI Feedback Generated",
+      value: analytics.totalAiFeedbackGenerated,
+      subtitle: "Total responses",
       icon: Target,
       color: "text-green-600",
     },
     {
-      title: "Avg Feedback/Teacher",
-      value: analytics.avgFeedbackPerTeacherPerMonth,
-      subtitle: "Per month",
+      title: "Recent Activity",
+      value: `${analytics.teachersWithRecentActivity}/${analytics.totalTeachers}`,
+      subtitle: "Teachers active (30 days)",
       icon: MessageSquare,
       color: "text-purple-600",
     },
@@ -207,8 +189,93 @@ const OverviewMetrics = ({ analytics }: { analytics: AnalyticsData | null | unde
   );
 };
 
-// Feedback Analysis Section
-const FeedbackAnalysis = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
+// Quick Insights Section for Basic Plan
+const QuickInsights = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
+  if (!analytics) {
+    return (
+      <Card className="animate-pulse">
+        <CardHeader>
+          <div className="h-6 bg-gray-200 rounded w-32"></div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="h-24 bg-gray-200 rounded"></div>
+            <div className="h-24 bg-gray-200 rounded"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Quick Insights
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Team Strengths */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
+                <Crown className="h-4 w-4" />
+                Top Team Strengths
+              </h4>
+              {analytics.topStrengths.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No reinforcement data yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {analytics.topStrengths.map((strength) => (
+                    <div key={strength.indicator} className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium">{strength.indicatorName}</span>
+                        <span className="text-xs text-muted-foreground ml-2">({strength.indicator})</span>
+                      </div>
+                      <span className="text-sm font-bold text-green-600">{strength.count}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Growth Areas */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-orange-700 dark:text-orange-300 flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                Focus Areas
+              </h4>
+              {analytics.topGrowthAreas.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No refinement data yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {analytics.topGrowthAreas.map((area) => (
+                    <div key={area.indicator} className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium">{area.indicatorName}</span>
+                        <span className="text-xs text-muted-foreground ml-2">({area.indicator})</span>
+                      </div>
+                      <span className="text-sm font-bold text-orange-600">{area.count}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+};
+
+// Domain Performance Chart - Pro Feature
+const DomainPerformanceChart = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
   if (!analytics) {
     return (
       <div className="grid gap-4 md:grid-cols-2">
@@ -325,26 +392,26 @@ const FeedbackAnalysis = ({ analytics }: { analytics: AnalyticsData | null | und
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
+                      <div className="space-y-6">
             <div>
               <h4 className="text-sm font-medium mb-3 text-green-700 dark:text-green-400">
-                Most Reinforced
+                Top Strengths
               </h4>
-              {analytics.topReinforcementIndicators.length === 0 ? (
+              {analytics.topStrengths.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No data yet</p>
               ) : (
                 <div className="space-y-2">
-                  {analytics.topReinforcementIndicators.slice(0, 3).map((item) => (
+                  {analytics.topStrengths.slice(0, 3).map((item) => (
                     <div key={item.indicator} className="flex items-center justify-between">
-                      <span className="text-sm truncate flex-1 mr-2" title={getIndicatorName(item.indicator)}>
-                        {getIndicatorName(item.indicator)}
+                      <span className="text-sm truncate flex-1 mr-2" title={item.indicatorName}>
+                        {item.indicatorName}
                       </span>
                       <div className="flex items-center gap-2">
                         <div className="w-12 bg-gray-200 rounded-full h-2">
                           <div 
                             className="bg-green-500 h-2 rounded-full transition-all"
                             style={{ 
-                              width: `${(item.count / Math.max(...analytics.topReinforcementIndicators.map((i) => i.count))) * 100}%` 
+                              width: `${(item.count / Math.max(...analytics.topStrengths.map((i) => i.count))) * 100}%` 
                             }}
                           ></div>
                         </div>
@@ -357,24 +424,24 @@ const FeedbackAnalysis = ({ analytics }: { analytics: AnalyticsData | null | und
             </div>
 
             <div>
-              <h4 className="text-sm font-medium mb-3 text-blue-700 dark:text-blue-400">
-                Most Refined
+              <h4 className="text-sm font-medium mb-3 text-orange-700 dark:text-orange-400">
+                Focus Areas
               </h4>
-              {analytics.topRefinementIndicators.length === 0 ? (
+              {analytics.topGrowthAreas.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No data yet</p>
               ) : (
                 <div className="space-y-2">
-                  {analytics.topRefinementIndicators.slice(0, 3).map((item) => (
+                  {analytics.topGrowthAreas.slice(0, 3).map((item) => (
                     <div key={item.indicator} className="flex items-center justify-between">
-                      <span className="text-sm truncate flex-1 mr-2" title={getIndicatorName(item.indicator)}>
-                        {getIndicatorName(item.indicator)}
+                      <span className="text-sm truncate flex-1 mr-2" title={item.indicatorName}>
+                        {item.indicatorName}
                       </span>
                       <div className="flex items-center gap-2">
                         <div className="w-12 bg-gray-200 rounded-full h-2">
                           <div 
-                            className="bg-blue-500 h-2 rounded-full transition-all"
+                            className="bg-orange-500 h-2 rounded-full transition-all"
                             style={{ 
-                              width: `${(item.count / Math.max(...analytics.topRefinementIndicators.map((i) => i.count))) * 100}%` 
+                              width: `${(item.count / Math.max(...analytics.topGrowthAreas.map((i) => i.count))) * 100}%` 
                             }}
                           ></div>
                         </div>
@@ -392,13 +459,13 @@ const FeedbackAnalysis = ({ analytics }: { analytics: AnalyticsData | null | und
   );
 };
 
-// Monthly Trends Chart
-const MonthlyTrends = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
+// Teacher Progress Heatmap - Pro Feature
+const TeacherProgressHeatmap = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
   if (!analytics) {
     return (
       <Card className="animate-pulse">
         <CardHeader>
-          <div className="h-6 bg-gray-200 rounded w-32"></div>
+          <div className="h-6 bg-gray-200 rounded w-48"></div>
         </CardHeader>
         <CardContent>
           <div className="h-64 bg-gray-200 rounded"></div>
@@ -407,10 +474,39 @@ const MonthlyTrends = ({ analytics }: { analytics: AnalyticsData | null | undefi
     );
   }
 
-  const maxValue = Math.max(
-    ...analytics.monthlyTrends.map((trend) => trend.total),
-    1
-  );
+  // Format domain names for display (convert from ALL CAPS to Title Case)
+  const formatDomainName = (domain: string) => {
+    return domain.charAt(0) + domain.slice(1).toLowerCase();
+  };
+
+  const domains = ["INSTRUCTION", "PLANNING", "ENVIRONMENT", "PROFESSIONALISM"];
+
+  // Get status color and styling
+  const getStatusStyle = (status: "strength" | "developing" | "needs_focus") => {
+    switch (status) {
+      case "strength":
+        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800";
+      case "developing":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800";
+      case "needs_focus":
+        return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-300 dark:border-gray-800";
+    }
+  };
+
+  const getStatusIcon = (status: "strength" | "developing" | "needs_focus") => {
+    switch (status) {
+      case "strength":
+        return "💪";
+      case "developing":
+        return "📈";
+      case "needs_focus":
+        return "🎯";
+      default:
+        return "⚪";
+    }
+  };
 
   return (
     <motion.div
@@ -421,160 +517,115 @@ const MonthlyTrends = ({ analytics }: { analytics: AnalyticsData | null | undefi
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Monthly Trends
+            <Users className="h-5 w-5" />
+            Teacher Progress Heatmap
           </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Individual teacher progress across rubric domains
+          </p>
         </CardHeader>
         <CardContent>
-          {analytics.monthlyTrends.length === 0 ? (
+          {analytics.teacherProgressMatrix.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No trend data available</p>
+              <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No teacher progress data available</p>
+              <p className="text-xs">Complete walkthroughs to see progress insights</p>
             </div>
           ) : (
-            <div className="h-64 flex items-end justify-between sm:justify-center sm:gap-4 overflow-x-auto pb-4">
-              {analytics.monthlyTrends.map((trend) => (
-                <div key={trend.month} className="flex flex-col items-center min-w-[60px] sm:min-w-0">
-                  <div className="flex flex-col items-center gap-1 mb-2">
-                    {/* Completed bar */}
-                    <div
-                      className="w-8 sm:w-12 bg-green-500 rounded-t transition-all hover:opacity-80"
-                      style={{
-                        height: Math.max(4, (trend.completed / maxValue) * 200),
-                      }}
-                      title={`Completed: ${trend.completed}`}
-                    ></div>
-                    {/* Draft bar */}
-                    <div
-                      className="w-8 sm:w-12 bg-blue-500 rounded-b transition-all hover:opacity-80"
-                      style={{
-                        height: Math.max(4, (trend.draft / maxValue) * 200),
-                      }}
-                      title={`Draft: ${trend.draft}`}
-                    ></div>
+            <div className="space-y-4">
+              {/* Header row with domain names */}
+              <div className="grid grid-cols-[1fr,repeat(4,1fr),auto] gap-2 pb-2 border-b border-border">
+                <div className="text-sm font-medium text-muted-foreground">Teacher</div>
+                {domains.map(domain => (
+                  <div key={domain} className="text-xs font-medium text-center text-muted-foreground">
+                    {formatDomainName(domain)}
                   </div>
-                  <span className="text-xs text-muted-foreground text-center">
-                    {trend.month}
-                  </span>
-                  <span className="text-xs font-medium text-center">
-                    {trend.total}
-                  </span>
+                ))}
+                <div className="text-xs font-medium text-muted-foreground">Last Seen</div>
+              </div>
+
+              {/* Teacher rows */}
+              <div className="space-y-2">
+                {analytics.teacherProgressMatrix.map((teacher) => (
+                  <div key={teacher.teacherId} className="grid grid-cols-[1fr,repeat(4,1fr),auto] gap-2 items-center p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                    {/* Teacher name */}
+                    <div className="text-sm font-medium truncate">
+                      {teacher.teacherName}
+                    </div>
+
+                    {/* Domain status cells */}
+                    {domains.map(domain => {
+                      const domainScore = teacher.domainScores.find(ds => ds.domain === domain);
+                      if (!domainScore) {
+                        return (
+                          <div key={domain} className="h-8 rounded border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center">
+                            <span className="text-xs text-muted-foreground">—</span>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={domain}
+                          className={`h-8 rounded border-2 flex items-center justify-center cursor-help transition-all hover:scale-105 ${getStatusStyle(domainScore.status)}`}
+                          title={`${formatDomainName(domain)}: ${domainScore.status.replace('_', ' ')} | Reinforcement: ${domainScore.reinforcementCount} | Refinement: ${domainScore.refinementCount}`}
+                        >
+                          <span className="text-xs">
+                            {getStatusIcon(domainScore.status)}
+                          </span>
+                        </div>
+                      );
+                    })}
+
+                    {/* Last observation */}
+                    <div className="text-xs text-muted-foreground">
+                      {teacher.lastObservation 
+                        ? (() => {
+                            const daysSince = Math.floor((Date.now() - teacher.lastObservation) / (24 * 60 * 60 * 1000));
+                            return daysSince === 0 ? 'Today' : 
+                                   daysSince === 1 ? '1 day ago' : 
+                                   daysSince < 7 ? `${daysSince} days ago` :
+                                   daysSince < 30 ? `${Math.floor(daysSince / 7)} weeks ago` :
+                                   `${Math.floor(daysSince / 30)} months ago`;
+                          })()
+                        : 'Never'
+                      }
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Legend */}
+              <div className="pt-4 border-t border-border">
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">Legend</h4>
+                <div className="flex flex-wrap gap-4 text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded border-2 ${getStatusStyle("strength")}`}></div>
+                    <span>💪 Strength</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded border-2 ${getStatusStyle("developing")}`}></div>
+                    <span>📈 Developing</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded border-2 ${getStatusStyle("needs_focus")}`}></div>
+                    <span>🎯 Needs Focus</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded border-2 border-dashed border-gray-300 dark:border-gray-600"></div>
+                    <span>— No Data</span>
+                  </div>
                 </div>
-              ))}
+              </div>
             </div>
           )}
-          <div className="flex justify-center gap-4 mt-4">
-            <div className="flex items-center gap-2 text-sm">
-              <div className="w-3 h-3 bg-green-500 rounded"></div>
-              <span>Completed</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <div className="w-3 h-3 bg-blue-500 rounded"></div>
-              <span>Draft</span>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </motion.div>
   );
 };
 
-// Action Items Section
-const ActionItems = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
-  if (!analytics) {
-    return (
-      <Card className="animate-pulse">
-        <CardHeader>
-          <div className="h-6 bg-gray-200 rounded w-32"></div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "text-red-600 bg-red-50 border-red-200 dark:bg-red-950/20 dark:text-red-300 dark:border-red-800";
-      case "medium":
-        return "text-orange-600 bg-orange-50 border-orange-200 dark:bg-orange-950/20 dark:text-orange-300 dark:border-orange-800";
-      case "low":
-        return "text-green-600 bg-green-50 border-green-200 dark:bg-green-950/20 dark:text-green-300 dark:border-green-800";
-      default:
-        return "text-gray-600 bg-gray-50 border-gray-200 dark:bg-gray-950/20 dark:text-gray-300 dark:border-gray-800";
-    }
-  };
-
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return <AlertCircle className="h-4 w-4" />;
-      case "medium":
-        return <Clock className="h-4 w-4" />;
-      case "low":
-      default:
-        return <CheckCircle2 className="h-4 w-4" />;
-    }
-  };
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          Action Items
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {analytics.actionItems.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <CheckCircle2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No action items</p>
-            <p className="text-sm">All tasks are complete!</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {analytics.actionItems.map((item, index) => (
-              <div 
-                key={`${item.type}-${item.teacherId || index}`}
-                className="p-3 border border-border rounded-lg hover:bg-accent/30 transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium text-sm">{item.title}</h4>
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${getPriorityColor(item.priority)}`}
-                      >
-                        <span className="flex items-center gap-1">
-                          {getPriorityIcon(item.priority)}
-                          {item.priority}
-                        </span>
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {item.description}
-                    </p>
-                  </div>
-                  <div className="ml-4">
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
 
 // Add this upgrade prompt component
 const UpgradePrompt = ({ feature }: { feature: string }) => (
@@ -618,13 +669,11 @@ export default function AnalyticsDashboardPage() {
     user && isLoaded ? {} : "skip"
   );
   
-  // Get analytics data for coach
-  const rawAnalytics = useQuery(
-    api.analytics.getCoachAnalytics,
+  // Get comprehensive analytics data for coach
+  const analytics = useQuery(
+    api.analytics.getComprehensiveCoachAnalytics,
     convexUser?.role === "coach" ? {} : "skip"
   );
-  
-  const analytics = rawAnalytics ? mapCoachAnalyticsToAnalyticsData(rawAnalytics) : null;
 
   if (!isLoaded || (user && convexUser === undefined) || planDetection.isLoading || !planFeatures) {
     return (
@@ -658,15 +707,19 @@ export default function AnalyticsDashboardPage() {
       {/* Overview Metrics - Always shown */}
       <OverviewMetrics analytics={analytics} />
 
-      {/* Advanced Analytics - Gated for Coach Pro */}
+      {/* Tiered Analytics Based on Plan */}
       {planFeatures.advancedAnalytics ? (
+        // Pro Plan: Advanced Analytics
         <>
-          <FeedbackAnalysis analytics={analytics} />
-          <MonthlyTrends analytics={analytics} />
-          <ActionItems analytics={analytics} />
+          <DomainPerformanceChart analytics={analytics} />
+          <TeacherProgressHeatmap analytics={analytics} />
         </>
       ) : (
-        <UpgradePrompt feature="Advanced Analytics" />
+        // Basic Plan: Quick Insights + Upgrade Prompt
+        <>
+          <QuickInsights analytics={analytics} />
+          <UpgradePrompt feature="Advanced Analytics" />
+        </>
       )}
     </div>
   );
