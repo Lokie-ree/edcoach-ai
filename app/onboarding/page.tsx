@@ -20,10 +20,10 @@ import {
   ArrowRight,
   Loader2,
 } from "lucide-react";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { PageHeader } from "@/components/common/PageHeader";
 import { toast } from "sonner";
-import { usePlanDetection } from "@/lib/usePlanDetection";
-import { AIUsageBadge, AIUsageWarning } from "@/components/ui/ai-usage-badge";
+import { usePlanDetection } from "@/hooks/usePlanDetection";
+import { AIUsageBadge, AIUsageWarning } from "@/components/ui/AiUsageBadge";
 import { useQuery as useConvexQuery } from "convex/react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";

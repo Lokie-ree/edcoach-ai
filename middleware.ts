@@ -26,7 +26,7 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId, has } = await auth();
+  const { userId } = await auth();
   const url = req.nextUrl.clone();
 
   // If user is not authenticated and trying to access protected route

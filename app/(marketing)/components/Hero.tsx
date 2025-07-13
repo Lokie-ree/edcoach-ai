@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import landingContent from "@/data/landing-content.json";
-import { Logo } from "@/components/shared/logo";
+import { Logo } from "@/components/common/Logo";
 import { Section } from "@/components/ui/section";
 
 export default function HeroSection() {

@@ -3,9 +3,9 @@ import { Oswald } from "next/font/google";
 import "./globals.css";
 import ConvexClientProvider from "@/components/providers/ConvexClientProvider";
 import { ClerkProvider } from "@clerk/nextjs";
-import { ThemeProvider } from "@/components/shared/theme-provider";
+import { ThemeProvider } from "@/components/common/theme-provider";
 import { Toaster } from "sonner";
-import AppLayout from "@/components/layout/AppLayout";
+import AppLayout from "@/components/common/AppLayout";
 import { dark } from "@clerk/themes";
 
 const oswald = Oswald({
