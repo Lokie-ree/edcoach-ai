@@ -80,11 +80,13 @@ export const getCoachAnalytics = query({
     activeTeachers: v.number(),
     totalWalkthroughs: v.number(),
     totalFeedbackGenerated: v.number(),
+    totalReflections: v.number(), // NEW
     recentWalkthroughs: v.array(v.object({
       _id: v.id("walkthroughs"),
       createdAt: v.number(),
       teacherName: v.string(),
       hasAiFeedback: v.boolean(),
+      hasReflection: v.boolean(), // NEW
     })),
   }),
   handler: async (ctx) => {
@@ -103,6 +105,7 @@ export const getCoachAnalytics = query({
     // Get all walkthroughs created by this coach's teachers
     let totalWalkthroughs = 0;
     let totalFeedbackGenerated = 0;
+    let totalReflections = 0;
     const recentWalkthroughs = [];
     if (teacherIds.length > 0) {
       // Get all walkthroughs for these teachers
@@ -125,14 +128,17 @@ export const getCoachAnalytics = query({
           .query("aiFeedback")
           .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", walkthrough._id))
           .first();
-        if (aiFeedback) {
-          totalFeedbackGenerated++;
-        }
+        // Check if this walkthrough has a reflection
+        const reflection = await ctx.db
+          .query("reflections")
+          .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", walkthrough._id))
+          .first();
         recentWalkthroughs.push({
           _id: walkthrough._id,
           createdAt: walkthrough.createdAt,
           teacherName: teacher?.name || "Unknown Teacher",
           hasAiFeedback: !!aiFeedback,
+          hasReflection: !!reflection,
         });
       }
       // Count total feedback for all coach's walkthroughs
@@ -142,12 +148,20 @@ export const getCoachAnalytics = query({
       totalFeedbackGenerated = allFeedback.filter(feedback => 
         coachWalkthroughs.some(w => w._id === feedback.walkthroughId)
       ).length;
+      // Count total reflections for all coach's walkthroughs
+      const allReflections = await ctx.db
+        .query("reflections")
+        .collect();
+      totalReflections = allReflections.filter(reflection => 
+        coachWalkthroughs.some(w => w._id === reflection.walkthroughId)
+      ).length;
     }
     return {
       totalTeachers,
       activeTeachers,
       totalWalkthroughs,
       totalFeedbackGenerated,
+      totalReflections,
       recentWalkthroughs,
     };
   },
@@ -321,6 +335,7 @@ export const getComprehensiveCoachAnalytics = query({
     completedWalkthroughs: v.number(),
     draftWalkthroughs: v.number(),
     totalAiFeedbackGenerated: v.number(),
+    totalReflections: v.number(), // NEW
     
     // Feedback metrics
     totalFeedbackInteractions: v.number(),
@@ -439,6 +454,14 @@ export const getComprehensiveCoachAnalytics = query({
     const totalFeedbackInteractions = coachFeedback.length;
     const totalAiFeedbackGenerated = totalFeedbackInteractions;
     
+    // Count total reflections for all coach's walkthroughs
+    const allReflections = await ctx.db
+      .query("reflections")
+      .collect();
+    const totalReflections = allReflections.filter(reflection => 
+      coachWalkthroughs.some(w => w._id === reflection.walkthroughId)
+    ).length;
+
     // Calculate teachers with recent activity (last 30 days)
     const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
     const teachersWithRecentActivity = teachers.filter(teacher => {
@@ -692,6 +715,7 @@ export const getComprehensiveCoachAnalytics = query({
         completedWalkthroughs,
         draftWalkthroughs,
         totalAiFeedbackGenerated,
+        totalReflections, // NEW
         
         // Feedback metrics
         totalFeedbackInteractions,

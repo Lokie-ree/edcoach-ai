@@ -99,6 +99,15 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_walkthrough", ["walkthroughId"]),
 
+  // Reflections: Teacher reflections on walkthroughs
+  reflections: defineTable({
+    walkthroughId: v.id("walkthroughs"),
+    teacherId: v.id("teachers"),
+    content: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+  }).index("by_walkthrough", ["walkthroughId"]),
+
   // Rubric system
   rubrics: defineTable({
     name: v.string(),

@@ -22,6 +22,7 @@ import Link from "next/link";
 import React from "react";
 import { Id } from "@/convex/_generated/dataModel";
 import { getIndicatorName } from "@/lib/IndicatorUtils";
+import { ReflectionCard } from "./components/ReflectionCard";
 
 export default function ViewWalkthroughPage({ 
   params 
@@ -139,15 +140,7 @@ export default function ViewWalkthroughPage({
         title="Classroom Walkthrough"
         description={`Professional development observation for ${specificTeacher?.name || "teacher"}`}
         gradient={true}
-        rightContent={
-          convexUser.role === "coach" ? (
-            <Link href={`/walkthrough/${walkthroughId}`}>
-              <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                Edit Walkthrough
-              </Button>
-            </Link>
-          ) : undefined
-        }
+        rightContent={undefined}
       />
 
       {/* Subtle Walkthrough Overview Card */}
@@ -240,6 +233,18 @@ export default function ViewWalkthroughPage({
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Reflection Section */}
+      {walkthrough && specificTeacher && (
+        <section>
+          <h2 className="text-lg font-semibold mb-2 mt-6">Reflection</h2>
+          <ReflectionCard
+            walkthroughId={walkthrough._id}
+            teacherId={walkthrough.teacherId}
+            userRole={convexUser.role as "teacher" | "coach"}
+          />
+        </section>
+      )}
 
       {/* Feedback Sections */}
       {walkthrough.status === "completed" && (
