@@ -16,6 +16,7 @@ export const getReflectionByWalkthrough = query({
       content: v.string(),
       createdAt: v.float64(),
       updatedAt: v.optional(v.float64()),
+      _creationTime: v.float64(),
     })
   ),
   handler: async (ctx, args) => {
