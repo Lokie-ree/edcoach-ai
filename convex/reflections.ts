@@ -14,8 +14,8 @@ export const getReflectionByWalkthrough = query({
       walkthroughId: v.id("walkthroughs"),
       teacherId: v.id("teachers"),
       content: v.string(),
-      createdAt: v.number(),
-      updatedAt: v.optional(v.number()),
+      createdAt: v.float64(),
+      updatedAt: v.optional(v.float64()),
     })
   ),
   handler: async (ctx, args) => {

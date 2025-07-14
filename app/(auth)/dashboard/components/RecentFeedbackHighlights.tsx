@@ -68,34 +68,40 @@ export default function RecentFeedbackHighlights() {
           
           {analytics.recentWalkthroughs.length > 0 ? (
             analytics.recentWalkthroughs.slice(0, 5).map((walkthrough) => (
-              <div key={walkthrough._id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
-                    <BookOpen className="h-4 w-4 text-white" />
+              <Link
+                key={walkthrough._id}
+                href={`/walkthrough/${walkthrough._id}/view`}
+                className="block group"
+              >
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg transition-colors group-hover:bg-accent/30 cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+                      <BookOpen className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        {walkthrough.teacherName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(walkthrough.createdAt, { addSuffix: true })}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      {walkthrough.teacherName}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(walkthrough.createdAt, { addSuffix: true })}
-                    </p>
+                  <div className="flex items-center gap-2">
+                    {walkthrough.hasAiFeedback ? (
+                      <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        <MessageSquare className="h-3 w-3 mr-1" />
+                        Feedback Ready
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        Pending
+                      </Badge>
+                    )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {walkthrough.hasAiFeedback ? (
-                    <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                      <MessageSquare className="h-3 w-3 mr-1" />
-                      Feedback Ready
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      Pending
-                    </Badge>
-                  )}
-                </div>
-              </div>
+              </Link>
             ))
           ) : (
             <div className="text-center py-8">
