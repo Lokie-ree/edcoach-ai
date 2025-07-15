@@ -1,6 +1,5 @@
 import { Id } from "@/convex/_generated/dataModel";
 
-// Type definitions for better type safety
 export type WalkthroughDoc = {
   _id: Id<"walkthroughs">;
   _creationTime: number;

@@ -4,10 +4,12 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PricingTable } from '@clerk/nextjs';
+import MaxWidthWrapper from "@/components/common/MaxWidthWrapper";
 
 export default function BillingPage() {
   return (
-    <div className="space-y-6">
+    <MaxWidthWrapper className="py-4 md:py-10 space-y-4">
+<div className="space-y-6">
       <PageHeader
         title="Billing & Plans"
         description="Choose the plan that fits your coaching needs"
@@ -15,7 +17,7 @@ export default function BillingPage() {
       />
 
       {/* Clerk Pricing Table */}
-      <div className="flex justify-center">
+      <div className="flex">
         <div className="w-full max-w-4xl">
           <PricingTable />
         </div>
@@ -36,5 +38,7 @@ export default function BillingPage() {
         </CardContent>
       </Card>
     </div>
+    </MaxWidthWrapper>
+    
   );
 } 

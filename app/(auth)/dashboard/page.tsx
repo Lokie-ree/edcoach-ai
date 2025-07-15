@@ -6,9 +6,9 @@ import { Loader2 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
+import MaxWidthWrapper from "@/components/common/MaxWidthWrapper";
 import TeacherDashboardPageContent from "@/app/(auth)/dashboard/components/TeacherDashboardPageContent";
 import CoachDashboardPageContent from "@/app/(auth)/dashboard/components/CoachDashboardPageContent";
-import GridDistortion from "@/app/(auth)/dashboard/components/GridDistortion";
 
 
 // Main Dashboard Component
@@ -117,9 +117,7 @@ export default function DashboardPage() {
 
   // Render appropriate dashboard based on role
   return (
-    <div className="relative">
-      <GridDistortion />
-
+    <MaxWidthWrapper className="py-4 md:py-10 space-y-4">
       {userRole === "teacher" ? (
         <TeacherDashboardPageContent
           user={user}
@@ -132,6 +130,6 @@ export default function DashboardPage() {
           convexUser={convexUser}
         />
       )}
-    </div>
+    </MaxWidthWrapper>
   );
 }

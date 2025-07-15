@@ -337,3 +337,29 @@ export const internalListByCoach = internalQuery({
       .collect();
   },
 });
+
+export const getTeacherOverview = query({
+  args: {},
+  returns: v.object({
+    total: v.number(),
+    active: v.number(),
+    needsDetails: v.number(),
+    pending: v.number(),
+    teachers: v.array(v.any()),
+  }),
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    if (!user || user.role !== "coach") {
+      return { total: 0, active: 0, needsDetails: 0, pending: 0, teachers: [] };
+    }
+    const teachers = await ctx.db
+      .query("teachers")
+      .withIndex("by_coach", (q) => q.eq("coachId", user._id))
+      .collect();
+    const total = teachers.length;
+    const active = teachers.filter((t) => t.status === "active").length;
+    const needsDetails = teachers.filter((t) => t.status === "needs_details").length;
+    const pending = teachers.filter((t) => t.status === "pending").length;
+    return { total, active, needsDetails, pending, teachers };
+  },
+});

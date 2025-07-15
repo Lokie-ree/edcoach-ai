@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { PageHeader } from "@/components/common/PageHeader";
-import { ConvexUser, ClerkUser } from "@/app/(auth)/dashboard/components/types";
+import { ConvexUser, ClerkUser } from "@/types/dashboard";
 import TeacherStatusOverview from "@/app/(auth)/dashboard/components/TeacherStatusOverview";
 import RecentFeedbackHighlights from "@/app/(auth)/dashboard/components/RecentFeedbackHighlights";
 import { AIUsageWarning } from "@/components/ui/AiUsageBadge";
@@ -93,7 +93,7 @@ export default function CoachDashboardPageContent({
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <Card className="bg-gradient-to-r from-primary/5 to-purple-500/5 border-primary/20">
-            <CardContent className="p-6 lg:p-8">
+            <CardContent>
               <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
                 {/* Text Content - Left Side */}
                 <div className="text-center lg:text-left lg:flex-1">

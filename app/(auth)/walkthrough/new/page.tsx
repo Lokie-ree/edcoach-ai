@@ -6,6 +6,7 @@ import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import MaxWidthWrapper from "@/components/common/MaxWidthWrapper";
 
 
 export default function NewObservationPage() {
@@ -17,18 +18,19 @@ export default function NewObservationPage() {
   const coachId = convexUser?._id as Id<'users'> | undefined;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <PageHeader
-        title="New Walkthrough"
-        description="Create a new classroom observation and provide feedback to support teacher growth"
-        gradient={true}
-      />
-
-      {/* Content */}
-      <div className="container max-w-4xl relative">
-        {coachId && <WalkthroughForm coachId={coachId} />}
+    <MaxWidthWrapper className="py-4 md:py-10 space-y-4">
+      <div className="space-y-6">
+        {/* Header */}
+        <PageHeader
+          title="New Walkthrough"
+          description="Create a new classroom observation and provide feedback to support teacher growth"
+          gradient={true}
+        />
+        {/* Content */}
+        <div className="container max-w-4xl relative">
+          {coachId && <WalkthroughForm coachId={coachId} />}
+        </div>
       </div>
-    </div>
+    </MaxWidthWrapper>
   );
 } 
