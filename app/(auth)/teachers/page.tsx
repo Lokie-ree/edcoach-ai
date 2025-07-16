@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Modal from "@/components/mage-ui/modal";
-import TeacherDetailsForm from "@/components/forms/TeacherDetailsForm";
+import TeacherDetailsForm from "@/app/(auth)/teachers/components/TeacherDetailsForm";
 import { motion } from "framer-motion";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import MaxWidthWrapper from "@/components/common/MaxWidthWrapper";

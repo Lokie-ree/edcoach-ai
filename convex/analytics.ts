@@ -180,6 +180,13 @@ export const getTeacherAnalytics = query({
     feedbackCount: v.number(),
     lastActivity: v.optional(v.number()),
     status: v.union(v.literal("active"), v.literal("pending"), v.literal("needs_details")),
+    pgpProgress: v.object({
+      trend: v.union(
+        v.literal("Needs Support"),
+        v.literal("Engaged"),
+        v.literal("Stable")
+      ),
+    }),
   })),
   handler: async (ctx) => {
     const user = await getCurrentUserOrThrow(ctx);
@@ -227,6 +234,44 @@ export const getTeacherAnalytics = query({
         lastActivity = latestWalkthrough?.createdAt;
       }
 
+      // --- PGP Progress Trend Calculation ---
+      // 1. Get last 5 completed walkthroughs (status === 'completed')
+      const completedWalkthroughs = walkthroughs
+        .filter(w => w.status === 'completed')
+        .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
+        .slice(0, 5);
+
+      // 2. Check for repeated refinementIndicator
+      let trend: "Needs Support" | "Engaged" | "Stable" = "Stable";
+      if (completedWalkthroughs.length >= 3) {
+        const refinementCounts = new Map<string, number>();
+        for (const wt of completedWalkthroughs) {
+          if (wt.refinementIndicator) {
+            const count = refinementCounts.get(wt.refinementIndicator) || 0;
+            refinementCounts.set(wt.refinementIndicator, count + 1);
+          }
+        }
+        for (const count of refinementCounts.values()) {
+          if (count >= 3) {
+            trend = "Needs Support";
+            break;
+          }
+        }
+      }
+      // 3. If not Needs Support, check for engagement (reflections)
+      if (trend !== "Needs Support") {
+        // Fetch reflections for these walkthroughs
+        const reflectionPromises = completedWalkthroughs.map(wt =>
+          ctx.db.query("reflections").withIndex("by_walkthrough", q => q.eq("walkthroughId", wt._id)).first()
+        );
+        const reflections = await Promise.all(reflectionPromises);
+        const reflectionCount = reflections.filter(Boolean).length;
+        if (reflectionCount >= 3) {
+          trend = "Engaged";
+        }
+      }
+      // 4. Otherwise, Stable
+
       result.push({
         teacherId: teacher._id,
         teacherName: teacher.name,
@@ -234,6 +279,7 @@ export const getTeacherAnalytics = query({
         feedbackCount,
         lastActivity,
         status: teacher.status,
+        pgpProgress: { trend },
       });
     }
 

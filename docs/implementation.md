@@ -58,24 +58,24 @@ Based on our strategic pivot, the priorities are crystal clear.
 *   **Dependencies**: None. This stage unblocks all future work and improves velocity.
 *   **Required Resources**: Solo Developer
 #### Sub-steps:
-- [ ] Create `components` directories within the relevant `/app` feature folders (e.g., `app/(dashboard)/teachers/components`).
-- [ ] Relocate feature-specific components (`walkthrough-form`, `teacher-invitation-form`, marketing `sections`) to their new colocated homes.
-- [ ] Update all import paths to reflect the new structure.
-- [ ] Create a root `/hooks` directory and move `lib/usePlanDetection.ts` into it.
-- [ ] Verify the application builds and all existing functionality works as expected after the refactor.
+- [x] Create `components` directories within the relevant `/app` feature folders (e.g., `app/(dashboard)/teachers/components`).
+- [x] Relocate feature-specific components (`walkthrough-form`, `teacher-invitation-form`, marketing `sections`) to their new colocated homes.
+- [x] Update all import paths to reflect the new structure.
+- [x] Create a root `/hooks` directory and move `lib/usePlanDetection.ts` into it.
+- [x] Verify the application builds and all existing functionality works as expected after the refactor.
 
 ### Stage 2: Core Feature - The Closed Loop
 *   **Duration**: ~1 Week
 *   **Dependencies**: Stage 1 completion.
 *   **Required Resources**: Solo Developer
 #### Sub-steps:
-- [ ] **Backend**: Add the `reflections` table to `convex/schema.ts` with appropriate fields and indexes.
-- [ ] **Backend**: Create the `createReflection` and `updateReflection` mutations in a new `convex/reflections.ts` file.
-- [ ] **Backend**: Update `analytics` or `walkthroughs` queries to optionally join reflection data for the coach's view.
-- [ ] **Frontend**: Create a new, reusable `<ReflectionCard />` component that includes a form for submitting reflections.
-- [ ] **Frontend**: Integrate the `<ReflectionCard />` into the teacher's walkthrough detail view (`/app/(dashboard)/walkthrough/[walkthroughId]/view/`).
-- [ ] **Frontend**: Update the coach's view of the same page to display the teacher's submitted reflection.
-- [ ] **Testing**: Manually test the end-to-end reflection flow: teacher adds reflection -> coach can view it.
+- [x] **Backend**: Add the `reflections` table to `convex/schema.ts` with appropriate fields and indexes.
+- [x] **Backend**: Create the `createReflection` and `updateReflection` mutations in a new `convex/reflections.ts` file.
+- [x] **Backend**: Update `analytics` or `walkthroughs` queries to optionally join reflection data for the coach's view.
+- [x] **Frontend**: Create a new, reusable `<ReflectionCard />` component that includes a form for submitting reflections.
+- [x] **Frontend**: Integrate the `<ReflectionCard />` into the teacher's walkthrough detail view (`/app/(dashboard)/walkthrough/[walkthroughId]/view/`).
+- [x] **Frontend**: Update the coach's view of the same page to display the teacher's submitted reflection.
+- [x] **Testing**: Manually test the end-to-end reflection flow: teacher adds reflection -> coach can view it.
 
 ### Stage 3: The Insightful Dashboards
 *   **Duration**: ~1.5 Weeks

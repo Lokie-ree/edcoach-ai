@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { ConvexUser, ClerkUser } from "@/types/dashboard";
 import TeacherStatusOverview from "@/app/(auth)/dashboard/components/TeacherStatusOverview";
 import RecentFeedbackHighlights from "@/app/(auth)/dashboard/components/RecentFeedbackHighlights";
-import { AIUsageWarning } from "@/components/ui/AiUsageBadge";
+import { AIUsageWarning } from "@/components/common/AiUsageBadge";
 import CoachTutorial from "@/app/onboarding/components/coach-tutorial";
 import { motion } from "framer-motion";
 import { useQuery } from "convex/react";
@@ -16,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Users, BarChart2, CreditCard } from "lucide-react";
 import Link from "next/link";
-import { AIUsageBadge, TeacherUsageBadge } from "@/components/ui/AiUsageBadge";
+import { AIUsageBadge, TeacherUsageBadge } from "@/components/common/AiUsageBadge";
 
 interface CoachDashboardPageContentProps {
   user: ClerkUser;

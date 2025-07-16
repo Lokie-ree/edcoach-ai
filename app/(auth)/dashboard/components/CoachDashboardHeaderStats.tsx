@@ -7,10 +7,10 @@ import { Sparkles } from "lucide-react";
 import {
   AIUsageBadge,
   TeacherUsageBadge,
-} from "@/components/ui/AiUsageBadge";
+} from "@/components/common/AiUsageBadge";
 import QuickActionsPanel from "@/app/(auth)/dashboard/components/QuickActionsPanel";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import type { AIUsage } from "@/components/ui/AiUsageBadge";
+import type { AIUsage } from "@/components/common/AiUsageBadge";
 import { usePlanDetection } from "@/hooks/usePlanDetection";
 
 interface CoachDashboardHeaderStatsProps {

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, UserPlus, AlertCircle, CheckCircle, Clock, Loader2 } from "lucide-react";
-import { TeacherInvitationForm } from "@/components/forms/TeacherInvitationForm";
+import { TeacherInvitationForm } from "@/app/(auth)/teachers/components/TeacherInvitationForm";
 
 export default function TeacherStatusOverview() {
   // UPDATED: Use coach-based teacher queries instead of organization-based

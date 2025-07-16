@@ -38,7 +38,7 @@ import { CalendarInput } from "@/components/ui/calendar-input";
 import { walkthroughFinalSchema } from "@/convex/validation/walkthroughFinalSchema";
 import { Sparkles, Loader2 } from "lucide-react";
 import { useCanCreateWalkthrough } from "@/hooks/usageEnforcer";
-import { AIUsageWarning } from "@/components/ui/AiUsageBadge";
+import { AIUsageWarning } from "@/components/common/AiUsageBadge";
 
 // Types
 export type WalkthroughFormData = z.infer<typeof walkthroughSchema>;
