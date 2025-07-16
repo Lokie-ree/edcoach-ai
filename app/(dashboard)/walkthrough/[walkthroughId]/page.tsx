@@ -1,6 +1,6 @@
 "use client";
 
-import { WalkthroughForm } from "@/app/(auth)/walkthrough/new/components/WalkthroughForm";
+import { WalkthroughForm } from "@/app/(dashboard)/walkthrough/new/components/WalkthroughForm";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Id } from "@/convex/_generated/dataModel";
 import React from "react";
