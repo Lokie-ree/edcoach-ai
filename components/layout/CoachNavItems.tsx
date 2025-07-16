@@ -10,7 +10,6 @@ import {
   Activity,
 } from "lucide-react";
 import { DashboardNav } from "./DashboardNav";
-import { UsageStats } from "@/app/(dashboard)/dashboard/components/UsageStats";
 
 export function CoachNavItems() {
   const navItems = [
@@ -46,10 +45,5 @@ export function CoachNavItems() {
     },
   ];
 
-  return (
-    <>
-      <DashboardNav items={navItems} />
-      <UsageStats />
-    </>
-  );
+  return <DashboardNav items={navItems} />;
 } 
