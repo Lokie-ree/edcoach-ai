@@ -17,11 +17,11 @@ import {
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useQuery } from "convex/react";
-import { getIndicatorName } from "@/lib/IndicatorUtils";
+import { getIndicatorName } from "@/lib/indicatorUtils";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ClerkUser, ConvexUser, TeacherRecord } from "@/types/user";
-import TeacherTutorial from "@/app/onboarding/components/teacher-tutorial";
+import TeacherTutorial from "@/app/onboarding/components/TeacherTutorial";
 import { Button } from "@/components/ui/button";
 
 interface TeacherDashboardPageContentProps {

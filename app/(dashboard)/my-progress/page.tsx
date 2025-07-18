@@ -4,7 +4,6 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { PageHeader } from "@/components/common/PageHeader";
-import MaxWidthWrapper from "@/components/common/MaxWidthWrapper";
 import StrengthsCard from "./components/StrengthsCard";
 import GrowthAreasCard from "./components/GrowthAreasCard";
 import RecentReinforcements from "./components/RecentReinforcements";
@@ -28,7 +27,7 @@ export default function MyProgressPage() {
   }
 
   return (
-    <MaxWidthWrapper className="space-y-6">
+    <div className="py-4 md:py-6 space-y-6">
       <PageHeader
         title="My Progress"
         description="Track your professional growth and development over time"
@@ -39,6 +38,6 @@ export default function MyProgressPage() {
       </div>
       <RecentReinforcements recentReinforcements={data.recentReinforcements} />
       <CoachConnectionCard coach={data.coach} coachingStats={data.coachingStats} />
-    </MaxWidthWrapper>
+    </div>
   );
 } 

@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Header from "@/components/common/Header";
+import Header from "@/components/layout/Header";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -17,6 +17,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                      pathname.startsWith("/my-walkthroughs") || 
                      pathname.startsWith("/billing") || 
                      pathname.startsWith("/walkthrough");
+                     pathname.startsWith("/my-pgp")
 
   return (
     <>

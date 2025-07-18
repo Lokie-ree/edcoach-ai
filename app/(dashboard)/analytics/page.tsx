@@ -11,7 +11,6 @@ import { QuickInsights } from "./components/QuickInsights";
 import { DomainPerformanceChart } from "./components/DomainPerformanceChart";
 import { TeacherProgressHeatmap } from "./components/TeacherProgressHeatmap";
 import { UpgradePrompt } from "./components/UpgradePrompt";
-import MaxWidthWrapper from "@/components/common/MaxWidthWrapper";
 
 
 export default function AnalyticsDashboardPage() {
@@ -56,7 +55,7 @@ export default function AnalyticsDashboardPage() {
   }
 
   return (
-    <MaxWidthWrapper className="py-4 md:py-10 space-y-4">
+    <div className="py-4 md:py-6 space-y-4">
       {/* Header */}
       <PageHeader
         title="Analytics Dashboard"
@@ -81,6 +80,6 @@ export default function AnalyticsDashboardPage() {
           <UpgradePrompt feature="Advanced Analytics" />
         </>
       )}
-    </MaxWidthWrapper>
+    </div>
   );
 } 

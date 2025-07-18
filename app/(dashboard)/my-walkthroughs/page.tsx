@@ -4,9 +4,8 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { PageHeader } from "@/components/common/PageHeader";
-import MaxWidthWrapper from "@/components/common/MaxWidthWrapper";
 import { useState } from "react";
-import { getIndicatorName } from "@/lib/IndicatorUtils";
+import { getIndicatorName } from "@/lib/indicatorUtils";
 import WalkthroughFilters from "./components/WalkthroughFilters";
 import WalkthroughList from "./components/WalkthroughList";
 import { Walkthrough } from "@/types/walkthrough";
@@ -36,7 +35,7 @@ export default function MyWalkthroughsPage() {
   }
 
   return (
-    <MaxWidthWrapper className="py-4 md:py-10 space-y-4">
+    <div className="py-4 md:py-6 space-y-4">
       <div className="space-y-6">
         {/* Header */}
         <PageHeader
@@ -57,6 +56,6 @@ export default function MyWalkthroughsPage() {
           getIndicatorName={getIndicatorName}
         />
       </div>
-    </MaxWidthWrapper>
+    </div>
   );
 } 

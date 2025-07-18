@@ -7,7 +7,7 @@ import { ConvexUser, ClerkUser } from "@/types/dashboard";
 import TeacherStatusOverview from "@/app/(dashboard)/dashboard/components/TeacherStatusOverview";
 import RecentFeedbackHighlights from "@/app/(dashboard)/dashboard/components/RecentFeedbackHighlights";
 import { AIUsageWarning } from "@/components/common/AiUsageBadge";
-import CoachTutorial from "@/app/onboarding/components/coach-tutorial";
+import CoachTutorial from "@/app/onboarding/components/CoachTutorial";
 import { motion } from "framer-motion";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";

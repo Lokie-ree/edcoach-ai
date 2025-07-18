@@ -9,7 +9,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { Id } from "@/convex/_generated/dataModel";
-import { getIndicatorName } from "@/lib/IndicatorUtils";
+import { getIndicatorName } from "@/lib/indicatorUtils";
 import { ReflectionCard } from "./components/ReflectionCard";
 import FeedbackSection from "./components/FeedbackSection";
 import DraftMessage from "./components/DraftMessage";
@@ -58,7 +58,7 @@ export default function ViewWalkthroughPage({ params }: { params: Promise<{ walk
   const { walkthrough, teacher, entries, userRole } = viewDetails;
 
   return (
-    <div className="space-y-6">
+    <div className="py-4 md:py-6 space-y-6">
       {/* Header */}
       <PageHeader
         title="Classroom Walkthrough"

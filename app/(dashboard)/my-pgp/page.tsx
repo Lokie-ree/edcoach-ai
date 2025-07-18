@@ -8,7 +8,7 @@ export default function TeacherPgpDashboardPage() {
   const { teacherDashboardData } = mockData;
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="py-4 md:py-6 space-y-6 max-w-4xl">
       {/* PGP Goal Card */}
       <PgpGoalCard
         title={teacherDashboardData.pgpGoal.title}

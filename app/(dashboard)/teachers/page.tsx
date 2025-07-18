@@ -7,7 +7,6 @@ import Modal from "@/components/mage-ui/modal";
 import TeacherDetailsForm from "@/app/(dashboard)/teachers/components/TeacherDetailsForm";
 import { motion } from "framer-motion";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
-import MaxWidthWrapper from "@/components/common/MaxWidthWrapper";
 import { PageHeader } from "@/components/common/PageHeader";
 import TeacherStatsCard from "./components/TeacherStatsCard";
 import TeacherList from "./components/TeacherList";
@@ -23,7 +22,7 @@ export default function TeachersPage() {
   const updateTeacher = useMutation(api.teachers.update);
 
   return (
-    <MaxWidthWrapper className="py-4 md:py-10 space-y-4">
+    <div className="py-4 md:py-6 space-y-4">
       <div className="space-y-6 relative">
         <GridDistortion />
         <PageHeader
@@ -88,6 +87,6 @@ export default function TeachersPage() {
           />
         </motion.div>
       </div>
-    </MaxWidthWrapper>
+    </div>
   );
 }

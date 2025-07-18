@@ -27,7 +27,7 @@ import { AIUsageBadge, AIUsageWarning } from "@/components/common/AiUsageBadge";
 import { useQuery as useConvexQuery } from "convex/react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
-import TeacherTutorial from "@/app/onboarding/components/teacher-tutorial";
+import TeacherTutorial from "@/app/onboarding/components/TeacherTutorial";
 
 export default function OnboardingPage() {
   const { user, isLoaded } = useUser();
