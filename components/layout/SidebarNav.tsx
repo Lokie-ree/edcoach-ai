@@ -5,14 +5,13 @@ import { GraduationCap } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { CoachNavItems } from "./CoachNavItems";
 import { TeacherNavItems } from "./TeacherNavItems";
-import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
+import { AIUsageBadge, TeacherUsageBadge } from "@/components/common/AiUsageBadge";
 
 interface SidebarNavProps {
   userRole?: "coach" | "teacher";
@@ -28,17 +27,18 @@ export function SidebarNav({ userRole }: SidebarNavProps) {
     },
   ];
 
-  // Sample user data - in a real app this would come from Clerk
-  const user = {
-    name: "User",
-    email: "user@example.com",
-    avatar: "/avatars/user.jpg",
-  };
-
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <TeamSwitcher teams={teams} />
+        <div className="space-y-3">
+          <TeamSwitcher teams={teams} />
+          {userRole === "coach" && (
+            <div className="space-y-2 space-x-2">
+              <AIUsageBadge />
+              <TeacherUsageBadge />
+            </div>
+          )}
+        </div>
       </SidebarHeader>
       <SidebarContent>
         {userRole === "coach" ? (
@@ -47,9 +47,6 @@ export function SidebarNav({ userRole }: SidebarNavProps) {
           <TeacherNavItems />
         )}
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={user} />
-      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

@@ -12,6 +12,10 @@ import TeacherList from "./components/TeacherList";
 import GridDistortion from "./components/GridDistortion";
 import { Teacher } from "@/types/teacher";
 import TeacherStatsCard from "./components/TeacherStatsCard";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import Link from "next/link";
+
 
 export default function TeachersPage() {
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
@@ -41,6 +45,14 @@ export default function TeachersPage() {
             </>
           }
           gradient={true}
+          rightContent={
+            <Link href="/teachers/invite">
+              <Button size="lg" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Invite Teacher
+              </Button>
+            </Link>
+          }
         />
         {/* Stats and List in better layout */}
         <div className="grid gap-4 lg:gap-6 grid-cols-1 xl:grid-cols-4">

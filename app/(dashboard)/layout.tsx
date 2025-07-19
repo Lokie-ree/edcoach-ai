@@ -6,8 +6,6 @@ import { api } from "@/convex/_generated/api";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SidebarNav } from "@/components/layout/SidebarNav";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
-import { usePathname } from "next/navigation";
 import MaxWidthWrapper from "@/components/common/MaxWidthWrapper";
 
 export default function DashboardLayout({
@@ -17,35 +15,6 @@ export default function DashboardLayout({
 }) {
   const { user, isLoaded } = useUser();
   const currentUser = useQuery(api.users.current);
-  const pathname = usePathname();
-
-  // Function to get page title based on pathname
-  const getPageTitle = (path: string) => {
-    const pathMap: Record<string, string> = {
-      "/dashboard": "Dashboard",
-      "/my-pgp": "My PGP",
-      "/teachers": "Teachers",
-      "/analytics": "Analytics",
-      "/settings/billing": "Billing",
-      "/settings/profile": "Settings",
-      "/walkthrough": "Walkthroughs",
-      "/walkthrough/new": "New Walkthrough",
-    };
-
-    // Handle dynamic routes
-    if (path.startsWith("/walkthrough/") && path.includes("/view")) {
-      return "View Walkthrough";
-    }
-    if (
-      path.startsWith("/walkthrough/") &&
-      !path.includes("/view") &&
-      !path.includes("/new")
-    ) {
-      return "Edit Walkthrough";
-    }
-
-    return pathMap[path] || "Dashboard";
-  };
 
   if (!isLoaded || !user) {
     return (
@@ -64,22 +33,6 @@ export default function DashboardLayout({
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-4">
                 <SidebarTrigger className="-ml-1" />
-                <Separator
-                  orientation="vertical"
-                  className="mr-2 data-[orientation=vertical]:h-4"
-                />
-                <div className="flex flex-col">
-                  <h1 className="text-lg font-semibold">
-                    {getPageTitle(pathname)}
-                  </h1>
-                  <p className="text-sm text-muted-foreground">
-                    Welcome,{" "}
-                    {user.firstName ||
-                      user.emailAddresses[0]?.emailAddress ||
-                      "User"}
-                    !
-                  </p>
-                </div>
               </div>
               <div className="flex items-center gap-2">
                 <UserButton afterSignOutUrl="/" />

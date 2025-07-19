@@ -34,8 +34,6 @@ export default function AnalyticsDashboardPage() {
 
   return (
     <div className="py-3 md:py-4 space-y-3">
-      {" "}
-      {/* Reduced spacing */}
       {/* Header */}
       <PageHeader
         title="Analytics Dashboard"
@@ -52,10 +50,10 @@ export default function AnalyticsDashboardPage() {
         </div>
       ) : (
         <div className="grid gap-4 lg:gap-6 grid-cols-1 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <QuickInsights analytics={analytics} />
           </div>
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-3">
             <UpgradePrompt feature="Advanced Analytics" />
           </div>
         </div>
