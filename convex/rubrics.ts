@@ -23,12 +23,10 @@ export const listRubricWithIndicators = query({
   handler: async (ctx) => {
     // Get the first rubric (or implement logic for active/default rubric)
     const rubric = await ctx.db.query("rubrics").first();
-    if (!rubric) return null;
-    // Fetch all indicators for this rubric (by rubricName)
-    const indicators = await ctx.db
-      .query("rubricIndicators")
-      .filter((q) => q.eq(q.field("rubricName"), rubric.name))
-      .collect();
+
+    // Fetch ALL indicators regardless of rubricName to ensure we get complete data
+    const indicators = await ctx.db.query("rubricIndicators").collect();
+
     // Group indicators by domain
     const domainsMap: Record<string, any> = {};
     for (const indicator of indicators) {
@@ -42,12 +40,14 @@ export const listRubricWithIndicators = query({
     }
     const domains = Object.values(domainsMap);
     return {
-      rubric: {
-        name: rubric.name,
-        description: rubric.description,
-        version: rubric.version,
-        isStandard: rubric.isStandard,
-      },
+      rubric: rubric
+        ? {
+            name: rubric.name,
+            description: rubric.description,
+            version: rubric.version,
+            isStandard: rubric.isStandard,
+          }
+        : null,
       domains,
     };
   },

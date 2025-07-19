@@ -1,21 +1,39 @@
 "use client";
 
-import { Users, BookOpen, MessageSquare } from "lucide-react";
+import { Users, BookOpen, MessageSquare, Plus, UserPlus } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { PrioritiesPanel } from "@/components/dashboard/PrioritiesPanel";
 import { RecentActivityFeed } from "@/components/dashboard/RecentActivityFeed";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/common/PageHeader";
+import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
+import { useUser } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function CoachDashboardPage() {
+  const { user } = useUser();
   const analytics = useQuery(api.analytics.getCoachAnalytics);
 
   if (!analytics) {
     return (
-      <div className="py-4 md:py-6 space-y-6">
+      <div className="py-3 md:py-4 space-y-4">
+        {/* Page Header Skeleton */}
+        <div className="space-y-2">
+          <div className="h-8 bg-muted animate-pulse rounded w-48"></div>
+          <div className="h-4 bg-muted animate-pulse rounded w-96"></div>
+        </div>
+
+        {/* Quick Actions Skeleton */}
+        <div className="flex gap-3">
+          <Skeleton className="h-10 w-40" />
+          <Skeleton className="h-10 w-40" />
+        </div>
+
         {/* KPI Cards Skeleton */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="p-6 border rounded-lg">
               <Skeleton className="h-4 w-24 mb-2" />
@@ -26,7 +44,7 @@ export default function CoachDashboardPage() {
         </div>
 
         {/* Main Dashboard Content Skeleton */}
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 lg:gap-6 grid-cols-1 xl:grid-cols-3">
           <div className="p-6 border rounded-lg">
             <Skeleton className="h-6 w-32 mb-4" />
             <div className="space-y-3">
@@ -35,7 +53,7 @@ export default function CoachDashboardPage() {
               ))}
             </div>
           </div>
-          <div className="p-6 border rounded-lg">
+          <div className="p-6 border rounded-lg xl:col-span-2">
             <Skeleton className="h-6 w-32 mb-4" />
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
@@ -49,9 +67,40 @@ export default function CoachDashboardPage() {
   }
 
   return (
-    <div className="py-4 md:py-6 space-y-6">
-      {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="py-3 md:py-4 space-y-4">
+      {/* Page Header */}
+      <PageHeader
+        title="Dashboard"
+        description={
+          <>
+            Welcome back,{" "}
+            <AnimatedGradientText className="font-semibold">
+              {user?.firstName || user?.fullName || "Coach"}
+            </AnimatedGradientText>
+            ! Here&apos;s your coaching overview and priorities.
+          </>
+        }
+        gradient={true}
+      />
+
+      {/* Quick Actions - Prominently displayed below header */}
+      <div className="flex flex-wrap gap-3">
+        <Link href="/walkthrough/new">
+          <Button className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Start New Walkthrough
+          </Button>
+        </Link>
+        <Link href="/teachers">
+          <Button variant="outline" className="flex items-center gap-2">
+            <UserPlus className="h-4 w-4" />
+            Invite Teacher
+          </Button>
+        </Link>
+      </div>
+
+      {/* KPI Cards - More responsive grid */}
+      <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
         <KpiCard
           title="Total Teachers"
           value={analytics.totalTeachers}
@@ -78,17 +127,21 @@ export default function CoachDashboardPage() {
         />
       </div>
 
-      {/* Main Dashboard Content */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Priorities Panel */}
-        <PrioritiesPanel
-          walkthroughsDue={analytics.priorities.walkthroughsDue}
-          reflectionsToReview={analytics.priorities.reflectionsToReview}
-          teachersNeedingSupport={analytics.priorities.teachersNeedingSupport}
-        />
+      {/* Main Dashboard Content - Better space utilization */}
+      <div className="grid gap-4 lg:gap-6 grid-cols-1 xl:grid-cols-3">
+        {/* Priorities Panel - Takes 1/3 on large screens */}
+        <div className="xl:col-span-1">
+          <PrioritiesPanel
+            walkthroughsDue={analytics.priorities.walkthroughsDue}
+            reflectionsToReview={analytics.priorities.reflectionsToReview}
+            teachersNeedingSupport={analytics.priorities.teachersNeedingSupport}
+          />
+        </div>
 
-        {/* Recent Activity Feed */}
-        <RecentActivityFeed activities={analytics.recentActivity} />
+        {/* Recent Activity Feed - Takes 2/3 on large screens */}
+        <div className="xl:col-span-2">
+          <RecentActivityFeed activities={analytics.recentActivity} />
+        </div>
       </div>
     </div>
   );

@@ -8,10 +8,10 @@ interface PrioritiesPanelProps {
   teachersNeedingSupport: number;
 }
 
-export function PrioritiesPanel({ 
-  walkthroughsDue, 
-  reflectionsToReview, 
-  teachersNeedingSupport 
+export function PrioritiesPanel({
+  walkthroughsDue,
+  reflectionsToReview,
+  teachersNeedingSupport,
 }: PrioritiesPanelProps) {
   const priorities = [
     {
@@ -38,16 +38,23 @@ export function PrioritiesPanel({
   ];
 
   return (
-    <Card>
+    <Card className="h-full">
+      {" "}
+      {/* Ensure consistent height */}
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5" />
           Priority Actions
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
+        {" "}
+        {/* Reduced spacing */}
         {priorities.map((priority) => (
-          <div key={priority.title} className="flex items-center justify-between p-3 border rounded-lg">
+          <div
+            key={priority.title}
+            className="flex items-center justify-between p-3 border rounded-lg"
+          >
             <div className="flex items-center gap-3">
               <div className={`p-2 rounded-full ${priority.color}`}>
                 <priority.icon className="h-4 w-4 text-white" />
@@ -55,7 +62,7 @@ export function PrioritiesPanel({
               <div>
                 <p className="font-medium">{priority.title}</p>
                 <p className="text-sm text-muted-foreground">
-                  {priority.count} {priority.count === 1 ? 'item' : 'items'}
+                  {priority.count} {priority.count === 1 ? "item" : "items"}
                 </p>
               </div>
             </div>
@@ -67,4 +74,4 @@ export function PrioritiesPanel({
       </CardContent>
     </Card>
   );
-} 
+}

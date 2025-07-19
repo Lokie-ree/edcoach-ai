@@ -3,6 +3,7 @@
 import { type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSidebar } from "@/components/ui/sidebar";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -23,6 +24,14 @@ interface DashboardNavProps {
 
 export function DashboardNav({ items }: DashboardNavProps) {
   const pathname = usePathname();
+  const { setOpenMobile, isMobile } = useSidebar();
+
+  const handleNavigation = () => {
+    // Close mobile sidebar when a navigation item is clicked
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
     <SidebarGroup>
@@ -30,11 +39,11 @@ export function DashboardNav({ items }: DashboardNavProps) {
       <SidebarMenu>
         {items.map((item) => {
           const isActive = pathname === item.url;
-          
+
           return (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild isActive={isActive}>
-                <Link href={item.url}>
+                <Link href={item.url} onClick={handleNavigation}>
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
                 </Link>
@@ -45,4 +54,4 @@ export function DashboardNav({ items }: DashboardNavProps) {
       </SidebarMenu>
     </SidebarGroup>
   );
-} 
+}

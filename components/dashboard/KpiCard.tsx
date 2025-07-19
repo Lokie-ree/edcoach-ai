@@ -12,9 +12,17 @@ interface KpiCardProps {
   };
 }
 
-export function KpiCard({ title, value, icon: Icon, description, trend }: KpiCardProps) {
+export function KpiCard({
+  title,
+  value,
+  icon: Icon,
+  description,
+  trend,
+}: KpiCardProps) {
   return (
-    <Card>
+    <Card className="h-full">
+      {" "}
+      {/* Ensure consistent height */}
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
@@ -26,8 +34,11 @@ export function KpiCard({ title, value, icon: Icon, description, trend }: KpiCar
         )}
         {trend && (
           <div className="flex items-center text-xs">
-            <span className={trend.isPositive ? "text-green-600" : "text-red-600"}>
-              {trend.isPositive ? "+" : "-"}{Math.abs(trend.value)}%
+            <span
+              className={trend.isPositive ? "text-green-600" : "text-red-600"}
+            >
+              {trend.isPositive ? "+" : "-"}
+              {Math.abs(trend.value)}%
             </span>
             <span className="text-muted-foreground ml-1">from last month</span>
           </div>
@@ -35,4 +46,4 @@ export function KpiCard({ title, value, icon: Icon, description, trend }: KpiCar
       </CardContent>
     </Card>
   );
-} 
+}

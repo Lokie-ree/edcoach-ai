@@ -102,12 +102,17 @@ export function TeacherInvitationForm({
     }
     try {
       // Check for PAID Pro plan only - free users get starter plan by default
-      const hasProPlan = (has?.({ plan: "coach_pro" }) ?? false) ||
-                        (has?.({ permission: "coach_pro" }) ?? false) ||
-                        (has?.({ role: "coach_pro" }) ?? false);
-      
-      console.log("🔍 Teacher invitation plan check:", { 
+      const hasProPlan =
+        (has?.({ plan: "coach_pro" }) ?? false) ||
+        (has?.({ permission: "coach_pro" }) ?? false) ||
+        (has?.({ role: "coach_pro" }) ?? false);
+
+      // All users without a paid Pro plan get starter plan benefits by default
+      const hasStarterPlan = !hasProPlan;
+
+      console.log("🔍 Teacher invitation plan check:", {
         hasProPlan,
+        hasStarterPlan,
         finalPlan: hasProPlan ? "pro" : "starter_free",
       });
 
@@ -117,6 +122,7 @@ export function TeacherInvitationForm({
         subject: values.subject,
         gradeBand: values.gradeBand,
         hasProPlan,
+        hasStarterPlan,
       });
 
       if (result.success) {

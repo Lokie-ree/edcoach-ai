@@ -4,7 +4,7 @@ import { Pencil, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Teacher } from "@/types/teacher";
-
+import { TeacherInvitationForm } from "./TeacherInvitationForm";
 
 interface TeacherListProps {
   teachers: Teacher[];
@@ -26,12 +26,26 @@ const SUBJECTS = [
   { value: "sped", label: "SPED" },
 ];
 
-export default function TeacherList({ teachers, setEditingTeacher }: TeacherListProps) {
+export default function TeacherList({
+  teachers,
+  setEditingTeacher,
+}: TeacherListProps) {
   return (
     <Card className="bg-card border-border">
       <CardHeader>
-        <CardTitle className="text-foreground">All Teachers</CardTitle>
-        <p className="text-sm text-muted-foreground">Manage your teaching staff details and status</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-foreground">All Teachers</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Manage your teaching staff details and status
+            </p>
+          </div>
+          <TeacherInvitationForm
+            onSuccess={() => {
+              // The form will handle its own state, but we could add a refresh here if needed
+            }}
+          />
+        </div>
       </CardHeader>
       <CardContent>
         {teachers && teachers.length > 0 ? (
@@ -50,54 +64,71 @@ export default function TeacherList({ teachers, setEditingTeacher }: TeacherList
                         {teacher.name}
                       </h3>
                       <span
-                        className={cn(
-                          "text-xs px-2 py-1 rounded-full",
-                          {
-                            "bg-green-100 text-green-700 dark:bg-green-950/20 dark:text-green-300 border border-green-200 dark:border-green-800": teacher.status === "active",
-                            "bg-blue-100 text-blue-700 dark:bg-blue-950/20 dark:text-blue-300 border border-blue-200 dark:border-blue-800": teacher.status === "pending",
-                            "bg-orange-100 text-orange-700 dark:bg-orange-950/20 dark:text-orange-300 border border-orange-200 dark:border-orange-800": teacher.status === "needs_details",
-                            "bg-gray-100 text-gray-700 dark:bg-gray-950/20 dark:text-gray-300 border border-gray-200 dark:border-gray-800": teacher.status !== "active" && teacher.status !== "pending" && teacher.status !== "needs_details",
-                          }
-                        )}
+                        className={cn("text-xs px-2 py-1 rounded-full", {
+                          "bg-green-100 text-green-700 dark:bg-green-950/20 dark:text-green-300 border border-green-200 dark:border-green-800":
+                            teacher.status === "active",
+                          "bg-blue-100 text-blue-700 dark:bg-blue-950/20 dark:text-blue-300 border border-blue-200 dark:border-blue-800":
+                            teacher.status === "pending",
+                          "bg-orange-100 text-orange-700 dark:bg-orange-950/20 dark:text-orange-300 border border-orange-200 dark:border-orange-800":
+                            teacher.status === "needs_details",
+                          "bg-gray-100 text-gray-700 dark:bg-gray-950/20 dark:text-gray-300 border border-gray-200 dark:border-gray-800":
+                            teacher.status !== "active" &&
+                            teacher.status !== "pending" &&
+                            teacher.status !== "needs_details",
+                        })}
                       >
-                        {teacher.status === "needs_details" 
+                        {teacher.status === "needs_details"
                           ? "Needs Details"
                           : (teacher.status || "inactive")
                               .charAt(0)
                               .toUpperCase() +
-                              (teacher.status || "inactive").slice(1)}
+                            (teacher.status || "inactive").slice(1)}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground mb-2">
                       {teacher.email}
                     </p>
                     <div className="flex flex-wrap gap-1.5 mt-2">
-                      {(teacher.subject && teacher.subject.length > 0) && 
-                        (Array.isArray(teacher.subject) ? teacher.subject : [teacher.subject]).map((subject) => (
+                      {teacher.subject &&
+                        teacher.subject.length > 0 &&
+                        (Array.isArray(teacher.subject)
+                          ? teacher.subject
+                          : [teacher.subject]
+                        ).map((subject) => (
                           <span
                             key={subject}
                             className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
                           >
-                            {SUBJECTS.find(o => o.value === subject)?.label || subject}
+                            {SUBJECTS.find((o) => o.value === subject)?.label ||
+                              subject}
                           </span>
-                        ))
-                      }
-                      <span
-                        className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-accent/60 text-accent-foreground border border-accent"
-                      >
-                        {GRADE_BAND_OPTIONS.find(o => o.value === teacher.gradeBand)?.label || teacher.gradeBand}
+                        ))}
+                      <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-accent/60 text-accent-foreground border border-accent">
+                        {GRADE_BAND_OPTIONS.find(
+                          (o) => o.value === teacher.gradeBand,
+                        )?.label || teacher.gradeBand}
                       </span>
                     </div>
                   </div>
                   <div className="flex gap-2 ml-4">
                     <Button
                       size="sm"
-                      variant={teacher.status === "needs_details" ? "default" : "outline"}
-                      className={teacher.status === "needs_details" ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}
+                      variant={
+                        teacher.status === "needs_details"
+                          ? "default"
+                          : "outline"
+                      }
+                      className={
+                        teacher.status === "needs_details"
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                          : ""
+                      }
                       onClick={() => setEditingTeacher(teacher)}
                     >
                       <Pencil className="h-4 w-4 mr-1" />
-                      {teacher.status === "needs_details" ? "Add Details" : "Edit"}
+                      {teacher.status === "needs_details"
+                        ? "Add Details"
+                        : "Edit"}
                     </Button>
                   </div>
                 </div>
@@ -108,10 +139,12 @@ export default function TeacherList({ teachers, setEditingTeacher }: TeacherList
           <div className="text-center py-8 text-muted-foreground">
             <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No teachers yet</p>
-            <p className="text-sm">Click &quot;Invite Teachers&quot; to get started</p>
+            <p className="text-sm">
+              Click &quot;Invite Teachers&quot; to get started
+            </p>
           </div>
         )}
       </CardContent>
     </Card>
   );
-} 
+}

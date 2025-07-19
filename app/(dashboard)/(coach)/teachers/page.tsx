@@ -22,8 +22,12 @@ export default function TeachersPage() {
   const updateTeacher = useMutation(api.teachers.update);
 
   return (
-    <div className="py-4 md:py-6 space-y-4">
-      <div className="space-y-6 relative">
+    <div className="py-3 md:py-4 space-y-3">
+      {" "}
+      {/* Reduced spacing */}
+      <div className="space-y-4 relative">
+        {" "}
+        {/* Reduced spacing */}
         <GridDistortion />
         <PageHeader
           title="Teachers"
@@ -38,19 +42,44 @@ export default function TeachersPage() {
           }
           gradient={true}
         />
-        {/* Stats Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          <TeacherStatsCard
-            total={overview?.total || 0}
-            active={overview?.active || 0}
-            needsDetails={overview?.needsDetails || 0}
-            pending={overview?.pending || 0}
-          />
-        </motion.div>
+        {/* Stats and List in better layout */}
+        <div className="grid gap-4 lg:gap-6 grid-cols-1 xl:grid-cols-4">
+          {/* Stats Card - Takes 1/4 on large screens */}
+          <div className="xl:col-span-1">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <TeacherStatsCard
+                total={overview?.total || 0}
+                active={overview?.active || 0}
+                needsDetails={overview?.needsDetails || 0}
+                pending={overview?.pending || 0}
+              />
+            </motion.div>
+          </div>
+
+          {/* Teachers List - Takes 3/4 on large screens */}
+          <div className="xl:col-span-3">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <TeacherList
+                teachers={(overview?.teachers || []).map(
+                  (t) =>
+                    ({
+                      ...t,
+                      coachId: t.coachId ?? "",
+                    }) as Teacher,
+                )}
+                setEditingTeacher={(teacher) => setEditingTeacher(teacher)}
+              />
+            </motion.div>
+          </div>
+        </div>
         {/* Edit Teacher Details Modal */}
         <Modal
           isOpen={!!editingTeacher}
@@ -76,23 +105,6 @@ export default function TeachersPage() {
             />
           )}
         </Modal>
-        {/* Teachers List */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <TeacherList
-            teachers={(overview?.teachers || []).map(
-              (t) =>
-                ({
-                  ...t,
-                  coachId: t.coachId ?? "",
-                }) as Teacher,
-            )}
-            setEditingTeacher={(teacher) => setEditingTeacher(teacher)}
-          />
-        </motion.div>
       </div>
     </div>
   );

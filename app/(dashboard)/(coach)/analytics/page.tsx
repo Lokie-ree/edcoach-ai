@@ -13,7 +13,7 @@ import { TeacherProgressHeatmap } from "./components/TeacherProgressHeatmap";
 import { UpgradePrompt } from "./components/UpgradePrompt";
 
 export default function AnalyticsDashboardPage() {
-  const { user, isLoaded } = useUser();
+  const { isLoaded } = useUser();
   const planDetection = usePlanDetection();
 
   // Get plan features to check for advanced analytics
@@ -21,24 +21,10 @@ export default function AnalyticsDashboardPage() {
     hasProPlan: planDetection.isProPlan,
   });
 
-  // Get convex user data
-  const convexUser = useQuery(
-    api.users.current,
-    user && isLoaded ? {} : "skip",
-  );
-
   // Get comprehensive analytics data for coach
-  const analytics = useQuery(
-    api.analytics.getComprehensiveCoachAnalytics,
-    convexUser?.role === "coach" ? {} : "skip",
-  );
+  const analytics = useQuery(api.analytics.getComprehensiveCoachAnalytics, {});
 
-  if (
-    !isLoaded ||
-    (user && convexUser === undefined) ||
-    planDetection.isLoading ||
-    !planFeatures
-  ) {
+  if (!isLoaded || planDetection.isLoading || !planFeatures || !analytics) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <span className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full inline-block"></span>
@@ -46,43 +32,33 @@ export default function AnalyticsDashboardPage() {
     );
   }
 
-  if (!user || !convexUser) {
-    return null;
-  }
-
-  if (convexUser?.role !== "coach") {
-    return (
-      <div className="flex items-center justify-center min-h-[400px] text-muted-foreground">
-        Only coaches can view analytics.
-      </div>
-    );
-  }
-
   return (
-    <div className="py-4 md:py-6 space-y-4">
+    <div className="py-3 md:py-4 space-y-3">
+      {" "}
+      {/* Reduced spacing */}
       {/* Header */}
       <PageHeader
         title="Analytics Dashboard"
         description="Comprehensive insights and metrics for your coaching effectiveness"
         gradient={true}
       />
-
       {/* Overview Metrics - Always shown */}
       <OverviewMetrics analytics={analytics} />
-
-      {/* Tiered Analytics Based on Plan */}
+      {/* Tiered Analytics - Better space distribution */}
       {planFeatures.advancedAnalytics ? (
-        // Pro Plan: Advanced Analytics
-        <>
+        <div className="grid gap-4 lg:gap-6 grid-cols-1 xl:grid-cols-2">
           <DomainPerformanceChart analytics={analytics} />
           <TeacherProgressHeatmap analytics={analytics} />
-        </>
+        </div>
       ) : (
-        // Basic Plan: Quick Insights + Upgrade Prompt
-        <>
-          <QuickInsights analytics={analytics} />
-          <UpgradePrompt feature="Advanced Analytics" />
-        </>
+        <div className="grid gap-4 lg:gap-6 grid-cols-1 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <QuickInsights analytics={analytics} />
+          </div>
+          <div className="lg:col-span-1">
+            <UpgradePrompt feature="Advanced Analytics" />
+          </div>
+        </div>
       )}
     </div>
   );

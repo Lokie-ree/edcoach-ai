@@ -59,27 +59,44 @@ export function RecentActivityFeed({ activities }: RecentActivityFeedProps) {
   };
 
   return (
-    <Card>
+    <Card className="h-full">
+      {" "}
+      {/* Ensure consistent height */}
       <CardHeader>
         <CardTitle>Recent Activity</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
+        {" "}
+        {/* Reduced spacing */}
         {activities.map((activity) => (
-          <div key={activity.id} className="flex items-start gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+          <div
+            key={activity.id}
+            className="flex items-start gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+          >
             <Avatar className="h-8 w-8">
               <AvatarFallback>
-                {activity.teacherName.split(" ").map(n => n[0]).join("")}
+                {activity.teacherName
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 {getActivityIcon(activity.type)}
-                <span className="font-medium text-sm">{activity.teacherName}</span>
-                <Badge variant="secondary" className={`text-xs ${getStatusColor(activity.status)}`}>
+                <span className="font-medium text-sm">
+                  {activity.teacherName}
+                </span>
+                <Badge
+                  variant="secondary"
+                  className={`text-xs ${getStatusColor(activity.status)}`}
+                >
                   {activity.status}
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground mb-1">{activity.title}</p>
+              <p className="text-sm text-muted-foreground mb-1">
+                {activity.title}
+              </p>
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
                 {formatTimeAgo(activity.timestamp)}
@@ -90,4 +107,4 @@ export function RecentActivityFeed({ activities }: RecentActivityFeedProps) {
       </CardContent>
     </Card>
   );
-} 
+}

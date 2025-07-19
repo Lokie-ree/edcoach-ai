@@ -3,7 +3,13 @@ import { useAction, useQuery } from "convex/react";
 import { useAuth } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +24,7 @@ interface AIFeedbackGeneratorProps {
   indicator: {
     indicator_name: string;
     indicator_code: string;
+    domain?: string;
     overview?: string;
     key_terms?: string;
     effective_practice?: string;
@@ -38,7 +45,7 @@ export function AIFeedbackGenerator({
 }: AIFeedbackGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedFeedback, setGeneratedFeedback] = useState<string>("");
-  
+
   const { has } = useAuth();
   const generateAIFeedback = useAction(api.aiFeedback.generateAIFeedback);
   const usageInfo = useQuery(api.users.checkAIUsageLimit);
@@ -50,22 +57,25 @@ export function AIFeedbackGenerator({
     }
 
     if (!usageInfo?.canGenerate) {
-      toast.error("AI generation limit reached. Please upgrade to Pro for unlimited access.");
+      toast.error(
+        "AI generation limit reached. Please upgrade to Pro for unlimited access.",
+      );
       return;
     }
 
     try {
       setIsGenerating(true);
-      
+
       // Check for PAID Pro plan only - free users get starter plan by default
-      const hasProPlan = (has?.({ plan: "coach_pro" }) ?? false) ||
-                        (has?.({ permission: "coach_pro" }) ?? false) ||
-                        (has?.({ role: "coach_pro" }) ?? false);
-      
-      // Note: We don't check for starter plan because it's the free default
-      // All users without a paid Pro plan get starter plan benefits
-      
-      console.log("🔍 AI Feedback Generator plan check:", { 
+      const hasProPlan =
+        (has?.({ plan: "coach_pro" }) ?? false) ||
+        (has?.({ permission: "coach_pro" }) ?? false) ||
+        (has?.({ role: "coach_pro" }) ?? false);
+
+      // All users without a paid Pro plan get starter plan benefits by default
+      const hasStarterPlan = !hasProPlan;
+
+      console.log("🔍 AI Feedback Generator plan check:", {
         hasProPlan,
         finalPlan: hasProPlan ? "pro" : "starter_free",
         checks: {
@@ -76,42 +86,80 @@ export function AIFeedbackGenerator({
           "permission:coach_starter": has?.({ permission: "coach_starter" }),
           "role:coach_starter": has?.({ role: "coach_starter" }),
           "role:admin": has?.({ role: "admin" }),
-        }
+        },
       });
-      
-      const feedback = await generateAIFeedback({
+
+      // Improved normalization function
+      const normalizeIndicatorField = (val: unknown): string => {
+        if (!val) return "N/A";
+
+        if (Array.isArray(val)) {
+          return val
+            .filter((item) => item && typeof item === "string")
+            .join("; ");
+        }
+
+        if (typeof val === "object" && val !== null) {
+          const values = Object.values(val as Record<string, unknown>);
+          return values
+            .filter((item) => item && typeof item === "string")
+            .join("; ");
+        }
+
+        return (val as string) || "N/A";
+      };
+
+      const feedback = (await generateAIFeedback({
         evidence,
         mode: promptType,
-        [promptType === "reinforcement" ? "reinforcementIndicator" : "refinementIndicator"]: {
+        [promptType === "reinforcement"
+          ? "reinforcementIndicator"
+          : "refinementIndicator"]: {
           indicator_name: indicator.indicator_name,
           indicator_code: indicator.indicator_code,
-          overview: indicator.overview,
-          key_terms: indicator.key_terms,
-          effective_practice: indicator.effective_practice,
-          development_evidence: indicator.development_evidence,
-          student_centered_evidence: indicator.student_centered_evidence,
+          domain: indicator.domain || "N/A",
+          overview: normalizeIndicatorField(indicator.overview),
+          key_terms: normalizeIndicatorField(indicator.key_terms),
+          effective_practice: normalizeIndicatorField(
+            indicator.effective_practice,
+          ),
+          development_evidence: normalizeIndicatorField(
+            indicator.development_evidence,
+          ),
+          student_centered_evidence: normalizeIndicatorField(
+            indicator.student_centered_evidence,
+          ),
         },
         hasProPlan,
-      }) as string;
+        hasStarterPlan,
+      })) as string;
 
       setGeneratedFeedback(feedback);
       onFeedbackGenerated(feedback);
-      
-      toast.success(`${promptType === "reinforcement" ? "Reinforcement" : "Refinement"} feedback generated!`);
+
+      toast.success(
+        `${promptType === "reinforcement" ? "Reinforcement" : "Refinement"} feedback generated!`,
+      );
     } catch (error: unknown) {
       console.error("Failed to generate AI feedback:", error);
-      
-      if (error instanceof Error && error.message?.includes("AI usage limit exceeded")) {
-        toast.error("You&apos;ve reached your monthly AI generation limit. Upgrade to Pro for unlimited access.", {
-          duration: 5000,
-          action: {
-            label: "Upgrade",
-            onClick: () => {
-              // TODO: Implement upgrade flow
-              console.log("Navigate to upgrade page");
+
+      if (
+        error instanceof Error &&
+        error.message?.includes("AI usage limit exceeded")
+      ) {
+        toast.error(
+          "You&apos;ve reached your monthly AI generation limit. Upgrade to Pro for unlimited access.",
+          {
+            duration: 5000,
+            action: {
+              label: "Upgrade",
+              onClick: () => {
+                // TODO: Implement upgrade flow
+                console.log("Navigate to upgrade page");
+              },
             },
           },
-        });
+        );
       } else {
         toast.error("Failed to generate feedback. Please try again.");
       }
@@ -128,7 +176,7 @@ export function AIFeedbackGenerator({
   };
 
   const canGenerate = usageInfo?.canGenerate ?? false;
-      const isPro = true; // Simplified - no subscription restrictions for now
+  const isPro = true; // Simplified - no subscription restrictions for now
 
   return (
     <Card className={cn("w-full", className)}>
@@ -141,11 +189,14 @@ export function AIFeedbackGenerator({
           <AIUsageBadge />
         </div>
         <CardDescription>
-          Generate {promptType === "reinforcement" ? "reinforcement" : "refinement"} feedback for{" "}
-          <span className="font-medium">{indicator.indicator_name}</span> ({indicator.indicator_code})
+          Generate{" "}
+          {promptType === "reinforcement" ? "reinforcement" : "refinement"}{" "}
+          feedback for{" "}
+          <span className="font-medium">{indicator.indicator_name}</span> (
+          {indicator.indicator_code})
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {/* AI Usage Warning */}
         <AIUsageWarning />
@@ -168,7 +219,9 @@ export function AIFeedbackGenerator({
               disabled={!canGenerate || isGenerating || !evidence.trim()}
               className={cn(
                 "flex items-center gap-2",
-                promptType === "reinforcement" ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"
+                promptType === "reinforcement"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-blue-600 hover:bg-blue-700",
               )}
             >
               {isGenerating ? (
@@ -179,7 +232,11 @@ export function AIFeedbackGenerator({
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  Generate {promptType === "reinforcement" ? "Reinforcement" : "Refinement"} Feedback
+                  Generate{" "}
+                  {promptType === "reinforcement"
+                    ? "Reinforcement"
+                    : "Refinement"}{" "}
+                  Feedback
                 </>
               )}
             </Button>
@@ -201,10 +258,14 @@ export function AIFeedbackGenerator({
                     AI Generation Limit Reached
                   </p>
                   <p className="text-amber-700 dark:text-amber-300 mt-1">
-                    You&apos;ve used all {usageInfo?.limit} AI generations for this month. 
-                    Upgrade to Pro for unlimited AI generations and advanced features.
+                    You&apos;ve used all {usageInfo?.limit} AI generations for
+                    this month. Upgrade to Pro for unlimited AI generations and
+                    advanced features.
                   </p>
-                  <Button size="sm" className="mt-2 bg-purple-600 hover:bg-purple-700">
+                  <Button
+                    size="sm"
+                    className="mt-2 bg-purple-600 hover:bg-purple-700"
+                  >
                     <Crown className="w-3 h-3 mr-1" />
                     Upgrade to Pro
                   </Button>
@@ -220,26 +281,30 @@ export function AIFeedbackGenerator({
             <Separator />
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">Generated Feedback</Label>
-                <Badge 
-                  variant="secondary" 
+                <Label className="text-sm font-medium">
+                  Generated Feedback
+                </Label>
+                <Badge
+                  variant="secondary"
                   className={cn(
-                    promptType === "reinforcement" 
-                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" 
-                      : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                    promptType === "reinforcement"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                      : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
                   )}
                 >
-                  {promptType === "reinforcement" ? "Reinforcement" : "Refinement"}
+                  {promptType === "reinforcement"
+                    ? "Reinforcement"
+                    : "Refinement"}
                 </Badge>
               </div>
-              
+
               <Textarea
                 value={generatedFeedback}
                 onChange={(e) => setGeneratedFeedback(e.target.value)}
                 placeholder="Generated feedback will appear here..."
                 className="min-h-[100px] resize-none"
               />
-              
+
               <div className="flex gap-2">
                 <Button onClick={handleUse} variant="default">
                   Use This Feedback
@@ -266,7 +331,8 @@ export function AIFeedbackGenerator({
                   Upgrade to Pro for unlimited AI generations
                 </p>
                 <p className="text-purple-700 dark:text-purple-300 mt-1">
-                  Get unlimited AI feedback generation, advanced features, and priority support.
+                  Get unlimited AI feedback generation, advanced features, and
+                  priority support.
                 </p>
               </div>
             </div>
@@ -275,4 +341,4 @@ export function AIFeedbackGenerator({
       </CardContent>
     </Card>
   );
-} 
+}

@@ -58,7 +58,9 @@ export const OverviewMetrics = ({
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+      {" "}
+      {/* More responsive grid */}
       {metrics.map((metric, index) => (
         <motion.div
           key={metric.title}
@@ -66,7 +68,9 @@ export const OverviewMetrics = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: index * 0.1 }}
         >
-          <Card>
+          <Card className="h-full">
+            {" "}
+            {/* Ensure consistent height */}
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 {metric.title}

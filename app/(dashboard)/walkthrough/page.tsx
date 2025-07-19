@@ -37,7 +37,9 @@ export default function WalkthroughsPage() {
   const { walkthroughs, isCoach } = walkthroughData;
 
   return (
-    <div className="py-4 md:py-6 space-y-6">
+    <div className="py-3 md:py-4 space-y-4">
+      {" "}
+      {/* Reduced spacing */}
       <PageHeader
         title="Walkthroughs"
         description={
@@ -57,7 +59,6 @@ export default function WalkthroughsPage() {
           )
         }
       />
-
       {/* Filters */}
       <Card>
         <CardHeader>
@@ -86,9 +87,10 @@ export default function WalkthroughsPage() {
           </CardContent>
         )}
       </Card>
-
       {/* Walkthroughs List */}
-      <div className="space-y-4">
+      <div className="space-y-3">
+        {" "}
+        {/* Reduced spacing */}
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">
             {isCoach ? "All Walkthroughs" : "My Walkthroughs"}
@@ -98,7 +100,6 @@ export default function WalkthroughsPage() {
             {walkthroughs.length !== 1 ? "s" : ""}
           </div>
         </div>
-
         <WalkthroughList
           walkthroughs={walkthroughs}
           isCoach={isCoach}
