@@ -9,7 +9,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { Id } from "@/convex/_generated/dataModel";
-import { getIndicatorName } from "@/lib/indicatorUtils";
+import { getIndicatorName } from "@/lib/IndicatorUtils";
 import { ReflectionCard } from "./components/ReflectionCard";
 import FeedbackSection from "./components/FeedbackSection";
 import DraftMessage from "./components/DraftMessage";

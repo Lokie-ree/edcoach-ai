@@ -5,7 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { PageHeader } from "@/components/common/PageHeader";
 import { useState } from "react";
-import { getIndicatorName } from "@/lib/indicatorUtils";
+import { getIndicatorName } from "@/lib/IndicatorUtils";
 import WalkthroughFilters from "./components/WalkthroughFilters";
 import WalkthroughList from "./components/WalkthroughList";
 import { Walkthrough } from "@/types/walkthrough";

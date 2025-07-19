@@ -17,7 +17,7 @@ import {
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useQuery } from "convex/react";
-import { getIndicatorName } from "@/lib/indicatorUtils";
+import { getIndicatorName } from "@/lib/IndicatorUtils";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ClerkUser, ConvexUser, TeacherRecord } from "@/types/user";
