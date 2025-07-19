@@ -1,11 +1,52 @@
+"use client";
+
 import { Users, BookOpen, MessageSquare } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { PrioritiesPanel } from "@/components/dashboard/PrioritiesPanel";
 import { RecentActivityFeed } from "@/components/dashboard/RecentActivityFeed";
-import { mockData } from "../mock-data";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CoachDashboardPage() {
-  const { coachDashboardData } = mockData;
+  const analytics = useQuery(api.analytics.getCoachAnalytics);
+
+  if (!analytics) {
+    return (
+      <div className="py-4 md:py-6 space-y-6">
+        {/* KPI Cards Skeleton */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="p-6 border rounded-lg">
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-8 w-16 mb-2" />
+              <Skeleton className="h-3 w-32" />
+            </div>
+          ))}
+        </div>
+
+        {/* Main Dashboard Content Skeleton */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="p-6 border rounded-lg">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-4 w-full" />
+              ))}
+            </div>
+          </div>
+          <div className="p-6 border rounded-lg">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-4 w-full" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="py-4 md:py-6 space-y-6">
@@ -13,25 +54,25 @@ export default function CoachDashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           title="Total Teachers"
-          value={coachDashboardData.kpis.totalTeachers}
+          value={analytics.totalTeachers}
           icon={Users}
           description="Active teachers in your portfolio"
         />
         <KpiCard
           title="Active Teachers"
-          value={coachDashboardData.kpis.activeTeachers}
+          value={analytics.activeTeachers}
           icon={Users}
           description="Teachers with recent activity"
         />
         <KpiCard
           title="Total Walkthroughs"
-          value={coachDashboardData.kpis.totalWalkthroughs}
+          value={analytics.totalWalkthroughs}
           icon={BookOpen}
           description="Walkthroughs completed this month"
         />
         <KpiCard
           title="Feedback Generated"
-          value={coachDashboardData.kpis.totalFeedback}
+          value={analytics.totalFeedbackGenerated}
           icon={MessageSquare}
           description="AI feedback pieces created"
         />
@@ -41,13 +82,13 @@ export default function CoachDashboardPage() {
       <div className="grid gap-6 md:grid-cols-2">
         {/* Priorities Panel */}
         <PrioritiesPanel
-          walkthroughsDue={coachDashboardData.priorities.walkthroughsDue}
-          reflectionsToReview={coachDashboardData.priorities.reflectionsToReview}
-          teachersNeedingSupport={coachDashboardData.priorities.teachersNeedingSupport}
+          walkthroughsDue={analytics.priorities.walkthroughsDue}
+          reflectionsToReview={analytics.priorities.reflectionsToReview}
+          teachersNeedingSupport={analytics.priorities.teachersNeedingSupport}
         />
 
         {/* Recent Activity Feed */}
-        <RecentActivityFeed activities={coachDashboardData.recentActivity} />
+        <RecentActivityFeed activities={analytics.recentActivity} />
       </div>
     </div>
   );

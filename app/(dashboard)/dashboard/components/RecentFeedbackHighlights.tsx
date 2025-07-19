@@ -6,7 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, BookOpen, TrendingUp, Calendar, Loader2 } from "lucide-react";
+import { MessageSquare, BookOpen, TrendingUp, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 
@@ -62,46 +62,41 @@ export default function RecentFeedbackHighlights() {
           </div>
         </div>
 
-        {/* Recent Walkthroughs */}
+        {/* Recent Activity */}
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-muted-foreground">Recent Activity</h4>
           
-          {analytics.recentWalkthroughs.length > 0 ? (
-            analytics.recentWalkthroughs.slice(0, 5).map((walkthrough) => (
-              <Link
-                key={walkthrough._id}
-                href={`/walkthrough/${walkthrough._id}/view`}
-                className="block group"
+          {analytics.recentActivity.length > 0 ? (
+            analytics.recentActivity.slice(0, 5).map((activity) => (
+              <div
+                key={activity.id}
+                className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
               >
-                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg transition-colors group-hover:bg-accent/30 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+                    {activity.type === "walkthrough" ? (
                       <BookOpen className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {walkthrough.teacherName}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(walkthrough.createdAt, { addSuffix: true })}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {walkthrough.hasAiFeedback ? (
-                      <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                        <MessageSquare className="h-3 w-3 mr-1" />
-                        Feedback Ready
-                      </Badge>
+                    ) : activity.type === "feedback" ? (
+                      <MessageSquare className="h-4 w-4 text-white" />
                     ) : (
-                      <Badge variant="outline">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        Pending
-                      </Badge>
+                      <TrendingUp className="h-4 w-4 text-white" />
                     )}
                   </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      {activity.teacherName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(activity.timestamp, { addSuffix: true })}
+                    </p>
+                  </div>
                 </div>
-              </Link>
+                <div className="flex items-center gap-2">
+                  <Badge variant={activity.status === "completed" ? "default" : "outline"}>
+                    {activity.title}
+                  </Badge>
+                </div>
+              </div>
             ))
           ) : (
             <div className="text-center py-8">
