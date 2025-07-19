@@ -1,13 +1,16 @@
 import { NeonGradientCard } from "@/components/magicui/neon-gradient-card";
 import { BorderBeam } from "@/components/magicui/border-beam";
+import { Section } from "@/components/ui/section";
+import { SignInButton } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
 import ctaData from "@/data/landing-content.json";
 
 export default function CTASection() {
   const { headline, sub_headline, cta } = ctaData.cta;
 
   return (
-    <div className="py-24 bg-background">
-      <div className="container mx-auto px-4 max-w-4xl">
+    <Section id="cta" spacing="landing" className="relative overflow-hidden">
+      <div className="mx-auto max-w-4xl px-6">
         <NeonGradientCard
           borderRadius={24}
           neonColors={{
@@ -16,14 +19,16 @@ export default function CTASection() {
           }}
           className="overflow-hidden relative"
         >
-          <div className="py-10 px-8 text-center">
+          <div className="py-8 px-6 text-center">
             <h2 className="text-3xl font-bold mb-6">{headline}</h2>
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
               {sub_headline}
             </p>
-            <button className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-blue-600 to-violet-600 px-8 py-3 text-md font-medium text-white shadow hover:opacity-90 transition-opacity">
-              {cta.label}
-            </button>
+            <SignInButton mode="modal">
+              <Button className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 px-8 py-3 text-md font-medium shadow hover:shadow-lg transition-all duration-300">
+                {cta.label}
+              </Button>
+            </SignInButton>
           </div>
           <BorderBeam
             size={200}
@@ -33,6 +38,6 @@ export default function CTASection() {
           />
         </NeonGradientCard>
       </div>
-    </div>
+    </Section>
   );
 }

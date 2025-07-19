@@ -22,7 +22,7 @@ export default function Pricing() {
   return (
     <Section
       id="pricing"
-      spacing="compact"
+      spacing="landing"
       className="relative overflow-hidden"
     >
       {/* Decorative background elements */}
@@ -37,7 +37,7 @@ export default function Pricing() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl xl:text-4xl mb-6">
             <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">
@@ -65,11 +65,6 @@ export default function Pricing() {
                   {tier.highlight && (
                     <span className="absolute top-3 right-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-1.5 rounded-full text-sm font-medium shadow-lg z-10">
                       Most Popular
-                    </span>
-                  )}
-                  {tier.disabled && (
-                    <span className="absolute top-3 right-3 bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-medium shadow-lg z-10">
-                      Join Waitlist
                     </span>
                   )}
                   <div className="flex flex-col h-full">

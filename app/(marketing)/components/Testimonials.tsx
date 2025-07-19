@@ -24,7 +24,7 @@ export default function TestimonialsSection() {
   return (
     <Section 
       id="testimonials"
-      spacing="compact"
+      spacing="landing"
       className="relative overflow-hidden"
     >
       {/* Decorative background elements */}
@@ -39,7 +39,7 @@ export default function TestimonialsSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl xl:text-4xl mb-6">
             <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">
@@ -48,7 +48,7 @@ export default function TestimonialsSection() {
           </h2>
         </motion.div>
         
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-16">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {testimonials.quotes.slice(0, 6).map((testimonial, index) => {
             const { from, to } = getGradientColors(index)
             return (

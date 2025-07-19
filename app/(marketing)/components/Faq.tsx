@@ -14,7 +14,7 @@ export default function FAQSection() {
   };
 
   return (
-    <Section id="faq" spacing="compact" className="relative overflow-hidden">
+    <Section id="faq" spacing="landing" className="relative overflow-hidden">
       {/* Decorative background elements */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-white via-indigo-50/30 to-purple-50/30 dark:from-zinc-950 dark:via-indigo-950/10 dark:to-purple-950/10"></div>
@@ -27,7 +27,7 @@ export default function FAQSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl xl:text-4xl mb-6">
             <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">

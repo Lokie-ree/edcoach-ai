@@ -5,7 +5,17 @@ import { Card } from "@/components/ui/card";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import landingContent from "@/data/landing-content.json";
 import { motion } from "framer-motion";
-import { BotMessageSquare, FileCog, LineChart, ClipboardList, UserCheck, Send } from "lucide-react";
+import { 
+  BotMessageSquare, 
+  FileCog, 
+  LineChart, 
+  ClipboardList, 
+  UserCheck, 
+  Send,
+  MessageSquareShare,
+  TrendingUp,
+  LayoutDashboard
+} from "lucide-react";
 
 // Map icon strings to components
 const iconMap = {
@@ -15,7 +25,9 @@ const iconMap = {
   ClipboardList: ClipboardList,
   UserCheck: UserCheck,
   Send: Send,
-  // Add other icon mappings as needed
+  MessageSquareShare: MessageSquareShare,
+  TrendingUp: TrendingUp,
+  LayoutDashboard: LayoutDashboard,
 };
 
 export default function FeaturesSection() {
@@ -41,7 +53,7 @@ export default function FeaturesSection() {
   return (
     <Section
       id="features"
-      spacing="compact"
+      spacing="landing"
       className="relative"
     >
       <div className="mx-auto max-w-4xl px-6">
@@ -49,7 +61,7 @@ export default function FeaturesSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl xl:text-4xl mb-6">
             <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">

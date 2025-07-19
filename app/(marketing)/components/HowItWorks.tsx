@@ -5,13 +5,14 @@ import { Card } from "@/components/ui/card"
 import { BorderBeam } from "@/components/magicui/border-beam"
 import landingContent from "@/data/landing-content.json"
 import { motion } from "framer-motion"
-import { ClipboardList, Sparkles, TrendingUp } from "lucide-react"
+import { ClipboardList, Sparkles, TrendingUp, MessageSquareShare } from "lucide-react"
 
 // Map icon strings to components
 const iconMap = {
   "ClipboardList": ClipboardList,
   "Sparkles": Sparkles,
   "TrendingUp": TrendingUp,
+  "MessageSquareShare": MessageSquareShare,
 }
 
 export default function HowItWorksSection() {
@@ -37,7 +38,7 @@ export default function HowItWorksSection() {
   return (
     <Section 
       id="how-it-works"
-      spacing="compact"
+      spacing="landing"
       className="relative"
     >
       <div className="mx-auto max-w-6xl px-6">
@@ -45,7 +46,7 @@ export default function HowItWorksSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl xl:text-4xl mb-6">
             <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">

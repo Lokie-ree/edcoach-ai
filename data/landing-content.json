@@ -8,142 +8,122 @@
       {"label": "Pricing", "href": "#pricing"},
       {"label": "FAQ", "href": "#faq"},
       {"label": "Login", "href": "/login"},
-      {"label": "Get Started For Free", "href": "#get-started", "is_primary": true}
+      {"label": "Get Started For Free", "href": "/signup", "is_primary": true}
     ]
-  }, 
+  },
   "hero": {
     "tagline": "LEADS/LER Ready!",
-    "headline": "AI-Powered Coaching for Frequent, Actionable Feedback in K-12 Schools",
-    "sub_headline": "Designed for K-12 leaders and coaches to streamline informal walkthroughs, generate real-time, rubric-aligned feedback, and foster continuous teacher growth—without replacing your formal evaluation system.",
-    "cta_primary": {"label": "Get Started For Free", "href": "#get-started"},
-    "cta_secondary": {"label": "Learn More", "href": "#features"},
-
+    "headline": "Transform Walkthroughs into Continuous Teacher Growth",
+    "sub_headline": "Empower your coaches and teachers with an AI partner that streamlines informal walkthroughs, delivers PGP-aligned feedback, and fosters a continuous growth loop through reflection.",
+    "cta_primary": {"label": "Start Your Free Trial", "href": "/signup"},
+    "cta_secondary": {"label": "See Features", "href": "#features"},
     "image_description": "Illustration: Coach using EdCoach AI on a tablet, providing feedback to a teacher, with subtle background elements suggesting growth charts and student success pathways."
   },
   "features": {
-    "headline": "Key Features for Continuous Teacher Growth",
+    "headline": "A Smarter Way to Support Teacher Growth",
     "cards": [
       {
         "icon": "ClipboardList",
-        "title": "Quick Informal Walkthroughs",
-        "description": "Select a teacher, choose focus indicators, and capture evidence in under 10 minutes—optimized for mobile and classroom use."
+        "title": "Effortless Walkthrough Capture",
+        "description": "Conduct focused, informal walkthroughs in minutes. Select a teacher, choose rubric indicators, and capture evidence on any device."
       },
       {
         "icon": "BotMessageSquare",
-        "title": "AI Feedback for Walkthroughs",
-        "description": "Generate concise, actionable, rubric-aligned feedback suggestions in real time. Edit and finalize before sharing."
+        "title": "Intelligent, PGP-Aligned Feedback",
+        "description": "Our AI generates feedback that's not just rubric-aligned, but also connects directly to each teacher's long-term PGP goal."
       },
       {
-        "icon": "Send",
-        "title": "Instant Feedback Delivery",
-        "description": "Share feedback with teachers immediately after walkthroughs—no waiting, no drafts."
+        "icon": "MessageSquareShare",
+        "title": "Close the Growth Loop",
+        "description": "Teachers don't just receive feedback; they engage with it. Our platform enables a two-way dialogue through reflections, turning feedback into action."
       },
       {
-        "icon": "UserCheck",
-        "title": "Teacher Feedback Portal",
-        "description": "Teachers access all of their feedback in a secure, easy-to-read feed."
+        "icon": "TrendingUp",
+        "title": "The Teacher Growth Journal",
+        "description": "Teachers get a private, focused dashboard with a timeline of their growth, helping them see progress and own their professional development."
       },
       {
-        "icon": "LineChart",
-        "title": "Role-Based Dashboards",
-        "description": "Principals and coaches see trends, frequency, and focus areas to inform school-wide PD and support."
+        "icon": "LayoutDashboard",
+        "title": "Insightful Coach Dashboards",
+        "description": "Instantly see which teachers need support and identify team-wide growth areas with an actionable, clutter-free command center."
       }
     ]
   },
   "how_it_works": {
-    "headline": "Get Meaningful Feedback Flowing in 3 Steps",
+    "headline": "Foster Growth in 3 Simple Steps",
     "steps": [
       {
         "id": 1,
         "icon": "ClipboardList",
-        "title": "Quick Informal Walkthroughs",
-        "description": "Select a teacher, choose 1-3 focus indicators, and jot down evidence—all in under 10 minutes."
+        "title": "1. Capture Evidence in Minutes",
+        "description": "Conduct a quick, informal walkthrough focused on a reinforcement and a refinement area."
       },
       {
         "id": 2,
         "icon": "Sparkles",
-        "title": "Real-Time AI Feedback",
-        "description": "Instantly get AI-suggested, rubric-aligned feedback based on your notes and rubric. Edit and share with teachers in seconds."
+        "title": "2. Generate PGP-Aligned Feedback",
+        "description": "Instantly get AI-suggested feedback that connects the observation to the teacher's annual goal. Edit and share in seconds."
       },
       {
         "id": 3,
-        "icon": "TrendingUp",
-        "title": "Review & Grow",
-        "description": "Teachers access all feedback in a secure portal. Leaders and coaches track trends and growth over time with role-based dashboards."
+        "icon": "MessageSquareShare",
+        "title": "3. Reflect & Track Growth",
+        "description": "The teacher receives the feedback and adds their reflection. Both coach and teacher see the interaction on their dashboards, tracking progress over time."
       }
     ]
   },
   "pricing": {
-    "headline": "Fair, Transparent Pricing for Every Coach",
-    "sub_headline": "Start free and upgrade when you're ready. No hidden fees, no surprise overages.",
+    "headline": "Simple, Powerful Plans for Every Coach",
+    "sub_headline": "Start with a free trial to experience the core loop. Upgrade to unlock the full power of continuous growth.",
     "tiers": [
       {
-        "name": "Coach Free",
-        "price": "$0/mo",
-        "price_description": "Perfect for getting started. Support 1 teacher and experience AI-powered walkthroughs.",
+        "name": "Free Trial",
+        "price": "$0",
+        "price_description": "Experience the core AI feedback loop for 14 days. No credit card required.",
         "features": [
-          "Support up to 1 teacher",
-          "Complete up to 3 walkthroughs per month",
-          "LEADS, LER, & NIET Alignment",
-          "AI powered reinforcements/refinements",
-          "Coach and teacher role-based dashboards",
-          "Basic feedback list view",
-          "14-day data retention",
-          "Email support (72-hour response)"
+          "Support up to 2 teachers",
+          "3 walkthroughs (total)",
+          "PGP-Aligned AI Feedback",
+          "7-day data retention"
         ],
-        "cta": {"label": "Get Started For Free", "href": "#get-started"},
-        "highlight": true
-      },
-      {
-        "name": "Coach Starter",
-        "price": "$7/mo",
-        "price_description": "For coaches ready to support a small team. More teachers, more walkthroughs, enhanced analytics.",
-        "features": [
-          "Support up to 5 teachers",
-          "Complete up to 15 walkthroughs per month",
-          "LEADS, LER, & NIET Alignment",
-          "AI powered reinforcements/refinements",
-          "Coach and teacher role-based dashboards",
-          "Enhanced analytics with usage charts",
-          "90-day data retention",
-          "Bulk teacher invitations",
-          "Priority email support (24-hour response)"
-        ],
-        "cta": {"label": "Get Started For Free", "href": "#get-started"},
+        "cta": {"label": "Start Your Free Trial", "href": "/signup"},
         "highlight": false
       },
       {
-        "name": "Coach Pro",
-        "price": "Coming Soon",
-        "price_description": "For coaches ready to scale their impact. Advanced analytics, more teachers, and premium support.",
+        "name": "Coach Starter",
+        "price": "$19",
+        "price_description": "per month, per coach",
         "features": [
           "Support up to 15 teachers",
-          "Complete up to 50 walkthroughs per month",
-          "LEADS, LER, & NIET Alignment",
-          "AI powered reinforcements/refinements",
-          "Coach and teacher role-based dashboards",
-          "Advanced analytics and trends",
+          "50 walkthroughs per month",
+          "**PGP Goal Tracking**",
+          "**Teacher Reflection Loop**",
+          "**Insightful Coach Dashboard**",
+          "**Teacher Growth Journal**",
           "90-day data retention",
-          "Download feedback as PDF",
-          "Bulk teacher invitations",
-          "Priority email support"
+          "Standard email support"
         ],
-        "cta": {"label": "Get Started For Free", "href": "#get-started"},
-        "highlight": false,
-        "disabled": true
+        "cta": {"label": "Choose Starter", "href": "/signup"},
+        "highlight": true
+      },
+      {
+        "name": "Coach Pro",
+        "price": "$49",
+        "price_description": "per month, per coach",
+        "features": [
+          "Support up to 50 teachers",
+          "Unlimited walkthroughs",
+          "Everything in Starter, plus:",
+          "**Advanced Team Analytics (Heat Maps)**",
+          "**Growth Trend Reporting**",
+          "**Bulk Teacher Invites**",
+          "**Export Feedback to PDF**",
+          "Priority Support"
+        ],
+        "cta": {"label": "Choose Pro", "href": "/signup"},
+        "highlight": false
       }
     ]
-  },
-  "pro_features_coming_soon": {
-    "headline": "Pro Features Coming Soon",
-    "features": [
-      "Download Feedback as PDF",
-      "Advanced Analytics Dashboard",
-      "In-Depth Progress Insights",
-      "Support for 15+ Teachers",
-      "Priority Email Support"
-    ],
-    "cta": {"label": "Get Started For Free", "href": "#get-started"}
   },
   "testimonials": {
     "headline": "What Educational Leaders & Teachers Are Saying",
@@ -154,11 +134,6 @@
         "title": "Former Principal & EdTech Advisor"
       },
       {
-        "quote": "Finally, a tool that adapts to *our* district's rubric, not the other way around. The trend data helps us target PD effectively.",
-        "author": "Marcus Chen",
-        "title": "Instructional Coach Mentor"
-      },
-      {
         "quote": "As a teacher, I love being able to access all my feedback in one place. The regular, actionable insights help me grow between formal observations.",
         "author": "Sarah Williams",
         "title": "Classroom Teacher"
@@ -167,79 +142,38 @@
         "quote": "The platform is clean, responsive, and easy to use on my tablet during walkthroughs – a huge improvement over our previous system.",
         "author": "Jessica Nguyen",
         "title": "Instructional Coach"
-      },
-      {
-        "quote": "EdCoach AI streamlines the observation process required by LEADS, but more importantly, it helps us turn evaluation into genuine professional growth.",
-        "author": "Samantha Bell",
-        "title": "Principal, Middle School"
-      },
-      {
-        "quote": "Being able to see growth trends across my team helps me provide differentiated support and celebrate progress in a tangible way.",
-        "author": "David Rodriguez",
-        "title": "Assistant Principal"
-      },
-      {
-        "quote": "The consistency EdCoach AI brings to our feedback process across multiple schools is invaluable for district-level improvement initiatives.",
-        "author": "Dr. Anya Sharma",
-        "title": "Chief Academic Officer"
-      },
-      {
-        "quote": "Our coaches feel empowered. They spend less time writing reports and more time actually coaching, thanks to the AI assist.",
-        "author": "Michael Greene",
-        "title": "Director of Curriculum & Instruction"
-      },
-      {
-        "quote": "The dashboard makes it easy for me as a principal to spot trends and plan PD that actually meets our teachers' needs.",
-        "author": "Maria Lopez",
-        "title": "Principal"
       }
     ]
   },
   "faq": {
-    "headline": "Got Questions? We've Got Answers.",
+    "headline": "Frequently Asked Questions",
     "questions": [
       {
         "question": "Does EdCoach AI replace our formal evaluation system?",
-        "answer": "No, EdCoach AI is designed to supplement—not replace—your formal evaluation process. It streamlines informal feedback and growth between formal observations."
+        "answer": "No, EdCoach AI is designed to supplement—not replace—your formal evaluation process. It provides the continuous, informal feedback and PGP tracking that happens *between* formal observations."
       },
       {
-        "question": "How do teachers access their feedback?",
-        "answer": "Teachers have a secure portal to view all feedback interactions in a clear, organized feed."
+        "question": "How do teachers interact with their feedback?",
+        "answer": "Teachers have a private, secure portal called the 'Growth Journal.' They can view all feedback, see their progress over time, and add personal reflections to close the coaching loop."
       },
       {
         "question": "How secure is our school's data?",
-        "answer": "Extremely. We use industry-leading partners (Convex & Clerk) for encrypted storage, secure authentication (MFA available), and adhere to strict data privacy protocols designed for education."
+        "answer": "Extremely. We use industry-leading partners for encrypted storage and secure authentication. We are built with FERPA compliance in mind, ensuring student and teacher data is always protected."
       },
       {
-        "question": "How does role-based access work?",
-        "answer": "Principals, coaches, and teachers each have access to the features and data relevant to their role, ensuring privacy and clarity for everyone."
+        "question": "What are the key features of the Coach Starter plan?",
+        "answer": "The Starter plan gives you the complete coaching loop: PGP Goal Tracking, the Teacher Reflection feature, and the insightful dashboards for both you and your teachers to track progress over time."
       },
       {
-        "question": "What are the usage limits for each plan?",
-        "answer": "Each plan has clear limits on the number of teachers you can support and walkthroughs you can complete per month. Upgrade prompts and usage tracking help you stay on top of your plan."
-      },
-      {
-        "question": "How does EdCoach AI ensure feedback is rubric-aligned?",
-        "answer": "Our AI is trained on the Louisiana Educator Rubric (LER), LEADS, and NIET frameworks, ensuring all feedback is aligned to your district's standards and best practices."
-      },
-      {
-        "question": "How fast is feedback generated?",
-        "answer": "Feedback is generated in real time—usually within a few seconds—so you can deliver actionable insights immediately after each walkthrough."
-      },
-      {
-        "question": "How long is my data retained?",
-        "answer": "Analytics and feedback are retained for 30 days on the Starter plan and 90 days on the Pro plan, helping you track growth over time."
-      },
-      {
-        "question": "What advanced features are available in the Pro plan?",
-        "answer": "Coach Pro includes bulk teacher invitations, advanced analytics, feedback export as PDF, and priority support."
+        "question": "What advanced features are available in the Coach Pro plan?",
+        "answer": "The Pro plan is for strategic leaders. It adds powerful team-level analytics like indicator heat maps and growth trends, plus efficiency tools like bulk invites and PDF exports."
       }
     ]
   },
   "cta": {
     "headline": "Ready to Make Every Coaching Moment Count?",
-    "sub_headline": "Start free today! Free up valuable time, deliver consistently impactful feedback, and foster a thriving culture of growth in your school or district.",
-    "cta": {"label": "Get Started For Free", "href": "#get-started"}
+    "sub_headline": "Start your free trial today. Free up valuable time, deliver consistently impactful feedback, and foster a thriving culture of growth in your school.",
+    "cta": {"label": "Get Started For Free", "href": "/signup"}
   },
   "footer": {
     "logo_placeholder": "EdCoach AI Logo",
@@ -248,7 +182,6 @@
        {
         "title": "Product",
         "links": [
-          {"label": "Why EdCoach AI?", "href": "#why-edcoach-ai"},
           {"label": "Features", "href": "#features"},
           {"label": "Pricing", "href": "#pricing"},
           {"label": "Security", "href": "/security"}
@@ -257,8 +190,7 @@
       {
         "title": "Resources",
         "links": [
-          {"label": "Blog", "href": "/blog"},
-          {"label": "Support / FAQ", "href": "/support"},
+          {"label": "Support / FAQ", "href": "#faq"},
           {"label": "Contact Us", "href": "/contact"}
         ]
       },
@@ -270,59 +202,16 @@
         ]
       }
     ],
-    "newsletter": {
-      "headline": "Stay Updated",
-      "description": "Get the latest news, tips, and early access info.",
-      "form_placeholder": "Enter your email"
-    },
     "social_links": [
       {
         "platform": "GitHub",
-        "icon": "github",
-        "href": "https://github.com/Lokie-ree",
-        "label": "GitHub"
+        "href": "https://github.com/Lokie-ree"
       },
       {
         "platform": "Twitter",
-        "icon": "twitter",
-        "href": "https://twitter.com/webdevlokie",
-        "label": "Twitter"
-      },
-      {
-        "platform": "LinkedIn",
-        "icon": "linkedin",
-        "href": "https://linkedin.com/in/lapointwebdev",
-        "label": "LinkedIn"
-      },
-      {
-        "platform": "Instagram",
-        "icon": "instagram",
-        "href": "https://instagram.com/lapointwebdev25",
-        "label": "Instagram"
+        "href": "https://twitter.com/webdevlokie"
       }
     ],
-    "navigation": [
-      {
-        "label": "Home",
-        "href": "/"
-      },
-      {
-        "label": "Features",
-        "href": "/#features"
-      },
-      {
-        "label": "How It Works",
-        "href": "/#how-it-works"
-      },
-      {
-        "label": "Pricing",
-        "href": "/#pricing"
-      },
-      {
-        "label": "FAQ",
-        "href": "/#faq"
-      }
-    ],
-    "copyright": "© 2024 EdCoach AI. All rights reserved."
+    "copyright": "© 2025 EdCoach AI. All rights reserved."
   }
 }
