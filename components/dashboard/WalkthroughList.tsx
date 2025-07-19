@@ -9,7 +9,11 @@ interface WalkthroughListProps {
   getIndicatorName: (indicator: string) => string;
 }
 
-export default function WalkthroughList({ walkthroughs, isCoach, getIndicatorName }: WalkthroughListProps) {
+export default function WalkthroughList({
+  walkthroughs,
+  isCoach,
+  getIndicatorName,
+}: WalkthroughListProps) {
   if (walkthroughs.length === 0) {
     return (
       <Card>
@@ -35,4 +39,4 @@ export default function WalkthroughList({ walkthroughs, isCoach, getIndicatorNam
       ))}
     </div>
   );
-} 
+}

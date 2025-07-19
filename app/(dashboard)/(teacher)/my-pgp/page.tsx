@@ -2,6 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { PageHeader } from "@/components/common/PageHeader";
 import { PgpGoalCard } from "@/components/dashboard/PgpGoalCard";
 import { RefinementFocusCard } from "@/components/dashboard/RefinementFocusCard";
 import { ReflectionPromptCard } from "@/components/dashboard/ReflectionPromptCard";
@@ -13,7 +14,12 @@ export default function TeacherPgpDashboardPage() {
 
   if (!pgpData) {
     return (
-      <div className="py-4 md:py-6 space-y-6 max-w-4xl">
+      <div className="py-4 md:py-6 space-y-6">
+        <PageHeader
+          title="My PGP"
+          description="Track your Professional Growth Plan progress and development goals"
+        />
+
         {/* PGP Goal Card Skeleton */}
         <div className="p-6 border rounded-lg">
           <Skeleton className="h-6 w-48 mb-4" />
@@ -60,7 +66,12 @@ export default function TeacherPgpDashboardPage() {
   }
 
   return (
-    <div className="py-4 md:py-6 space-y-6 max-w-4xl">
+    <div className="py-4 md:py-6 space-y-6">
+      <PageHeader
+        title="My PGP"
+        description="Track your Professional Growth Plan progress and development goals"
+      />
+
       {/* PGP Goal Card */}
       <PgpGoalCard
         title={pgpData.pgpGoal.title}
@@ -89,4 +100,4 @@ export default function TeacherPgpDashboardPage() {
       <WalkthroughTimeline walkthroughs={pgpData.recentWalkthroughs} />
     </div>
   );
-} 
+}

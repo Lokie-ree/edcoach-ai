@@ -17,9 +17,10 @@ export const UpgradePrompt = ({ feature }: { feature: string }) => (
           {feature} Available in Coach Pro
         </h3>
         <p className="text-purple-700 dark:text-purple-300 mb-6">
-          Upgrade to Coach Pro to unlock advanced analytics, trends, and detailed insights
+          Upgrade to Coach Pro to unlock advanced analytics, trends, and
+          detailed insights
         </p>
-        <Link href="/billing">
+        <Link href="/settings/billing">
           <Button className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white">
             Upgrade to Coach Pro
             <ArrowRight className="ml-2 h-4 w-4" />
@@ -28,4 +29,4 @@ export const UpgradePrompt = ({ feature }: { feature: string }) => (
       </CardContent>
     </Card>
   </motion.div>
-); 
+);

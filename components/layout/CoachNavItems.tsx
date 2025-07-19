@@ -25,7 +25,7 @@ export function CoachNavItems() {
     },
     {
       title: "Walkthroughs",
-      url: "/my-walkthroughs",
+      url: "/walkthrough",
       icon: BookOpen,
     },
     {
@@ -35,15 +35,15 @@ export function CoachNavItems() {
     },
     {
       title: "Billing",
-      url: "/billing",
+      url: "/settings/billing",
       icon: CreditCard,
     },
     {
       title: "Settings",
-      url: "/settings",
+      url: "/settings/profile",
       icon: Settings,
     },
   ];
 
   return <DashboardNav items={navItems} />;
-} 
+}

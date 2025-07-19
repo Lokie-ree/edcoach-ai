@@ -7,7 +7,6 @@ import { Plus, Users, BarChart2, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-
 export default function QuickActionsPanel() {
   return (
     <motion.div
@@ -55,7 +54,7 @@ export default function QuickActionsPanel() {
               </Button>
             </Link>
             {/* Billing */}
-            <Link href="/billing">
+            <Link href="/settings/billing">
               <Button
                 variant="outline"
                 className="h-auto flex-col items-center p-3 space-y-2 w-full"
@@ -69,4 +68,4 @@ export default function QuickActionsPanel() {
       </Card>
     </motion.div>
   );
-} 
+}

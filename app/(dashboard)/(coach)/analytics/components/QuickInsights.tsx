@@ -1,9 +1,13 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { TrendingUp, Crown, Target } from "lucide-react";
-import { AnalyticsData } from "./types";
+import { AnalyticsData } from "@/types/dashboard";
 
-export const QuickInsights = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
+export const QuickInsights = ({
+  analytics,
+}: {
+  analytics: AnalyticsData | null | undefined;
+}) => {
   if (!analytics) {
     return (
       <Card className="animate-pulse">
@@ -42,16 +46,27 @@ export const QuickInsights = ({ analytics }: { analytics: AnalyticsData | null |
                 Top Team Strengths
               </h4>
               {analytics.topStrengths.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No reinforcement data yet</p>
+                <p className="text-sm text-muted-foreground">
+                  No reinforcement data yet
+                </p>
               ) : (
                 <div className="space-y-2">
                   {analytics.topStrengths.map((strength) => (
-                    <div key={strength.indicator} className="flex items-center justify-between">
+                    <div
+                      key={strength.indicator}
+                      className="flex items-center justify-between"
+                    >
                       <div>
-                        <span className="text-sm font-medium">{strength.indicatorName}</span>
-                        <span className="text-xs text-muted-foreground ml-2">({strength.indicator})</span>
+                        <span className="text-sm font-medium">
+                          {strength.indicatorName}
+                        </span>
+                        <span className="text-xs text-muted-foreground ml-2">
+                          ({strength.indicator})
+                        </span>
                       </div>
-                      <span className="text-sm font-bold text-green-600">{strength.count}</span>
+                      <span className="text-sm font-bold text-green-600">
+                        {strength.count}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -65,16 +80,27 @@ export const QuickInsights = ({ analytics }: { analytics: AnalyticsData | null |
                 Focus Areas
               </h4>
               {analytics.topGrowthAreas.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No refinement data yet</p>
+                <p className="text-sm text-muted-foreground">
+                  No refinement data yet
+                </p>
               ) : (
                 <div className="space-y-2">
                   {analytics.topGrowthAreas.map((area) => (
-                    <div key={area.indicator} className="flex items-center justify-between">
+                    <div
+                      key={area.indicator}
+                      className="flex items-center justify-between"
+                    >
                       <div>
-                        <span className="text-sm font-medium">{area.indicatorName}</span>
-                        <span className="text-xs text-muted-foreground ml-2">({area.indicator})</span>
+                        <span className="text-sm font-medium">
+                          {area.indicatorName}
+                        </span>
+                        <span className="text-xs text-muted-foreground ml-2">
+                          ({area.indicator})
+                        </span>
                       </div>
-                      <span className="text-sm font-bold text-orange-600">{area.count}</span>
+                      <span className="text-sm font-bold text-orange-600">
+                        {area.count}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -85,4 +111,4 @@ export const QuickInsights = ({ analytics }: { analytics: AnalyticsData | null |
       </Card>
     </motion.div>
   );
-}; 
+};

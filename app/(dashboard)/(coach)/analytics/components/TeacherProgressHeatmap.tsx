@@ -1,9 +1,13 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Users } from "lucide-react";
-import { AnalyticsData } from "./types";
+import { AnalyticsData } from "@/types/dashboard";
 
-export const TeacherProgressHeatmap = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
+export const TeacherProgressHeatmap = ({
+  analytics,
+}: {
+  analytics: AnalyticsData | null | undefined;
+}) => {
   if (!analytics) {
     return (
       <Card className="animate-pulse">
@@ -25,7 +29,9 @@ export const TeacherProgressHeatmap = ({ analytics }: { analytics: AnalyticsData
   const domains = ["INSTRUCTION", "PLANNING", "ENVIRONMENT", "PROFESSIONALISM"];
 
   // Get status color and styling
-  const getStatusStyle = (status: "strength" | "developing" | "needs_focus") => {
+  const getStatusStyle = (
+    status: "strength" | "developing" | "needs_focus",
+  ) => {
     switch (status) {
       case "strength":
         return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800";
@@ -72,37 +78,56 @@ export const TeacherProgressHeatmap = ({ analytics }: { analytics: AnalyticsData
             <div className="text-center py-8 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No teacher progress data available</p>
-              <p className="text-xs">Complete walkthroughs to see progress insights</p>
+              <p className="text-xs">
+                Complete walkthroughs to see progress insights
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
               {/* Header row with domain names */}
               <div className="grid grid-cols-[1fr,repeat(4,1fr),auto] gap-2 pb-2 border-b border-border">
-                <div className="text-sm font-medium text-muted-foreground">Teacher</div>
-                {domains.map(domain => (
-                  <div key={domain} className="text-xs font-medium text-center text-muted-foreground">
+                <div className="text-sm font-medium text-muted-foreground">
+                  Teacher
+                </div>
+                {domains.map((domain) => (
+                  <div
+                    key={domain}
+                    className="text-xs font-medium text-center text-muted-foreground"
+                  >
                     {formatDomainName(domain)}
                   </div>
                 ))}
-                <div className="text-xs font-medium text-muted-foreground">Last Seen</div>
+                <div className="text-xs font-medium text-muted-foreground">
+                  Last Seen
+                </div>
               </div>
 
               {/* Teacher rows */}
               <div className="space-y-2">
                 {analytics.teacherProgressMatrix.map((teacher) => (
-                  <div key={teacher.teacherId} className="grid grid-cols-[1fr,repeat(4,1fr),auto] gap-2 items-center p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div
+                    key={teacher.teacherId}
+                    className="grid grid-cols-[1fr,repeat(4,1fr),auto] gap-2 items-center p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                  >
                     {/* Teacher name */}
                     <div className="text-sm font-medium truncate">
                       {teacher.teacherName}
                     </div>
 
                     {/* Domain status cells */}
-                    {domains.map(domain => {
-                      const domainScore = teacher.domainScores.find(ds => ds.domain === domain);
+                    {domains.map((domain) => {
+                      const domainScore = teacher.domainScores.find(
+                        (ds) => ds.domain === domain,
+                      );
                       if (!domainScore) {
                         return (
-                          <div key={domain} className="h-8 rounded border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center">
-                            <span className="text-xs text-muted-foreground">—</span>
+                          <div
+                            key={domain}
+                            className="h-8 rounded border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center"
+                          >
+                            <span className="text-xs text-muted-foreground">
+                              —
+                            </span>
                           </div>
                         );
                       }
@@ -111,7 +136,7 @@ export const TeacherProgressHeatmap = ({ analytics }: { analytics: AnalyticsData
                         <div
                           key={domain}
                           className={`h-8 rounded border-2 flex items-center justify-center cursor-help transition-all hover:scale-105 ${getStatusStyle(domainScore.status)}`}
-                          title={`${formatDomainName(domain)}: ${domainScore.status.replace('_', ' ')} | Reinforcement: ${domainScore.reinforcementCount} | Refinement: ${domainScore.refinementCount}`}
+                          title={`${formatDomainName(domain)}: ${domainScore.status.replace("_", " ")} | Reinforcement: ${domainScore.reinforcementCount} | Refinement: ${domainScore.refinementCount}`}
                         >
                           <span className="text-xs">
                             {getStatusIcon(domainScore.status)}
@@ -122,17 +147,23 @@ export const TeacherProgressHeatmap = ({ analytics }: { analytics: AnalyticsData
 
                     {/* Last observation */}
                     <div className="text-xs text-muted-foreground">
-                      {teacher.lastObservation 
+                      {teacher.lastObservation
                         ? (() => {
-                            const daysSince = Math.floor((Date.now() - teacher.lastObservation) / (24 * 60 * 60 * 1000));
-                            return daysSince === 0 ? 'Today' : 
-                                   daysSince === 1 ? '1 day ago' : 
-                                   daysSince < 7 ? `${daysSince} days ago` :
-                                   daysSince < 30 ? `${Math.floor(daysSince / 7)} weeks ago` :
-                                   `${Math.floor(daysSince / 30)} months ago`;
+                            const daysSince = Math.floor(
+                              (Date.now() - teacher.lastObservation) /
+                                (24 * 60 * 60 * 1000),
+                            );
+                            return daysSince === 0
+                              ? "Today"
+                              : daysSince === 1
+                                ? "1 day ago"
+                                : daysSince < 7
+                                  ? `${daysSince} days ago`
+                                  : daysSince < 30
+                                    ? `${Math.floor(daysSince / 7)} weeks ago`
+                                    : `${Math.floor(daysSince / 30)} months ago`;
                           })()
-                        : 'Never'
-                      }
+                        : "Never"}
                     </div>
                   </div>
                 ))}
@@ -140,18 +171,26 @@ export const TeacherProgressHeatmap = ({ analytics }: { analytics: AnalyticsData
 
               {/* Legend */}
               <div className="pt-4 border-t border-border">
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">Legend</h4>
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                  Legend
+                </h4>
                 <div className="flex flex-wrap gap-4 text-xs">
                   <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded border-2 ${getStatusStyle("strength")}`}></div>
+                    <div
+                      className={`w-4 h-4 rounded border-2 ${getStatusStyle("strength")}`}
+                    ></div>
                     <span>💪 Strength</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded border-2 ${getStatusStyle("developing")}`}></div>
+                    <div
+                      className={`w-4 h-4 rounded border-2 ${getStatusStyle("developing")}`}
+                    ></div>
                     <span>📈 Developing</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded border-2 ${getStatusStyle("needs_focus")}`}></div>
+                    <div
+                      className={`w-4 h-4 rounded border-2 ${getStatusStyle("needs_focus")}`}
+                    ></div>
                     <span>🎯 Needs Focus</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -166,4 +205,4 @@ export const TeacherProgressHeatmap = ({ analytics }: { analytics: AnalyticsData
       </Card>
     </motion.div>
   );
-}; 
+};

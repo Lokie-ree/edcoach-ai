@@ -12,29 +12,33 @@ import { DomainPerformanceChart } from "./components/DomainPerformanceChart";
 import { TeacherProgressHeatmap } from "./components/TeacherProgressHeatmap";
 import { UpgradePrompt } from "./components/UpgradePrompt";
 
-
 export default function AnalyticsDashboardPage() {
   const { user, isLoaded } = useUser();
   const planDetection = usePlanDetection();
-  
+
   // Get plan features to check for advanced analytics
-  const planFeatures = useQuery(api.plans.getPlanFeatures, { 
-    hasProPlan: planDetection.isProPlan 
+  const planFeatures = useQuery(api.plans.getPlanFeatures, {
+    hasProPlan: planDetection.isProPlan,
   });
-  
+
   // Get convex user data
   const convexUser = useQuery(
     api.users.current,
-    user && isLoaded ? {} : "skip"
+    user && isLoaded ? {} : "skip",
   );
-  
+
   // Get comprehensive analytics data for coach
   const analytics = useQuery(
     api.analytics.getComprehensiveCoachAnalytics,
-    convexUser?.role === "coach" ? {} : "skip"
+    convexUser?.role === "coach" ? {} : "skip",
   );
 
-  if (!isLoaded || (user && convexUser === undefined) || planDetection.isLoading || !planFeatures) {
+  if (
+    !isLoaded ||
+    (user && convexUser === undefined) ||
+    planDetection.isLoading ||
+    !planFeatures
+  ) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <span className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full inline-block"></span>
@@ -82,4 +86,4 @@ export default function AnalyticsDashboardPage() {
       )}
     </div>
   );
-} 
+}

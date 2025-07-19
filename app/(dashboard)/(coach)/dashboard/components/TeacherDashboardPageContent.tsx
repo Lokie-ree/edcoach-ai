@@ -2,18 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { api } from "@/convex/_generated/api";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  BookOpen,
-  Award,
-  Target,
-  BarChart,
-} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookOpen, Award, Target } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useQuery } from "convex/react";
@@ -30,10 +20,10 @@ interface TeacherDashboardPageContentProps {
   teacherRecord: TeacherRecord;
 }
 
-export default function TeacherDashboardPageContent({ 
-  user, 
+export default function TeacherDashboardPageContent({
+  user,
   convexUser,
-  teacherRecord
+  teacherRecord,
 }: TeacherDashboardPageContentProps) {
   // Tutorial state
   const [showTutorial, setShowTutorial] = useState(false);
@@ -41,11 +31,11 @@ export default function TeacherDashboardPageContent({
   // Fetch teacher-specific data
   const walkthroughs = useQuery(
     api.walkthroughs.listByTeacher,
-    teacherRecord?._id ? { teacherId: teacherRecord._id } : "skip"
+    teacherRecord?._id ? { teacherId: teacherRecord._id } : "skip",
   );
 
   const safeWalkthroughs = walkthroughs ?? [];
-  
+
   const recentWalkthroughs = safeWalkthroughs
     .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
     .slice(0, 3);
@@ -54,11 +44,13 @@ export default function TeacherDashboardPageContent({
   useEffect(() => {
     if (convexUser && teacherRecord) {
       const userCreatedAt = convexUser.createdAt;
-      const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
-      
+      const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+
       // Check if tutorial was already shown/completed
-      const tutorialShown = localStorage.getItem(`teacher-tutorial-shown-${convexUser._id}`);
-      
+      const tutorialShown = localStorage.getItem(
+        `teacher-tutorial-shown-${convexUser._id}`,
+      );
+
       // Show tutorial if user was created within the last 5 minutes AND hasn't seen tutorial
       if (userCreatedAt > fiveMinutesAgo && !tutorialShown) {
         setShowTutorial(true);
@@ -70,7 +62,7 @@ export default function TeacherDashboardPageContent({
     setShowTutorial(false);
     // Mark tutorial as completed
     if (convexUser) {
-      localStorage.setItem(`teacher-tutorial-shown-${convexUser._id}`, 'true');
+      localStorage.setItem(`teacher-tutorial-shown-${convexUser._id}`, "true");
     }
   };
 
@@ -78,7 +70,7 @@ export default function TeacherDashboardPageContent({
     setShowTutorial(false);
     // Mark tutorial as completed even if skipped
     if (convexUser) {
-      localStorage.setItem(`teacher-tutorial-shown-${convexUser._id}`, 'true');
+      localStorage.setItem(`teacher-tutorial-shown-${convexUser._id}`, "true");
     }
   };
 
@@ -90,7 +82,11 @@ export default function TeacherDashboardPageContent({
           title="Dashboard"
           description={
             <>
-              Welcome back, <AnimatedGradientText className="font-semibold">{user.firstName || user.fullName || "Teacher"}</AnimatedGradientText>! Ready to continue your professional growth journey?
+              Welcome back,{" "}
+              <AnimatedGradientText className="font-semibold">
+                {user.firstName || user.fullName || "Teacher"}
+              </AnimatedGradientText>
+              ! Ready to continue your professional growth journey?
             </>
           }
           gradient={true}
@@ -104,37 +100,39 @@ export default function TeacherDashboardPageContent({
         >
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-foreground">Quick Navigation</CardTitle>
+              <CardTitle className="text-foreground">
+                Quick Navigation
+              </CardTitle>
               <p className="text-sm text-muted-foreground">
                 Access your professional development tools and progress
               </p>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* My Walkthroughs */}
-                <Link href="/my-walkthroughs">
+                {/* My PGP */}
+                <Link href="/my-pgp">
+                  <Button
+                    variant="outline"
+                    className="h-auto flex-col items-center p-6 space-y-3 w-full"
+                  >
+                    <Target className="h-8 w-8 text-primary" />
+                    <span className="text-base font-medium">My PGP</span>
+                    <span className="text-sm text-muted-foreground text-center">
+                      Professional growth & walkthroughs
+                    </span>
+                  </Button>
+                </Link>
+
+                {/* Walkthroughs */}
+                <Link href="/walkthrough">
                   <Button
                     variant="outline"
                     className="h-auto flex-col items-center p-6 space-y-3 w-full"
                   >
                     <BookOpen className="h-8 w-8 text-primary" />
-                    <span className="text-base font-medium">My Walkthroughs</span>
+                    <span className="text-base font-medium">Walkthroughs</span>
                     <span className="text-sm text-muted-foreground text-center">
                       View all classroom observations
-                    </span>
-                  </Button>
-                </Link>
-
-                {/* My Progress */}
-                <Link href="/my-progress">
-                  <Button
-                    variant="outline"
-                    className="h-auto flex-col items-center p-6 space-y-3 w-full"
-                  >
-                    <BarChart className="h-8 w-8 text-primary" />
-                    <span className="text-base font-medium">My Progress</span>
-                    <span className="text-sm text-muted-foreground text-center">
-                      Track your growth over time
                     </span>
                   </Button>
                 </Link>
@@ -151,41 +149,55 @@ export default function TeacherDashboardPageContent({
         >
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-foreground">Recent Walkthroughs</CardTitle>
+              <CardTitle className="text-foreground">
+                Recent Walkthroughs
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {recentWalkthroughs.length > 0 ? (
                 <div className="space-y-4">
                   {recentWalkthroughs.map((walkthrough) => (
-                    <Link 
-                      key={walkthrough._id} 
+                    <Link
+                      key={walkthrough._id}
                       href={`/walkthrough/${walkthrough._id}/view`}
                       className="block"
                     >
                       <div className="p-4 border border-border rounded-lg hover:bg-accent/30 transition-colors cursor-pointer">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="font-medium text-foreground">Classroom Walkthrough</p>
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              walkthrough.status === "completed" 
-                                ? "bg-primary/10 text-primary border border-primary/20"
-                                : "bg-accent/10 text-accent-foreground border border-accent/20"
-                            }`}>
-                              {walkthrough.status === "completed" ? "Completed" : "In Progress"}
+                            <p className="font-medium text-foreground">
+                              Classroom Walkthrough
+                            </p>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs ${
+                                walkthrough.status === "completed"
+                                  ? "bg-primary/10 text-primary border border-primary/20"
+                                  : "bg-accent/10 text-accent-foreground border border-accent/20"
+                              }`}
+                            >
+                              {walkthrough.status === "completed"
+                                ? "Completed"
+                                : "In Progress"}
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            {new Date(walkthrough.walkthroughDate).toLocaleDateString()}
+                            {new Date(
+                              walkthrough.walkthroughDate,
+                            ).toLocaleDateString()}
                           </p>
                           {walkthrough.status === "completed" && (
                             <div className="flex flex-wrap gap-2 mt-3">
                               <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-300 rounded-full border border-green-200 dark:border-green-800">
                                 <Award className="h-3 w-3" />
-                                {getIndicatorName(walkthrough.reinforcementIndicator)}
+                                {getIndicatorName(
+                                  walkthrough.reinforcementIndicator,
+                                )}
                               </span>
                               <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-300 rounded-full border border-blue-200 dark:border-blue-800">
                                 <Target className="h-3 w-3" />
-                                {getIndicatorName(walkthrough.refinementIndicator)}
+                                {getIndicatorName(
+                                  walkthrough.refinementIndicator,
+                                )}
                               </span>
                             </div>
                           )}
@@ -198,7 +210,9 @@ export default function TeacherDashboardPageContent({
                 <div className="text-center py-8 text-muted-foreground">
                   <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>No walkthroughs yet</p>
-                  <p className="text-sm">Your coach will schedule walkthroughs soon</p>
+                  <p className="text-sm">
+                    Your coach will schedule walkthroughs soon
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -215,4 +229,4 @@ export default function TeacherDashboardPageContent({
       )}
     </>
   );
-} 
+}

@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ConvexUser, ClerkUser } from "@/types/dashboard";
-import TeacherStatusOverview from "@/app/(dashboard)/dashboard/components/TeacherStatusOverview";
-import RecentFeedbackHighlights from "@/app/(dashboard)/dashboard/components/RecentFeedbackHighlights";
+import TeacherStatusOverview from "@/app/(dashboard)/(coach)/dashboard/components/TeacherStatusOverview";
+import RecentFeedbackHighlights from "@/app/(dashboard)/(coach)/dashboard/components/RecentFeedbackHighlights";
 import { AIUsageWarning } from "@/components/common/AiUsageBadge";
 import CoachTutorial from "@/app/onboarding/components/CoachTutorial";
 import { motion } from "framer-motion";
@@ -16,7 +16,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Users, BarChart2, CreditCard } from "lucide-react";
 import Link from "next/link";
-import { AIUsageBadge, TeacherUsageBadge } from "@/components/common/AiUsageBadge";
+import {
+  AIUsageBadge,
+  TeacherUsageBadge,
+} from "@/components/common/AiUsageBadge";
 
 interface CoachDashboardPageContentProps {
   user: ClerkUser;
@@ -101,10 +104,11 @@ export default function CoachDashboardPageContent({
                     Ready to conduct a walkthrough?
                   </h2>
                   <p className="text-muted-foreground text-base lg:text-lg max-w-2xl">
-                    Capture classroom observations and generate AI-powered feedback to support your teachers&apos; professional growth
+                    Capture classroom observations and generate AI-powered
+                    feedback to support your teachers&apos; professional growth
                   </p>
                 </div>
-                
+
                 {/* Action Elements - Right Side */}
                 <div className="flex flex-col items-center gap-4 lg:items-end">
                   {/* Usage Badges */}
@@ -121,7 +125,7 @@ export default function CoachDashboardPageContent({
                       hasStarterPlan={hasStarterPlan}
                     />
                   </div>
-                  
+
                   {/* Primary Action Button */}
                   <Link href="/walkthrough/new">
                     <Button size="lg" className="gap-2 px-6 py-3 text-base">
@@ -155,7 +159,9 @@ export default function CoachDashboardPageContent({
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg">Teachers</h3>
                       <p className="text-sm text-muted-foreground">
-                        {analytics ? `${analytics.totalTeachers} active team members` : "Manage your team"}
+                        {analytics
+                          ? `${analytics.totalTeachers} active team members`
+                          : "Manage your team"}
                       </p>
                     </div>
                   </div>
@@ -181,7 +187,7 @@ export default function CoachDashboardPageContent({
               </Card>
             </Link>
 
-            <Link href="/billing">
+            <Link href="/settings/billing">
               <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer group">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
@@ -191,7 +197,11 @@ export default function CoachDashboardPageContent({
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg">Billing</h3>
                       <p className="text-sm text-muted-foreground">
-                        {hasProPlan ? "Pro Plan Active" : hasStarterPlan ? "Starter Plan Active" : "Free Plan"}
+                        {hasProPlan
+                          ? "Pro Plan Active"
+                          : hasStarterPlan
+                            ? "Starter Plan Active"
+                            : "Free Plan"}
                       </p>
                     </div>
                   </div>

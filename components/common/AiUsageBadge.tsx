@@ -289,7 +289,7 @@ function CombinedUsageWarning() {
             : " Upgrade for more walkthroughs and teachers."}
         </div>
       </div>
-      <Link href="/billing">
+      <Link href="/settings/billing">
         <Button size="sm" variant="outline" className="ml-4 flex-shrink-0">
           Upgrade
           <ArrowRight className="ml-1 h-3 w-3" />

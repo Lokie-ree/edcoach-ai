@@ -1,9 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Users, Calendar, Target, MessageSquare } from "lucide-react";
-import { AnalyticsData } from "./types";
+import { AnalyticsData } from "@/types/dashboard";
 
-export const OverviewMetrics = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
+export const OverviewMetrics = ({
+  analytics,
+}: {
+  analytics: AnalyticsData | null | undefined;
+}) => {
   if (!analytics) {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -71,13 +75,11 @@ export const OverviewMetrics = ({ analytics }: { analytics: AnalyticsData | null
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{metric.value}</div>
-              <p className="text-xs text-muted-foreground">
-                {metric.subtitle}
-              </p>
+              <p className="text-xs text-muted-foreground">{metric.subtitle}</p>
             </CardContent>
           </Card>
         </motion.div>
       ))}
     </div>
   );
-}; 
+};

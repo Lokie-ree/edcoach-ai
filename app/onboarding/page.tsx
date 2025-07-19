@@ -215,7 +215,10 @@ export default function OnboardingPage() {
                 <>
                   <strong>Teacher Limit Reached:</strong> You have added all{" "}
                   {teacherLimit} teachers allowed on your plan.{" "}
-                  <Link href="/billing" className="underline font-semibold">
+                  <Link
+                    href="/settings/billing"
+                    className="underline font-semibold"
+                  >
                     Upgrade to Coach Pro
                   </Link>{" "}
                   to add more.

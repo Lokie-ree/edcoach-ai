@@ -32,11 +32,11 @@ export default function DashboardLayout({
     const pathMap: Record<string, string> = {
       "/dashboard": "Dashboard",
       "/my-pgp": "My PGP",
-      "/my-progress": "My Progress",
-      "/my-walkthroughs": "My Walkthroughs",
       "/teachers": "Teachers",
       "/analytics": "Analytics",
-      "/billing": "Billing",
+      "/settings/billing": "Billing",
+      "/settings/profile": "Settings",
+      "/walkthrough": "Walkthroughs",
       "/walkthrough/new": "New Walkthrough",
     };
 
@@ -44,7 +44,11 @@ export default function DashboardLayout({
     if (path.startsWith("/walkthrough/") && path.includes("/view")) {
       return "View Walkthrough";
     }
-    if (path.startsWith("/walkthrough/") && !path.includes("/view")) {
+    if (
+      path.startsWith("/walkthrough/") &&
+      !path.includes("/view") &&
+      !path.includes("/new")
+    ) {
       return "Edit Walkthrough";
     }
 
@@ -91,11 +95,9 @@ export default function DashboardLayout({
           </MaxWidthWrapper>
         </header>
         <div className="flex flex-1 flex-col">
-          <MaxWidthWrapper>
-            {children}
-          </MaxWidthWrapper>
+          <MaxWidthWrapper>{children}</MaxWidthWrapper>
         </div>
       </SidebarInset>
     </SidebarProvider>
   );
-} 
+}

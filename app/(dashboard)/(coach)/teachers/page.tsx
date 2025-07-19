@@ -4,14 +4,14 @@ import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Modal from "@/components/mage-ui/modal";
-import TeacherDetailsForm from "@/app/(dashboard)/teachers/components/TeacherDetailsForm";
+import TeacherDetailsForm from "@/app/(dashboard)/(coach)/teachers/components/TeacherDetailsForm";
 import { motion } from "framer-motion";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { PageHeader } from "@/components/common/PageHeader";
-import TeacherStatsCard from "./components/TeacherStatsCard";
 import TeacherList from "./components/TeacherList";
 import GridDistortion from "./components/GridDistortion";
 import { Teacher } from "@/types/teacher";
+import TeacherStatsCard from "./components/TeacherStatsCard";
 
 export default function TeachersPage() {
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
@@ -29,7 +29,11 @@ export default function TeachersPage() {
           title="Teachers"
           description={
             <>
-              Manage your <AnimatedGradientText className="font-semibold">teaching staff</AnimatedGradientText> and their professional growth
+              Manage your{" "}
+              <AnimatedGradientText className="font-semibold">
+                teaching staff
+              </AnimatedGradientText>{" "}
+              and their professional growth
             </>
           }
           gradient={true}
@@ -79,10 +83,13 @@ export default function TeachersPage() {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <TeacherList
-            teachers={(overview?.teachers || []).map(t => ({
-              ...t,
-              coachId: t.coachId ?? ""
-            } as Teacher))}
+            teachers={(overview?.teachers || []).map(
+              (t) =>
+                ({
+                  ...t,
+                  coachId: t.coachId ?? "",
+                }) as Teacher,
+            )}
             setEditingTeacher={(teacher) => setEditingTeacher(teacher)}
           />
         </motion.div>

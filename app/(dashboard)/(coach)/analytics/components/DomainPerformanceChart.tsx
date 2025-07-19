@@ -1,9 +1,13 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { PieChart, BarChart3 } from "lucide-react";
-import { AnalyticsData } from "./types";
+import { AnalyticsData } from "@/types/dashboard";
 
-export const DomainPerformanceChart = ({ analytics }: { analytics: AnalyticsData | null | undefined }) => {
+export const DomainPerformanceChart = ({
+  analytics,
+}: {
+  analytics: AnalyticsData | null | undefined;
+}) => {
   if (!analytics) {
     return (
       <div className="grid gap-4 md:grid-cols-2">
@@ -24,7 +28,7 @@ export const DomainPerformanceChart = ({ analytics }: { analytics: AnalyticsData
   // Donut chart for feedback distribution
   const DonutChart = () => {
     const total = analytics.reinforcementCount + analytics.refinementCount;
-    
+
     if (total === 0) {
       return (
         <div className="flex flex-col items-center justify-center h-48">
@@ -130,20 +134,28 @@ export const DomainPerformanceChart = ({ analytics }: { analytics: AnalyticsData
               ) : (
                 <div className="space-y-2">
                   {analytics.topStrengths.slice(0, 3).map((item) => (
-                    <div key={item.indicator} className="flex items-center justify-between">
-                      <span className="text-sm truncate flex-1 mr-2" title={item.indicatorName}>
+                    <div
+                      key={item.indicator}
+                      className="flex items-center justify-between"
+                    >
+                      <span
+                        className="text-sm truncate flex-1 mr-2"
+                        title={item.indicatorName}
+                      >
                         {item.indicatorName}
                       </span>
                       <div className="flex items-center gap-2">
                         <div className="w-12 bg-gray-200 rounded-full h-2">
-                          <div 
+                          <div
                             className="bg-green-500 h-2 rounded-full transition-all"
-                            style={{ 
-                              width: `${(item.count / Math.max(...analytics.topStrengths.map((i) => i.count))) * 100}%` 
+                            style={{
+                              width: `${(item.count / Math.max(...analytics.topStrengths.map((i) => i.count))) * 100}%`,
                             }}
                           ></div>
                         </div>
-                        <span className="text-sm font-medium w-6 text-right">{item.count}</span>
+                        <span className="text-sm font-medium w-6 text-right">
+                          {item.count}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -160,20 +172,28 @@ export const DomainPerformanceChart = ({ analytics }: { analytics: AnalyticsData
               ) : (
                 <div className="space-y-2">
                   {analytics.topGrowthAreas.slice(0, 3).map((item) => (
-                    <div key={item.indicator} className="flex items-center justify-between">
-                      <span className="text-sm truncate flex-1 mr-2" title={item.indicatorName}>
+                    <div
+                      key={item.indicator}
+                      className="flex items-center justify-between"
+                    >
+                      <span
+                        className="text-sm truncate flex-1 mr-2"
+                        title={item.indicatorName}
+                      >
                         {item.indicatorName}
                       </span>
                       <div className="flex items-center gap-2">
                         <div className="w-12 bg-gray-200 rounded-full h-2">
-                          <div 
+                          <div
                             className="bg-orange-500 h-2 rounded-full transition-all"
-                            style={{ 
-                              width: `${(item.count / Math.max(...analytics.topGrowthAreas.map((i) => i.count))) * 100}%` 
+                            style={{
+                              width: `${(item.count / Math.max(...analytics.topGrowthAreas.map((i) => i.count))) * 100}%`,
                             }}
                           ></div>
                         </div>
-                        <span className="text-sm font-medium w-6 text-right">{item.count}</span>
+                        <span className="text-sm font-medium w-6 text-right">
+                          {item.count}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -185,4 +205,4 @@ export const DomainPerformanceChart = ({ analytics }: { analytics: AnalyticsData
       </Card>
     </motion.div>
   );
-}; 
+};
