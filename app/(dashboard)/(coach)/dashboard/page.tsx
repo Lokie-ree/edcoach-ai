@@ -3,9 +3,9 @@
 import { Users, BookOpen, MessageSquare, Plus, UserPlus } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { KpiCard } from "@/components/dashboard/KpiCard";
-import { PrioritiesPanel } from "@/components/dashboard/PrioritiesPanel";
-import { RecentActivityFeed } from "@/components/dashboard/RecentActivityFeed";
+import { KpiCard } from "@/app/(dashboard)/(coach)/dashboard/components/KpiCard";
+import { PrioritiesPanel } from "@/app/(dashboard)/(coach)/dashboard/components/PrioritiesPanel";
+import { RecentActivityFeed } from "@/app/(dashboard)/(coach)/dashboard/components/RecentActivityFeed";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/common/PageHeader";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";

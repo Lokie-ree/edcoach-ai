@@ -100,6 +100,7 @@ export const getCoachAnalytics = query({
         timestamp: v.number(),
         status: v.string(),
         title: v.string(),
+        href: v.string(),
       }),
     ),
   }),
@@ -204,7 +205,8 @@ export const getCoachAnalytics = query({
         teacherName: teacher?.name || "Unknown Teacher",
         timestamp: walkthrough.createdAt,
         status: walkthrough.status,
-        title: "Classroom Observation",
+        title: `${walkthrough.status === "completed" ? "Completed" : "Draft"} walkthrough`,
+        href: `/walkthrough/${walkthrough._id}/view`,
       });
 
       // Check for AI feedback
@@ -223,6 +225,7 @@ export const getCoachAnalytics = query({
           timestamp: aiFeedback.createdAt,
           status: "generated",
           title: "AI Feedback Generated",
+          href: `/walkthrough/${walkthrough._id}/view`,
         });
       }
 
@@ -242,6 +245,7 @@ export const getCoachAnalytics = query({
           timestamp: reflection.createdAt,
           status: "completed",
           title: "Teacher Reflection",
+          href: `/walkthrough/${walkthrough._id}/view`,
         });
       }
     }
@@ -1288,9 +1292,266 @@ export const getMyPgpData = query({
 });
 
 /**
+ * Get PGP data for a specific teacher (public query for coach dashboard)
+ */
+export const getTeacherPgpData = query({
+  args: { teacherId: v.id("teachers") },
+  returns: v.union(
+    v.null(),
+    v.object({
+      pgpGoal: v.object({
+        title: v.string(),
+        description: v.string(),
+        progress: v.number(),
+        trend: v.union(
+          v.literal("Needs Support"),
+          v.literal("Engaged"),
+          v.literal("Stable"),
+        ),
+        targetDate: v.optional(v.string()),
+      }),
+      recentWalkthroughs: v.array(
+        v.object({
+          id: v.string(),
+          date: v.number(),
+          indicators: v.array(v.string()),
+          hasReflection: v.boolean(),
+          title: v.string(),
+          status: v.string(),
+        }),
+      ),
+      reflectionPrompt: v.object({
+        question: v.string(),
+        lastAnswered: v.optional(v.number()),
+        isOverdue: v.boolean(),
+      }),
+      refinementFocus: v.object({
+        currentIndicator: v.string(),
+        description: v.string(),
+        progress: v.number(),
+        nextSteps: v.array(v.string()),
+      }),
+      strengths: v.array(
+        v.object({
+          indicator: v.string(),
+          name: v.string(),
+          frequency: v.number(),
+          lastObserved: v.number(),
+        }),
+      ),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserOrThrow(ctx);
+    if (user.role !== "coach") {
+      throw new Error("Only coaches can view teacher PGP data");
+    }
+
+    const teacher = await ctx.db.get(args.teacherId);
+    if (!teacher || teacher.coachId !== user._id) {
+      throw new Error("Teacher not found or not authorized");
+    }
+
+    // Get walkthroughs for this teacher
+    const walkthroughs = await ctx.db
+      .query("walkthroughs")
+      .withIndex("by_teacher", (q) => q.eq("teacherId", args.teacherId))
+      .collect();
+
+    // Get recent walkthroughs (last 5)
+    const recentWalkthroughs = [];
+    const sortedWalkthroughs = walkthroughs
+      .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
+      .slice(0, 5);
+
+    for (const walkthrough of sortedWalkthroughs) {
+      // Check if this walkthrough has a reflection
+      const reflection = await ctx.db
+        .query("reflections")
+        .withIndex("by_walkthrough", (q) =>
+          q.eq("walkthroughId", walkthrough._id),
+        )
+        .first();
+
+      const indicators = [];
+      if (walkthrough.reinforcementIndicator)
+        indicators.push(walkthrough.reinforcementIndicator);
+      if (walkthrough.refinementIndicator)
+        indicators.push(walkthrough.refinementIndicator);
+
+      recentWalkthroughs.push({
+        id: walkthrough._id,
+        date: walkthrough.walkthroughDate,
+        indicators,
+        hasReflection: !!reflection,
+        title: "Classroom Observation",
+        status: walkthrough.status,
+      });
+    }
+
+    // Calculate PGP progress trend
+    let trend: "Needs Support" | "Engaged" | "Stable" = "Stable";
+    const completedWalkthroughs = walkthroughs
+      .filter((w) => w.status === "completed")
+      .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
+      .slice(0, 5);
+
+    if (completedWalkthroughs.length >= 3) {
+      const refinementCounts = new Map<string, number>();
+      for (const wt of completedWalkthroughs) {
+        if (wt.refinementIndicator) {
+          const count = refinementCounts.get(wt.refinementIndicator) || 0;
+          refinementCounts.set(wt.refinementIndicator, count + 1);
+        }
+      }
+      for (const count of refinementCounts.values()) {
+        if (count >= 3) {
+          trend = "Needs Support";
+          break;
+        }
+      }
+    }
+
+    if (trend !== "Needs Support") {
+      const reflectionPromises = completedWalkthroughs.map((wt) =>
+        ctx.db
+          .query("reflections")
+          .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", wt._id))
+          .first(),
+      );
+      const reflections = await Promise.all(reflectionPromises);
+      const reflectionCount = reflections.filter(Boolean).length;
+      if (reflectionCount >= 3) {
+        trend = "Engaged";
+      }
+    }
+
+    // Calculate progress based on completed walkthroughs vs target
+    const targetWalkthroughs = 8; // Assume 8 walkthroughs per year as target
+    const progress = Math.min(
+      Math.round((completedWalkthroughs.length / targetWalkthroughs) * 100),
+      100,
+    );
+
+    // Get most recent reflection for reflection prompt
+    const allReflections = await ctx.db.query("reflections").collect();
+    const teacherReflections = allReflections.filter((reflection) =>
+      completedWalkthroughs.some((w) => w._id === reflection.walkthroughId),
+    );
+    const lastReflection = teacherReflections.sort(
+      (a, b) => b.createdAt - a.createdAt,
+    )[0];
+
+    // Determine if reflection is overdue (more than 7 days since last walkthrough)
+    const lastWalkthrough = completedWalkthroughs[0];
+    const isOverdue =
+      lastWalkthrough &&
+      !lastReflection &&
+      Date.now() - lastWalkthrough.walkthroughDate > 7 * 24 * 60 * 60 * 1000;
+
+    // Get current refinement focus (most common refinement indicator in last 3 walkthroughs)
+    let currentIndicator = "No focus area identified";
+    let refinementDescription =
+      "Complete more walkthroughs to identify specific growth areas.";
+    let refinementProgress = 0;
+    let nextSteps = [
+      "Schedule your next walkthrough",
+      "Review feedback with your coach",
+    ];
+
+    if (completedWalkthroughs.length >= 2) {
+      const recentRefinements = completedWalkthroughs
+        .slice(0, 3)
+        .map((w) => w.refinementIndicator)
+        .filter(Boolean);
+
+      if (recentRefinements.length > 0) {
+        const refinementCounts = new Map<string, number>();
+        for (const indicator of recentRefinements) {
+          const count = refinementCounts.get(indicator!) || 0;
+          refinementCounts.set(indicator!, count + 1);
+        }
+
+        const mostCommon = Array.from(refinementCounts.entries()).sort(
+          (a, b) => b[1] - a[1],
+        )[0];
+
+        if (mostCommon) {
+          currentIndicator = mostCommon[0];
+          refinementProgress = Math.round((mostCommon[1] / 3) * 100);
+
+          // Generate description and next steps based on indicator
+          refinementDescription = `Focus on improving ${currentIndicator.toLowerCase()} based on recent feedback.`;
+          nextSteps = [
+            "Review specific feedback on this indicator",
+            "Plan targeted strategies for improvement",
+            "Practice new approaches in upcoming lessons",
+          ];
+        }
+      }
+    }
+
+    // Calculate strengths (most common reinforcement indicators)
+    const strengths = [];
+    const reinforcementCounts = new Map<string, number>();
+
+    for (const walkthrough of completedWalkthroughs) {
+      if (walkthrough.reinforcementIndicator) {
+        const count =
+          reinforcementCounts.get(walkthrough.reinforcementIndicator) || 0;
+        reinforcementCounts.set(walkthrough.reinforcementIndicator, count + 1);
+      }
+    }
+
+    const topStrengths = Array.from(reinforcementCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+
+    for (const [indicator, frequency] of topStrengths) {
+      const lastObserved =
+        completedWalkthroughs
+          .filter((w) => w.reinforcementIndicator === indicator)
+          .sort((a, b) => b.walkthroughDate - a.walkthroughDate)[0]
+          ?.walkthroughDate || Date.now();
+
+      strengths.push({
+        indicator,
+        name: indicator, // In a real app, you'd map this to a human-readable name
+        frequency,
+        lastObserved,
+      });
+    }
+
+    return {
+      pgpGoal: {
+        title: teacher.pgpGoal?.text || "Improve Teaching Practice",
+        description: teacher.pgpGoal?.contextNotes || "Focus on continuous improvement through regular walkthroughs and reflection.",
+        progress: teacher.pgpGoal?.progress || progress,
+        trend,
+        targetDate: teacher.pgpGoal?.targetDate ? new Date(teacher.pgpGoal.targetDate).toISOString() : undefined,
+      },
+      recentWalkthroughs,
+      reflectionPrompt: {
+        question:
+          "How did your recent walkthrough feedback influence your lesson planning this week?",
+        lastAnswered: lastReflection?.createdAt,
+        isOverdue,
+      },
+      refinementFocus: {
+        currentIndicator,
+        description: refinementDescription,
+        progress: refinementProgress,
+        nextSteps,
+      },
+      strengths,
+    };
+  },
+});
+
+/**
  * Internal query: Get PGP data for a specific teacher (for AI feedback context)
  */
-export const getTeacherPgpData = internalQuery({
+export const getTeacherPgpDataInternal = internalQuery({
   args: { teacherId: v.id("teachers") },
   returns: v.union(
     v.null(),

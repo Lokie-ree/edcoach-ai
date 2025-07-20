@@ -3,7 +3,6 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { PageHeader } from "@/components/common/PageHeader";
-import { PgpGoalCard } from "@/components/dashboard/PgpGoalCard";
 import { RefinementFocusCard } from "@/components/dashboard/RefinementFocusCard";
 import { ReflectionPromptCard } from "@/components/dashboard/ReflectionPromptCard";
 import { WalkthroughTimeline } from "@/components/dashboard/WalkthroughTimeline";
@@ -72,14 +71,25 @@ export default function TeacherPgpDashboardPage() {
         description="Track your Professional Growth Plan progress and development goals"
       />
 
-      {/* PGP Goal Card */}
-      <PgpGoalCard
-        title={pgpData.pgpGoal.title}
-        description={pgpData.pgpGoal.description}
-        progress={pgpData.pgpGoal.progress}
-        trend={pgpData.pgpGoal.trend}
-        targetDate={pgpData.pgpGoal.targetDate || ""}
-      />
+      {/* PGP Goal Card - Note: This component now requires teacher-specific props */}
+      {/* For teacher view, we'll show a simplified version or create a separate component */}
+      <div className="p-6 border rounded-lg">
+        <h3 className="text-lg font-semibold mb-2">{pgpData.pgpGoal.title}</h3>
+        <p className="text-muted-foreground mb-4">{pgpData.pgpGoal.description}</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Progress:</span>
+            <span className="font-medium">{pgpData.pgpGoal.progress}%</span>
+          </div>
+          <span className={`text-xs px-2 py-1 rounded-full ${
+            pgpData.pgpGoal.trend === "Engaged" ? "bg-green-100 text-green-800" :
+            pgpData.pgpGoal.trend === "Needs Support" ? "bg-red-100 text-red-800" :
+            "bg-blue-100 text-blue-800"
+          }`}>
+            {pgpData.pgpGoal.trend}
+          </span>
+        </div>
+      </div>
 
       {/* Refinement Focus Card */}
       <RefinementFocusCard

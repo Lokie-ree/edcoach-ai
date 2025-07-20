@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { BookOpen, FileText, MessageSquare, Clock } from "lucide-react";
+import Link from "next/link";
 
 interface ActivityItem {
   id: string;
@@ -10,6 +11,7 @@ interface ActivityItem {
   timestamp: number;
   status: string;
   title: string;
+  href?: string;
 }
 
 interface RecentActivityFeedProps {
@@ -69,40 +71,43 @@ export function RecentActivityFeed({ activities }: RecentActivityFeedProps) {
         {" "}
         {/* Reduced spacing */}
         {activities.map((activity) => (
-          <div
+          <Link
             key={activity.id}
-            className="flex items-start gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+            href={activity.href || "#"}
+            className="block"
           >
-            <Avatar className="h-8 w-8">
-              <AvatarFallback>
-                {activity.teacherName
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                {getActivityIcon(activity.type)}
-                <span className="font-medium text-sm">
-                  {activity.teacherName}
-                </span>
-                <Badge
-                  variant="secondary"
-                  className={`text-xs ${getStatusColor(activity.status)}`}
-                >
-                  {activity.status}
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground mb-1">
-                {activity.title}
-              </p>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                {formatTimeAgo(activity.timestamp)}
+            <div className="flex items-start gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback>
+                  {activity.teacherName
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  {getActivityIcon(activity.type)}
+                  <span className="font-medium text-sm">
+                    {activity.teacherName}
+                  </span>
+                  <Badge
+                    variant="secondary"
+                    className={`text-xs ${getStatusColor(activity.status)}`}
+                  >
+                    {activity.status}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mb-1">
+                  {activity.title}
+                </p>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  {formatTimeAgo(activity.timestamp)}
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </CardContent>
     </Card>

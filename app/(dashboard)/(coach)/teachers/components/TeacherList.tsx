@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Teacher } from "@/types/teacher";
 import { TeacherInvitationForm } from "./TeacherInvitationForm";
+import Link from "next/link";
 
 interface TeacherListProps {
   teachers: Teacher[];
@@ -51,12 +52,12 @@ export default function TeacherList({
         {teachers && teachers.length > 0 ? (
           <div className="space-y-4">
             {teachers.map((teacher) => (
-              <motion.div
-                key={teacher._id}
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-                className="p-4 border border-border rounded-lg hover:bg-accent/30 transition-colors"
-              >
+              <Link key={teacher._id} href={`/teachers/${teacher._id}`}>
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                  className="p-4 border border-border rounded-lg hover:bg-accent/30 transition-colors cursor-pointer"
+                >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -123,7 +124,11 @@ export default function TeacherList({
                           ? "bg-primary text-primary-foreground hover:bg-primary/90"
                           : ""
                       }
-                      onClick={() => setEditingTeacher(teacher)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setEditingTeacher(teacher);
+                      }}
                     >
                       <Pencil className="h-4 w-4 mr-1" />
                       {teacher.status === "needs_details"
@@ -133,7 +138,8 @@ export default function TeacherList({
                   </div>
                 </div>
               </motion.div>
-            ))}
+            </Link>
+          ))}
           </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground">

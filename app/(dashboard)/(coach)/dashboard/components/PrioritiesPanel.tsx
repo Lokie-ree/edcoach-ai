@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, FileText, Users, AlertTriangle } from "lucide-react";
+import Link from "next/link";
 
 interface PrioritiesPanelProps {
   walkthroughsDue: number;
@@ -20,6 +21,7 @@ export function PrioritiesPanel({
       icon: Calendar,
       color: "bg-blue-500",
       action: "Schedule Now",
+      href: "/walkthrough/new",
     },
     {
       title: "Reflections to Review",
@@ -27,6 +29,7 @@ export function PrioritiesPanel({
       icon: FileText,
       color: "bg-green-500",
       action: "Review",
+      href: "/walkthrough", // This will show walkthroughs with reflections
     },
     {
       title: "Teachers Needing Support",
@@ -34,6 +37,7 @@ export function PrioritiesPanel({
       icon: Users,
       color: "bg-orange-500",
       action: "Check In",
+      href: "/teachers", // This will show teachers list
     },
   ];
 
@@ -66,9 +70,11 @@ export function PrioritiesPanel({
                 </p>
               </div>
             </div>
-            <Button variant="outline" size="sm">
-              {priority.action}
-            </Button>
+            <Link href={priority.href}>
+              <Button variant="outline" size="sm">
+                {priority.action}
+              </Button>
+            </Link>
           </div>
         ))}
       </CardContent>

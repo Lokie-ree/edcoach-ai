@@ -86,14 +86,11 @@ export const generateAIFeedback = action({
     let pgpContext = "";
     if (args.teacherId) {
       try {
-        const pgpData = await ctx.runQuery(
-          internal.analytics.getTeacherPgpData,
-          {
-            teacherId: args.teacherId,
-          },
-        );
-        if (pgpData && pgpData.pgpGoal) {
-          pgpContext = `\n\nTeacher's Professional Growth Goal: "${pgpData.pgpGoal.title}" - ${pgpData.pgpGoal.description}`;
+        const teacher = await ctx.runQuery(internal.teachers.getTeacher, {
+          teacherId: args.teacherId,
+        });
+        if (teacher && teacher.pgpGoal) {
+          pgpContext = `\n\nTeacher's Professional Growth Goal: "${teacher.pgpGoal.text}" (Indicator: ${teacher.pgpGoal.indicatorCode})${teacher.pgpGoal.contextNotes ? `\nContext: ${teacher.pgpGoal.contextNotes}` : ""}`;
         }
       } catch (error) {
         console.warn("Failed to fetch PGP data:", error);

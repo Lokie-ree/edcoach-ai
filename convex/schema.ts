@@ -67,6 +67,15 @@ export default defineSchema({
     coachId: v.id("users"), // The coach who manages this teacher
     // Keep clerkOrganizationId for backwards compatibility during migration
     clerkOrganizationId: v.optional(v.string()),
+    // NEW: PGP Goal Management
+    pgpGoal: v.optional(v.object({
+      text: v.string(),
+      indicatorCode: v.string(),
+      contextNotes: v.optional(v.string()),
+      setAt: v.number(),
+      targetDate: v.optional(v.number()),
+      progress: v.optional(v.number()), // 0-100 percentage
+    })),
   })
     .index("by_user", ["userId"])
     .index("by_email", ["email"])
