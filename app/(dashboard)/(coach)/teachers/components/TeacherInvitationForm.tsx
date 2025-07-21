@@ -317,3 +317,225 @@ export function TeacherInvitationForm({
     </Dialog>
   );
 }
+
+export function TeacherInvitationFormContent({
+  onSuccess,
+}: {
+  onSuccess?: () => void;
+}) {
+  const { has } = useAuth();
+  const sendInvitation = useAction(api.invitations.inviteTeacher);
+
+  const {
+    allowed: canInviteTeacher,
+    reason: inviteBlockReason,
+    teacherUsage,
+  } = useCanInviteTeacher();
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      teacherEmail: "",
+      teacherName: "",
+      subject: "",
+      gradeBand: "",
+    },
+  });
+
+  const isLoading = form.formState.isSubmitting;
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!canInviteTeacher) {
+      toast.error("Teacher Limit Reached", {
+        description:
+          inviteBlockReason ||
+          "You have reached your teacher limit. Upgrade to Coach Pro for more.",
+      });
+      return;
+    }
+    try {
+      const hasProPlan =
+        (has?.({ plan: "coach_pro" }) ?? false) ||
+        (has?.({ permission: "coach_pro" }) ?? false) ||
+        (has?.({ role: "coach_pro" }) ?? false);
+
+      const hasStarterPlan = !hasProPlan;
+
+      const result = await sendInvitation({
+        teacherEmail: values.teacherEmail,
+        teacherName: values.teacherName,
+        subject: values.subject,
+        gradeBand: values.gradeBand,
+        hasProPlan,
+        hasStarterPlan,
+      });
+
+      if (result.success) {
+        toast.success("Invitation sent successfully!", {
+          description: `An invitation has been sent to ${values.teacherEmail}`,
+        });
+        form.reset();
+        onSuccess?.();
+      } else {
+        toast.error("Failed to send invitation", {
+          description: result.message,
+        });
+      }
+    } catch (error) {
+      console.error("Error sending invitation:", error);
+      toast.error("An error occurred", {
+        description: "Failed to send invitation. Please try again.",
+      });
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Show current usage and warning if at limit */}
+      {teacherUsage && (
+        <div className="p-3 rounded bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-950/20 dark:text-blue-200 dark:border-blue-800">
+          <div className="text-sm">
+            <strong>Teacher Usage:</strong> {teacherUsage.teacherCount} of{" "}
+            {teacherUsage.teacherLimit} used
+          </div>
+          {teacherUsage.teachersRemaining > 0 && (
+            <div className="text-xs mt-1">
+              {teacherUsage.teachersRemaining} teacher
+              {teacherUsage.teachersRemaining === 1 ? "" : "s"} remaining
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Show warning if at teacher limit */}
+      {!canInviteTeacher && (
+        <div className="p-3 rounded bg-orange-50 text-orange-800 border border-orange-200 dark:bg-orange-950/20 dark:text-orange-200 dark:border-orange-800">
+          {inviteBlockReason ||
+            "You have reached your teacher limit. Upgrade to Coach Pro for more."}
+        </div>
+      )}
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="teacherName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Teacher Name</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., Sarah Johnson"
+                    {...field}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="teacherEmail"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email Address</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="teacher@school.edu"
+                    {...field}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="subject"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Subject Area (optional)</FormLabel>
+                <FormControl>
+                  <Select
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select subject area" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SUBJECT_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="gradeBand"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Grade Band (optional)</FormLabel>
+                <FormControl>
+                  <Select
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select grade band" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {GRADE_BAND_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex justify-center space-x-2 pt-4">
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={onSuccess}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading || !canInviteTeacher}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="h-4 w-4" />
+                  Send Invitation
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
+  );
+}

@@ -1,10 +1,9 @@
 "use client";
 
-import { Users, BookOpen, MessageSquare, Plus, UserPlus } from "lucide-react";
+import { Users, BookOpen, Plus, UserPlus, ThumbsUp, Wrench } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { KpiCard } from "@/app/(dashboard)/(coach)/dashboard/components/KpiCard";
-import { PrioritiesPanel } from "@/app/(dashboard)/(coach)/dashboard/components/PrioritiesPanel";
 import { RecentActivityFeed } from "@/app/(dashboard)/(coach)/dashboard/components/RecentActivityFeed";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -12,6 +11,7 @@ import { AnimatedGradientText } from "@/components/magicui/animated-gradient-tex
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { TeacherInvitationForm } from "@/app/(dashboard)/(coach)/teachers/components/TeacherInvitationForm";
 
 export default function CoachDashboardPage() {
   const { user } = useUser();
@@ -81,23 +81,25 @@ export default function CoachDashboardPage() {
           </>
         }
         gradient={true}
+        rightContent={
+          <div className="flex flex-wrap gap-3">
+            <Link href="/walkthrough/new">
+              <Button className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Start Walkthrough
+              </Button>
+            </Link>
+            <TeacherInvitationForm
+              trigger={
+                <Button variant="outline" className="flex items-center gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  Invite Teacher
+                </Button>
+              }
+            />
+          </div>
+        }
       />
-
-      {/* Quick Actions - Prominently displayed below header */}
-      <div className="flex flex-wrap gap-3">
-        <Link href="/walkthrough/new">
-          <Button className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Start Walkthrough
-          </Button>
-        </Link>
-        <Link href="/teachers">
-          <Button variant="outline" className="flex items-center gap-2">
-            <UserPlus className="h-4 w-4" />
-            Invite Teacher
-          </Button>
-        </Link>
-      </div>
 
       {/* KPI Cards - More responsive grid */}
       <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
@@ -108,40 +110,29 @@ export default function CoachDashboardPage() {
           description="Active teachers in your portfolio"
         />
         <KpiCard
-          title="Active Teachers"
-          value={analytics.activeTeachers}
-          icon={Users}
-          description="Teachers with recent activity"
-        />
-        <KpiCard
           title="Total Walkthroughs"
           value={analytics.totalWalkthroughs}
           icon={BookOpen}
           description="Walkthroughs completed this month"
         />
         <KpiCard
-          title="Feedback Generated"
-          value={analytics.totalFeedbackGenerated}
-          icon={MessageSquare}
-          description="AI feedback pieces created"
+          title="Most Common Reinforcement"
+          value={analytics.mostCommonReinforcement ? analytics.mostCommonReinforcement.count : 0}
+          icon={ThumbsUp}
+          description={analytics.mostCommonReinforcement ? analytics.mostCommonReinforcement.indicatorName : 'None'}
+        />
+        <KpiCard
+          title="Most Common Refinement"
+          value={analytics.mostCommonRefinement ? analytics.mostCommonRefinement.count : 0}
+          icon={Wrench}
+          description={analytics.mostCommonRefinement ? analytics.mostCommonRefinement.indicatorName : 'None'}
         />
       </div>
 
-      {/* Main Dashboard Content - Better space utilization */}
-      <div className="grid gap-4 lg:gap-6 grid-cols-1 xl:grid-cols-3">
-        {/* Priorities Panel - Takes 1/3 on large screens */}
-        <div className="xl:col-span-1">
-          <PrioritiesPanel
-            walkthroughsDue={analytics.priorities.walkthroughsDue}
-            reflectionsToReview={analytics.priorities.reflectionsToReview}
-            teachersNeedingSupport={analytics.priorities.teachersNeedingSupport}
-          />
-        </div>
-
-        {/* Recent Activity Feed - Takes 2/3 on large screens */}
-        <div className="xl:col-span-2">
-          <RecentActivityFeed activities={analytics.recentActivity} />
-        </div>
+      {/* Main Dashboard Content */}
+      <div className="grid gap-4 lg:gap-6 grid-cols-1">
+        {/* Recent Activity Feed - Full width */}
+        <RecentActivityFeed activities={analytics.recentActivity} />
       </div>
     </div>
   );

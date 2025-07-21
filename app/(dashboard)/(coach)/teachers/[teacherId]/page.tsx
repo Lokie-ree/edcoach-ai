@@ -55,7 +55,7 @@ export default function TeacherDetailsPage() {
             Start Walkthrough
           </Button>
         </Link>
-        <Link href={`/teachers/${teacherId}/walkthroughs`}>
+        <Link href={`/walkthrough?teacherId=${teacherId}`}>
           <Button variant="outline">
             <MessageSquare className="w-4 h-4 mr-2" />
             View Walkthroughs

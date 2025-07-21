@@ -24,7 +24,11 @@ export function PageHeader({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay }}
-      className={cn("flex items-center justify-between", className)}
+      className={cn(
+        // Responsive flex: column on mobile, row on md+
+        "flex flex-col md:flex-row md:items-center md:justify-between",
+        className
+      )}
     >
       <div>
         <h1 className="text-3xl font-bold tracking-tight">
@@ -43,7 +47,12 @@ export function PageHeader({
         )}
       </div>
       {rightContent && (
-        <div className="flex-shrink-0">
+        <div
+          className={
+            // Add spacing above on mobile, none on md+
+            "mt-4 md:mt-0 flex-shrink-0"
+          }
+        >
           {rightContent}
         </div>
       )}

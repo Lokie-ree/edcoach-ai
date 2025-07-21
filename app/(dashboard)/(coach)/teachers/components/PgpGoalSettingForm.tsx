@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -30,6 +30,14 @@ type PgpGoalSettingFormProps = {
   teacherGradeBand: string;
   onSuccess: () => void;
   onCancel: () => void;
+  existingGoal?: {
+    text: string;
+    indicatorCode: string;
+    contextNotes?: string;
+    setAt: number;
+    targetDate?: number;
+    progress?: number;
+  };
 };
 
 export default function PgpGoalSettingForm({
@@ -39,6 +47,7 @@ export default function PgpGoalSettingForm({
   teacherGradeBand,
   onSuccess,
   onCancel,
+  existingGoal,
 }: PgpGoalSettingFormProps) {
   const [isDrafting, setIsDrafting] = useState(false);
   
@@ -54,6 +63,17 @@ export default function PgpGoalSettingForm({
       goalText: "",
     },
   });
+
+  // Prefill form with existing goal data when editing
+  useEffect(() => {
+    if (existingGoal) {
+      form.reset({
+        indicatorCode: existingGoal.indicatorCode,
+        contextNotes: existingGoal.contextNotes || "",
+        goalText: existingGoal.text,
+      });
+    }
+  }, [existingGoal, form]);
 
   const selectedIndicator = form.watch("indicatorCode");
   const selectedIndicatorData = indicators?.find(ind => ind.indicator_code === selectedIndicator);
@@ -95,7 +115,7 @@ export default function PgpGoalSettingForm({
         indicatorCode: values.indicatorCode,
         contextNotes: values.contextNotes || undefined,
       });
-      toast.success("PGP goal set successfully!");
+      toast.success(existingGoal ? "PGP goal updated successfully!" : "PGP goal set successfully!");
       onSuccess();
     } catch (error) {
       toast.error("Failed to save goal. Please try again.");
@@ -106,10 +126,13 @@ export default function PgpGoalSettingForm({
     return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold text-foreground mb-2">
-        Set PGP Goal for {teacherName}
+        {existingGoal ? "Edit" : "Set"} PGP Goal for {teacherName}
       </h2>
       <p className="text-foreground mb-4">
-        Create a Professional Growth Plan goal focused on improving specific teaching practices.
+        {existingGoal 
+          ? "Update the Professional Growth Plan goal for this teacher."
+          : "Create a Professional Growth Plan goal focused on improving specific teaching practices."
+        }
       </p>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -232,12 +255,12 @@ export default function PgpGoalSettingForm({
               {form.formState.isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Setting Goal...
+                  {existingGoal ? "Updating..." : "Setting Goal..."}
                 </>
               ) : (
                 <>
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Set PGP Goal
+                  {existingGoal ? "Update PGP Goal" : "Set PGP Goal"}
                 </>
               )}
             </Button>

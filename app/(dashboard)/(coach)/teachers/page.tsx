@@ -12,9 +12,7 @@ import TeacherList from "./components/TeacherList";
 import GridDistortion from "./components/GridDistortion";
 import { Teacher } from "@/types/teacher";
 import TeacherStatsCard from "./components/TeacherStatsCard";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import Link from "next/link";
+import { TeacherInvitationForm } from "./components/TeacherInvitationForm";
 
 
 export default function TeachersPage() {
@@ -46,12 +44,7 @@ export default function TeachersPage() {
           }
           gradient={true}
           rightContent={
-            <Link href="/teachers/invite">
-              <Button size="lg" className="gap-2">
-                <Plus className="h-4 w-4" />
-                Invite Teacher
-              </Button>
-            </Link>
+            <TeacherInvitationForm />
           }
         />
         {/* Stats and List in better layout */}
@@ -117,6 +110,8 @@ export default function TeachersPage() {
             />
           )}
         </Modal>
+
+
       </div>
     </div>
   );

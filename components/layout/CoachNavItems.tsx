@@ -4,7 +4,6 @@ import * as React from "react";
 import {
   BarChart3,
   BookOpen,
-  Settings,
   Users,
   CreditCard,
   Activity,
@@ -37,11 +36,6 @@ export function CoachNavItems() {
       title: "Billing",
       url: "/settings/billing",
       icon: CreditCard,
-    },
-    {
-      title: "Settings",
-      url: "/settings/profile",
-      icon: Settings,
     },
   ];
 

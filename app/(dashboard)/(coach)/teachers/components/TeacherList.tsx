@@ -4,7 +4,6 @@ import { Pencil, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Teacher } from "@/types/teacher";
-import { TeacherInvitationForm } from "./TeacherInvitationForm";
 import Link from "next/link";
 
 interface TeacherListProps {
@@ -34,18 +33,11 @@ export default function TeacherList({
   return (
     <Card className="bg-card border-border">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-foreground">All Teachers</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Manage your teaching staff details and status
-            </p>
-          </div>
-          <TeacherInvitationForm
-            onSuccess={() => {
-              // The form will handle its own state, but we could add a refresh here if needed
-            }}
-          />
+        <div>
+          <CardTitle className="text-foreground">All Teachers</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Manage your teaching staff details and status
+          </p>
         </div>
       </CardHeader>
       <CardContent>
@@ -146,7 +138,7 @@ export default function TeacherList({
             <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No teachers yet</p>
             <p className="text-sm">
-              Click &quot;Invite Teachers&quot; to get started
+              Use the invite button above to get started
             </p>
           </div>
         )}

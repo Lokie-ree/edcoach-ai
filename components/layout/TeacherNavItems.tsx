@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BookOpen, Settings, Target } from "lucide-react";
+import { BookOpen, Target } from "lucide-react";
 import { DashboardNav } from "./DashboardNav";
 
 export function TeacherNavItems() {
@@ -15,11 +15,6 @@ export function TeacherNavItems() {
       title: "Walkthroughs",
       url: "/walkthrough",
       icon: BookOpen,
-    },
-    {
-      title: "Settings",
-      url: "/settings/profile",
-      icon: Settings,
     },
   ];
 

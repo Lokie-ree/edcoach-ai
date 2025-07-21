@@ -234,6 +234,7 @@ export function PgpGoalCard({
           teacherGradeBand={teacherGradeBand}
           onSuccess={() => setIsModalOpen(false)}
           onCancel={() => setIsModalOpen(false)}
+          existingGoal={pgpGoal}
         />
       </Modal>
     </>

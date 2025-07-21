@@ -366,6 +366,7 @@ export const getMyWalkthroughs = query({
   args: {
     searchTerm: v.optional(v.string()),
     statusFilter: v.optional(v.string()),
+    teacherId: v.optional(v.id("teachers")),
   },
   returns: v.object({
     walkthroughs: v.array(v.any()),
@@ -396,10 +397,25 @@ export const getMyWalkthroughs = query({
         .withIndex("by_coach", (q) => q.eq("coachId", user._id))
         .collect();
       const teacherIds = teachers.map(t => t._id);
-      walkthroughs = await ctx.db
-        .query("walkthroughs")
-        .filter((q) => q.or(...teacherIds.map(id => q.eq(q.field("teacherId"), id))))
-        .collect();
+      
+      // If a specific teacherId is provided, filter to just that teacher
+      if (args.teacherId) {
+        // Verify the teacher belongs to this coach
+        const targetTeacher = teachers.find(t => t._id === args.teacherId);
+        if (!targetTeacher) {
+          return { walkthroughs: [], isCoach: true };
+        }
+        walkthroughs = await ctx.db
+          .query("walkthroughs")
+          .withIndex("by_teacher", (q) => q.eq("teacherId", args.teacherId!))
+          .collect();
+      } else {
+        // Get all walkthroughs for all teachers
+        walkthroughs = await ctx.db
+          .query("walkthroughs")
+          .filter((q) => q.or(...teacherIds.map(id => q.eq(q.field("teacherId"), id))))
+          .collect();
+      }
     }
     // Attach teacher name for coaches
     if (user.role === "coach") {
