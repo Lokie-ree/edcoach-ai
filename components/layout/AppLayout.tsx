@@ -14,7 +14,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/analytics") ||
     pathname.startsWith("/teachers") ||
-    pathname.startsWith("/my-pgp") ||
+          pathname.startsWith("/growth-journal") ||
     pathname.startsWith("/walkthrough") ||
     pathname.startsWith("/settings");
 

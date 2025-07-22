@@ -20,7 +20,7 @@ export default function CoachLayout({
       if (currentUser.role !== "coach") {
         // Redirect to appropriate page based on role
         if (currentUser.role === "teacher") {
-          redirect("/my-pgp");
+          redirect("/growth-journal");
         } else {
           redirect("/dashboard");
         }

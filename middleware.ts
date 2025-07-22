@@ -6,8 +6,6 @@ const isProtectedRoute = createRouteMatcher([
   '/analytics(.*)',
   '/teachers(.*)',
   '/walkthrough(.*)',
-  '/my-walkthroughs(.*)',
-  '/my-progress(.*)'
 ]);
 
 const isCoachRoute = createRouteMatcher([
@@ -22,6 +20,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/onboarding(.*)',
+  '/invite(.*)',
   '/billing(.*)'
 ]);
 

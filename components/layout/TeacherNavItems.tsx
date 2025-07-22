@@ -7,8 +7,8 @@ import { DashboardNav } from "./DashboardNav";
 export function TeacherNavItems() {
   const navItems = [
     {
-      title: "My PGP",
-      url: "/my-pgp",
+      title: "My Growth Journal",
+      url: "/growth-journal",
       icon: Target,
     },
     {

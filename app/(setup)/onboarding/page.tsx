@@ -27,7 +27,8 @@ import { AIUsageBadge, AIUsageWarning } from "@/components/common/AiUsageBadge";
 import { useQuery as useConvexQuery } from "convex/react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
-import TeacherTutorial from "@/app/onboarding/components/TeacherTutorial";
+import TeacherTutorial from "@/app/(setup)/onboarding/components/TeacherTutorial";
+import CoachTutorial from "@/app/(setup)/onboarding/components/CoachTutorial";
 
 export default function OnboardingPage() {
   const { user, isLoaded } = useUser();
@@ -38,6 +39,9 @@ export default function OnboardingPage() {
   >("role-detection");
   const [completingOnboarding, setCompletingOnboarding] = useState(false);
   const [showTeacherTutorial, setShowTeacherTutorial] = useState(false);
+  const [showCoachTutorial, setShowCoachTutorial] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [tutorialInitialized, setTutorialInitialized] = useState(false);
 
   // Get current user data
   const convexUser = useQuery(
@@ -61,43 +65,73 @@ export default function OnboardingPage() {
 
   // Handle redirect to dashboard after onboarding is complete
   useEffect(() => {
-    if (convexUser?.onboardingComplete && !completingOnboarding) {
+    if (convexUser?.onboardingComplete && !completingOnboarding && !isRedirecting) {
       console.log("Onboarding complete, redirecting to dashboard");
+      setIsRedirecting(true);
       // Small delay to prevent immediate redirect during state changes
       const timer = setTimeout(() => {
         router.replace("/dashboard");
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [convexUser?.onboardingComplete, completingOnboarding, router]);
+  }, [convexUser?.onboardingComplete, completingOnboarding, isRedirecting, router]);
 
   // Determine initial step based on user state
   useEffect(() => {
-    if (!convexUser || !isLoaded || completingOnboarding) return;
+    if (!convexUser || !isLoaded || completingOnboarding || tutorialInitialized) return;
     if (convexUser.onboardingComplete) return;
-    if (convexUser.role === "teacher") {
-      setShowTeacherTutorial(true);
-      setStep("complete");
-      return;
-    }
-    if (convexUser.role === "coach") {
-      setStep("role-detection");
-    }
-  }, [convexUser, isLoaded, completingOnboarding]);
+    
+    console.log("Initializing tutorial for user:", convexUser.role);
+    
+    // Small delay to ensure user data is stable
+    const timer = setTimeout(() => {
+      if (convexUser.role === "teacher") {
+        setShowTeacherTutorial(true);
+        setStep("complete");
+        setTutorialInitialized(true);
+        return;
+      }
+      if (convexUser.role === "coach") {
+        setShowCoachTutorial(true);
+        setStep("complete");
+        setTutorialInitialized(true);
+        return;
+      }
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [convexUser, isLoaded, completingOnboarding, tutorialInitialized]);
+
+  const handleRedirectToDashboard = () => {
+    if (isRedirecting) return; // Prevent multiple redirects
+    setIsRedirecting(true);
+    console.log("Redirecting to dashboard...");
+    toast.success("Welcome to EdCoach AI!");
+    setTimeout(() => {
+      router.replace("/dashboard");
+    }, 1000);
+  };
 
   const handleCompleteOnboarding = async () => {
     setCompletingOnboarding(true);
 
     try {
       console.log("Completing onboarding for user:", convexUser?.role);
-      await completeOnboarding({});
-      console.log("Onboarding completed successfully");
-      toast.success("Welcome to EdCoach AI!");
-
-      // Small delay then redirect
-      setTimeout(() => {
-        router.replace("/dashboard");
-      }, 1000);
+      console.log("User ID:", convexUser?._id);
+      console.log("Current onboardingComplete status:", convexUser?.onboardingComplete);
+      
+      const result = await completeOnboarding({});
+      console.log("Onboarding completion result:", result);
+      
+      if (result.success) {
+        console.log("Onboarding completed successfully");
+        setCompletingOnboarding(false);
+        handleRedirectToDashboard();
+      } else {
+        console.error("Onboarding completion returned failure:", result);
+        toast.error("Failed to complete setup. Please try again.");
+        setCompletingOnboarding(false);
+      }
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
       toast.error("Failed to complete setup. Please try again.");
@@ -116,16 +150,24 @@ export default function OnboardingPage() {
   if (!convexUser) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading your account...</p>
+        </div>
       </div>
     );
   }
 
-  if (convexUser?.onboardingComplete) {
+  if (convexUser?.onboardingComplete || isRedirecting) {
     // Show a spinner while redirecting to dashboard
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">
+            {isRedirecting ? "Redirecting to dashboard..." : "Setting up your account..."}
+          </p>
+        </div>
       </div>
     );
   }
@@ -142,6 +184,18 @@ export default function OnboardingPage() {
     );
   }
 
+  // Show loading while tutorial is being initialized
+  if (convexUser && !convexUser.onboardingComplete && !tutorialInitialized && !showTeacherTutorial && !showCoachTutorial) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Preparing your tutorial...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (
     showTeacherTutorial &&
     convexUser?.role === "teacher" &&
@@ -150,18 +204,99 @@ export default function OnboardingPage() {
     return (
       <TeacherTutorial
         onComplete={async () => {
+          console.log("Teacher tutorial completed");
           setShowTeacherTutorial(false);
           setCompletingOnboarding(true);
-          await completeOnboarding({});
-          setCompletingOnboarding(false);
-          router.replace("/dashboard");
+          try {
+            const result = await completeOnboarding({});
+            console.log("Teacher tutorial completion result:", result);
+            if (result.success) {
+              setCompletingOnboarding(false);
+              handleRedirectToDashboard();
+            } else {
+              console.error("Teacher tutorial completion failed:", result);
+              setCompletingOnboarding(false);
+              toast.error("Failed to complete setup. Please try again.");
+            }
+          } catch (error) {
+            console.error("Teacher tutorial completion error:", error);
+            setCompletingOnboarding(false);
+            toast.error("Failed to complete setup. Please try again.");
+          }
         }}
         onSkip={async () => {
+          console.log("Teacher tutorial skipped");
           setShowTeacherTutorial(false);
           setCompletingOnboarding(true);
-          await completeOnboarding({});
-          setCompletingOnboarding(false);
-          router.replace("/dashboard");
+          try {
+            const result = await completeOnboarding({});
+            console.log("Teacher tutorial skip result:", result);
+            if (result.success) {
+              setCompletingOnboarding(false);
+              handleRedirectToDashboard();
+            } else {
+              console.error("Teacher tutorial skip failed:", result);
+              setCompletingOnboarding(false);
+              toast.error("Failed to complete setup. Please try again.");
+            }
+          } catch (error) {
+            console.error("Teacher tutorial skip error:", error);
+            setCompletingOnboarding(false);
+            toast.error("Failed to complete setup. Please try again.");
+          }
+        }}
+      />
+    );
+  }
+
+  if (
+    showCoachTutorial &&
+    convexUser?.role === "coach" &&
+    !convexUser.onboardingComplete
+  ) {
+    return (
+      <CoachTutorial
+        onComplete={async () => {
+          console.log("Coach tutorial completed");
+          setShowCoachTutorial(false);
+          setCompletingOnboarding(true);
+          try {
+            const result = await completeOnboarding({});
+            console.log("Coach tutorial completion result:", result);
+            if (result.success) {
+              setCompletingOnboarding(false);
+              handleRedirectToDashboard();
+            } else {
+              console.error("Coach tutorial completion failed:", result);
+              setCompletingOnboarding(false);
+              toast.error("Failed to complete setup. Please try again.");
+            }
+          } catch (error) {
+            console.error("Coach tutorial completion error:", error);
+            setCompletingOnboarding(false);
+            toast.error("Failed to complete setup. Please try again.");
+          }
+        }}
+        onSkip={async () => {
+          console.log("Coach tutorial skipped");
+          setShowCoachTutorial(false);
+          setCompletingOnboarding(true);
+          try {
+            const result = await completeOnboarding({});
+            console.log("Coach tutorial skip result:", result);
+            if (result.success) {
+              setCompletingOnboarding(false);
+              handleRedirectToDashboard();
+            } else {
+              console.error("Coach tutorial skip failed:", result);
+              setCompletingOnboarding(false);
+              toast.error("Failed to complete setup. Please try again.");
+            }
+          } catch (error) {
+            console.error("Coach tutorial skip error:", error);
+            setCompletingOnboarding(false);
+            toast.error("Failed to complete setup. Please try again.");
+          }
         }}
       />
     );

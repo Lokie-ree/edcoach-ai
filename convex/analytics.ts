@@ -1098,7 +1098,7 @@ export const getMyPgpData = query({
     reflectionPrompt: v.object({
       question: v.string(),
       lastAnswered: v.optional(v.number()),
-      isOverdue: v.boolean(),
+      isOverdue: v.optional(v.boolean()),
     }),
     refinementFocus: v.object({
       currentIndicator: v.string(),
