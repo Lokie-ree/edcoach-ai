@@ -332,23 +332,73 @@ export const getViewDetails = query({
     entries: v.array(v.any()),
     canView: v.boolean(),
     userRole: v.string(),
+    indicatorNames: v.object({
+      reinforcementIndicatorName: v.string(),
+      refinementIndicatorName: v.string(),
+    }),
   }),
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
-    if (!user) return { walkthrough: null, teacher: null, observer: null, entries: [], canView: false, userRole: "none" };
+    if (!user)
+      return {
+        walkthrough: null,
+        teacher: null,
+        observer: null,
+        entries: [],
+        canView: false,
+        userRole: "none",
+        indicatorNames: {
+          reinforcementIndicatorName: "",
+          refinementIndicatorName: "",
+        },
+      };
     const walkthrough = await ctx.db.get(args.walkthroughId);
-    if (!walkthrough) return { walkthrough: null, teacher: null, observer: null, entries: [], canView: false, userRole: user.role };
+    if (!walkthrough)
+      return {
+        walkthrough: null,
+        teacher: null,
+        observer: null,
+        entries: [],
+        canView: false,
+        userRole: user.role,
+        indicatorNames: {
+          reinforcementIndicatorName: "",
+          refinementIndicatorName: "",
+        },
+      };
     const teacher = await ctx.db.get(walkthrough.teacherId);
     const observer = await ctx.db.get(walkthrough.observerId);
     const entries = await ctx.db
       .query("walkthroughEntries")
-      .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", args.walkthroughId))
+      .withIndex("by_walkthrough", (q) =>
+        q.eq("walkthroughId", args.walkthroughId),
+      )
       .collect();
+
+    // Get indicator names from the database
+    const reinforcementIndicator = await ctx.db
+      .query("rubricIndicators")
+      .withIndex("by_indicator_code", (q) =>
+        q.eq("indicator_code", walkthrough.reinforcementIndicator),
+      )
+      .first();
+    const refinementIndicator = await ctx.db
+      .query("rubricIndicators")
+      .withIndex("by_indicator_code", (q) =>
+        q.eq("indicator_code", walkthrough.refinementIndicator),
+      )
+      .first();
+
     // Permission logic: coach can view any, teacher can view their own
     let canView = false;
     if (user.role === "coach") {
       canView = true;
-    } else if (user.role === "teacher" && teacher && teacher.userId && teacher.userId === user._id) {
+    } else if (
+      user.role === "teacher" &&
+      teacher &&
+      teacher.userId &&
+      teacher.userId === user._id
+    ) {
       canView = true;
     }
     return {
@@ -358,6 +408,14 @@ export const getViewDetails = query({
       entries,
       canView,
       userRole: user.role,
+      indicatorNames: {
+        reinforcementIndicatorName:
+          reinforcementIndicator?.indicator_name ||
+          walkthrough.reinforcementIndicator,
+        refinementIndicatorName:
+          refinementIndicator?.indicator_name ||
+          walkthrough.refinementIndicator,
+      },
     };
   },
 });
@@ -396,12 +454,12 @@ export const getMyWalkthroughs = query({
         .query("teachers")
         .withIndex("by_coach", (q) => q.eq("coachId", user._id))
         .collect();
-      const teacherIds = teachers.map(t => t._id);
-      
+      const teacherIds = teachers.map((t) => t._id);
+
       // If a specific teacherId is provided, filter to just that teacher
       if (args.teacherId) {
         // Verify the teacher belongs to this coach
-        const targetTeacher = teachers.find(t => t._id === args.teacherId);
+        const targetTeacher = teachers.find((t) => t._id === args.teacherId);
         if (!targetTeacher) {
           return { walkthroughs: [], isCoach: true };
         }
@@ -413,33 +471,41 @@ export const getMyWalkthroughs = query({
         // Get all walkthroughs for all teachers
         walkthroughs = await ctx.db
           .query("walkthroughs")
-          .filter((q) => q.or(...teacherIds.map(id => q.eq(q.field("teacherId"), id))))
+          .filter((q) =>
+            q.or(...teacherIds.map((id) => q.eq(q.field("teacherId"), id))),
+          )
           .collect();
       }
     }
     // Attach teacher name for coaches
     if (user.role === "coach") {
-      walkthroughs = walkthroughs.map(w => ({
+      walkthroughs = walkthroughs.map((w) => ({
         ...w,
-        teacherName: teachers.find(t => t._id === w.teacherId)?.name || "Unknown Teacher",
+        teacherName:
+          teachers.find((t) => t._id === w.teacherId)?.name ||
+          "Unknown Teacher",
       }));
     }
     // Filter by search term
     if (args.searchTerm) {
       const term = args.searchTerm.toLowerCase();
-      walkthroughs = walkthroughs.filter(w =>
-        w.evidenceSummary?.toLowerCase().includes(term) ||
-        w.reinforcementIndicator?.toLowerCase().includes(term) ||
-        w.refinementIndicator?.toLowerCase().includes(term) ||
-        (user.role === "coach" && w.teacherName?.toLowerCase().includes(term))
+      walkthroughs = walkthroughs.filter(
+        (w) =>
+          w.evidenceSummary?.toLowerCase().includes(term) ||
+          w.reinforcementIndicator?.toLowerCase().includes(term) ||
+          w.refinementIndicator?.toLowerCase().includes(term) ||
+          (user.role === "coach" &&
+            w.teacherName?.toLowerCase().includes(term)),
       );
     }
     // Filter by status
     if (args.statusFilter && args.statusFilter !== "all") {
-      walkthroughs = walkthroughs.filter(w => w.status === args.statusFilter);
+      walkthroughs = walkthroughs.filter((w) => w.status === args.statusFilter);
     }
     // Sort by date (newest first)
-    walkthroughs = walkthroughs.sort((a, b) => b.walkthroughDate - a.walkthroughDate);
+    walkthroughs = walkthroughs.sort(
+      (a, b) => b.walkthroughDate - a.walkthroughDate,
+    );
     return { walkthroughs, isCoach: user.role === "coach" };
   },
 });
@@ -455,7 +521,7 @@ export const getMyProgress = query({
           indicatorName: v.string(),
           count: v.number(),
           percent: v.number(),
-        })
+        }),
       ),
       growthAreas: v.array(
         v.object({
@@ -463,7 +529,7 @@ export const getMyProgress = query({
           indicatorName: v.string(),
           count: v.number(),
           percent: v.number(),
-        })
+        }),
       ),
       recentReinforcements: v.array(
         v.object({
@@ -471,14 +537,14 @@ export const getMyProgress = query({
           indicatorName: v.string(),
           walkthroughDate: v.number(),
           aiFeedback: v.string(),
-        })
+        }),
       ),
       coach: v.union(
         v.null(),
         v.object({
           name: v.string(),
           email: v.string(),
-        })
+        }),
       ),
       coachingStats: v.object({
         totalWalkthroughs: v.number(),
@@ -488,7 +554,7 @@ export const getMyProgress = query({
         latestFeedback: v.union(v.string(), v.null()),
         latestIndicator: v.union(v.string(), v.null()),
       }),
-    })
+    }),
   ),
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
@@ -500,9 +566,7 @@ export const getMyProgress = query({
       .first();
     if (!teacher) return null;
     // Get coach info
-    const coach = teacher.coachId
-      ? await ctx.db.get(teacher.coachId)
-      : null;
+    const coach = teacher.coachId ? await ctx.db.get(teacher.coachId) : null;
     // Get all walkthroughs for this teacher
     const walkthroughs = await ctx.db
       .query("walkthroughs")
@@ -514,16 +578,21 @@ export const getMyProgress = query({
     for (const walkthroughId of walkthroughIds) {
       const entries = await ctx.db
         .query("walkthroughEntries")
-        .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", walkthroughId))
+        .withIndex("by_walkthrough", (q) =>
+          q.eq("walkthroughId", walkthroughId),
+        )
         .collect();
       walkthroughEntries.push(...entries);
     }
     // Get all indicators for mapping
     const indicators = await ctx.db.query("rubricIndicators").collect();
-    const indicatorMap = indicators.reduce((map, ind) => {
-      map[ind.indicator_code] = ind.indicator_name;
-      return map;
-    }, {} as Record<string, string>);
+    const indicatorMap = indicators.reduce(
+      (map, ind) => {
+        map[ind.indicator_code] = ind.indicator_name;
+        return map;
+      },
+      {} as Record<string, string>,
+    );
     // Calculate strengths (reinforcement indicators)
     const reinforcementIndicators: Record<string, number> = {};
     const refinementIndicators: Record<string, number> = {};
@@ -574,10 +643,13 @@ export const getMyProgress = query({
     const reinforcements = walkthroughEntries
       .filter((entry) => entry.type === "reinforcement" && entry.aiFeedback)
       .map((entry) => {
-        const walkthrough = walkthroughs.find((w) => w._id === entry.walkthroughId);
+        const walkthrough = walkthroughs.find(
+          (w) => w._id === entry.walkthroughId,
+        );
         return {
           indicator: entry.indicatorAcronym,
-          indicatorName: indicatorMap[entry.indicatorAcronym] || entry.indicatorAcronym,
+          indicatorName:
+            indicatorMap[entry.indicatorAcronym] || entry.indicatorAcronym,
           walkthroughDate: walkthrough?.walkthroughDate || 0,
           aiFeedback: entry.aiFeedback,
         };
@@ -586,11 +658,15 @@ export const getMyProgress = query({
       .slice(0, 8);
     // Coaching stats
     const totalWalkthroughs = walkthroughs.length;
-    const recentWalkthrough = walkthroughs.length > 0
-      ? walkthroughs.slice().sort((a, b) => b.walkthroughDate - a.walkthroughDate)[0]
-      : null;
+    const recentWalkthrough =
+      walkthroughs.length > 0
+        ? walkthroughs
+            .slice()
+            .sort((a, b) => b.walkthroughDate - a.walkthroughDate)[0]
+        : null;
     const lastObservation = recentWalkthrough?.walkthroughDate || null;
-    const latestReinforcement = reinforcements.length > 0 ? reinforcements[0] : null;
+    const latestReinforcement =
+      reinforcements.length > 0 ? reinforcements[0] : null;
     const coachingStats = {
       totalWalkthroughs,
       completedWalkthroughs,
@@ -603,9 +679,7 @@ export const getMyProgress = query({
       strengths: topStrengths,
       growthAreas: topGrowthAreas,
       recentReinforcements: reinforcements,
-      coach: coach
-        ? { name: coach.name, email: coach.email || "" }
-        : null,
+      coach: coach ? { name: coach.name, email: coach.email || "" } : null,
       coachingStats,
     };
   },

@@ -3,11 +3,24 @@ import { BorderBeam } from "@/components/magicui/border-beam";
 import { Award, Target } from "lucide-react";
 import { motion } from "framer-motion";
 import React from "react";
-import { Feedback, Walkthrough } from "@/types/walkthrough";
+import { FeedbackEntry, Walkthrough } from "@/types/walkthrough";
 
-export default function FeedbackSection({ feedback, walkthrough }: { feedback: Feedback; walkthrough: Walkthrough }) {
-  const reinforcementEntry = feedback.entries?.find(e => e.type === "reinforcement");
-  const refinementEntry = feedback.entries?.find(e => e.type === "refinement");
+interface FeedbackSectionProps {
+  entries: FeedbackEntry[];
+  walkthrough: Walkthrough;
+  indicatorNames: {
+    reinforcementIndicatorName: string;
+    refinementIndicatorName: string;
+  };
+}
+
+export default function FeedbackSection({
+  entries,
+  walkthrough,
+  indicatorNames,
+}: FeedbackSectionProps) {
+  const reinforcementEntry = entries?.find((e) => e.type === "reinforcement");
+  const refinementEntry = entries?.find((e) => e.type === "refinement");
 
   if (walkthrough.status !== "completed") return null;
 
@@ -35,12 +48,18 @@ export default function FeedbackSection({ feedback, walkthrough }: { feedback: F
         <CardContent>
           <div className="space-y-3">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Indicator</p>
-              <p className="font-medium">{feedback.getIndicatorName(walkthrough.reinforcementIndicator)}</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Indicator
+              </p>
+              <p className="font-medium">
+                {indicatorNames.reinforcementIndicatorName}
+              </p>
             </div>
             {reinforcementEntry?.aiFeedback && (
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Feedback</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Feedback
+                </p>
                 <div className="mt-2 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
                   <p className="text-sm whitespace-pre-wrap">
                     {reinforcementEntry.aiFeedback}
@@ -68,12 +87,18 @@ export default function FeedbackSection({ feedback, walkthrough }: { feedback: F
         <CardContent>
           <div className="space-y-3">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Indicator</p>
-              <p className="font-medium">{feedback.getIndicatorName(walkthrough.refinementIndicator)}</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Indicator
+              </p>
+              <p className="font-medium">
+                {indicatorNames.refinementIndicatorName}
+              </p>
             </div>
             {refinementEntry?.aiFeedback && (
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Feedback</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Feedback
+                </p>
                 <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                   <p className="text-sm whitespace-pre-wrap">
                     {refinementEntry.aiFeedback}
@@ -86,4 +111,4 @@ export default function FeedbackSection({ feedback, walkthrough }: { feedback: F
       </Card>
     </motion.div>
   );
-} 
+}

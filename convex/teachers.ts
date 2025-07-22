@@ -360,7 +360,9 @@ export const getTeacherOverview = query({
       .collect();
     const total = teachers.length;
     const active = teachers.filter((t) => t.status === "active").length;
-    const needsDetails = teachers.filter((t) => t.status === "needs_details").length;
+    const needsDetails = teachers.filter(
+      (t) => t.status === "needs_details",
+    ).length;
     const pending = teachers.filter((t) => t.status === "pending").length;
     return { total, active, needsDetails, pending, teachers };
   },
@@ -420,17 +422,23 @@ export const getTeacher = internalQuery({
       email: v.string(),
       subject: v.array(v.string()),
       gradeBand: v.string(),
-      status: v.union(v.literal("pending"), v.literal("active"), v.literal("needs_details")),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("active"),
+        v.literal("needs_details"),
+      ),
       coachId: v.id("users"),
-      pgpGoal: v.optional(v.object({
-        text: v.string(),
-        indicatorCode: v.string(),
-        contextNotes: v.optional(v.string()),
-        setAt: v.number(),
-        targetDate: v.optional(v.number()),
-        progress: v.optional(v.number()),
-      })),
-    })
+      pgpGoal: v.optional(
+        v.object({
+          text: v.string(),
+          indicatorCode: v.string(),
+          contextNotes: v.optional(v.string()),
+          setAt: v.number(),
+          targetDate: v.optional(v.number()),
+          progress: v.optional(v.number()),
+        }),
+      ),
+    }),
   ),
   handler: async (ctx, args) => {
     const teacher = await ctx.db.get(args.teacherId);
@@ -467,17 +475,23 @@ export const getTeacherById = query({
       email: v.string(),
       subject: v.array(v.string()),
       gradeBand: v.string(),
-      status: v.union(v.literal("pending"), v.literal("active"), v.literal("needs_details")),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("active"),
+        v.literal("needs_details"),
+      ),
       coachId: v.id("users"),
-      pgpGoal: v.optional(v.object({
-        text: v.string(),
-        indicatorCode: v.string(),
-        contextNotes: v.optional(v.string()),
-        setAt: v.number(),
-        targetDate: v.optional(v.number()),
-        progress: v.optional(v.number()),
-      })),
-    })
+      pgpGoal: v.optional(
+        v.object({
+          text: v.string(),
+          indicatorCode: v.string(),
+          contextNotes: v.optional(v.string()),
+          setAt: v.number(),
+          targetDate: v.optional(v.number()),
+          progress: v.optional(v.number()),
+        }),
+      ),
+    }),
   ),
   handler: async (ctx, args) => {
     const user = await getCurrentUserOrThrow(ctx);
@@ -520,7 +534,7 @@ export const getPgpGoal = query({
       setAt: v.number(),
       targetDate: v.optional(v.number()),
       progress: v.optional(v.number()),
-    })
+    }),
   ),
   handler: async (ctx, args) => {
     const user = await getCurrentUserOrThrow(ctx);
@@ -631,7 +645,7 @@ Return only the goal text, no additional formatting or explanations.`;
 
     try {
       const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4.1-mini",
         messages: [{ role: "user", content: prompt }],
         max_tokens: 200,
         temperature: 0.3,

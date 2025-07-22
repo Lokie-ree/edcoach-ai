@@ -56,16 +56,15 @@ This is what we defined before, but broken down into more granular steps.
     - [x] Is the coach-teacher relationship properly established in the database?
     - [x] Does the teacher appear in the coach's teacher list immediately?
     - [x] Are the teacher's initial settings (plan, permissions) correctly set?
-- **[ ] PGP Goal-Setting Flow:**
-  - [ ] Can the coach access the PGP Goal-Setting Wizard for a teacher?
-  - [ ] Does the LER indicator search/selection work?
-  - [ ] Does the AI-assisted drafting generate a reasonable goal?
-  - [ ] Does saving the goal correctly update the teacher's record in the database?
-- **[ ] Walkthrough & Feedback Flow:**
-  - [ ] Can the coach create and save a draft walkthrough?
-  - [ ] Can the coach complete a walkthrough and trigger AI feedback generation?
-  - [ ] Does the AI feedback correctly use the PGP context?
-  - [ ] Can the coach edit and submit the final feedback?
+- **[x] PGP Goal-Setting Flow:**
+  - [x] Can the coach access the PGP Goal-Setting Wizard for a teacher?
+  - [x] Does the LER indicator search/selection work?
+  - [x] Does the AI-assisted drafting generate a reasonable goal?
+  - [x] Does saving the goal correctly update the teacher's record in the database?
+- **[x] Walkthrough & Feedback Flow:**
+  - [x] Can the coach complete a walkthrough and trigger AI feedback generation?
+  - [x] Does the AI feedback correctly use the PGP context?
+  - [x] Can the coach edit and submit the final feedback?
 - **[ ] Reflection Flow:**
   - [ ] Does the teacher receive a notification (or see an update) about new feedback?
   - [ ] Can the teacher successfully submit a reflection?
