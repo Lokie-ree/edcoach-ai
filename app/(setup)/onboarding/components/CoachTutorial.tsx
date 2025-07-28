@@ -1,9 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Users, ClipboardList, BarChart3, ArrowRight, X } from "lucide-react";
+import {
+  CheckCircle,
+  Users,
+  ClipboardList,
+  BarChart3,
+  ArrowRight,
+  X,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface CoachTutorialProps {
@@ -11,13 +24,17 @@ interface CoachTutorialProps {
   onSkip: () => void;
 }
 
-export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps) {
+export default function CoachTutorial({
+  onComplete,
+  onSkip,
+}: CoachTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
 
   const steps = [
     {
       title: "Welcome to Your Coach Dashboard",
-      description: "Your coaching team is now set up! Now, we will walk through the key features.",
+      description:
+        "Your coaching team is now set up! Now, we will walk through the key features.",
       icon: Users,
       content: (
         <div className="space-y-4">
@@ -27,7 +44,8 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
             </div>
             <h3 className="text-lg font-semibold mb-2">You&apos;re All Set!</h3>
             <p className="text-muted-foreground">
-              Your coaching team is ready and you&apos;re set to start supporting your teachers directly.
+              Your coaching team is ready and you&apos;re set to start
+              supporting your teachers directly.
             </p>
           </div>
           <div className="grid gap-2 text-sm">
@@ -42,10 +60,10 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
           </div>
           <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              <strong>Coach Free Plan</strong> - Start with 1 teacher and
-              3 walkthroughs per month. Upgrade to Coach Starter
-              ($7/month) for 5 teachers and 15 walkthroughs, or Coach Pro
-              for even more.
+              <strong>Coach Free Plan</strong> - Start with 2 teachers and 4
+              walkthroughs total (lifetime). Upgrade to Coach Starter
+              ($19/month) for 15 teachers and 50 walkthroughs/month, or Coach
+              Pro for even more.
             </p>
           </div>
         </div>
@@ -63,7 +81,8 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
             </div>
             <h3 className="text-lg font-semibold mb-2">Building Your Team</h3>
             <p className="text-muted-foreground">
-              Go to the Teachers page to invite teachers directly to your coaching group.
+              Go to the Teachers page to invite teachers directly to your
+              coaching group.
             </p>
           </div>
           <div className="bg-muted/50 rounded-lg p-4 space-y-2">
@@ -80,7 +99,8 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
     },
     {
       title: "Conduct Walkthroughs",
-      description: "Create classroom observations and generate AI-powered feedback.",
+      description:
+        "Create classroom walkthroughs and generate AI-powered feedback.",
       icon: ClipboardList,
       content: (
         <div className="space-y-4">
@@ -88,17 +108,18 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mb-4">
               <ClipboardList className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Smart Observations</h3>
+            <h3 className="text-lg font-semibold mb-2">Smart Walkthroughs</h3>
             <p className="text-muted-foreground">
-              Create detailed walkthroughs with AI-generated, rubric-aligned feedback for your teachers.
+              Create detailed walkthroughs with AI-generated, rubric-aligned
+              feedback for your teachers.
             </p>
           </div>
           <div className="bg-muted/50 rounded-lg p-4 space-y-2">
             <h4 className="font-medium">Walkthrough process:</h4>
             <ul className="text-sm space-y-1 text-muted-foreground">
-              <li>1. Select a teacher and observation date</li>
+              <li>1. Select a teacher and walkthrough date</li>
               <li>2. Choose reinforcement and refinement indicators</li>
-              <li>3. Record evidence and observations</li>
+              <li>3. Record evidence and walkthrough notes</li>
               <li>4. Generate and customize AI feedback</li>
               <li>5. Share with the teacher</li>
             </ul>
@@ -108,7 +129,8 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
     },
     {
       title: "Track Progress with Analytics",
-      description: "Monitor teacher growth and coaching effectiveness with detailed insights.",
+      description:
+        "Monitor teacher growth and coaching effectiveness with detailed insights.",
       icon: BarChart3,
       content: (
         <div className="space-y-3">
@@ -116,12 +138,15 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
             <div className="mx-auto w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mb-3">
               <BarChart3 className="h-6 w-6 text-white" />
             </div>
-            <h3 className="text-base font-semibold mb-1">Data-Driven Coaching</h3>
+            <h3 className="text-base font-semibold mb-1">
+              Data-Driven Coaching
+            </h3>
             <p className="text-sm text-muted-foreground">
-              Use analytics to track teacher progress and identify coaching opportunities in your group.
+              Use analytics to track teacher progress and identify coaching
+              opportunities in your group.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-muted/50 rounded-lg p-3">
               <h4 className="font-medium text-sm mb-2">Analytics features:</h4>
@@ -133,9 +158,12 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
               </ul>
             </div>
             <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
-              <h4 className="font-medium text-sm mb-2 text-green-800 dark:text-green-200">Ready to start!</h4>
+              <h4 className="font-medium text-sm mb-2 text-green-800 dark:text-green-200">
+                Ready to start!
+              </h4>
               <p className="text-xs text-green-700 dark:text-green-300">
-                Coach Free Plan: 1 teacher, 3 walkthroughs/month. Upgrade anytime from settings.
+                Coach Free Plan: 2 teachers, 4 walkthroughs total. Upgrade
+                anytime from settings.
               </p>
             </div>
           </div>
@@ -182,14 +210,14 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            
+
             {/* Progress indicator */}
             <div className="flex items-center gap-2 mt-4">
               {steps.map((_, index) => (
                 <div
                   key={index}
                   className={`h-2 flex-1 rounded-full ${
-                    index <= currentStep ? 'bg-primary' : 'bg-muted'
+                    index <= currentStep ? "bg-primary" : "bg-muted"
                   }`}
                 />
               ))}
@@ -198,7 +226,7 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
               {currentStep + 1} of {steps.length}
             </div>
           </CardHeader>
-          
+
           <CardContent className="space-y-4">
             <AnimatePresence mode="wait">
               <motion.div
@@ -211,7 +239,7 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
                 {currentStepData.content}
               </motion.div>
             </AnimatePresence>
-            
+
             <div className="flex items-center justify-between pt-3 border-t">
               <Button
                 variant="outline"
@@ -220,7 +248,7 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
               >
                 Previous
               </Button>
-              
+
               <div className="flex items-center gap-2">
                 <Button variant="ghost" onClick={onSkip}>
                   Skip Tutorial
@@ -232,7 +260,7 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </>
                   ) : (
-                    'Next'
+                    "Next"
                   )}
                 </Button>
               </div>
@@ -242,4 +270,4 @@ export default function CoachTutorial({ onComplete, onSkip }: CoachTutorialProps
       </motion.div>
     </div>
   );
-} 
+}

@@ -5,9 +5,22 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, Clock, UserCheck, Mail, Loader2 } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  Clock,
+  UserCheck,
+  Mail,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useUser, SignInButton } from "@clerk/nextjs";
 
@@ -21,7 +34,7 @@ export default function InvitePageContent() {
 
   const invitation = useQuery(
     api.invitations.getInvitationByToken,
-    token ? { token } : "skip"
+    token ? { token } : "skip",
   );
 
   const acceptInvitation = useMutation(api.invitations.acceptInvitation);
@@ -32,6 +45,61 @@ export default function InvitePageContent() {
       router.push("/");
     }
   }, [token, router]);
+
+  // If user is not loaded yet, show loader
+  if (!userLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          Loading...
+        </div>
+      </div>
+    );
+  }
+
+  // If user is not signed in, show sign-in prompt with button
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <UserCheck className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+            <CardTitle>Sign In Required</CardTitle>
+            <CardDescription>
+              To accept this teaching invitation from{" "}
+              {invitation?.coachName || "your coach"}, you must sign in with the
+              email address that received this invitation. This will create your
+              account and allow you to join the team.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <div className="p-4 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                <Mail className="h-4 w-4 inline mr-1" />
+                {invitation?.teacherEmail || "(invited email)"}
+              </p>
+              {invitation?.coachName && (
+                <p className="text-sm font-medium mt-1">
+                  Coach: {invitation.coachName}
+                </p>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Please sign in with the same email address that received this
+              invitation.
+            </p>
+            <SignInButton mode="modal">
+              <Button className="w-full">
+                <Mail className="mr-2 h-4 w-4" />
+                Sign In to Accept Invitation
+              </Button>
+            </SignInButton>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleAcceptInvitation = async () => {
     if (!token || !user) return;
@@ -59,38 +127,6 @@ export default function InvitePageContent() {
       setIsAccepting(false);
     }
   };
-
-  if (!userLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          Loading...
-        </div>
-      </div>
-    );
-  }
-
-  if (!token) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <CardTitle>Invalid Invitation</CardTitle>
-            <CardDescription>
-              This invitation link is invalid or missing required information.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-            <Button onClick={() => router.push("/")} variant="outline">
-              Go to Homepage
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   if (invitation === undefined) {
     return (
@@ -132,7 +168,8 @@ export default function InvitePageContent() {
             <Clock className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
             <CardTitle>Invitation Expired</CardTitle>
             <CardDescription>
-              This invitation from {invitation.coachName} has expired. Please contact them for a new invitation.
+              This invitation from {invitation.coachName} has expired. Please
+              contact them for a new invitation.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center space-y-4">
@@ -159,44 +196,14 @@ export default function InvitePageContent() {
             <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
             <CardTitle>Already Accepted</CardTitle>
             <CardDescription>
-              This invitation has already been accepted. You can access your dashboard to get started.
+              This invitation has already been accepted. You can access your
+              dashboard to get started.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
-            <Button onClick={() => router.push("/dashboard")}>Go to Dashboard</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <UserCheck className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-            <CardTitle>Sign In Required</CardTitle>
-            <CardDescription>
-              You need to sign in to accept this teaching invitation from {invitation.coachName}.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                <Mail className="h-4 w-4 inline mr-1" />
-                {invitation.teacherEmail}
-              </p>
-              <p className="text-sm font-medium mt-1">
-                Coach: {invitation.coachName}
-              </p>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Please sign in with the same email address that received this invitation.
-            </p>
-            <SignInButton mode="modal">
-              <Button>Sign In to Accept</Button>
-            </SignInButton>
+            <Button onClick={() => router.push("/dashboard")}>
+              Go to Dashboard
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -210,7 +217,8 @@ export default function InvitePageContent() {
           <UserCheck className="h-12 w-12 text-blue-500 mx-auto mb-4" />
           <CardTitle>Teacher Invitation</CardTitle>
           <CardDescription>
-            You&apos;ve been invited to join {invitation.coachName}&apos;s coaching team
+            You&apos;ve been invited to join {invitation.coachName}&apos;s
+            coaching team
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -238,7 +246,9 @@ export default function InvitePageContent() {
                 What happens next?
               </h4>
               <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                <li>• You&apos;ll join {invitation.coachName}&apos;s coaching team</li>
+                <li>
+                  • You&apos;ll join {invitation.coachName}&apos;s coaching team
+                </li>
                 <li>• Complete your teacher profile setup</li>
                 <li>• Start creating classroom observation walkthroughs</li>
                 <li>• Receive AI-powered feedback on your teaching</li>
@@ -277,4 +287,4 @@ export default function InvitePageContent() {
       </Card>
     </div>
   );
-} 
+}

@@ -26,8 +26,8 @@ export const getCurrentPlanLimits = action({
 
     // Default to free plan limits
     return {
-      walkthroughLimit: 3,
-      teacherLimit: 1,
+      walkthroughLimit: 4,
+      teacherLimit: 2,
       plan: "free",
       hasProFeatures: false,
     };

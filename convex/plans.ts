@@ -8,8 +8,8 @@ export const PLAN_CONFIG = {
     name: "Coach Free",
     description: "Get started with EdCoach AI for free",
     features: {
-      maxAIGenerations: 6, // 3 walkthroughs per month (2 AI generations each)
-      maxTeachers: 1,
+      maxAIGenerations: 8, // 4 walkthroughs total (2 AI generations each)
+      maxTeachers: 2,
       analyticsDepth: 14, // days
       exportEnabled: false,
       bulkInvitationsEnabled: false,

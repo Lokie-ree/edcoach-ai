@@ -1,6 +1,13 @@
 "use client";
 
-import { Users, BookOpen, Plus, UserPlus, ThumbsUp, Wrench } from "lucide-react";
+import {
+  Users,
+  BookOpen,
+  Plus,
+  UserPlus,
+  ThumbsUp,
+  Wrench,
+} from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { KpiCard } from "@/app/(dashboard)/(coach)/dashboard/components/KpiCard";
@@ -117,15 +124,31 @@ export default function CoachDashboardPage() {
         />
         <KpiCard
           title="Most Common Reinforcement"
-          value={analytics.mostCommonReinforcement ? analytics.mostCommonReinforcement.count : 0}
+          value={
+            analytics.mostCommonReinforcement
+              ? analytics.mostCommonReinforcement.count
+              : 0
+          }
           icon={ThumbsUp}
-          description={analytics.mostCommonReinforcement ? analytics.mostCommonReinforcement.indicatorName : 'None'}
+          description={
+            analytics.mostCommonReinforcement
+              ? analytics.mostCommonReinforcement.indicatorName
+              : "None"
+          }
         />
         <KpiCard
           title="Most Common Refinement"
-          value={analytics.mostCommonRefinement ? analytics.mostCommonRefinement.count : 0}
+          value={
+            analytics.mostCommonRefinement
+              ? analytics.mostCommonRefinement.count
+              : 0
+          }
           icon={Wrench}
-          description={analytics.mostCommonRefinement ? analytics.mostCommonRefinement.indicatorName : 'None'}
+          description={
+            analytics.mostCommonRefinement
+              ? analytics.mostCommonRefinement.indicatorName
+              : "None"
+          }
         />
       </div>
 

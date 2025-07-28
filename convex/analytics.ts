@@ -1,6 +1,5 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
-import { Id } from "./_generated/dataModel";
 import { getCurrentUserOrThrow, getCurrentUser } from "./auth";
 import { internalQuery } from "./_generated/server";
 
@@ -85,7 +84,7 @@ export const getCoachAnalytics = query({
         indicator: v.string(),
         indicatorName: v.string(),
         count: v.number(),
-      })
+      }),
     ),
     mostCommonRefinement: v.union(
       v.null(),
@@ -93,7 +92,7 @@ export const getCoachAnalytics = query({
         indicator: v.string(),
         indicatorName: v.string(),
         count: v.number(),
-      })
+      }),
     ),
     priorities: v.object({
       walkthroughsDue: v.number(),
@@ -142,12 +141,16 @@ export const getCoachAnalytics = query({
     const totalWalkthroughs = coachWalkthroughs.length;
 
     // Count total feedback and reflections
-    const allWalkthroughEntries = await ctx.db.query("walkthroughEntries").collect();
+    const allWalkthroughEntries = await ctx.db
+      .query("walkthroughEntries")
+      .collect();
 
     const allReflections = await ctx.db.query("reflections").collect();
 
-    const totalFeedbackGenerated = allWalkthroughEntries.filter((entry) =>
-      coachWalkthroughs.some((w) => w._id === entry.walkthroughId) && entry.aiFeedback
+    const totalFeedbackGenerated = allWalkthroughEntries.filter(
+      (entry) =>
+        coachWalkthroughs.some((w) => w._id === entry.walkthroughId) &&
+        entry.aiFeedback,
     ).length;
 
     // Calculate feedback trend (this month vs last month)
@@ -157,22 +160,34 @@ export const getCoachAnalytics = query({
     const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
 
     const thisMonthFeedback = allWalkthroughEntries.filter((entry) => {
-      const walkthrough = coachWalkthroughs.find(w => w._id === entry.walkthroughId);
+      const walkthrough = coachWalkthroughs.find(
+        (w) => w._id === entry.walkthroughId,
+      );
       if (!walkthrough || !entry.aiFeedback) return false;
       const walkDate = new Date(walkthrough.walkthroughDate);
-      return walkDate.getMonth() === thisMonth && walkDate.getFullYear() === thisYear;
+      return (
+        walkDate.getMonth() === thisMonth && walkDate.getFullYear() === thisYear
+      );
     }).length;
 
     const lastMonthFeedback = allWalkthroughEntries.filter((entry) => {
-      const walkthrough = coachWalkthroughs.find(w => w._id === entry.walkthroughId);
+      const walkthrough = coachWalkthroughs.find(
+        (w) => w._id === entry.walkthroughId,
+      );
       if (!walkthrough || !entry.aiFeedback) return false;
       const walkDate = new Date(walkthrough.walkthroughDate);
-      return walkDate.getMonth() === lastMonth && walkDate.getFullYear() === lastMonthYear;
+      return (
+        walkDate.getMonth() === lastMonth &&
+        walkDate.getFullYear() === lastMonthYear
+      );
     }).length;
 
-    const feedbackTrend = lastMonthFeedback > 0 
-      ? Math.round(((thisMonthFeedback - lastMonthFeedback) / lastMonthFeedback) * 100)
-      : 0;
+    const feedbackTrend =
+      lastMonthFeedback > 0
+        ? Math.round(
+            ((thisMonthFeedback - lastMonthFeedback) / lastMonthFeedback) * 100,
+          )
+        : 0;
 
     const totalReflections = allReflections.filter((reflection) =>
       coachWalkthroughs.some((w) => w._id === reflection.walkthroughId),
@@ -253,7 +268,9 @@ export const getCoachAnalytics = query({
         )
         .collect();
 
-      const hasAiFeedback = walkthroughEntries.some(entry => entry.aiFeedback);
+      const hasAiFeedback = walkthroughEntries.some(
+        (entry) => entry.aiFeedback,
+      );
 
       if (hasAiFeedback) {
         recentActivity.push({
@@ -319,20 +336,22 @@ export const getCoachAnalytics = query({
           (refinementCounts[w.refinementIndicator] || 0) + 1;
       }
     });
-    const mostCommonReinforcement = Object.entries(reinforcementCounts)
-      .map(([indicator, count]) => ({
-        indicator,
-        indicatorName: indicatorMap[indicator]?.name || indicator,
-        count,
-      }))
-      .sort((a, b) => b.count - a.count)[0] || null;
-    const mostCommonRefinement = Object.entries(refinementCounts)
-      .map(([indicator, count]) => ({
-        indicator,
-        indicatorName: indicatorMap[indicator]?.name || indicator,
-        count,
-      }))
-      .sort((a, b) => b.count - a.count)[0] || null;
+    const mostCommonReinforcement =
+      Object.entries(reinforcementCounts)
+        .map(([indicator, count]) => ({
+          indicator,
+          indicatorName: indicatorMap[indicator]?.name || indicator,
+          count,
+        }))
+        .sort((a, b) => b.count - a.count)[0] || null;
+    const mostCommonRefinement =
+      Object.entries(refinementCounts)
+        .map(([indicator, count]) => ({
+          indicator,
+          indicatorName: indicatorMap[indicator]?.name || indicator,
+          count,
+        }))
+        .sort((a, b) => b.count - a.count)[0] || null;
 
     return {
       totalTeachers,
@@ -409,10 +428,13 @@ export const getTeacherAnalytics = query({
         const walkthroughIds = walkthroughs.map((w) => w._id);
 
         // Get all feedback for this teacher's walkthroughs
-        const allWalkthroughEntries = await ctx.db.query("walkthroughEntries").collect();
+        const allWalkthroughEntries = await ctx.db
+          .query("walkthroughEntries")
+          .collect();
 
-        const teacherFeedback = allWalkthroughEntries.filter((entry) =>
-          walkthroughIds.includes(entry.walkthroughId) && entry.aiFeedback
+        const teacherFeedback = allWalkthroughEntries.filter(
+          (entry) =>
+            walkthroughIds.includes(entry.walkthroughId) && entry.aiFeedback,
         );
 
         feedbackCount = teacherFeedback.length;
@@ -544,7 +566,9 @@ export const getMyTeacherAnalytics = query({
         )
         .collect();
 
-      const hasAiFeedback = walkthroughEntries.some(entry => entry.aiFeedback);
+      const hasAiFeedback = walkthroughEntries.some(
+        (entry) => entry.aiFeedback,
+      );
 
       if (hasAiFeedback) {
         totalFeedbackReceived++;
@@ -713,10 +737,14 @@ export const getComprehensiveCoachAnalytics = query({
     }).length;
 
     // Get all AI feedback for coach's walkthroughs
-    const allWalkthroughEntries = await ctx.db.query("walkthroughEntries").collect();
+    const allWalkthroughEntries = await ctx.db
+      .query("walkthroughEntries")
+      .collect();
 
-    const coachFeedback = allWalkthroughEntries.filter((entry) =>
-      coachWalkthroughs.some((w) => w._id === entry.walkthroughId) && entry.aiFeedback
+    const coachFeedback = allWalkthroughEntries.filter(
+      (entry) =>
+        coachWalkthroughs.some((w) => w._id === entry.walkthroughId) &&
+        entry.aiFeedback,
     );
 
     const totalFeedbackInteractions = coachFeedback.length;
@@ -767,20 +795,22 @@ export const getComprehensiveCoachAnalytics = query({
         totalRefinementCount++;
       }
     });
-    const mostCommonReinforcement = Object.entries(reinforcementCounts)
-      .map(([indicator, count]) => ({
-        indicator,
-        indicatorName: indicatorMap[indicator]?.name || indicator,
-        count,
-      }))
-      .sort((a, b) => b.count - a.count)[0] || null;
-    const mostCommonRefinement = Object.entries(refinementCounts)
-      .map(([indicator, count]) => ({
-        indicator,
-        indicatorName: indicatorMap[indicator]?.name || indicator,
-        count,
-      }))
-      .sort((a, b) => b.count - a.count)[0] || null;
+    const mostCommonReinforcement =
+      Object.entries(reinforcementCounts)
+        .map(([indicator, count]) => ({
+          indicator,
+          indicatorName: indicatorMap[indicator]?.name || indicator,
+          count,
+        }))
+        .sort((a, b) => b.count - a.count)[0] || null;
+    const mostCommonRefinement =
+      Object.entries(refinementCounts)
+        .map(([indicator, count]) => ({
+          indicator,
+          indicatorName: indicatorMap[indicator]?.name || indicator,
+          count,
+        }))
+        .sort((a, b) => b.count - a.count)[0] || null;
 
     // Quick insights for basic plan
     const topStrengths = Object.entries(reinforcementCounts)
@@ -1281,10 +1311,11 @@ export const getMyPgpData = query({
 
     // Determine if reflection is overdue (more than 7 days since last walkthrough)
     const lastWalkthrough = completedWalkthroughs[0];
-    const isOverdue =
+    const isOverdue = !!(
       lastWalkthrough &&
       !lastReflection &&
-      Date.now() - lastWalkthrough.walkthroughDate > 7 * 24 * 60 * 60 * 1000;
+      Date.now() - lastWalkthrough.walkthroughDate > 7 * 24 * 60 * 60 * 1000
+    );
 
     // Get current refinement focus (most common refinement indicator in last 3 walkthroughs)
     let currentIndicator = "No focus area identified";
@@ -1476,7 +1507,7 @@ export const getTeacherPgpData = query({
 
       recentWalkthroughs.push({
         id: walkthrough._id,
-        date: walkthrough.walkthroughDate,
+        date: Number(walkthrough.walkthroughDate),
         indicators,
         hasReflection: !!reflection,
         title: "Classroom Observation",
@@ -1539,10 +1570,11 @@ export const getTeacherPgpData = query({
 
     // Determine if reflection is overdue (more than 7 days since last walkthrough)
     const lastWalkthrough = completedWalkthroughs[0];
-    const isOverdue =
+    const isOverdue = !!(
       lastWalkthrough &&
       !lastReflection &&
-      Date.now() - lastWalkthrough.walkthroughDate > 7 * 24 * 60 * 60 * 1000;
+      Date.now() - lastWalkthrough.walkthroughDate > 7 * 24 * 60 * 60 * 1000
+    );
 
     // Get current refinement focus (most common refinement indicator in last 3 walkthroughs)
     let currentIndicator = "No focus area identified";
@@ -1620,25 +1652,35 @@ export const getTeacherPgpData = query({
     return {
       pgpGoal: {
         title: teacher.pgpGoal?.text || "Improve Teaching Practice",
-        description: teacher.pgpGoal?.contextNotes || "Focus on continuous improvement through regular walkthroughs and reflection.",
-        progress: teacher.pgpGoal?.progress || progress,
+        description:
+          teacher.pgpGoal?.contextNotes ||
+          "Focus on continuous improvement through regular walkthroughs and reflection.",
+        progress: Number(teacher.pgpGoal?.progress || progress),
         trend,
-        targetDate: teacher.pgpGoal?.targetDate ? new Date(teacher.pgpGoal.targetDate).toISOString() : undefined,
+        targetDate: teacher.pgpGoal?.targetDate
+          ? new Date(teacher.pgpGoal.targetDate).toISOString()
+          : undefined,
       },
       recentWalkthroughs,
       reflectionPrompt: {
         question:
           "How did your recent walkthrough feedback influence your lesson planning this week?",
-        lastAnswered: lastReflection?.createdAt,
+        lastAnswered: lastReflection?.createdAt
+          ? Number(lastReflection.createdAt)
+          : undefined,
         isOverdue,
       },
       refinementFocus: {
         currentIndicator,
         description: refinementDescription,
-        progress: refinementProgress,
+        progress: Number(refinementProgress),
         nextSteps,
       },
-      strengths,
+      strengths: strengths.map((strength) => ({
+        ...strength,
+        frequency: Number(strength.frequency),
+        lastObserved: Number(strength.lastObserved),
+      })),
     };
   },
 });
@@ -1724,7 +1766,7 @@ export const getTeacherPgpDataInternal = internalQuery({
         title: "Improve Teaching Practice",
         description:
           "Focus on continuous improvement through regular walkthroughs and reflection.",
-        progress,
+        progress: Number(progress),
         trend,
         targetDate: undefined,
       },

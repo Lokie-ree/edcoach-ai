@@ -211,6 +211,7 @@ export function WalkthroughForm({
     setAILoading(true);
     try {
       const evidence = watch("evidenceSummary") || "";
+      const teacherId = watch("teacherId"); // Get the selected teacher ID
 
       // Check if evidence is provided
       if (!evidence.trim()) {
@@ -218,6 +219,17 @@ export function WalkthroughForm({
           title: "Evidence Required",
           description:
             "Please provide evidence summary before generating AI feedback.",
+          variant: "destructive",
+        });
+        setAILoading(false);
+        return;
+      }
+
+      // Check if teacher is selected
+      if (!teacherId) {
+        toast({
+          title: "Teacher Required",
+          description: "Please select a teacher before generating AI feedback.",
           variant: "destructive",
         });
         setAILoading(false);
@@ -320,6 +332,7 @@ export function WalkthroughForm({
         },
         hasProPlan,
         hasStarterPlan,
+        teacherId: teacherId as Id<"teachers">, // Add this line
       })) as { reinforcement: string; refinement: string };
       setValue("walkthroughEntries", [
         {

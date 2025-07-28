@@ -9,17 +9,22 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { Id } from "@/convex/_generated/dataModel";
-import { getIndicatorName } from "@/lib/IndicatorUtils";
 import { ReflectionCard } from "./components/ReflectionCard";
 import FeedbackSection from "./components/FeedbackSection";
 import DraftMessage from "./components/DraftMessage";
 
-export default function ViewWalkthroughPage({ params }: { params: Promise<{ walkthroughId: string }> }) {
+export default function ViewWalkthroughPage({
+  params,
+}: {
+  params: Promise<{ walkthroughId: string }>;
+}) {
   const { walkthroughId } = React.use(params);
   const { user, isLoaded } = useUser();
 
   // Get all walkthrough view details from backend
-  const viewDetails = useQuery(api.walkthroughs.getViewDetails, { walkthroughId: walkthroughId as Id<"walkthroughs"> });
+  const viewDetails = useQuery(api.walkthroughs.getViewDetails, {
+    walkthroughId: walkthroughId as Id<"walkthroughs">,
+  });
 
   if (!isLoaded || (user && viewDetails === undefined)) {
     return (
@@ -42,8 +47,7 @@ export default function ViewWalkthroughPage({ params }: { params: Promise<{ walk
         <p className="text-muted-foreground mb-4">
           {viewDetails.walkthrough
             ? "You don't have permission to view this walkthrough."
-            : "The walkthrough you're looking for doesn't exist."
-          }
+            : "The walkthrough you're looking for doesn't exist."}
         </p>
         <Link href="/dashboard">
           <Button>
@@ -55,7 +59,8 @@ export default function ViewWalkthroughPage({ params }: { params: Promise<{ walk
     );
   }
 
-  const { walkthrough, teacher, entries, userRole } = viewDetails;
+  const { walkthrough, teacher, entries, userRole, indicatorNames } =
+    viewDetails;
 
   return (
     <div className="py-4 md:py-6 space-y-6">
@@ -79,12 +84,20 @@ export default function ViewWalkthroughPage({ params }: { params: Promise<{ walk
       )}
       {/* Feedback Section */}
       {walkthrough && (
-        <FeedbackSection walkthrough={walkthrough} feedback={{ entries: entries || [], getIndicatorName: getIndicatorName }} />
+        <FeedbackSection
+          walkthrough={walkthrough}
+          entries={entries || []}
+          indicatorNames={indicatorNames}
+        />
       )}
       {/* Draft Message */}
       {walkthrough && (
-        <DraftMessage walkthrough={walkthrough} walkthroughId={walkthroughId} userRole={userRole} />
+        <DraftMessage
+          walkthrough={walkthrough}
+          walkthroughId={walkthroughId}
+          userRole={userRole}
+        />
       )}
     </div>
   );
-} 
+}

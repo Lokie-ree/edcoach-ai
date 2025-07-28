@@ -4,16 +4,30 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Sparkles, CheckCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { usePgpForm } from "./use-pgp-form";
 
 const formSchema = z.object({
   indicatorCode: z.string().min(1, "Please select an indicator"),
@@ -50,7 +64,8 @@ export default function PgpGoalSettingForm({
   existingGoal,
 }: PgpGoalSettingFormProps) {
   const [isDrafting, setIsDrafting] = useState(false);
-  
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
   const indicators = useQuery(api.rubricIndicators.getAllIndicators);
   const draftGoal = useAction(api.teachers.draftPgpGoal);
   const setPgpGoal = useMutation(api.teachers.setPgpGoal);
@@ -64,6 +79,16 @@ export default function PgpGoalSettingForm({
     },
   });
 
+  // Create initial data for dirty state tracking
+  const initialData = {
+    indicatorCode: existingGoal?.indicatorCode || "",
+    contextNotes: existingGoal?.contextNotes || "",
+    goalText: existingGoal?.text || "",
+  };
+
+  // Use the custom hook to track form state
+  const { setFormData, isDirty } = usePgpForm(initialData);
+
   // Prefill form with existing goal data when editing
   useEffect(() => {
     if (existingGoal) {
@@ -75,8 +100,33 @@ export default function PgpGoalSettingForm({
     }
   }, [existingGoal, form]);
 
+  // Update form data when form values change
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      setFormData({
+        indicatorCode: value.indicatorCode || "",
+        contextNotes: value.contextNotes || "",
+        goalText: value.goalText || "",
+      });
+    });
+    return () => subscription.unsubscribe();
+  }, [form, setFormData]);
+
+  // Handle close with confirmation logic
+  const handleClose = () => {
+    if (isDirty) {
+      // If the form has changes, open the confirmation modal
+      setIsConfirmModalOpen(true);
+    } else {
+      // If there are no changes, just close the wizard
+      onCancel();
+    }
+  };
+
   const selectedIndicator = form.watch("indicatorCode");
-  const selectedIndicatorData = indicators?.find(ind => ind.indicator_code === selectedIndicator);
+  const selectedIndicatorData = indicators?.find(
+    (ind) => ind.indicator_code === selectedIndicator,
+  );
 
   const handleDraftGoal = async () => {
     if (!selectedIndicator || !selectedIndicatorData) {
@@ -96,7 +146,7 @@ export default function PgpGoalSettingForm({
         indicatorDomain: selectedIndicatorData.domain,
         indicatorOverview: selectedIndicatorData.overview,
       });
-      
+
       form.setValue("goalText", goal);
       toast.success("Goal drafted successfully!");
     } catch (error) {
@@ -115,7 +165,11 @@ export default function PgpGoalSettingForm({
         indicatorCode: values.indicatorCode,
         contextNotes: values.contextNotes || undefined,
       });
-      toast.success(existingGoal ? "PGP goal updated successfully!" : "PGP goal set successfully!");
+      toast.success(
+        existingGoal
+          ? "PGP goal updated successfully!"
+          : "PGP goal set successfully!",
+      );
       onSuccess();
     } catch (error) {
       toast.error("Failed to save goal. Please try again.");
@@ -123,16 +177,15 @@ export default function PgpGoalSettingForm({
     }
   };
 
-    return (
+  return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold text-foreground mb-2">
         {existingGoal ? "Edit" : "Set"} PGP Goal for {teacherName}
       </h2>
       <p className="text-foreground mb-4">
-        {existingGoal 
+        {existingGoal
           ? "Update the Professional Growth Plan goal for this teacher."
-          : "Create a Professional Growth Plan goal focused on improving specific teaching practices."
-        }
+          : "Create a Professional Growth Plan goal focused on improving specific teaching practices."}
       </p>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -150,11 +203,13 @@ export default function PgpGoalSettingForm({
                   </FormControl>
                   <SelectContent>
                     {indicators?.map((indicator) => (
-                      <SelectItem key={indicator.indicator_code} value={indicator.indicator_code}>
+                      <SelectItem
+                        key={indicator.indicator_code}
+                        value={indicator.indicator_code}
+                      >
                         <div className="flex flex-col">
-                          <span className="font-medium">{indicator.indicator_name}</span>
-                          <span className="text-sm text-muted-foreground">
-                            {indicator.indicator_code} • {indicator.domain}
+                          <span className="font-medium">
+                            {indicator.indicator_name}
                           </span>
                         </div>
                       </SelectItem>
@@ -165,21 +220,6 @@ export default function PgpGoalSettingForm({
               </FormItem>
             )}
           />
-
-          {selectedIndicatorData && (
-            <div className="p-4 bg-muted/50 rounded-lg border border-border">
-              <div className="mb-2">
-                <h4 className="font-semibold">{selectedIndicatorData.indicator_name}</h4>
-                <p className="text-sm text-muted-foreground">{selectedIndicatorData.indicator_code}</p>
-              </div>
-              <p className="text-sm mb-2">
-                {selectedIndicatorData.overview || "No overview available"}
-              </p>
-              <Badge variant="secondary">
-                {selectedIndicatorData.domain}
-              </Badge>
-            </div>
-          )}
 
           <FormField
             control={form.control}
@@ -243,13 +283,15 @@ export default function PgpGoalSettingForm({
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={onCancel}
+              onClick={handleClose}
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={form.formState.isSubmitting || !form.getValues("goalText")}
+            <Button
+              type="submit"
+              disabled={
+                form.formState.isSubmitting || !form.getValues("goalText")
+              }
               className="flex-1"
             >
               {form.formState.isSubmitting ? (
@@ -267,6 +309,21 @@ export default function PgpGoalSettingForm({
           </div>
         </form>
       </Form>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={() => {
+          setIsConfirmModalOpen(false);
+          onCancel();
+        }}
+        title="Discard unsaved changes?"
+        description="You have unsaved changes. Are you sure you want to discard them? This action cannot be undone."
+        confirmText="Discard Changes"
+        cancelText="Keep Editing"
+        variant="destructive"
+      />
     </div>
   );
-} 
+}
