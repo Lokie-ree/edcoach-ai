@@ -15,9 +15,10 @@ import {
 interface CalendarInputProps {
   date: Date | undefined;
   setDate: (date: Date | undefined) => void;
+  className?: string;
 }
 
-export function CalendarInput({ date, setDate }: CalendarInputProps) {
+export function CalendarInput({ date, setDate, className }: CalendarInputProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
@@ -32,7 +33,8 @@ export function CalendarInput({ date, setDate }: CalendarInputProps) {
           variant="outline"
           className={cn(
             "w-full justify-start text-left font-normal bg-white",
-            !date && "text-muted-foreground"
+            !date && "text-muted-foreground",
+            className
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />

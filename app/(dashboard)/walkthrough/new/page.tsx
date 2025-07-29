@@ -1,7 +1,6 @@
 "use client";
 
-import { WalkthroughForm } from "@/app/(dashboard)/walkthrough/new/components/WalkthroughForm";
-import { PageHeader } from "@/components/common/PageHeader";
+import { WalkthroughWizard } from "@/app/(dashboard)/walkthrough/new/components/WalkthroughWizard";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -34,19 +33,8 @@ export default function NewObservationPage() {
   const coachId = convexUser._id as Id<"users">;
 
   return (
-    <div className="py-4 md:py-6 space-y-4">
-      <div className="space-y-6">
-        {/* Header */}
-        <PageHeader
-          title="New Walkthrough"
-          description="Create a new classroom observation and provide feedback to support teacher growth"
-          gradient={true}
-        />
-        {/* Content */}
-        <div className="container max-w-4xl relative">
-          {coachId && <WalkthroughForm coachId={coachId} />}
-        </div>
-      </div>
+    <div className="min-h-screen">
+      {coachId && <WalkthroughWizard coachId={coachId} />}
     </div>
   );
 }
