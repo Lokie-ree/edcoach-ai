@@ -9,9 +9,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight, Lightbulb, Clock } from "lucide-react";
+import { Lightbulb, Clock } from "lucide-react";
 import { WalkthroughFormData } from "../WalkthroughWizard";
 import { useState, useEffect } from "react";
 
@@ -36,8 +35,6 @@ const EVIDENCE_PROMPTS = [
 ];
 
 export function EvidenceCaptureStep({
-  onNext,
-  onPrevious,
   canProceed,
 }: EvidenceCaptureStepProps) {
   const methods = useFormContext<WalkthroughFormData>();
@@ -178,23 +175,6 @@ export function EvidenceCaptureStep({
               ? "Evidence captured - ready for AI feedback"
               : "Add your observations to continue"}
           </p>
-        </div>
-
-        {/* Desktop navigation */}
-        <div className="hidden md:flex justify-between">
-          <Button variant="outline" onClick={onPrevious} size="lg">
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Previous
-          </Button>
-          <Button
-            onClick={onNext}
-            disabled={!canProceed}
-            size="lg"
-            className="min-w-32"
-          >
-            Generate Feedback
-            <ChevronRight className="w-4 h-4 ml-2" />
-          </Button>
         </div>
       </div>
 

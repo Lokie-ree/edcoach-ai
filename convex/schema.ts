@@ -201,4 +201,58 @@ export default defineSchema({
     result: v.any(),        // the AI feedback result (object or string)
     createdAt: v.number(),  // timestamp for TTL/expiry
   }).index("by_promptHash", ["promptHash"]),
+
+  // Workflow state management for 6-step EdCoach methodology
+  workflowStates: defineTable({
+    teacherId: v.id("teachers"),
+    coachId: v.id("users"),
+    currentStep: v.union(
+      v.literal("setup"),
+      v.literal("capture"),
+      v.literal("analyze"), 
+      v.literal("refine"),
+      v.literal("reflect"),
+      v.literal("monitor")
+    ),
+    stepProgress: v.object({
+      setup: v.object({
+        pgpSet: v.boolean(),
+        goalIndicator: v.optional(v.string()),
+        completedAt: v.optional(v.number())
+      }),
+      capture: v.object({
+        walkthroughsCompleted: v.number(),
+        lastWalkthroughDate: v.optional(v.number()),
+        evidenceQuality: v.optional(v.number()) // 1-5 rating
+      }),
+      analyze: v.object({
+        patternsIdentified: v.array(v.string()),
+        insightsGenerated: v.number(),
+        lastAnalysisDate: v.optional(v.number())
+      }),
+      refine: v.object({
+        strategiesAdjusted: v.number(),
+        lastRefinementDate: v.optional(v.number()),
+        refinementType: v.optional(v.string())
+      }),
+      reflect: v.object({
+        reflectionsCompleted: v.number(),
+        lastReflectionDate: v.optional(v.number()),
+        insightDepth: v.optional(v.number()) // 1-5 rating
+      }),
+      monitor: v.object({
+        progressMetrics: v.array(v.any()),
+        trendsIdentified: v.array(v.string()),
+        lastMonitoringDate: v.optional(v.number())
+      })
+    }),
+    cycleNumber: v.number(), // Track multiple coaching cycles
+    createdAt: v.number(),
+    updatedAt: v.number()
+  })
+    .index("by_teacher", ["teacherId"])
+    .index("by_coach", ["coachId"])
+    .index("by_current_step", ["currentStep"])
+    .index("by_cycle", ["cycleNumber"])
+    .index("by_teacher_cycle", ["teacherId", "cycleNumber"]),
 });

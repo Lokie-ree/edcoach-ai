@@ -13,7 +13,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
-  ChevronLeft,
   Send,
   Loader2,
   Calendar,
@@ -47,9 +46,10 @@ interface ReviewStepProps {
   isFirst: boolean;
   isLast: boolean;
   canProceed: boolean;
+  clearFormData?: () => void;
 }
 
-export function ReviewStep({ onPrevious }: ReviewStepProps) {
+export function ReviewStep({ clearFormData }: ReviewStepProps) {
   const methods = useFormContext<WalkthroughFormData>();
   const router = useRouter();
   const { toast } = useToast();
@@ -72,6 +72,9 @@ export function ReviewStep({ onPrevious }: ReviewStepProps) {
   // Mutations
   const createWalkthrough = useMutation(
     api.walkthroughs.createWalkthroughAndEntries,
+  );
+  const recordWalkthroughCompletion = useMutation(
+    api.workflowState.recordWalkthroughCompletion,
   );
 
   // Form data
@@ -158,6 +161,23 @@ export function ReviewStep({ onPrevious }: ReviewStepProps) {
         hasProPlan,
         hasStarterPlan,
       });
+
+      // Record walkthrough completion in workflow state
+      try {
+        await recordWalkthroughCompletion({
+          teacherId: data.teacherId as Id<"teachers">,
+          walkthroughDate,
+          evidenceQuality: entries.length > 0 ? 4 : 3, // Simple quality assessment
+        });
+      } catch (workflowError) {
+        console.error("Failed to update workflow state:", workflowError);
+        // Don't fail the whole operation if workflow update fails
+      }
+
+      // Clear form data from localStorage
+      if (clearFormData) {
+        clearFormData();
+      }
 
       toast({
         title: "Success!",
@@ -403,22 +423,13 @@ export function ReviewStep({ onPrevious }: ReviewStepProps) {
           </p>
         </div>
 
-        {/* Desktop navigation */}
-        <div className="hidden md:flex justify-between">
-          <Button
-            variant="outline"
-            onClick={onPrevious}
-            size="lg"
-            disabled={isSubmitting}
-          >
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Previous
-          </Button>
+        {/* Submit button for desktop - only show submit button */}
+        <div className="hidden md:flex justify-center">
           <Button
             onClick={handleSubmit}
             disabled={!isComplete || !canCreateWalkthrough || isSubmitting}
             size="lg"
-            className="min-w-32"
+            className="min-w-48"
           >
             {isSubmitting ? (
               <>

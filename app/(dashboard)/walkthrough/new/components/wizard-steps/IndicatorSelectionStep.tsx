@@ -17,10 +17,9 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { WalkthroughFormData } from "../WalkthroughWizard";
 import { useState } from "react";
 
@@ -45,13 +44,13 @@ interface IndicatorSelectionStepProps {
 }
 
 export function IndicatorSelectionStep({
-  onNext,
-  onPrevious,
   canProceed,
 }: IndicatorSelectionStepProps) {
   const methods = useFormContext<WalkthroughFormData>();
-  const [selectedReinforcementDetails, setSelectedReinforcementDetails] = useState<Indicator | null>(null);
-  const [selectedRefinementDetails, setSelectedRefinementDetails] = useState<Indicator | null>(null);
+  const [selectedReinforcementDetails, setSelectedReinforcementDetails] =
+    useState<Indicator | null>(null);
+  const [selectedRefinementDetails, setSelectedRefinementDetails] =
+    useState<Indicator | null>(null);
 
   const rubricData = useQuery(api.rubrics.listRubricWithIndicators);
   const indicators: Indicator[] = rubricData
@@ -66,11 +65,9 @@ export function IndicatorSelectionStep({
 
   const normalizeIndicatorField = (val: unknown): string => {
     if (!val) return "";
-    
+
     if (Array.isArray(val)) {
-      return val
-        .filter((item) => item && typeof item === "string")
-        .join("; ");
+      return val.filter((item) => item && typeof item === "string").join("; ");
     }
 
     if (typeof val === "object" && val !== null) {
@@ -93,8 +90,24 @@ export function IndicatorSelectionStep({
     setSelectedRefinementDetails(indicator || null);
   };
 
+  // Debug values
+  const reinforcementValue = methods.watch("reinforcementIndicator");
+  const refinementValue = methods.watch("refinementIndicator");
+
   return (
     <div className="space-y-6">
+      {/* Debug info - remove in production */}
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <h4 className="font-medium text-yellow-800 mb-2">Debug Info:</h4>
+        <div className="text-sm text-yellow-700 space-y-1">
+          <div>Indicators loaded: {indicators.length}</div>
+          <div>Reinforcement selected: {reinforcementValue || "none"}</div>
+          <div>Refinement selected: {refinementValue || "none"}</div>
+          <div>Can proceed: {canProceed ? "Yes" : "No"}</div>
+          <div>Form errors: {JSON.stringify(methods.formState.errors)}</div>
+        </div>
+      </div>
+
       {/* Explanation */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div className="flex items-start gap-3">
@@ -104,8 +117,9 @@ export function IndicatorSelectionStep({
               Select Your Focus Indicators
             </p>
             <p className="text-blue-700">
-              Choose one indicator to <strong>reinforce</strong> (what the teacher is doing well) 
-              and one to <strong>refine</strong> (area for growth).
+              Choose one indicator to <strong>reinforce</strong> (what the
+              teacher is doing well) and one to <strong>refine</strong> (area
+              for growth).
             </p>
           </div>
         </div>
@@ -120,7 +134,10 @@ export function IndicatorSelectionStep({
             <FormItem>
               <FormLabel className="text-base font-medium flex items-center gap-2">
                 Reinforcement Indicator
-                <Badge variant="secondary" className="bg-green-100 text-green-700">
+                <Badge
+                  variant="secondary"
+                  className="bg-green-100 text-green-700"
+                >
                   Strengths
                 </Badge>
               </FormLabel>
@@ -179,12 +196,18 @@ export function IndicatorSelectionStep({
             <CardContent className="text-xs text-green-700 space-y-2">
               {selectedReinforcementDetails.overview && (
                 <div>
-                  <strong>Overview:</strong> {normalizeIndicatorField(selectedReinforcementDetails.overview)}
+                  <strong>Overview:</strong>{" "}
+                  {normalizeIndicatorField(
+                    selectedReinforcementDetails.overview,
+                  )}
                 </div>
               )}
               {selectedReinforcementDetails.key_terms && (
                 <div>
-                  <strong>Key Terms:</strong> {normalizeIndicatorField(selectedReinforcementDetails.key_terms)}
+                  <strong>Key Terms:</strong>{" "}
+                  {normalizeIndicatorField(
+                    selectedReinforcementDetails.key_terms,
+                  )}
                 </div>
               )}
             </CardContent>
@@ -201,7 +224,10 @@ export function IndicatorSelectionStep({
             <FormItem>
               <FormLabel className="text-base font-medium flex items-center gap-2">
                 Refinement Indicator
-                <Badge variant="secondary" className="bg-orange-100 text-orange-700">
+                <Badge
+                  variant="secondary"
+                  className="bg-orange-100 text-orange-700"
+                >
                   Growth Area
                 </Badge>
               </FormLabel>
@@ -260,12 +286,16 @@ export function IndicatorSelectionStep({
             <CardContent className="text-xs text-orange-700 space-y-2">
               {selectedRefinementDetails.overview && (
                 <div>
-                  <strong>Overview:</strong> {normalizeIndicatorField(selectedRefinementDetails.overview)}
+                  <strong>Overview:</strong>{" "}
+                  {normalizeIndicatorField(selectedRefinementDetails.overview)}
                 </div>
               )}
               {selectedRefinementDetails.development_evidence && (
                 <div>
-                  <strong>Development Evidence:</strong> {normalizeIndicatorField(selectedRefinementDetails.development_evidence)}
+                  <strong>Development Evidence:</strong>{" "}
+                  {normalizeIndicatorField(
+                    selectedRefinementDetails.development_evidence,
+                  )}
                 </div>
               )}
             </CardContent>
@@ -278,29 +308,10 @@ export function IndicatorSelectionStep({
         {/* Mobile navigation hint */}
         <div className="md:hidden text-center mb-4">
           <p className="text-sm text-muted-foreground">
-            {canProceed ? "Ready to continue" : "Select both indicators to proceed"}
+            {canProceed
+              ? "Ready to continue"
+              : "Select both indicators to proceed"}
           </p>
-        </div>
-
-        {/* Desktop navigation */}
-        <div className="hidden md:flex justify-between">
-          <Button
-            variant="outline"
-            onClick={onPrevious}
-            size="lg"
-          >
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Previous
-          </Button>
-          <Button
-            onClick={onNext}
-            disabled={!canProceed}
-            size="lg"
-            className="min-w-32"
-          >
-            Next Step
-            <ChevronRight className="w-4 h-4 ml-2" />
-          </Button>
         </div>
       </div>
     </div>

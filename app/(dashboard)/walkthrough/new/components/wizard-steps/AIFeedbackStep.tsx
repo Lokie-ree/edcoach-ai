@@ -12,8 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/toast";
 import {
-  ChevronLeft,
-  ChevronRight,
   Sparkles,
   Loader2,
   RefreshCw,
@@ -48,7 +46,7 @@ type WalkthroughEntry = {
   aiFeedback: string;
 };
 
-export function AIFeedbackStep({ onNext, onPrevious }: AIFeedbackStepProps) {
+export function AIFeedbackStep({}: AIFeedbackStepProps) {
   const methods = useFormContext<WalkthroughFormData>();
   const { toast } = useToast();
   const { has } = useAuth();
@@ -386,23 +384,6 @@ export function AIFeedbackStep({ onNext, onPrevious }: AIFeedbackStepProps) {
               ? "Feedback ready - proceed to review"
               : "Generate feedback to continue"}
           </p>
-        </div>
-
-        {/* Desktop navigation */}
-        <div className="hidden md:flex justify-between">
-          <Button variant="outline" onClick={onPrevious} size="lg">
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Previous
-          </Button>
-          <Button
-            onClick={onNext}
-            disabled={!hasFeedback}
-            size="lg"
-            className="min-w-32"
-          >
-            Review & Submit
-            <ChevronRight className="w-4 h-4 ml-2" />
-          </Button>
         </div>
       </div>
     </div>

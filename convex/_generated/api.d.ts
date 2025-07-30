@@ -36,6 +36,7 @@ import type * as validation_walkthroughDraftSchema from "../validation/walkthrou
 import type * as validation_walkthroughFinalSchema from "../validation/walkthroughFinalSchema.js";
 import type * as walkthroughEntries from "../walkthroughEntries.js";
 import type * as walkthroughs from "../walkthroughs.js";
+import type * as workflowState from "../workflowState.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -69,6 +70,7 @@ declare const fullApi: ApiFromModules<{
   "validation/walkthroughFinalSchema": typeof validation_walkthroughFinalSchema;
   walkthroughEntries: typeof walkthroughEntries;
   walkthroughs: typeof walkthroughs;
+  workflowState: typeof workflowState;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

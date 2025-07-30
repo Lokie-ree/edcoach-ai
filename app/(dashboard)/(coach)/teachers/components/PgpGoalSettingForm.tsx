@@ -69,6 +69,8 @@ export default function PgpGoalSettingForm({
   const indicators = useQuery(api.rubricIndicators.getAllIndicators);
   const draftGoal = useAction(api.teachers.draftPgpGoal);
   const setPgpGoal = useMutation(api.teachers.setPgpGoal);
+  const initializeWorkflow = useMutation(api.workflowState.initializeWorkflowState);
+  const completePgpSetup = useMutation(api.workflowState.completePgpSetup);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -165,6 +167,30 @@ export default function PgpGoalSettingForm({
         indicatorCode: values.indicatorCode,
         contextNotes: values.contextNotes || undefined,
       });
+
+      // If this is a new goal (not editing), initialize workflow and complete setup step
+      if (!existingGoal) {
+        try {
+          // Get coach ID from current user context (you might need to pass this as a prop)
+          const coachId = "coach_id_placeholder" as Id<"users">; // TODO: Get actual coach ID
+          
+          // Initialize workflow state if it doesn't exist
+          await initializeWorkflow({
+            teacherId: teacherId as Id<"teachers">,
+            coachId,
+          });
+
+          // Complete the PGP setup step
+          await completePgpSetup({
+            teacherId: teacherId as Id<"teachers">,
+            goalIndicator: values.indicatorCode,
+          });
+        } catch (workflowError) {
+          console.error("Workflow initialization error:", workflowError);
+          // Don't fail the whole operation if workflow update fails
+        }
+      }
+
       toast.success(
         existingGoal
           ? "PGP goal updated successfully!"

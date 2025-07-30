@@ -18,8 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CalendarInput } from "@/components/ui/calendar-input";
-import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
 import { WalkthroughFormData } from "../WalkthroughWizard";
 
 interface Teacher {
@@ -43,7 +41,7 @@ interface BasicInfoStepProps {
   canProceed: boolean;
 }
 
-export function BasicInfoStep({ onNext, canProceed }: BasicInfoStepProps) {
+export function BasicInfoStep({ canProceed }: BasicInfoStepProps) {
   const methods = useFormContext<WalkthroughFormData>();
   const teachers = (useQuery(api.teachers.list) ?? []) as Teacher[];
 
@@ -110,11 +108,7 @@ export function BasicInfoStep({ onNext, canProceed }: BasicInfoStepProps) {
             </FormLabel>
             <FormControl>
               <CalendarInput
-                date={
-                  field.value instanceof Date
-                    ? field.value
-                    : undefined
-                }
+                date={field.value instanceof Date ? field.value : undefined}
                 setDate={field.onChange}
                 className="h-12"
               />
@@ -124,25 +118,14 @@ export function BasicInfoStep({ onNext, canProceed }: BasicInfoStepProps) {
         )}
       />
 
-      {/* Mobile-friendly action area */}
+      {/* Status indicator */}
       <div className="pt-6">
-        <div className="flex flex-col space-y-3 md:hidden">
+        <div className="flex flex-col space-y-3">
           <p className="text-sm text-muted-foreground text-center">
-            Select a teacher and date to continue
+            {canProceed
+              ? "✓ Ready to continue to next step"
+              : "Select a teacher and date to continue"}
           </p>
-        </div>
-        
-        {/* Desktop navigation */}
-        <div className="hidden md:flex justify-end">
-          <Button
-            onClick={onNext}
-            disabled={!canProceed}
-            size="lg"
-            className="min-w-32"
-          >
-            Next Step
-            <ChevronRight className="w-4 h-4 ml-2" />
-          </Button>
         </div>
       </div>
 
@@ -150,7 +133,8 @@ export function BasicInfoStep({ onNext, canProceed }: BasicInfoStepProps) {
       {teachers.length > 0 && (
         <div className="bg-muted/50 rounded-lg p-4 mt-6">
           <p className="text-sm text-muted-foreground">
-            <strong>{teachers.length}</strong> teacher{teachers.length !== 1 ? 's' : ''} available for walkthroughs
+            <strong>{teachers.length}</strong> teacher
+            {teachers.length !== 1 ? "s" : ""} available for walkthroughs
           </p>
         </div>
       )}

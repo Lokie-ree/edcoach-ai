@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -44,6 +44,7 @@ interface WizardStepProps {
   isFirst: boolean;
   isLast: boolean;
   canProceed: boolean;
+  clearFormData?: () => void;
 }
 
 const STEPS: WizardStep[] = [
@@ -102,22 +103,58 @@ interface WalkthroughWizardProps {
 export function WalkthroughWizard({ walkthroughId }: WalkthroughWizardProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [isFormLoaded, setIsFormLoaded] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
   const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
+  const formKey = `walkthrough-draft-${walkthroughId || "new"}`;
 
-  // Form setup
+  // Form setup with localStorage persistence
+  const getStoredFormData = (): Partial<WalkthroughFormData> => {
+    if (typeof window === "undefined") return {};
+    try {
+      const stored = localStorage.getItem(formKey);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const storeFormData = useCallback(
+    (data: WalkthroughFormData) => {
+      if (typeof window === "undefined") return;
+      try {
+        localStorage.setItem(formKey, JSON.stringify(data));
+      } catch {
+        // Ignore localStorage errors
+      }
+    },
+    [formKey],
+  );
+
+  const clearStoredFormData = () => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.removeItem(formKey);
+    } catch {
+      // Ignore localStorage errors
+    }
+  };
+
+  const storedData = getStoredFormData();
   const methods = useForm<WalkthroughFormData>({
     resolver: zodResolver(walkthroughSchema),
     defaultValues: {
       type: "walkthrough",
-      teacherId: "",
-      walkthroughDate: new Date(),
+      teacherId: storedData.teacherId || "",
+      walkthroughDate: storedData.walkthroughDate
+        ? new Date(storedData.walkthroughDate)
+        : new Date(),
       status: "draft",
-      evidenceSummary: "",
-      reinforcementIndicator: "",
-      refinementIndicator: "",
-      walkthroughEntries: [
+      evidenceSummary: storedData.evidenceSummary || "",
+      reinforcementIndicator: storedData.reinforcementIndicator || "",
+      refinementIndicator: storedData.refinementIndicator || "",
+      walkthroughEntries: storedData.walkthroughEntries || [
         { indicatorAcronym: "", type: "reinforcement", aiFeedback: "" },
         { indicatorAcronym: "", type: "refinement", aiFeedback: "" },
       ],
@@ -132,7 +169,7 @@ export function WalkthroughWizard({ walkthroughId }: WalkthroughWizardProps) {
   const saveDraft = useMutation(api.walkthroughs.createWalkthroughAndEntries);
   const updateDraft = useMutation(api.walkthroughs.updateWalkthroughAndEntries);
 
-  const handleAutoSave = async () => {
+  const handleAutoSave = useCallback(async () => {
     try {
       const formData = methods.getValues();
       const walkthroughDate =
@@ -180,6 +217,9 @@ export function WalkthroughWizard({ walkthroughId }: WalkthroughWizardProps) {
         }
       }
 
+      // Also store in localStorage
+      storeFormData(formData);
+
       // Show subtle feedback that save occurred
       toast({
         title: "Draft saved",
@@ -189,6 +229,14 @@ export function WalkthroughWizard({ walkthroughId }: WalkthroughWizardProps) {
     } catch (error) {
       console.warn("Auto-save failed:", error);
       // Don't show error toast for auto-save failures to avoid overwhelming user
+    }
+  }, [walkthroughId, saveDraft, updateDraft, methods, storeFormData, toast]);
+
+  // Clear stored data on successful submission
+  const clearFormData = () => {
+    clearStoredFormData();
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(`${formKey}-step`);
     }
   };
 
@@ -265,6 +313,42 @@ export function WalkthroughWizard({ walkthroughId }: WalkthroughWizardProps) {
 
   // Enhanced validation with field-specific feedback
 
+  // Persist form data to localStorage on changes
+  useEffect(() => {
+    if (!isFormLoaded) return; // Wait until form is loaded
+    const subscription = methods.watch((data) => {
+      storeFormData(data as WalkthroughFormData);
+    });
+    return () => subscription.unsubscribe();
+  }, [methods, isFormLoaded, storeFormData]);
+
+  // Persist current step index
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(`${formKey}-step`, currentStepIndex.toString());
+    }
+  }, [currentStepIndex, formKey]);
+
+  // Load step index from localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedStep = localStorage.getItem(`${formKey}-step`);
+      if (storedStep) {
+        const stepIndex = parseInt(storedStep, 10);
+        if (stepIndex >= 0 && stepIndex < STEPS.length) {
+          setCurrentStepIndex(stepIndex);
+          // Mark previous steps as completed
+          const completed = new Set<number>();
+          for (let i = 0; i < stepIndex; i++) {
+            completed.add(i);
+          }
+          setCompletedSteps(completed);
+        }
+      }
+      setIsFormLoaded(true);
+    }
+  }, [formKey]);
+
   // Setup auto-save timer
   useEffect(() => {
     const setupAutoSave = () => {
@@ -287,7 +371,7 @@ export function WalkthroughWizard({ walkthroughId }: WalkthroughWizardProps) {
         clearInterval(autoSaveTimer.current);
       }
     };
-  }, [walkthroughId]);
+  }, [walkthroughId, handleAutoSave, methods]);
 
   // Load draft data if editing
   useEffect(() => {
@@ -297,6 +381,18 @@ export function WalkthroughWizard({ walkthroughId }: WalkthroughWizardProps) {
   }, [walkthroughId]);
 
   const CurrentStepComponent = currentStep.component;
+
+  // Show loading state until form data is loaded
+  if (!isFormLoaded) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading walkthrough...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <FormProvider {...methods}>
@@ -401,6 +497,7 @@ export function WalkthroughWizard({ walkthroughId }: WalkthroughWizardProps) {
                 isFirst={currentStepIndex === 0}
                 isLast={currentStepIndex === STEPS.length - 1}
                 canProceed={canProceed()}
+                clearFormData={clearFormData}
               />
             </CardContent>
           </Card>
@@ -420,9 +517,7 @@ export function WalkthroughWizard({ walkthroughId }: WalkthroughWizardProps) {
               Previous
             </Button>
             <Button
-              onClick={
-                currentStepIndex === STEPS.length - 1 ? undefined : handleNext
-              }
+              onClick={handleNext}
               disabled={!canProceed()}
               className="flex-1 h-12 text-base"
               size="lg"
