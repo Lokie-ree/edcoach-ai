@@ -1,7 +1,7 @@
 ---
 name: openai-feedback-optimizer
 description: Use this agent when you need to optimize OpenAI integration for educational feedback systems, particularly when working with PGP-aware prompts, Louisiana Rubric integration, or when you need to improve response times, cost efficiency, and feedback quality. Examples: <example>Context: The user is implementing an educational feedback system that needs to integrate with OpenAI APIs while maintaining cost efficiency and high-quality responses. user: 'I need to set up our OpenAI integration for the student feedback system with Louisiana Rubric scoring' assistant: 'I'll use the openai-feedback-optimizer agent to design the integration with proper prompt engineering and rubric alignment' <commentary>Since the user needs OpenAI integration specifically for educational feedback with rubric requirements, use the openai-feedback-optimizer agent to handle the technical implementation and optimization.</commentary></example> <example>Context: The user is experiencing slow response times or high costs in their OpenAI-powered educational platform. user: 'Our OpenAI feedback system is taking 15 seconds to respond and costs are getting too high' assistant: 'Let me use the openai-feedback-optimizer agent to analyze and optimize the performance and cost issues' <commentary>Since the user has performance and cost optimization needs for their OpenAI educational system, use the openai-feedback-optimizer agent to implement solutions.</commentary></example>
-tools: Glob, Grep, LS, ExitPlanMode, Read, NotebookRead, WebFetch, TodoWrite, WebSearch, Edit, MultiEdit, Write, NotebookEdit, Task
+tools: Grep, Read, Edit, MultiEdit, Write, WebFetch, WebSearch
 color: purple
 ---
 

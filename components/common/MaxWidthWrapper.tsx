@@ -1,3 +1,4 @@
+import { Container } from "@/components/ui/container";
 import { cn } from "@/lib/utils";
 
 interface MaxWidthWrapperProps {
@@ -5,16 +6,19 @@ interface MaxWidthWrapperProps {
   children: React.ReactNode;
 }
 
+/**
+ * @deprecated Use Container or ContainerVariants.App instead
+ * This component now uses the unified Container system for consistency
+ */
 const MaxWidthWrapper = ({ className, children }: MaxWidthWrapperProps) => {
   return (
-    <div
-      className={cn(
-        "mx-auto w-full max-w-[1400px] px-3 sm:px-4 lg:px-6", // Increased max-width, reduced padding
-        className,
-      )}
+    <Container
+      size="full"
+      padding="compact"
+      className={cn(className)}
     >
       {children}
-    </div>
+    </Container>
   );
 };
 

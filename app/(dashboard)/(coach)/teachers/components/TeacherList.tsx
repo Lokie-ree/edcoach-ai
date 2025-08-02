@@ -1,14 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil, Users } from "lucide-react";
+import { Pencil, Users, UserPlus } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Teacher } from "@/types/teacher";
+import { TeacherStatusBadge } from "@/components/ui/teacher-status-badge";
 import Link from "next/link";
 
 interface TeacherListProps {
   teachers: Teacher[];
   setEditingTeacher: (teacher: Teacher) => void;
+  onResendInvite?: (teacher: Teacher) => void;
 }
 
 const GRADE_BAND_OPTIONS = [
@@ -29,6 +31,7 @@ const SUBJECTS = [
 export default function TeacherList({
   teachers,
   setEditingTeacher,
+  onResendInvite,
 }: TeacherListProps) {
   return (
     <Card className="bg-card border-border">
@@ -52,31 +55,17 @@ export default function TeacherList({
                 >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
                       <h3 className="font-medium text-foreground">
                         {teacher.name}
                       </h3>
-                      <span
-                        className={cn("text-xs px-2 py-1 rounded-full", {
-                          "bg-green-100 text-green-700 dark:bg-green-950/20 dark:text-green-300 border border-green-200 dark:border-green-800":
-                            teacher.status === "active",
-                          "bg-blue-100 text-blue-700 dark:bg-blue-950/20 dark:text-blue-300 border border-blue-200 dark:border-blue-800":
-                            teacher.status === "pending",
-                          "bg-orange-100 text-orange-700 dark:bg-orange-950/20 dark:text-orange-300 border border-orange-200 dark:border-orange-800":
-                            teacher.status === "needs_details",
-                          "bg-gray-100 text-gray-700 dark:bg-gray-950/20 dark:text-gray-300 border border-gray-200 dark:border-gray-800":
-                            teacher.status !== "active" &&
-                            teacher.status !== "pending" &&
-                            teacher.status !== "needs_details",
-                        })}
-                      >
-                        {teacher.status === "needs_details"
-                          ? "Needs Details"
-                          : (teacher.status || "inactive")
-                              .charAt(0)
-                              .toUpperCase() +
-                            (teacher.status || "inactive").slice(1)}
-                      </span>
+                      <TeacherStatusBadge
+                        teacher={teacher}
+                        size="sm"
+                        compact={true}
+                        showActions={true}
+                        onResendInvite={onResendInvite ? () => onResendInvite(teacher) : undefined}
+                      />
                     </div>
                     <p className="text-sm text-muted-foreground mb-2">
                       {teacher.email}
@@ -103,30 +92,42 @@ export default function TeacherList({
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-2 ml-4">
-                    <Button
-                      size="sm"
-                      variant={
-                        teacher.status === "needs_details"
-                          ? "default"
-                          : "outline"
-                      }
-                      className={
-                        teacher.status === "needs_details"
-                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                          : ""
-                      }
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setEditingTeacher(teacher);
-                      }}
-                    >
-                      <Pencil className="h-4 w-4 mr-1" />
-                      {teacher.status === "needs_details"
-                        ? "Add Details"
-                        : "Edit"}
-                    </Button>
+                  <div className="flex flex-col sm:flex-row gap-2 ml-0 sm:ml-4 mt-2 sm:mt-0">
+                    {/* Always show edit button for active teachers */}
+                    {teacher.status === "active" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="min-h-[44px] touch-manipulation w-full sm:w-auto"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setEditingTeacher(teacher);
+                        }}
+                        aria-label={`Edit details for ${teacher.name}`}
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Edit Details
+                      </Button>
+                    )}
+                    
+                    {/* Show resend for expired/pending invitations */}
+                    {(teacher.status === "pending" || teacher.status === "needs_details") && onResendInvite && (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="min-h-[44px] touch-manipulation w-full sm:w-auto"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onResendInvite(teacher);
+                        }}
+                        aria-label={`Resend invitation to ${teacher.name}`}
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Resend Invite
+                      </Button>
+                    )}
                   </div>
                 </div>
               </motion.div>

@@ -1,7 +1,7 @@
 ---
 name: edcoach-workflow-architect
 description: Use this agent when implementing or optimizing the 6-step EdCoach AI user journey (Setup→Capture→Analyze→Refine→Reflect→Monitor), developing PGP (Professional Growth Plan) wizards, creating walkthrough systems, building reflection loops, implementing dashboard analytics, or enhancing any workflow-related user experience components. Examples: <example>Context: User is implementing a new reflection loop feature for the EdCoach workflow. user: 'I need to add a reflection component that captures teacher insights after each coaching session and feeds into the analytics dashboard' assistant: 'I'll use the edcoach-workflow-architect agent to design and implement this reflection loop component with proper integration to the analytics system' <commentary>Since this involves the reflection step of the EdCoach workflow and dashboard analytics integration, use the edcoach-workflow-architect agent.</commentary></example> <example>Context: User is creating a PGP wizard for the Setup phase. user: 'Create a multi-step wizard that guides teachers through setting up their Professional Growth Plan with goal selection and timeline configuration' assistant: 'I'll use the edcoach-workflow-architect agent to build this PGP wizard following the EdCoach Setup phase best practices' <commentary>This is clearly a PGP wizard implementation for the Setup phase of the EdCoach workflow, requiring the edcoach-workflow-architect agent.</commentary></example>
-tools: Task, Glob, Grep, LS, ExitPlanMode, Read, Edit, MultiEdit, Write, WebFetch, TodoWrite, WebSearch
+tools: Grep, Glob, Read, Edit, MultiEdit, Write, LS
 color: yellow
 ---
 

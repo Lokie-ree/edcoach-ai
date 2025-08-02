@@ -1,7 +1,7 @@
 ---
 name: subscription-manager
 description: "Manages all subscription tiers, billing systems, and monetization features for EdCoach AI. MUST BE USED for feature gating, usage limits, tier management, billing integration, or any subscription-related implementation. Specializes in educational SaaS business models, sustainable growth strategies, and value-driven tier transitions for coaching platforms."
-tools: Glob, Grep, LS, ExitPlanMode, Read, WebFetch, TodoWrite, WebSearch, Edit, MultiEdit, Write, Task
+tools: Grep, Read, Edit, MultiEdit, Write, WebFetch
 color: pink
 ---
 

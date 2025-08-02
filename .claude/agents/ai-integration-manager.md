@@ -1,7 +1,7 @@
 ---
 name: ai-integration-manager
 description: "Manages all OpenAI integration, prompt engineering, and AI feedback generation systems for EdCoach AI. MUST BE USED for AI reliability issues, feedback quality improvements, prompt optimization tasks, or any challenge involving GPT-4.1 Mini integration and educational feedback generation. Specializes in Louisiana Educator Rubric alignment, Professional Growth Plan intelligence, and hyper-contextualized coaching feedback."
-tools: Task, Glob, Grep, LS, ExitPlanMode, Read, Edit, MultiEdit, Write, WebFetch, TodoWrite, WebSearch
+tools: Grep, Read, Edit, MultiEdit, Write, WebFetch, WebSearch
 color: green
 ---
 

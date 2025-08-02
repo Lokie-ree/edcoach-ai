@@ -1,7 +1,7 @@
 ---
 name: convex-performance-optimizer
 description: "Optimizes all Convex database performance, query efficiency, and data architecture for EdCoach AI. MUST BE USED for slow dashboard loading, inefficient data fetching, schema design issues, or any performance bottleneck affecting user experience. Specializes in walkthrough data optimization, real-time collaboration scaling, and multi-tenant performance for educational coaching platforms."
-tools: Task, Glob, Grep, LS, ExitPlanMode, Read, Edit, MultiEdit, Write, WebFetch, TodoWrite, WebSearch
+tools: Grep, Glob, LS, Read, Edit, MultiEdit, Write
 color: purple
 ---
 

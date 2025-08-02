@@ -1,7 +1,7 @@
 ---
 name: ui-feature-architect
 description: Use this agent when implementing user interface features, creating mobile-optimized designs, or building complete user workflows, particularly for educational technology applications. Examples: <example>Context: User needs to implement a PGP encryption wizard interface. user: 'I need to create a step-by-step PGP key generation wizard for mobile users' assistant: 'I'll use the ui-feature-architect agent to design and implement this mobile-first PGP wizard with intuitive workflows.' <commentary>Since this involves UI feature implementation with mobile optimization focus, use the ui-feature-architect agent.</commentary></example> <example>Context: User wants to build a teacher reflection dashboard. user: 'Create an analytics dashboard where teachers can reflect on student progress' assistant: 'Let me use the ui-feature-architect agent to build this dashboard with mobile-responsive design and accessible workflows.' <commentary>This requires UI implementation, dashboard analytics, and user workflow design - perfect for the ui-feature-architect agent.</commentary></example>
-tools: Read, WebFetch, WebSearch, Edit, MultiEdit, Write
+tools: Grep, Glob, Read, Edit, MultiEdit, Write, LS
 color: green
 ---
 

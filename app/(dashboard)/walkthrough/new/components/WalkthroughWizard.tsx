@@ -124,9 +124,42 @@ export function WalkthroughWizard({ walkthroughId }: WalkthroughWizardProps) {
     (data: WalkthroughFormData) => {
       if (typeof window === "undefined") return;
       try {
-        localStorage.setItem(formKey, JSON.stringify(data));
-      } catch {
-        // Ignore localStorage errors
+        // Check available storage space before storing
+        const dataStr = JSON.stringify(data);
+        const sizeInBytes = new Blob([dataStr]).size;
+        
+        // If data is too large (>1MB), store essential fields only
+        if (sizeInBytes > 1024 * 1024) {
+          const essentialData = {
+            teacherId: data.teacherId,
+            walkthroughDate: data.walkthroughDate,
+            evidenceSummary: data.evidenceSummary?.substring(0, 5000), // Truncate large evidence
+            reinforcementIndicator: data.reinforcementIndicator,
+            refinementIndicator: data.refinementIndicator
+          };
+          localStorage.setItem(formKey, JSON.stringify(essentialData));
+        } else {
+          localStorage.setItem(formKey, dataStr);
+        }
+      } catch (error) {
+        // Handle quota exceeded gracefully
+        console.warn('localStorage quota exceeded, clearing old data:', error);
+        try {
+          // Clear other walkthrough drafts to make space
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('walkthrough-draft-') && key !== formKey) {
+              localStorage.removeItem(key);
+            }
+          });
+          // Try storing essential data only
+          const essentialData = {
+            teacherId: data.teacherId,
+            evidenceSummary: data.evidenceSummary?.substring(0, 1000)
+          };
+          localStorage.setItem(formKey, JSON.stringify(essentialData));
+        } catch {
+          // Final fallback - just ignore storage
+        }
       }
     },
     [formKey],
@@ -361,7 +394,7 @@ export function WalkthroughWizard({ walkthroughId }: WalkthroughWizardProps) {
         if (formData.teacherId && formData.evidenceSummary?.trim()) {
           handleAutoSave();
         }
-      }, 30000); // Auto-save every 30 seconds
+      }, 60000); // Auto-save every 60 seconds - reduced frequency to avoid overwhelming users
     };
 
     setupAutoSave();
@@ -477,8 +510,8 @@ export function WalkthroughWizard({ walkthroughId }: WalkthroughWizardProps) {
           </div>
         </div>
 
-        {/* Main content */}
-        <div className="container max-w-4xl mx-auto px-4 py-6">
+        {/* Main content - improved spacing for mobile footer */}
+        <div className="container max-w-4xl mx-auto px-4 py-6 pb-32 md:pb-6">
           <Card className="border-0 shadow-sm">
             <CardContent className="p-6">
               {/* Step title and description */}
@@ -503,28 +536,46 @@ export function WalkthroughWizard({ walkthroughId }: WalkthroughWizardProps) {
           </Card>
         </div>
 
-        {/* Mobile navigation footer */}
-        <div className="sticky bottom-0 bg-background border-t p-4 md:hidden shadow-lg">
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentStepIndex === 0}
-              className="flex-1 h-12 text-base"
-              size="lg"
-            >
-              <ChevronLeft className="w-5 h-5" />
-              Previous
-            </Button>
-            <Button
-              onClick={handleNext}
-              disabled={!canProceed()}
-              className="flex-1 h-12 text-base"
-              size="lg"
-            >
-              {currentStepIndex === STEPS.length - 1 ? "Submit" : "Next"}
-              <ChevronRight className="w-5 h-5" />
-            </Button>
+        {/* Mobile navigation footer - improved positioning and touch targets */}
+        <div className="sticky bottom-0 bg-background border-t shadow-lg md:hidden z-20">
+          <div className="safe-area-padding-bottom">
+            <div className="p-4 pb-6">
+              {/* Manual save button for better control */}
+              <div className="flex justify-center mb-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleAutoSave}
+                  className="text-xs text-muted-foreground h-8"
+                >
+                  💾 Save Progress
+                </Button>
+              </div>
+              
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={handlePrevious}
+                  disabled={currentStepIndex === 0}
+                  className="flex-1 h-12 text-base min-h-[44px] touch-manipulation" 
+                  size="lg"
+                  aria-label={`Go to previous step: ${currentStepIndex > 0 ? STEPS[currentStepIndex - 1]?.title : ''}`}
+                >
+                  <ChevronLeft className="w-5 h-5 mr-1" />
+                  Previous
+                </Button>
+                <Button
+                  onClick={handleNext}
+                  disabled={!canProceed()}
+                  className="flex-1 h-12 text-base min-h-[44px] touch-manipulation"
+                  size="lg"
+                  aria-label={`${currentStepIndex === STEPS.length - 1 ? 'Submit walkthrough' : `Go to next step: ${STEPS[currentStepIndex + 1]?.title}`}`}
+                >
+                  {currentStepIndex === STEPS.length - 1 ? "Submit" : "Next"}
+                  <ChevronRight className="w-5 h-5 ml-1" />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

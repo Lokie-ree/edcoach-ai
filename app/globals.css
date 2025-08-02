@@ -247,6 +247,16 @@
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+  }
+
+  /* Safe area support for mobile devices */
+  .safe-area-padding-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-area-padding-top {
+    padding-top: env(safe-area-inset-top);
+  }
     user-select: none;
   }
 
