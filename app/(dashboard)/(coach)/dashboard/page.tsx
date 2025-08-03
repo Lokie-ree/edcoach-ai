@@ -3,20 +3,16 @@
 import {
   Users,
   BookOpen,
-  Plus,
-  UserPlus,
   ThumbsUp,
   TrendingUp,
-  Calendar,
-  Bell,
   ChevronRight,
-  BarChart3,
   FileText,
   Target,
 } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { RecentActivityFeed } from "@/app/(dashboard)/(coach)/dashboard/components/RecentActivityFeed";
+import { PrioritiesPanel } from "@/app/(dashboard)/(coach)/dashboard/components/PrioritiesPanel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { useUser } from "@clerk/nextjs";
@@ -24,140 +20,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { TeacherInvitationForm } from "@/app/(dashboard)/(coach)/teachers/components/TeacherInvitationForm";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useSwipe } from "@/hooks/use-swipe";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { QuickActions } from "@/app/(dashboard)/(coach)/dashboard/components/QuickActions";
 
 // Mobile-first coach dashboard with card-based layout
-function QuickActionCard({
-  title,
-  icon: Icon,
-  href,
-  action,
-  variant = "default",
-  notification,
-}: {
-  title: string;
-  icon: React.ComponentType<{ className?: string }>;
-  href?: string;
-  action?: () => void;
-  variant?: "default" | "primary";
-  notification?: number;
-}) {
-  const cardContent = (
-    <Card
-      className={`h-20 cursor-pointer transition-all hover:shadow-md active:scale-95 ${
-        variant === "primary" ? "bg-primary text-primary-foreground" : ""
-      }`}
-    >
-      <CardContent className="flex items-center justify-between p-4 h-full">
-        <div className="flex items-center gap-3">
-          <div
-            className={`p-2 rounded-lg ${
-              variant === "primary" ? "bg-primary-foreground/20" : "bg-muted"
-            }`}
-          >
-            <Icon className="h-5 w-5" />
-          </div>
-          <span className="font-medium text-sm">{title}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {notification && (
-            <Badge variant="secondary" className="text-xs">
-              {notification}
-            </Badge>
-          )}
-          <ChevronRight className="h-4 w-4 opacity-60" />
-        </div>
-      </CardContent>
-    </Card>
-  );
 
-  if (href) {
-    return <Link href={href}>{cardContent}</Link>;
-  }
-
-  return <div onClick={action}>{cardContent}</div>;
-}
-
-// Mobile-optimized priority card
-function PriorityCard({
-  analytics,
-}: {
-  analytics: {
-    priorities?: {
-      walkthroughsDue?: number;
-      reflectionsToReview?: number;
-      teachersNeedingSupport?: number;
-    };
-  };
-}) {
-  const priorities = [
-    {
-      label: "Walkthroughs Due",
-      count: analytics.priorities?.walkthroughsDue || 0,
-      icon: Calendar,
-      color:
-        "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
-    },
-    {
-      label: "Reflections to Review",
-      count: analytics.priorities?.reflectionsToReview || 0,
-      icon: FileText,
-      color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-    },
-    {
-      label: "Teachers Needing Support",
-      count: analytics.priorities?.teachersNeedingSupport || 0,
-      icon: Target,
-      color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-    },
-  ];
-
-  const totalPriorities = priorities.reduce((sum, p) => sum + p.count, 0);
-
-  if (totalPriorities === 0) {
-    return (
-      <Card>
-        <CardContent className="p-4 text-center">
-          <div className="text-2xl mb-2">🎉</div>
-          <p className="text-sm text-muted-foreground">
-            All caught up! No urgent priorities right now.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Bell className="h-4 w-4" />
-          Priorities
-          <Badge variant="secondary" className="text-xs">
-            {totalPriorities}
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0 space-y-3">
-        {priorities
-          .filter((p) => p.count > 0)
-          .map((priority, index) => (
-            <div key={index} className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <priority.icon className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{priority.label}</span>
-              </div>
-              <Badge className={priority.color}>{priority.count}</Badge>
-            </div>
-          ))}
-      </CardContent>
-    </Card>
-  );
-}
 
 // Enhanced mobile metrics overview with detailed breakdown
 function MetricsOverview({
@@ -318,7 +189,7 @@ function TopInsights({
       value: analytics.mostCommonReinforcement.indicatorName,
       count: analytics.mostCommonReinforcement.count,
       icon: ThumbsUp,
-      color: "text-green-600",
+      color: "text-green-600 dark:text-green-400",
     });
   }
 
@@ -329,7 +200,7 @@ function TopInsights({
       value: analytics.mostCommonRefinement.indicatorName,
       count: analytics.mostCommonRefinement.count,
       icon: Target,
-      color: "text-amber-600",
+      color: "text-amber-600 dark:text-amber-400",
     });
   }
 
@@ -372,7 +243,7 @@ function TopInsights({
 export default function CoachDashboardPage() {
   const { user } = useUser();
   const analytics = useQuery(api.analytics.getCoachAnalytics);
-  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   if (!analytics) {
     return (
@@ -389,21 +260,23 @@ export default function CoachDashboardPage() {
           <Skeleton className="h-20 w-full" />
         </div>
 
-        {/* Metrics skeleton */}
-        <div className="grid grid-cols-2 gap-3">
-          <Skeleton className="h-24" />
-          <Skeleton className="h-24" />
+        {/* Layout skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-24 w-full" />
+          </div>
+          <div>
+            <Skeleton className="h-64 w-full" />
+          </div>
         </div>
-
-        {/* Priority card skeleton */}
-        <Skeleton className="h-32 w-full" />
       </div>
     );
   }
 
   return (
-    <div className="py-3 md:py-4 space-y-4">
-      {/* Welcome Header - Simplified for mobile */}
+    <div className="py-3 md:py-4 space-y-6">
+      {/* Welcome Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -423,84 +296,63 @@ export default function CoachDashboardPage() {
         </p>
       </motion.div>
 
-      {/* Quick Actions - Mobile-first design */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="space-y-3"
-      >
-        <QuickActionCard
-          title="Start Walkthrough"
-          icon={Plus}
-          href="/walkthrough/new"
-          variant="primary"
-        />
+            {/* Quick Actions - Mobile only */}
+      {isMobile && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+        >
+          <QuickActions isMobile={true} />
+        </motion.div>
+      )}
 
-        <TeacherInvitationForm
-          trigger={
-            <div className="w-full">
-              <QuickActionCard
-                title="Invite Teacher"
-                icon={UserPlus}
-                action={() => {}}
-              />
-            </div>
-          }
-        />
-
-        <QuickActionCard
-          title="View Analytics"
-          icon={BarChart3}
-          href="/analytics"
-        />
-      </motion.div>
-
-      {/* Metrics Overview */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <MetricsOverview analytics={analytics} />
-      </motion.div>
-
-      {/* Priorities Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-      >
-        <PriorityCard analytics={analytics} />
-      </motion.div>
-
-      {/* Key Insights */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
-        <TopInsights analytics={analytics} />
-      </motion.div>
-
-      {/* Recent Activity - Progressive disclosure for mobile */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-        className="space-y-3"
-      >
-        <Card>
-          <CardHeader
-            className="pb-3 cursor-pointer"
-            onClick={() =>
-              setExpandedSection(
-                expandedSection === "activity" ? null : "activity",
-              )
-            }
+{/* Main Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Quick Actions - Span full width on larger devices */}
+        {!isMobile && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="col-span-1 lg:col-span-2"
           >
-            <CardTitle className="flex items-center justify-between text-base">
-              <div className="flex items-center gap-2">
+            <QuickActions isMobile={false} />
+          </motion.div>
+        )}
+        
+        {/* Top KPI Cards - Span full width on larger devices */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="col-span-1 lg:col-span-2"
+        >
+          <MetricsOverview analytics={analytics} />
+        </motion.div>
+        
+        {/* Left Column: Priorities Panel (The Most Important Part) */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="space-y-4"
+        >
+          <PrioritiesPanel priorities={analytics.priorities} />
+
+          {/* Key Insights */}
+          <TopInsights analytics={analytics} />
+        </motion.div>
+
+        {/* Right Column: Recent Activity Feed (Context) */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <Card className="h-fit">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
                 <FileText className="h-4 w-4" />
                 Recent Activity
                 {analytics.recentActivity.length > 0 && (
@@ -508,70 +360,22 @@ export default function CoachDashboardPage() {
                     {analytics.recentActivity.length}
                   </Badge>
                 )}
-              </div>
-              <motion.div
-                animate={{
-                  rotate: expandedSection === "activity" ? 90 : 0,
-                }}
-                transition={{ duration: 0.2 }}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </motion.div>
-            </CardTitle>
-          </CardHeader>
-
-          {expandedSection === "activity" && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CardContent className="pt-0">
-                <RecentActivityFeed
-                  activities={analytics.recentActivity.slice(0, 5)}
-                />
-                {analytics.recentActivity.length > 5 && (
-                  <div className="mt-3 text-center">
-                    <Link href="/analytics">
-                      <Button variant="ghost" size="sm">
-                        View All Activity
-                        <ChevronRight className="h-3 w-3 ml-1" />
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </CardContent>
-            </motion.div>
-          )}
-        </Card>
-      </motion.div>
-
-      {/* Desktop view - Additional cards shown on larger screens */}
-      <div className="hidden lg:block">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3"
-        >
-          {/* Additional desktop-specific cards would go here */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Teaching Excellence</CardTitle>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-4">
-                <div className="text-2xl mb-2">📈</div>
-                <p className="text-sm text-muted-foreground">
-                  Track teacher growth patterns and celebrate successes
-                </p>
-                <Link href="/teachers">
-                  <Button variant="outline" size="sm" className="mt-3">
-                    View Teachers
-                  </Button>
-                </Link>
-              </div>
+              <RecentActivityFeed
+                activities={analytics.recentActivity.slice(0, 10)}
+              />
+              {analytics.recentActivity.length > 10 && (
+                <div className="mt-4 text-center">
+                  <Link href="/analytics">
+                    <Button variant="ghost" size="sm">
+                      View All Activity
+                      <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>

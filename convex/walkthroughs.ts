@@ -1,6 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { getCurrentUser } from "./auth";
 
 export const createWalkthroughAndEntries = mutation({
@@ -64,8 +64,10 @@ export const createWalkthroughAndEntries = mutation({
       createdAt: now,
       updatedAt: now,
     });
-    // Increment usage after successful creation
-    await ctx.runMutation(api.usage.trackUsage, { type: "walkthrough" });
+    // Only increment usage for completed walkthroughs, not drafts
+    if (args.status === "completed") {
+      await ctx.runMutation(api.usage.trackUsage, { type: "walkthrough" });
+    }
     for (const entry of args.walkthroughEntries) {
       await ctx.db.insert("walkthroughEntries", {
         walkthroughId,
@@ -75,6 +77,21 @@ export const createWalkthroughAndEntries = mutation({
         createdAt: now,
       });
     }
+
+    // If this is a completed walkthrough, update workflow state
+    if (args.status === "completed") {
+      try {
+        await ctx.runMutation(internal.workflowState.recordWalkthroughCompletionInternal, {
+          teacherId: args.teacherId,
+          walkthroughDate: args.walkthroughDate,
+          evidenceQuality: Math.min(10, args.evidenceSummary.length / 20), // Simple quality metric
+        });
+      } catch (error) {
+        // Don't fail walkthrough creation if workflow update fails
+        console.warn("Failed to update workflow state for walkthrough:", error);
+      }
+    }
+
     return walkthroughId;
   },
 });
@@ -147,6 +164,24 @@ export const updateWalkthroughAndEntries = mutation({
         createdAt: now,
       });
     }
+
+    // If this walkthrough was just completed (changed from draft to completed), update workflow state and usage
+    if (args.status === "completed" && walkthrough.status === "draft") {
+      try {
+        await ctx.runMutation(internal.workflowState.recordWalkthroughCompletionInternal, {
+          teacherId: args.teacherId,
+          walkthroughDate: args.walkthroughDate,
+          evidenceQuality: Math.min(10, args.evidenceSummary.length / 20), // Simple quality metric
+        });
+      } catch (error) {
+        // Don't fail walkthrough update if workflow update fails
+        console.warn("Failed to update workflow state for walkthrough completion:", error);
+      }
+      
+      // Track usage now that the walkthrough is completed
+      await ctx.runMutation(api.usage.trackUsage, { type: "walkthrough" });
+    }
+
     return null;
   },
 });

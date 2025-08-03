@@ -1,7 +1,8 @@
-import { query } from "./_generated/server";
+import { query, action } from "./_generated/server";
 import { v } from "convex/values";
 import { getCurrentUserOrThrow, getCurrentUser } from "./auth";
 import { internalQuery } from "./_generated/server";
+import { api } from "./_generated/api";
 
 export const observerAnalytics = query({
   args: {
@@ -1135,6 +1136,11 @@ export const getMyPgpData = query({
       description: v.string(),
       progress: v.number(),
       nextSteps: v.array(v.string()),
+      aiInsights: v.optional(v.object({
+        trendAnalysis: v.string(),
+        strategicRecommendations: v.array(v.string()),
+        progressPrediction: v.string(),
+      })),
     }),
     strengths: v.array(
       v.object({
@@ -1675,6 +1681,7 @@ export const getTeacherPgpData = query({
         description: refinementDescription,
         progress: Number(refinementProgress),
         nextSteps,
+        aiInsights: undefined, // TODO: Add AI insights generation for teacher view
       },
       strengths: strengths.map((strength) => ({
         ...strength,
@@ -1770,6 +1777,94 @@ export const getTeacherPgpDataInternal = internalQuery({
         trend,
         targetDate: undefined,
       },
+    };
+  },
+});
+
+/**
+ * Generate AI-powered insights for a teacher's refinement focus area.
+ */
+export const generateRefinementInsights = action({
+  args: {
+    teacherId: v.id("teachers"),
+    currentIndicator: v.string(),
+    recentWalkthroughs: v.array(v.any()),
+    progressTrend: v.union(
+      v.literal("Needs Support"),
+      v.literal("Engaged"),
+      v.literal("Stable"),
+    ),
+  },
+  returns: v.object({
+    trendAnalysis: v.string(),
+    strategicRecommendations: v.array(v.string()),
+    progressPrediction: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    // Get teacher data for context
+    const teacher = await ctx.runQuery(api.teachers.getTeacherById, { 
+      teacherId: args.teacherId 
+    });
+    
+    if (!teacher) {
+      throw new Error("Teacher not found");
+    }
+
+    // Analyze walkthrough patterns
+    const walkthroughCount = args.recentWalkthroughs.length;
+    const refinementFrequency = args.recentWalkthroughs.filter(
+      (w: any) => w.refinementIndicator === args.currentIndicator
+    ).length;
+    
+    const consistencyRate = walkthroughCount > 0 ? (refinementFrequency / walkthroughCount) * 100 : 0;
+
+    // Generate trend analysis
+    let trendAnalysis: string;
+    if (consistencyRate >= 75) {
+      trendAnalysis = `${args.currentIndicator} appears consistently in recent observations (${Math.round(consistencyRate)}% of walkthroughs), indicating this is a priority area for focused development.`;
+    } else if (consistencyRate >= 50) {
+      trendAnalysis = `${args.currentIndicator} shows moderate consistency in observations (${Math.round(consistencyRate)}% frequency), suggesting targeted improvement opportunities.`;
+    } else {
+      trendAnalysis = `${args.currentIndicator} appears occasionally in observations, indicating emerging growth opportunities in this area.`;
+    }
+
+    // Generate strategic recommendations based on indicator and trend
+    const strategicRecommendations: string[] = [];
+    
+    if (args.progressTrend === "Needs Support") {
+      strategicRecommendations.push(
+        "Schedule more frequent coaching conversations to provide additional support",
+        "Consider peer observation opportunities with teachers strong in this indicator",
+        "Break down the indicator into smaller, achievable practice goals"
+      );
+    } else if (args.progressTrend === "Engaged") {
+      strategicRecommendations.push(
+        "Leverage this engagement by setting stretch goals in this area",
+        "Consider this teacher as a peer mentor for others developing this skill",
+        "Document successful strategies for replication with other teachers"
+      );
+    } else {
+      strategicRecommendations.push(
+        "Maintain consistent focus with regular check-ins and feedback",
+        "Explore new instructional strategies to reinvigorate growth",
+        "Set specific milestones to track incremental progress"
+      );
+    }
+
+    // Generate progress prediction
+    let progressPrediction: string;
+    if (args.progressTrend === "Engaged" && consistencyRate >= 50) {
+      progressPrediction = "Strong likelihood of measurable improvement over the next 4-6 weeks with continued focus and support.";
+    } else if (args.progressTrend === "Needs Support") {
+      progressPrediction = "With intensive support and clear action steps, expect gradual improvement over 6-8 weeks.";
+    } else {
+      progressPrediction = "Steady, consistent progress expected with regular coaching support and practice opportunities.";
+    }
+
+    return {
+      trendAnalysis,
+      strategicRecommendations: strategicRecommendations.slice(0, 3), // Limit to 3 recommendations
+      progressPrediction,
     };
   },
 });

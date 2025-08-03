@@ -1,9 +1,25 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { Doc, Id } from "./_generated/dataModel";
 
-// Initialize workflow state for a new teacher
+// Initialize workflow state for a new teacher (both public and internal versions)
 export const initializeWorkflowState = mutation({
+  args: {
+    teacherId: v.id("teachers"),
+    coachId: v.id("users"),
+  },
+  returns: v.id("workflowStates"),
+  handler: async (ctx, { teacherId, coachId }): Promise<Id<"workflowStates">> => {
+    return await ctx.runMutation(internal.workflowState.initializeWorkflowStateInternal, {
+      teacherId,
+      coachId,
+    });
+  },
+});
+
+// Internal version for cross-mutation calls
+export const initializeWorkflowStateInternal = internalMutation({
   args: {
     teacherId: v.id("teachers"),
     coachId: v.id("users"),
@@ -225,7 +241,7 @@ export const completePgpSetup = mutation({
   },
 });
 
-// Record walkthrough completion
+// Record walkthrough completion (public for UI components)
 export const recordWalkthroughCompletion = mutation({
   args: {
     teacherId: v.id("teachers"),
@@ -233,7 +249,20 @@ export const recordWalkthroughCompletion = mutation({
     evidenceQuality: v.optional(v.number()),
   },
   returns: v.id("workflowStates"),
-  handler: async (ctx, { teacherId, walkthroughDate, evidenceQuality }) => {
+  handler: async (ctx, args): Promise<Id<"workflowStates">> => {
+    return await ctx.runMutation(internal.workflowState.recordWalkthroughCompletionInternal, args);
+  },
+});
+
+// Record walkthrough completion (internal for workflow integration)
+export const recordWalkthroughCompletionInternal = internalMutation({
+  args: {
+    teacherId: v.id("teachers"),
+    walkthroughDate: v.number(),
+    evidenceQuality: v.optional(v.number()),
+  },
+  returns: v.id("workflowStates"),
+  handler: async (ctx, { teacherId, walkthroughDate, evidenceQuality }): Promise<Id<"workflowStates">> => {
     const workflowState = await ctx.db
       .query("workflowStates")
       .withIndex("by_teacher", (q) => q.eq("teacherId", teacherId))
@@ -241,7 +270,14 @@ export const recordWalkthroughCompletion = mutation({
       .first();
 
     if (!workflowState) {
-      throw new Error("Workflow state not found");
+      // If no workflow state exists, initialize one
+      const teacher = await ctx.db.get(teacherId);
+      if (!teacher) throw new Error("Teacher not found");
+      
+      return await ctx.runMutation(internal.workflowState.initializeWorkflowStateInternal, {
+        teacherId,
+        coachId: teacher.coachId,
+      });
     }
 
     const currentWalkthroughs =
@@ -255,6 +291,7 @@ export const recordWalkthroughCompletion = mutation({
         walkthroughsCompleted: currentWalkthroughs + 1,
         lastWalkthroughDate: walkthroughDate,
         ...(evidenceQuality && { evidenceQuality }),
+        completedAt: now, // Mark this step as having activity
       },
     };
 
@@ -263,12 +300,33 @@ export const recordWalkthroughCompletion = mutation({
       updatedAt: now,
     });
 
+    // Check if we should advance to the next step
+    // If we have 2+ walkthroughs and we're in capture phase, advance to analyze
+    if (currentWalkthroughs + 1 >= 2 && workflowState.currentStep === "capture") {
+      const stepOrder = [
+        "setup",
+        "capture", 
+        "analyze",
+        "refine",
+        "reflect",
+        "monitor",
+      ] as const;
+      const currentIndex = stepOrder.indexOf(workflowState.currentStep);
+      const nextIndex = (currentIndex + 1) % stepOrder.length;
+      const nextStep = stepOrder[nextIndex];
+
+      await ctx.db.patch(workflowState._id, {
+        currentStep: nextStep,
+        updatedAt: now,
+      });
+    }
+
     return workflowState._id;
   },
 });
 
-// Record reflection completion
-export const recordReflectionCompletion = mutation({
+// Record reflection completion (internal for workflow integration)
+export const recordReflectionCompletion = internalMutation({
   args: {
     teacherId: v.id("teachers"),
     insightDepth: v.optional(v.number()),
@@ -296,6 +354,7 @@ export const recordReflectionCompletion = mutation({
         reflectionsCompleted: currentReflections + 1,
         lastReflectionDate: now,
         ...(insightDepth && { insightDepth }),
+        completedAt: now, // Mark this step as having activity
       },
     };
 
@@ -303,6 +362,27 @@ export const recordReflectionCompletion = mutation({
       stepProgress: updatedProgress,
       updatedAt: now,
     });
+
+    // Check if we have enough reflections to potentially advance the workflow
+    // If this is the 2nd reflection (minimum threshold), consider advancing to monitor step
+    if (currentReflections + 1 >= 2 && workflowState.currentStep === "reflect") {
+      const stepOrder = [
+        "setup",
+        "capture", 
+        "analyze",
+        "refine",
+        "reflect",
+        "monitor",
+      ] as const;
+      const currentIndex = stepOrder.indexOf(workflowState.currentStep);
+      const nextIndex = (currentIndex + 1) % stepOrder.length;
+      const nextStep = stepOrder[nextIndex];
+
+      await ctx.db.patch(workflowState._id, {
+        currentStep: nextStep,
+        updatedAt: now,
+      });
+    }
 
     return workflowState._id;
   },

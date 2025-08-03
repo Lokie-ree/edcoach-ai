@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
+import { internal } from "./_generated/api";
 
 /**
  * Query: Get the reflection for a given walkthrough (if any).
@@ -30,6 +31,7 @@ export const getReflectionByWalkthrough = query({
 
 /**
  * Create a new teacher reflection for a walkthrough.
+ * This also integrates with the workflow state to track reflection completion.
  */
 export const createReflection = mutation({
   args: {
@@ -44,14 +46,31 @@ export const createReflection = mutation({
     if (!walkthrough) throw new Error("Walkthrough not found");
     const teacher = await ctx.db.get(args.teacherId);
     if (!teacher) throw new Error("Teacher not found");
+    
     const now = Date.now();
-    return await ctx.db.insert("reflections", {
+    
+    // Create the reflection
+    const reflectionId = await ctx.db.insert("reflections", {
       walkthroughId: args.walkthroughId,
       teacherId: args.teacherId,
       content: args.content,
       createdAt: now,
       updatedAt: now,
     });
+
+    // Update workflow state to record reflection completion
+    // This helps track progress in the reflect step of the EdCoach methodology
+    try {
+      await ctx.runMutation(internal.workflowState.recordReflectionCompletion, {
+        teacherId: args.teacherId,
+        insightDepth: Math.floor(args.content.length / 50), // Simple insight quality metric
+      });
+    } catch (error) {
+      // Don't fail reflection creation if workflow update fails
+      console.warn("Failed to update workflow state for reflection:", error);
+    }
+
+    return reflectionId;
   },
 });
 

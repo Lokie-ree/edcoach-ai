@@ -28,6 +28,7 @@ export const ANIMATIONS = {
     fast: "duration-150",
     normal: "duration-250",
     slow: "duration-400",
+    extended: "duration-[600ms]",
     ease: "ease-in-out"
   }
 } as const;

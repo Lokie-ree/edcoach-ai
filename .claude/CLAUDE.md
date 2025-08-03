@@ -97,7 +97,7 @@ export const functionName = query({
 - Implement caching for expensive AI operations
 
 ### Testing & Quality
-- Run `npm run lint` before committing (includes ESLint checks)
+- Run `pnpm run lint` before committing (includes ESLint checks)
 - Follow existing component patterns and naming conventions
 - Use proper TypeScript types from `convex/_generated/dataModel`
 - Maintain audit trail for all data modifications

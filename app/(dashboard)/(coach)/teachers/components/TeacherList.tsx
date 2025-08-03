@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pencil, Users, UserPlus } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+
 import { Teacher } from "@/types/teacher";
 import { TeacherStatusBadge } from "@/components/ui/teacher-status-badge";
 import Link from "next/link";

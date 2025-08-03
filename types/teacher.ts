@@ -1,9 +1,3 @@
-export type Teacher = {
-  _id: string;
-  name: string;
-  email: string;
-  status: string;
-  subject: string[];
-  gradeBand: string;
-  coachId: string;
-}; 
+import { Doc } from "@/convex/_generated/dataModel";
+
+export type Teacher = Doc<"teachers">; 

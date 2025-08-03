@@ -113,30 +113,34 @@ Container.displayName = "Container";
 /**
  * Pre-configured container variants for common use cases
  */
-export const ContainerVariants = {
-  /** Full-width application container (replaces MaxWidthWrapper) */
-  App: forwardRef<HTMLElement, Omit<ContainerProps, 'size' | 'padding'>>((props, ref) => (
-    <Container ref={ref} size="full" padding="compact" {...props} />
-  )),
-  
-  /** Standard page content container */
-  Page: forwardRef<HTMLElement, Omit<ContainerProps, 'size' | 'padding'>>((props, ref) => (
-    <Container ref={ref} size="lg" padding="normal" {...props} />
-  )),
-  
-  /** Narrow form container */
-  Form: forwardRef<HTMLElement, Omit<ContainerProps, 'size' | 'spacing'>>((props, ref) => (
-    <Container ref={ref} size="sm" spacing="md" {...props} />
-  )),
-  
-  /** Wide dashboard container */
-  Dashboard: forwardRef<HTMLElement, Omit<ContainerProps, 'size'>>((props, ref) => (
-    <Container ref={ref} size="xl" {...props} />
-  )),
-} as const;
 
-// Add display names for dev tools
-ContainerVariants.App.displayName = "Container.App";
-ContainerVariants.Page.displayName = "Container.Page"; 
-ContainerVariants.Form.displayName = "Container.Form";
-ContainerVariants.Dashboard.displayName = "Container.Dashboard";
+/** Full-width application container (replaces MaxWidthWrapper) */
+const AppContainer = forwardRef<HTMLElement, Omit<ContainerProps, 'size' | 'padding'>>((props, ref) => (
+  <Container ref={ref} size="full" padding="compact" {...props} />
+));
+AppContainer.displayName = "Container.App";
+
+/** Standard page content container */
+const PageContainer = forwardRef<HTMLElement, Omit<ContainerProps, 'size' | 'padding'>>((props, ref) => (
+  <Container ref={ref} size="lg" padding="normal" {...props} />
+));
+PageContainer.displayName = "Container.Page";
+
+/** Narrow form container */
+const FormContainer = forwardRef<HTMLElement, Omit<ContainerProps, 'size' | 'spacing'>>((props, ref) => (
+  <Container ref={ref} size="sm" spacing="md" {...props} />
+));
+FormContainer.displayName = "Container.Form";
+
+/** Wide dashboard container */
+const DashboardContainer = forwardRef<HTMLElement, Omit<ContainerProps, 'size'>>((props, ref) => (
+  <Container ref={ref} size="xl" {...props} />
+));
+DashboardContainer.displayName = "Container.Dashboard";
+
+export const ContainerVariants = {
+  App: AppContainer,
+  Page: PageContainer,
+  Form: FormContainer,
+  Dashboard: DashboardContainer,
+} as const;

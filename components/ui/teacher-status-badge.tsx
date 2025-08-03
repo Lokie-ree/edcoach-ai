@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Clock, CheckCircle, Mail, AlertCircle, UserPlus } from "lucide-react";
 import { Teacher } from "@/types/teacher";
-import { ICONS, STATUS_COLORS, SPACING, getStatusClasses, getAnimationClass } from "@/lib/design-tokens";
+import { ICONS, SPACING, getStatusClasses, getAnimationClass } from "@/lib/design-tokens";
 
 // Simplified status types based on audit recommendations
 export type SimplifiedTeacherStatus = "invited" | "active" | "expired";
@@ -20,6 +20,8 @@ interface TeacherStatusBadgeProps {
   size?: "sm" | "md" | "lg";
   /** Compact mode for mobile */
   compact?: boolean;
+  /** Additional CSS classes */
+  className?: string;
 }
 
 /**
@@ -41,7 +43,8 @@ export function TeacherStatusBadge({
   onResendInvite,
   onEdit,
   size = "md",
-  compact = false
+  compact = false,
+  className
 }: TeacherStatusBadgeProps) {
   // Map legacy status to simplified status
   const getSimplifiedStatus = (teacher: Teacher): SimplifiedTeacherStatus => {
@@ -145,7 +148,7 @@ export function TeacherStatusBadge({
   }
 
   return (
-    <div className="space-y-2">
+    <div className={cn("space-y-2", className)}>
       {/* Status Badge with Icon */}
       <div className="flex items-center gap-2">
         <Badge 

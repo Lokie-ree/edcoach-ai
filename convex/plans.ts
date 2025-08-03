@@ -8,8 +8,8 @@ export const PLAN_CONFIG = {
     name: "Coach Free",
     description: "Get started with EdCoach AI for free",
     features: {
-      maxAIGenerations: 8, // 4 walkthroughs total (2 AI generations each)
-      maxTeachers: 2,
+      maxAIGenerations: 10, // 5 walkthroughs total
+      maxTeachers: 1,
       analyticsDepth: 14, // days
       exportEnabled: false,
       bulkInvitationsEnabled: false,
@@ -97,7 +97,28 @@ export const getAIUsageThisMonth = query({
       now.getMonth() !== resetDate.getMonth() ||
       now.getFullYear() !== resetDate.getFullYear();
 
-    const walkthroughsUsed = isNewMonth ? 0 : usage.walkthroughs;
+    let walkthroughsUsed = isNewMonth ? 0 : usage.walkthroughs;
+
+    // TEMPORARY FIX: Double-check usage by counting actual completed walkthroughs this month
+    // This handles cases where drafts were previously counted incorrectly
+    const thisMonth = now.getMonth();
+    const thisYear = now.getFullYear();
+    const actualCompletedWalkthroughsThisMonth = await ctx.db
+      .query("walkthroughs")
+      .withIndex("by_observer", (q) => q.eq("observerId", user._id))
+      .filter((q) => q.eq(q.field("status"), "completed"))
+      .collect();
+    
+    const completedThisMonth = actualCompletedWalkthroughsThisMonth.filter((w) => {
+      const walkDate = new Date(w.walkthroughDate);
+      return walkDate.getMonth() === thisMonth && walkDate.getFullYear() === thisYear;
+    }).length;
+    
+    // Use the actual count if it's different from stored usage (indicating data inconsistency)
+    if (!isNewMonth && Math.abs(walkthroughsUsed - completedThisMonth) > 0) {
+      walkthroughsUsed = completedThisMonth;
+      // Note: Data inconsistency detected but will self-correct over time through usage tracking
+    }
     const walkthroughsRemaining = Math.max(
       0,
       walkthroughLimit - walkthroughsUsed,
@@ -210,3 +231,5 @@ export const getPlanFeatures = query({
     };
   },
 });
+
+
