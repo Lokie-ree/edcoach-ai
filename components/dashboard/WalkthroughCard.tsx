@@ -27,7 +27,7 @@ export default function WalkthroughCard({ walkthrough, isCoach, getIndicatorName
                 ) : (
                   <>
                     <Clock className="h-3 w-3 mr-1" />
-                    Draft
+                    Completed
                   </>
                 )}
               </Badge>

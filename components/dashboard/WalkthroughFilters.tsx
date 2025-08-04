@@ -34,7 +34,7 @@ export default function WalkthroughFilters({ searchTerm, setSearchTerm, statusFi
         <SelectContent>
           <SelectItem value="all">All Status</SelectItem>
           <SelectItem value="completed">Completed</SelectItem>
-          <SelectItem value="draft">Draft</SelectItem>
+          
         </SelectContent>
       </Select>
     </motion.div>

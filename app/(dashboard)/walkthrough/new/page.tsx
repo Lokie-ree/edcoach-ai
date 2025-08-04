@@ -5,12 +5,16 @@ import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function NewObservationPage() {
   const { user, isLoaded } = useUser();
   const convexUser = useQuery(api.users.current, user ? {} : "skip");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const preselectedTeacherId = searchParams.get("teacherId") as Id<"teachers"> | null;
 
   useEffect(() => {
     if (isLoaded && user && convexUser) {
@@ -30,11 +34,20 @@ export default function NewObservationPage() {
     );
   }
 
-  const coachId = convexUser._id as Id<"users">;
+  const handleClose = () => {
+    if (preselectedTeacherId) {
+      router.push(`/teachers/${preselectedTeacherId}`);
+    } else {
+      router.push("/teachers");
+    }
+  };
 
   return (
     <div className="min-h-screen">
-      {coachId && <WalkthroughWizard coachId={coachId} />}
+      <WalkthroughWizard 
+        preselectedTeacherId={preselectedTeacherId || undefined} 
+        onClose={handleClose}
+      />
     </div>
   );
 }

@@ -1,8 +1,6 @@
-import { query, action } from "./_generated/server";
+import { query } from "./_generated/server";
 import { v } from "convex/values";
 import { getCurrentUserOrThrow, getCurrentUser } from "./auth";
-import { internalQuery } from "./_generated/server";
-import { api } from "./_generated/api";
 
 export const observerAnalytics = query({
   args: {
@@ -38,20 +36,16 @@ export const observerAnalytics = query({
 
     // Feedback by indicator (reinforcement + refinement)
     const indicatorCounts: Record<string, number> = {};
-    let reinforcementCount = 0;
-    let refinementCount = 0;
     const teacherSet = new Set();
 
     for (const w of walkthroughs) {
       if (w.reinforcementIndicator) {
         indicatorCounts[w.reinforcementIndicator] =
           (indicatorCounts[w.reinforcementIndicator] || 0) + 1;
-        reinforcementCount++;
       }
       if (w.refinementIndicator) {
         indicatorCounts[w.refinementIndicator] =
           (indicatorCounts[w.refinementIndicator] || 0) + 1;
-        refinementCount++;
       }
       if (w.teacherId) {
         teacherSet.add(w.teacherId);
@@ -67,34 +61,18 @@ export const observerAnalytics = query({
   },
 });
 
-/**
- * Get aggregated analytics for the current coach.
- * Coach-centric: All queries are based on direct coach-teacher relationships.
- */
 export const getCoachAnalytics = query({
   args: {},
   returns: v.object({
     totalTeachers: v.number(),
     activeTeachers: v.number(),
     totalWalkthroughs: v.number(),
-    feedbackTrend: v.number(),
-    totalReflections: v.number(),
-    mostCommonReinforcement: v.union(
-      v.null(),
-      v.object({
-        indicator: v.string(),
-        indicatorName: v.string(),
-        count: v.number(),
-      }),
-    ),
-    mostCommonRefinement: v.union(
-      v.null(),
-      v.object({
-        indicator: v.string(),
-        indicatorName: v.string(),
-        count: v.number(),
-      }),
-    ),
+    totalFeedbackGenerated: v.number(),
+    feedbackTrend: v.object({
+      thisMonth: v.number(),
+      lastMonth: v.number(),
+      percentageChange: v.number(),
+    }),
     priorities: v.object({
       walkthroughsDue: v.number(),
       reflectionsToReview: v.number(),
@@ -103,11 +81,7 @@ export const getCoachAnalytics = query({
     recentActivity: v.array(
       v.object({
         id: v.string(),
-        type: v.union(
-          v.literal("walkthrough"),
-          v.literal("reflection"),
-          v.literal("feedback"),
-        ),
+        type: v.string(),
         teacherName: v.string(),
         timestamp: v.number(),
         status: v.string(),
@@ -133,26 +107,17 @@ export const getCoachAnalytics = query({
     const activeTeachers = teachers.filter((t) => t.status === "active").length;
 
     // Get all walkthroughs for coach's teachers
-    const allWalkthroughs = await ctx.db.query("walkthroughs").collect();
-
-    const coachWalkthroughs = allWalkthroughs.filter((w) =>
-      teacherIds.includes(w.teacherId),
-    );
+    const coachWalkthroughs = teacherIds.length > 0 
+      ? await ctx.db
+          .query("walkthroughs")
+          .filter((q) =>
+            q.or(...teacherIds.map((id) => q.eq(q.field("teacherId"), id))),
+          )
+          .collect()
+      : [];
 
     const totalWalkthroughs = coachWalkthroughs.length;
-
-    // Count total feedback and reflections
-    const allWalkthroughEntries = await ctx.db
-      .query("walkthroughEntries")
-      .collect();
-
-    const allReflections = await ctx.db.query("reflections").collect();
-
-    const totalFeedbackGenerated = allWalkthroughEntries.filter(
-      (entry) =>
-        coachWalkthroughs.some((w) => w._id === entry.walkthroughId) &&
-        entry.aiFeedback,
-    ).length;
+    const totalFeedbackGenerated = coachWalkthroughs.length; // Each walkthrough is completed feedback
 
     // Calculate feedback trend (this month vs last month)
     const thisMonth = new Date().getMonth();
@@ -160,253 +125,110 @@ export const getCoachAnalytics = query({
     const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
     const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
 
-    const thisMonthFeedback = allWalkthroughEntries.filter((entry) => {
-      const walkthrough = coachWalkthroughs.find(
-        (w) => w._id === entry.walkthroughId,
-      );
-      if (!walkthrough || !entry.aiFeedback) return false;
+    const thisMonthFeedback = coachWalkthroughs.filter((walkthrough) => {
       const walkDate = new Date(walkthrough.walkthroughDate);
       return (
         walkDate.getMonth() === thisMonth && walkDate.getFullYear() === thisYear
       );
     }).length;
 
-    const lastMonthFeedback = allWalkthroughEntries.filter((entry) => {
-      const walkthrough = coachWalkthroughs.find(
-        (w) => w._id === entry.walkthroughId,
-      );
-      if (!walkthrough || !entry.aiFeedback) return false;
+    const lastMonthFeedback = coachWalkthroughs.filter((walkthrough) => {
       const walkDate = new Date(walkthrough.walkthroughDate);
       return (
-        walkDate.getMonth() === lastMonth &&
-        walkDate.getFullYear() === lastMonthYear
+        walkDate.getMonth() === lastMonth && walkDate.getFullYear() === lastMonthYear
       );
     }).length;
 
-    const feedbackTrend =
-      lastMonthFeedback > 0
-        ? Math.round(
-            ((thisMonthFeedback - lastMonthFeedback) / lastMonthFeedback) * 100,
-          )
-        : 0;
+    const percentageChange = lastMonthFeedback === 0 
+      ? (thisMonthFeedback > 0 ? 100 : 0)
+      : ((thisMonthFeedback - lastMonthFeedback) / lastMonthFeedback) * 100;
 
-    const totalReflections = allReflections.filter((reflection) =>
-      coachWalkthroughs.some((w) => w._id === reflection.walkthroughId),
-    ).length;
-
-    // Calculate priorities
-    const now = Date.now();
-    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-
-    // Walkthroughs due (draft walkthroughs older than 7 days)
-    const draftWalkthroughs = coachWalkthroughs.filter(
-      (w) =>
-        w.status === "draft" && w.createdAt < now - 7 * 24 * 60 * 60 * 1000,
-    );
-    const walkthroughsDue = draftWalkthroughs.length;
-
-    // Reflections to review (reflections without coach response in last 30 days)
-    const recentReflections = allReflections.filter(
-      (reflection) =>
-        coachWalkthroughs.some((w) => w._id === reflection.walkthroughId) &&
-        reflection.createdAt > thirtyDaysAgo,
-    );
-    const reflectionsToReview = recentReflections.length;
-
-    // Teachers needing support (based on PGP trend calculation)
-    let teachersNeedingSupport = 0;
-    for (const teacher of teachers) {
-      const teacherWalkthroughs = coachWalkthroughs.filter(
-        (w) => w.teacherId === teacher._id,
-      );
-      const completedWalkthroughs = teacherWalkthroughs
-        .filter((w) => w.status === "completed")
-        .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
-        .slice(0, 5);
-
-      if (completedWalkthroughs.length >= 3) {
-        const refinementCounts = new Map<string, number>();
-        for (const wt of completedWalkthroughs) {
-          if (wt.refinementIndicator) {
-            const count = refinementCounts.get(wt.refinementIndicator) || 0;
-            refinementCounts.set(wt.refinementIndicator, count + 1);
-          }
-        }
-        for (const count of refinementCounts.values()) {
-          if (count >= 3) {
-            teachersNeedingSupport++;
-            break;
-          }
-        }
-      }
-    }
-
-    // Recent activity (last 10 activities)
-    const recentActivity = [];
-    const sortedWalkthroughs = coachWalkthroughs
+    // Get recent activity (last 10 walkthroughs)
+    const recentWalkthroughs = coachWalkthroughs
       .sort((a, b) => b.createdAt - a.createdAt)
       .slice(0, 10);
 
-    for (const walkthrough of sortedWalkthroughs) {
-      const teacher = teachers.find((t) => t._id === walkthrough.teacherId);
-
-      // Add walkthrough activity
+    const recentActivity = [];
+    
+    for (const walkthrough of recentWalkthroughs) {
+      const teacher = teachers.find(t => t._id === walkthrough.teacherId);
       recentActivity.push({
         id: walkthrough._id,
-        type: "walkthrough" as const,
+        type: "walkthrough",
         teacherName: teacher?.name || "Unknown Teacher",
         timestamp: walkthrough.createdAt,
-        status: walkthrough.status,
-        title: `${walkthrough.status === "completed" ? "Completed" : "Draft"} walkthrough`,
-        href: `/walkthrough/${walkthrough._id}/view`,
+        status: "completed",
+        title: `Walkthrough observation completed`,
+        href: `/walkthrough/${walkthrough._id}`,
       });
-
-      // Check for AI feedback
-      const walkthroughEntries = await ctx.db
-        .query("walkthroughEntries")
-        .withIndex("by_walkthrough", (q) =>
-          q.eq("walkthroughId", walkthrough._id),
-        )
-        .collect();
-
-      const hasAiFeedback = walkthroughEntries.some(
-        (entry) => entry.aiFeedback,
-      );
-
-      if (hasAiFeedback) {
-        recentActivity.push({
-          id: `feedback-${walkthrough._id}`,
-          type: "feedback" as const,
-          teacherName: teacher?.name || "Unknown Teacher",
-          timestamp: walkthrough.createdAt,
-          status: "generated",
-          title: "AI Feedback Generated",
-          href: `/walkthrough/${walkthrough._id}/view`,
-        });
-      }
-
-      // Check for reflection
-      const reflection = await ctx.db
-        .query("reflections")
-        .withIndex("by_walkthrough", (q) =>
-          q.eq("walkthroughId", walkthrough._id),
-        )
-        .first();
-
-      if (reflection) {
-        recentActivity.push({
-          id: reflection._id,
-          type: "reflection" as const,
-          teacherName: teacher?.name || "Unknown Teacher",
-          timestamp: reflection.createdAt,
-          status: "completed",
-          title: "Teacher Reflection",
-          href: `/walkthrough/${walkthrough._id}/view`,
-        });
-      }
     }
 
-    // Sort recent activity by timestamp and take top 10
-    const sortedRecentActivity = recentActivity
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, 10);
-
-    // Get all indicators to map codes to names and domains
-    const allIndicators = await ctx.db.query("rubricIndicators").collect();
-    const indicatorMap = allIndicators.reduce(
-      (map, ind) => {
-        map[ind.indicator_code] = {
-          name: ind.indicator_name,
-          domain: ind.domain,
-        };
-        return map;
-      },
-      {} as Record<string, { name: string; domain: string }>,
-    );
-
-    // Indicator analysis
-    const reinforcementCounts: Record<string, number> = {};
-    const refinementCounts: Record<string, number> = {};
-    coachWalkthroughs.forEach((w) => {
-      if (w.reinforcementIndicator) {
-        reinforcementCounts[w.reinforcementIndicator] =
-          (reinforcementCounts[w.reinforcementIndicator] || 0) + 1;
-      }
-      if (w.refinementIndicator) {
-        refinementCounts[w.refinementIndicator] =
-          (refinementCounts[w.refinementIndicator] || 0) + 1;
-      }
-    });
-    const mostCommonReinforcement =
-      Object.entries(reinforcementCounts)
-        .map(([indicator, count]) => ({
-          indicator,
-          indicatorName: indicatorMap[indicator]?.name || indicator,
-          count,
-        }))
-        .sort((a, b) => b.count - a.count)[0] || null;
-    const mostCommonRefinement =
-      Object.entries(refinementCounts)
-        .map(([indicator, count]) => ({
-          indicator,
-          indicatorName: indicatorMap[indicator]?.name || indicator,
-          count,
-        }))
-        .sort((a, b) => b.count - a.count)[0] || null;
+    // Calculate priorities
+    // For now, using placeholder logic - these can be refined based on business rules
+    const walkthroughsDue = teachers.filter(t => t.status === "active").length; // Assume each active teacher needs a walkthrough
+    
+    // Count reflections that need review (recently created reflections)
+    const recentReflections = teacherIds.length > 0 
+      ? await ctx.db
+          .query("reflections")
+          .filter((q) => 
+            q.and(
+              q.gte(q.field("createdAt"), Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+              q.or(...teacherIds.map((id) => q.eq(q.field("teacherId"), id)))
+            )
+          )
+          .collect()
+      : [];
+    const reflectionsToReview = recentReflections.length;
+    
+    // Teachers needing support (those with status "needs_details" or no recent activity)
+    const teachersNeedingSupport = teachers.filter(t => 
+      t.status === "needs_details" || t.status === "pending"
+    ).length;
 
     return {
       totalTeachers,
       activeTeachers,
       totalWalkthroughs,
-      feedbackTrend,
-      totalReflections,
-      mostCommonReinforcement,
-      mostCommonRefinement,
+      totalFeedbackGenerated,
+      feedbackTrend: {
+        thisMonth: thisMonthFeedback,
+        lastMonth: lastMonthFeedback,
+        percentageChange: Math.round(percentageChange),
+      },
       priorities: {
         walkthroughsDue,
         reflectionsToReview,
         teachersNeedingSupport,
       },
-      recentActivity: sortedRecentActivity,
+      recentActivity,
     };
   },
 });
 
-/**
- * Get detailed teacher analytics for a specific coach.
- * NEW: Uses coach-based relationships instead of organization queries.
- */
 export const getTeacherAnalytics = query({
   args: {},
   returns: v.array(
     v.object({
       teacherId: v.id("teachers"),
       teacherName: v.string(),
+              status: v.union(v.literal("active"), v.literal("pending"), v.literal("needs_details")),
       walkthroughCount: v.number(),
       feedbackCount: v.number(),
       lastActivity: v.optional(v.number()),
-      status: v.union(
-        v.literal("active"),
-        v.literal("pending"),
-        v.literal("needs_details"),
-      ),
-      pgpProgress: v.object({
         trend: v.union(
           v.literal("Needs Support"),
           v.literal("Engaged"),
           v.literal("Stable"),
         ),
-      }),
     }),
   ),
   handler: async (ctx) => {
     const user = await getCurrentUserOrThrow(ctx);
-
     if (user.role !== "coach") {
       throw new Error("Only coaches can view teacher analytics");
     }
 
-    // NEW: Get teachers assigned to this specific coach
     const teachers = await ctx.db
       .query("teachers")
       .withIndex("by_coach", (q) => q.eq("coachId", user._id))
@@ -421,85 +243,45 @@ export const getTeacherAnalytics = query({
         .withIndex("by_teacher", (q) => q.eq("teacherId", teacher._id))
         .collect();
 
-      // Get feedback count for this teacher's walkthroughs
-      let feedbackCount = 0;
-      let lastActivity = undefined;
-
-      if (walkthroughs.length > 0) {
-        const walkthroughIds = walkthroughs.map((w) => w._id);
-
-        // Get all feedback for this teacher's walkthroughs
-        const allWalkthroughEntries = await ctx.db
-          .query("walkthroughEntries")
-          .collect();
-
-        const teacherFeedback = allWalkthroughEntries.filter(
-          (entry) =>
-            walkthroughIds.includes(entry.walkthroughId) && entry.aiFeedback,
-        );
-
-        feedbackCount = teacherFeedback.length;
+      const walkthroughCount = walkthroughs.length;
+      const feedbackCount = walkthroughs.length; // Each walkthrough includes feedback
 
         // Find most recent activity (latest walkthrough)
-        const latestWalkthrough = walkthroughs.sort(
-          (a, b) => b.createdAt - a.createdAt,
-        )[0];
-        lastActivity = latestWalkthrough?.createdAt;
-      }
+      const lastActivity = walkthroughs.length > 0
+        ? walkthroughs.sort((a, b) => b.createdAt - a.createdAt)[0].createdAt
+        : undefined;
 
-      // --- PGP Progress Trend Calculation ---
-      // 1. Get last 5 completed walkthroughs (status === 'completed')
-      const completedWalkthroughs = walkthroughs
-        .filter((w) => w.status === "completed")
+      // PGP Progress Trend Calculation
+      const recentWalkthroughs = walkthroughs
         .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
         .slice(0, 5);
 
-      // 2. Check for repeated refinementIndicator
       let trend: "Needs Support" | "Engaged" | "Stable" = "Stable";
-      if (completedWalkthroughs.length >= 3) {
-        const refinementCounts = new Map<string, number>();
-        for (const wt of completedWalkthroughs) {
-          if (wt.refinementIndicator) {
-            const count = refinementCounts.get(wt.refinementIndicator) || 0;
-            refinementCounts.set(wt.refinementIndicator, count + 1);
-          }
-        }
-        for (const count of refinementCounts.values()) {
-          if (count >= 3) {
-            trend = "Needs Support";
-            break;
-          }
-        }
-      }
-      // 3. If not Needs Support, check for engagement (reflections)
-      if (trend !== "Needs Support") {
-        // Fetch reflections for these walkthroughs
-        const reflectionPromises = completedWalkthroughs.map((wt) =>
-          ctx.db
-            .query("reflections")
-            .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", wt._id))
-            .first(),
+      if (recentWalkthroughs.length >= 3) {
+        const refinementIndicators = recentWalkthroughs.map(w => w.refinementIndicator);
+        const repeatedIndicator = refinementIndicators.find((indicator, index) =>
+          refinementIndicators.indexOf(indicator) !== index
         );
-        const reflections = await Promise.all(reflectionPromises);
-        const reflectionCount = reflections.filter(Boolean).length;
-        if (reflectionCount >= 3) {
+        
+        if (repeatedIndicator) {
+          trend = "Needs Support";
+        } else {
           trend = "Engaged";
         }
       }
-      // 4. Otherwise, Stable
 
       result.push({
         teacherId: teacher._id,
         teacherName: teacher.name,
-        walkthroughCount: walkthroughs.length,
+        status: teacher.status,
+        walkthroughCount,
         feedbackCount,
         lastActivity,
-        status: teacher.status,
-        pgpProgress: { trend },
+        trend,
       });
     }
 
-    return result.sort((a, b) => b.walkthroughCount - a.walkthroughCount);
+    return result;
   },
 });
 
@@ -521,69 +303,44 @@ export const getMyTeacherAnalytics = query({
   }),
   handler: async (ctx) => {
     const user = await getCurrentUser(ctx);
-
-    if (!user || user.role !== "teacher") {
-      return {
-        totalWalkthroughs: 0,
-        totalFeedbackReceived: 0,
-        recentWalkthroughs: [],
-      };
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+    if (user.role !== "teacher") {
+      throw new Error("Only teachers can view their analytics");
     }
 
-    // Get teacher record for this user
+    // Get teacher record
     const teacher = await ctx.db
       .query("teachers")
       .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .first();
+      .unique();
 
     if (!teacher) {
-      return {
-        totalWalkthroughs: 0,
-        totalFeedbackReceived: 0,
-        recentWalkthroughs: [],
-      };
+      throw new Error("Teacher not found");
     }
 
-    // Get walkthroughs for this teacher
+    // Get all walkthroughs for this teacher
     const walkthroughs = await ctx.db
       .query("walkthroughs")
       .withIndex("by_teacher", (q) => q.eq("teacherId", teacher._id))
       .collect();
 
-    // Get feedback count
-    let totalFeedbackReceived = 0;
-    const recentWalkthroughs = [];
+    const totalWalkthroughs = walkthroughs.length;
+    const totalFeedbackReceived = walkthroughs.length; // Each walkthrough includes feedback
 
-    const sortedWalkthroughs = walkthroughs
+    // Get recent walkthroughs (last 10)
+    const recentWalkthroughs = walkthroughs
       .sort((a, b) => b.createdAt - a.createdAt)
-      .slice(0, 10);
-
-    for (const walkthrough of sortedWalkthroughs) {
-      // Check if this walkthrough has AI feedback
-      const walkthroughEntries = await ctx.db
-        .query("walkthroughEntries")
-        .withIndex("by_walkthrough", (q) =>
-          q.eq("walkthroughId", walkthrough._id),
-        )
-        .collect();
-
-      const hasAiFeedback = walkthroughEntries.some(
-        (entry) => entry.aiFeedback,
-      );
-
-      if (hasAiFeedback) {
-        totalFeedbackReceived++;
-      }
-
-      recentWalkthroughs.push({
+      .slice(0, 10)
+      .map(walkthrough => ({
         _id: walkthrough._id,
         createdAt: walkthrough.createdAt,
-        hasAiFeedback: hasAiFeedback,
-      });
-    }
+        hasAiFeedback: true, // All walkthroughs now include feedback
+      }));
 
     return {
-      totalWalkthroughs: walkthroughs.length,
+      totalWalkthroughs,
       totalFeedbackReceived,
       recentWalkthroughs,
     };
@@ -592,43 +349,36 @@ export const getMyTeacherAnalytics = query({
 
 /**
  * Get comprehensive analytics for the current coach.
- * Returns all data needed by the analytics dashboard frontend.
  */
 export const getComprehensiveCoachAnalytics = query({
   args: {},
   returns: v.object({
-    // Overview metrics
     totalTeachers: v.number(),
     activeTeachers: v.number(),
     totalWalkthroughs: v.number(),
-    thisMonthWalkthroughs: v.number(),
     completedWalkthroughs: v.number(),
-    draftWalkthroughs: v.number(),
-    totalAiFeedbackGenerated: v.number(),
-    totalReflections: v.number(), // NEW
-
-    // Feedback metrics
+    thisMonthWalkthroughs: v.number(),
     totalFeedbackInteractions: v.number(),
+    totalReflections: v.number(),
+    averageReflectionsPerWalkthrough: v.number(),
+    totalAiFeedbackGenerated: v.number(),
     teachersWithRecentActivity: v.number(),
     reinforcementCount: v.number(),
     refinementCount: v.number(),
-    // Quick insights for basic plan
     topStrengths: v.array(
       v.object({
         indicator: v.string(),
         indicatorName: v.string(),
         count: v.number(),
-      }),
+      })
     ),
     topGrowthAreas: v.array(
       v.object({
         indicator: v.string(),
         indicatorName: v.string(),
         count: v.number(),
-      }),
+      })
     ),
-
-    // Pro analytics features
     domainPerformance: v.array(
       v.object({
         domain: v.string(),
@@ -636,7 +386,7 @@ export const getComprehensiveCoachAnalytics = query({
         refinementCount: v.number(),
         totalCount: v.number(),
         strengthPercentage: v.number(),
-      }),
+      })
     ),
     teacherProgressMatrix: v.array(
       v.object({
@@ -648,14 +398,14 @@ export const getComprehensiveCoachAnalytics = query({
             status: v.union(
               v.literal("strength"),
               v.literal("developing"),
-              v.literal("needs_focus"),
+              v.literal("needs_focus")
             ),
             reinforcementCount: v.number(),
             refinementCount: v.number(),
-          }),
+          })
         ),
         lastObservation: v.optional(v.number()),
-      }),
+      })
     ),
     coachingInsights: v.array(
       v.object({
@@ -665,31 +415,26 @@ export const getComprehensiveCoachAnalytics = query({
         priority: v.union(
           v.literal("high"),
           v.literal("medium"),
-          v.literal("low"),
+          v.literal("low")
         ),
-      }),
+      })
     ),
-
-    // Teacher progress data
     teacherProgress: v.array(
       v.object({
         teacherId: v.string(),
         teacherName: v.string(),
         totalWalkthroughs: v.number(),
         completedWalkthroughs: v.number(),
-        draftWalkthroughs: v.number(),
         lastObservation: v.optional(v.number()),
         completionRate: v.number(),
         recentFeedbackCount: v.number(),
-      }),
+      })
     ),
-
-    // Monthly trends
     monthlyTrends: v.array(
       v.object({
         month: v.string(),
         completed: v.number(),
-        draft: v.number(),
+  
         total: v.number(),
       }),
     ),
@@ -711,20 +456,17 @@ export const getComprehensiveCoachAnalytics = query({
     const activeTeachers = teachers.filter((t) => t.status === "active").length;
 
     // Get all walkthroughs for coach's teachers
-    const allWalkthroughs = await ctx.db.query("walkthroughs").collect();
+    const coachWalkthroughs = teacherIds.length > 0 
+      ? await ctx.db
+          .query("walkthroughs")
+          .filter((q) =>
+            q.or(...teacherIds.map((id) => q.eq(q.field("teacherId"), id))),
+          )
+          .collect()
+      : [];
 
-    const coachWalkthroughs = allWalkthroughs.filter((w) =>
-      teacherIds.includes(w.teacherId),
-    );
-
-    // Basic walkthrough metrics
     const totalWalkthroughs = coachWalkthroughs.length;
-    const completedWalkthroughs = coachWalkthroughs.filter(
-      (w) => w.status === "completed",
-    ).length;
-    const draftWalkthroughs = coachWalkthroughs.filter(
-      (w) => w.status === "draft",
-    ).length;
+    const completedWalkthroughs = coachWalkthroughs.length; // All are completed now
 
     // This month's walkthroughs
     const now = new Date();
@@ -737,384 +479,292 @@ export const getComprehensiveCoachAnalytics = query({
       );
     }).length;
 
-    // Get all AI feedback for coach's walkthroughs
-    const allWalkthroughEntries = await ctx.db
-      .query("walkthroughEntries")
-      .collect();
+    const totalFeedbackInteractions = coachWalkthroughs.length; // Each walkthrough includes feedback
+    const totalAiFeedbackGenerated = coachWalkthroughs.length; // Each walkthrough includes AI feedback
 
-    const coachFeedback = allWalkthroughEntries.filter(
-      (entry) =>
-        coachWalkthroughs.some((w) => w._id === entry.walkthroughId) &&
-        entry.aiFeedback,
-    );
-
-    const totalFeedbackInteractions = coachFeedback.length;
-    const totalAiFeedbackGenerated = totalFeedbackInteractions;
-
-    // Count total reflections for all coach's walkthroughs
+    // Count reflections
     const allReflections = await ctx.db.query("reflections").collect();
-    const totalReflections = allReflections.filter((reflection) =>
-      coachWalkthroughs.some((w) => w._id === reflection.walkthroughId),
-    ).length;
+    const coachReflections = allReflections.filter((reflection) =>
+      coachWalkthroughs.some((w) => w._id === reflection.walkthroughId)
+    );
+    const totalReflections = coachReflections.length;
+    const averageReflectionsPerWalkthrough = totalWalkthroughs > 0 
+      ? totalReflections / totalWalkthroughs 
+      : 0;
 
-    // Calculate teachers with recent activity (last 30 days)
-    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    // Teachers with recent activity (last 30 days)
+    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
     const teachersWithRecentActivity = teachers.filter((teacher) => {
-      const teacherWalkthroughs = coachWalkthroughs.filter(
-        (w) => w.teacherId === teacher._id,
-      );
-      return teacherWalkthroughs.some((w) => w.createdAt > thirtyDaysAgo);
+      const teacherWalkthroughs = coachWalkthroughs.filter(w => w.teacherId === teacher._id);
+      return teacherWalkthroughs.some(w => w.walkthroughDate >= thirtyDaysAgo);
     }).length;
 
-    // Get all indicators to map codes to names and domains
+    // Get all indicators for name lookup
     const allIndicators = await ctx.db.query("rubricIndicators").collect();
-    const indicatorMap = allIndicators.reduce(
-      (map, ind) => {
-        map[ind.indicator_code] = {
-          name: ind.indicator_name,
-          domain: ind.domain,
-        };
-        return map;
-      },
-      {} as Record<string, { name: string; domain: string }>,
+    const indicatorMap = new Map(
+      allIndicators.map(ind => [ind.indicator_code, ind.indicator_name])
     );
 
-    // Indicator analysis
+    // Count reinforcement and refinement indicators
     const reinforcementCounts: Record<string, number> = {};
     const refinementCounts: Record<string, number> = {};
     let totalReinforcementCount = 0;
     let totalRefinementCount = 0;
-    coachWalkthroughs.forEach((w) => {
-      if (w.reinforcementIndicator) {
-        reinforcementCounts[w.reinforcementIndicator] =
-          (reinforcementCounts[w.reinforcementIndicator] || 0) + 1;
+
+    for (const walkthrough of coachWalkthroughs) {
+      if (walkthrough.reinforcementIndicator) {
+        reinforcementCounts[walkthrough.reinforcementIndicator] = 
+          (reinforcementCounts[walkthrough.reinforcementIndicator] || 0) + 1;
         totalReinforcementCount++;
       }
-      if (w.refinementIndicator) {
-        refinementCounts[w.refinementIndicator] =
-          (refinementCounts[w.refinementIndicator] || 0) + 1;
+      if (walkthrough.refinementIndicator) {
+        refinementCounts[walkthrough.refinementIndicator] = 
+          (refinementCounts[walkthrough.refinementIndicator] || 0) + 1;
         totalRefinementCount++;
       }
-    });
-    const mostCommonReinforcement =
-      Object.entries(reinforcementCounts)
-        .map(([indicator, count]) => ({
-          indicator,
-          indicatorName: indicatorMap[indicator]?.name || indicator,
-          count,
-        }))
-        .sort((a, b) => b.count - a.count)[0] || null;
-    const mostCommonRefinement =
-      Object.entries(refinementCounts)
-        .map(([indicator, count]) => ({
-          indicator,
-          indicatorName: indicatorMap[indicator]?.name || indicator,
-          count,
-        }))
-        .sort((a, b) => b.count - a.count)[0] || null;
+    }
 
-    // Quick insights for basic plan
+    // Get top strengths (reinforcement indicators)
     const topStrengths = Object.entries(reinforcementCounts)
       .map(([indicator, count]) => ({
         indicator,
-        indicatorName: indicatorMap[indicator]?.name || indicator,
+        indicatorName: indicatorMap.get(indicator) || indicator,
         count,
       }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 3);
+      .slice(0, 5);
 
+    // Get top growth areas (refinement indicators)
     const topGrowthAreas = Object.entries(refinementCounts)
       .map(([indicator, count]) => ({
         indicator,
-        indicatorName: indicatorMap[indicator]?.name || indicator,
+        indicatorName: indicatorMap.get(indicator) || indicator,
         count,
       }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 3);
+      .slice(0, 5);
 
     // Domain performance analysis
-    const domainCounts: Record<
-      string,
-      { reinforcement: number; refinement: number }
-    > = {};
-
-    // Initialize domain counts (use ALL CAPS to match database values)
-    const domains = [
-      "INSTRUCTION",
-      "PLANNING",
-      "ENVIRONMENT",
-      "PROFESSIONALISM",
-    ];
-    domains.forEach((domain) => {
-      domainCounts[domain] = { reinforcement: 0, refinement: 0 };
-    });
-
-    // Count by domain
-    coachWalkthroughs.forEach((w) => {
-      if (w.reinforcementIndicator && indicatorMap[w.reinforcementIndicator]) {
-        const domain = indicatorMap[w.reinforcementIndicator].domain;
-        domainCounts[domain].reinforcement++;
+    const domainCounts: Record<string, { reinforcement: number; refinement: number }> = {};
+    
+    for (const indicator of allIndicators) {
+      if (!domainCounts[indicator.domain]) {
+        domainCounts[indicator.domain] = { reinforcement: 0, refinement: 0 };
       }
-      if (w.refinementIndicator && indicatorMap[w.refinementIndicator]) {
-        const domain = indicatorMap[w.refinementIndicator].domain;
-        domainCounts[domain].refinement++;
-      }
-    });
+      
+      const reinforcementCount = reinforcementCounts[indicator.indicator_code] || 0;
+      const refinementCount = refinementCounts[indicator.indicator_code] || 0;
+      
+      domainCounts[indicator.domain].reinforcement += reinforcementCount;
+      domainCounts[indicator.domain].refinement += refinementCount;
+    }
 
-    const domainPerformance = domains.map((domain) => {
-      const reinforcementCount = domainCounts[domain].reinforcement;
-      const refinementCount = domainCounts[domain].refinement;
-      const totalCount = reinforcementCount + refinementCount;
-      const strengthPercentage =
-        totalCount > 0
-          ? Math.round((reinforcementCount / totalCount) * 100)
-          : 0;
-
+    const domainPerformance = Object.entries(domainCounts).map(([domain, counts]) => {
+      const totalCount = counts.reinforcement + counts.refinement;
+      const strengthPercentage = totalCount > 0 ? (counts.reinforcement / totalCount) * 100 : 0;
+      
       return {
         domain,
-        reinforcementCount,
-        refinementCount,
+        reinforcementCount: counts.reinforcement,
+        refinementCount: counts.refinement,
         totalCount,
-        strengthPercentage,
+        strengthPercentage: Math.round(strengthPercentage),
       };
     });
 
-    // Teacher progress matrix for heatmap
+    // Teacher progress matrix
     const teacherProgressMatrix = teachers.map((teacher) => {
-      const teacherWalkthroughs = coachWalkthroughs.filter(
-        (w) => w.teacherId === teacher._id,
-      );
-      const lastObservation =
-        teacherWalkthroughs.length > 0
-          ? Math.max(...teacherWalkthroughs.map((w) => w.createdAt))
-          : undefined;
-
-      // Calculate domain scores for this teacher
-      const teacherDomainCounts: Record<
-        string,
-        { reinforcement: number; refinement: number }
-      > = {};
-      domains.forEach((domain) => {
-        teacherDomainCounts[domain] = { reinforcement: 0, refinement: 0 };
-      });
-
-      teacherWalkthroughs.forEach((w) => {
-        if (
-          w.reinforcementIndicator &&
-          indicatorMap[w.reinforcementIndicator]
-        ) {
-          const domain = indicatorMap[w.reinforcementIndicator].domain;
-          teacherDomainCounts[domain].reinforcement++;
+      const teacherWalkthroughs = coachWalkthroughs.filter(w => w.teacherId === teacher._id);
+      const lastWalkthrough = teacherWalkthroughs.sort((a, b) => b.walkthroughDate - a.walkthroughDate)[0];
+      
+      // Get teacher's indicator counts by domain
+      const teacherDomainCounts: Record<string, { reinforcement: number; refinement: number }> = {};
+      
+      for (const walkthrough of teacherWalkthroughs) {
+        const reinforcementIndicator = allIndicators.find(ind => ind.indicator_code === walkthrough.reinforcementIndicator);
+        const refinementIndicator = allIndicators.find(ind => ind.indicator_code === walkthrough.refinementIndicator);
+        
+        if (reinforcementIndicator) {
+          if (!teacherDomainCounts[reinforcementIndicator.domain]) {
+            teacherDomainCounts[reinforcementIndicator.domain] = { reinforcement: 0, refinement: 0 };
+          }
+          teacherDomainCounts[reinforcementIndicator.domain].reinforcement++;
         }
-        if (w.refinementIndicator && indicatorMap[w.refinementIndicator]) {
-          const domain = indicatorMap[w.refinementIndicator].domain;
-          teacherDomainCounts[domain].refinement++;
+        
+        if (refinementIndicator) {
+          if (!teacherDomainCounts[refinementIndicator.domain]) {
+            teacherDomainCounts[refinementIndicator.domain] = { reinforcement: 0, refinement: 0 };
+          }
+          teacherDomainCounts[refinementIndicator.domain].refinement++;
         }
-      });
-
-      const domainScores = domains.map((domain) => {
-        const reinforcementCount = teacherDomainCounts[domain].reinforcement;
-        const refinementCount = teacherDomainCounts[domain].refinement;
-        const total = reinforcementCount + refinementCount;
-
+      }
+      
+      const domainScores = Object.entries(teacherDomainCounts).map(([domain, counts]) => {
+        const total = counts.reinforcement + counts.refinement;
+        const reinforcementRatio = total > 0 ? counts.reinforcement / total : 0;
+        
         let status: "strength" | "developing" | "needs_focus";
-        if (total === 0) {
-          status = "developing"; // No data yet
-        } else if (reinforcementCount > refinementCount) {
+        if (reinforcementRatio >= 0.7) {
           status = "strength";
-        } else if (reinforcementCount === refinementCount) {
+        } else if (reinforcementRatio >= 0.4) {
           status = "developing";
         } else {
           status = "needs_focus";
         }
-
+        
         return {
           domain,
           status,
-          reinforcementCount,
-          refinementCount,
+          reinforcementCount: counts.reinforcement,
+          refinementCount: counts.refinement,
         };
       });
-
+      
       return {
         teacherId: teacher._id,
         teacherName: teacher.name,
         domainScores,
-        lastObservation,
+        lastObservation: lastWalkthrough?.walkthroughDate,
       };
     });
 
-    // Coaching insights
+    // Generate coaching insights
     const coachingInsights = [];
-
-    // Identify team-wide domain weaknesses
-    const weakDomains = domainPerformance
-      .filter((dp) => dp.totalCount > 0 && dp.strengthPercentage < 40)
-      .sort((a, b) => a.strengthPercentage - b.strengthPercentage);
-
-    if (weakDomains.length > 0) {
+    
+    // High-priority insight: Teachers needing support
+    const teachersNeedingSupport = teachers.filter(t => t.status === "needs_details" || t.status === "pending").length;
+    if (teachersNeedingSupport > 0) {
       coachingInsights.push({
-        type: "team_weakness",
-        title: `Team Focus Area: ${weakDomains[0].domain}`,
-        description: `Only ${weakDomains[0].strengthPercentage}% of feedback in ${weakDomains[0].domain} shows strengths. Consider team PD.`,
+        type: "teacher_support",
+        title: "Teachers Need Onboarding Support",
+        description: `${teachersNeedingSupport} teacher${teachersNeedingSupport > 1 ? 's' : ''} need${teachersNeedingSupport === 1 ? 's' : ''} help completing their profile setup.`,
         priority: "high" as const,
       });
     }
-
-    // Identify teachers needing attention
-    const inactiveTeachers = teacherProgressMatrix.filter(
-      (tp) =>
-        !tp.lastObservation ||
-        tp.lastObservation < Date.now() - 21 * 24 * 60 * 60 * 1000,
-    );
-
-    if (inactiveTeachers.length > 0) {
+    
+    // Medium-priority insight: Most common growth area
+    if (topGrowthAreas.length > 0) {
+      const topGrowthArea = topGrowthAreas[0];
       coachingInsights.push({
-        type: "inactive_teachers",
-        title: "Schedule Follow-up Observations",
-        description: `${inactiveTeachers.length} teacher${inactiveTeachers.length > 1 ? "s have" : " has"} not been observed recently.`,
+        type: "growth_focus",
+        title: "Common Growth Area Identified",
+        description: `${topGrowthArea.indicatorName} appears in ${topGrowthArea.count} walkthrough${topGrowthArea.count > 1 ? 's' : ''} as a refinement focus.`,
         priority: "medium" as const,
       });
     }
-
-    // Success pattern analysis
-    const strongDomains = domainPerformance
-      .filter((dp) => dp.totalCount > 0 && dp.strengthPercentage > 70)
-      .sort((a, b) => b.strengthPercentage - a.strengthPercentage);
-
-    if (strongDomains.length > 0) {
+    
+    // Low-priority insight: Team strength
+    if (topStrengths.length > 0) {
+      const topStrength = topStrengths[0];
       coachingInsights.push({
         type: "team_strength",
-        title: `Team Strength: ${strongDomains[0].domain}`,
-        description: `${strongDomains[0].strengthPercentage}% strength rate. Consider peer mentoring opportunities.`,
+        title: "Team Strength Highlighted",
+        description: `Your team shows consistent strength in ${topStrength.indicatorName}, reinforced ${topStrength.count} time${topStrength.count > 1 ? 's' : ''}.`,
         priority: "low" as const,
       });
     }
 
     // Teacher progress data
-    const teacherProgress = [];
-    for (const teacher of teachers) {
-      const teacherWalkthroughs = coachWalkthroughs.filter(
-        (w) => w.teacherId === teacher._id,
-      );
-      const teacherCompleted = teacherWalkthroughs.filter(
-        (w) => w.status === "completed",
-      ).length;
-      const teacherDraft = teacherWalkthroughs.filter(
-        (w) => w.status === "draft",
-      ).length;
-      const teacherCompletionRate =
-        teacherWalkthroughs.length > 0
-          ? Math.round((teacherCompleted / teacherWalkthroughs.length) * 100)
-          : 0;
-
-      const lastObservation =
-        teacherWalkthroughs.length > 0
-          ? Math.max(...teacherWalkthroughs.map((w) => w.createdAt))
-          : undefined;
-
-      const teacherFeedbackCount = coachFeedback.filter((entry) =>
-        teacherWalkthroughs.some((w) => w._id === entry.walkthroughId),
-      ).length;
-
-      teacherProgress.push({
+    const teacherProgress = teachers.map((teacher) => {
+      const teacherWalkthroughs = coachWalkthroughs.filter(w => w.teacherId === teacher._id);
+      const lastWalkthrough = teacherWalkthroughs.sort((a, b) => b.walkthroughDate - a.walkthroughDate)[0];
+      
+      // Recent feedback count (last 30 days)
+      const recentFeedback = teacherWalkthroughs.filter(w => w.walkthroughDate >= thirtyDaysAgo);
+      
+      return {
         teacherId: teacher._id,
         teacherName: teacher.name,
         totalWalkthroughs: teacherWalkthroughs.length,
-        completedWalkthroughs: teacherCompleted,
-        draftWalkthroughs: teacherDraft,
-        lastObservation,
-        completionRate: teacherCompletionRate,
-        recentFeedbackCount: teacherFeedbackCount,
-      });
-    }
+        completedWalkthroughs: teacherWalkthroughs.length,
+
+        lastObservation: lastWalkthrough?.walkthroughDate,
+        completionRate: 100, // All walkthroughs are completed
+        recentFeedbackCount: recentFeedback.length,
+      };
+    });
 
     // Monthly trends (last 6 months)
     const monthlyTrends = [];
     for (let i = 5; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-      const month = date.toLocaleDateString("en-US", {
-        month: "short",
-        year: "2-digit",
-      });
-      const monthNumber = date.getMonth();
-      const year = date.getFullYear();
+      const targetDate = new Date();
+      targetDate.setMonth(targetDate.getMonth() - i);
+      const month = targetDate.getMonth();
+      const year = targetDate.getFullYear();
 
       const monthWalkthroughs = coachWalkthroughs.filter((w) => {
         const walkDate = new Date(w.walkthroughDate);
-        return (
-          walkDate.getMonth() === monthNumber && walkDate.getFullYear() === year
-        );
+        return walkDate.getMonth() === month && walkDate.getFullYear() === year;
       });
 
-      const completed = monthWalkthroughs.filter(
-        (w) => w.status === "completed",
-      ).length;
-      const draft = monthWalkthroughs.filter(
-        (w) => w.status === "draft",
-      ).length;
-
       monthlyTrends.push({
-        month,
-        completed,
-        draft,
-        total: completed + draft,
+        month: targetDate.toLocaleDateString("en-US", { month: "short" }),
+        completed: monthWalkthroughs.length,
+
+        total: monthWalkthroughs.length,
       });
     }
 
     return {
-      // Overview metrics
       totalTeachers,
       activeTeachers,
       totalWalkthroughs,
-      thisMonthWalkthroughs,
       completedWalkthroughs,
-      draftWalkthroughs,
-      totalAiFeedbackGenerated,
-      totalReflections, // NEW
-
-      // Feedback metrics
+      thisMonthWalkthroughs,
       totalFeedbackInteractions,
+      totalReflections,
+      averageReflectionsPerWalkthrough: Math.round(averageReflectionsPerWalkthrough * 100) / 100,
+      totalAiFeedbackGenerated,
       teachersWithRecentActivity,
       reinforcementCount: totalReinforcementCount,
       refinementCount: totalRefinementCount,
-
-      // Quick insights for basic plan
       topStrengths,
       topGrowthAreas,
-
-      // Pro analytics features
       domainPerformance,
       teacherProgressMatrix,
       coachingInsights,
-
-      // Teacher progress data
       teacherProgress,
-
-      // Monthly trends
       monthlyTrends,
     };
   },
 });
 
 /**
- * Get comprehensive PGP data for the current teacher.
- * Returns all data needed by the teacher's PGP dashboard.
+ * Get PGP data for the current teacher's growth journal
  */
-export const getMyPgpData = query({
-  args: {},
+/**
+ * Get PGP data for a specific teacher (for coaches to view)
+ */
+export const getTeacherPgpData = query({
+  args: {
+    teacherId: v.id("teachers"),
+  },
   returns: v.object({
     pgpGoal: v.object({
       title: v.string(),
       description: v.string(),
       progress: v.number(),
       trend: v.union(
-        v.literal("Needs Support"),
         v.literal("Engaged"),
+        v.literal("Needs Support"),
         v.literal("Stable"),
       ),
-      targetDate: v.optional(v.string()),
+      targetDate: v.optional(v.number()),
+    }),
+    refinementFocus: v.object({
+      currentIndicator: v.string(),
+      description: v.string(),
+      progress: v.object({
+        current: v.number(),
+        target: v.number(),
+        trend: v.string(),
+      }),
+      nextSteps: v.array(v.string()),
+    }),
+    reflectionPrompt: v.object({
+      question: v.string(),
+      lastAnswered: v.optional(v.number()),
+      isOverdue: v.boolean(),
     }),
     recentWalkthroughs: v.array(
       v.object({
@@ -1126,745 +776,248 @@ export const getMyPgpData = query({
         status: v.string(),
       }),
     ),
-    reflectionPrompt: v.object({
-      question: v.string(),
-      lastAnswered: v.optional(v.number()),
-      isOverdue: v.optional(v.boolean()),
-    }),
-    refinementFocus: v.object({
-      currentIndicator: v.string(),
-      description: v.string(),
-      progress: v.number(),
-      nextSteps: v.array(v.string()),
-      aiInsights: v.optional(v.object({
-        trendAnalysis: v.string(),
-        strategicRecommendations: v.array(v.string()),
-        progressPrediction: v.string(),
-      })),
-    }),
-    strengths: v.array(
-      v.object({
-        indicator: v.string(),
-        name: v.string(),
-        frequency: v.number(),
-        lastObserved: v.number(),
-      }),
-    ),
   }),
-  handler: async (ctx) => {
+  handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
-
-    if (!user || user.role !== "teacher") {
-      // Return default data for non-teachers
-      return {
-        pgpGoal: {
-          title: "Set Your Professional Growth Goal",
-          description:
-            "Define a specific, measurable goal for your professional development this year.",
-          progress: 0,
-          trend: "Stable" as const,
-          targetDate: undefined,
-        },
-        recentWalkthroughs: [],
-        reflectionPrompt: {
-          question:
-            "How did your recent walkthrough feedback influence your lesson planning this week?",
-          lastAnswered: undefined,
-          isOverdue: false,
-        },
-        refinementFocus: {
-          currentIndicator: "No focus area set",
-          description:
-            "Complete your first walkthrough to identify growth areas.",
-          progress: 0,
-          nextSteps: [
-            "Schedule your first walkthrough",
-            "Review feedback with your coach",
-          ],
-        },
-        strengths: [],
-      };
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+    if (user.role !== "coach") {
+      throw new Error("Only coaches can view teacher PGP data");
     }
 
-    // Get teacher record for this user
-    const teacher = await ctx.db
-      .query("teachers")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .first();
-
+    // Get teacher record
+    const teacher = await ctx.db.get(args.teacherId);
     if (!teacher) {
-      return {
-        pgpGoal: {
-          title: "Set Your Professional Growth Goal",
-          description:
-            "Define a specific, measurable goal for your professional development this year.",
-          progress: 0,
-          trend: "Stable" as const,
-          targetDate: undefined,
-        },
-        recentWalkthroughs: [],
-        reflectionPrompt: {
-          question:
-            "How did your recent walkthrough feedback influence your lesson planning this week?",
-          lastAnswered: undefined,
-          isOverdue: false,
-        },
-        refinementFocus: {
-          currentIndicator: "No focus area set",
-          description:
-            "Complete your first walkthrough to identify growth areas.",
-          progress: 0,
-          nextSteps: [
-            "Schedule your first walkthrough",
-            "Review feedback with your coach",
-          ],
-        },
-        strengths: [],
-      };
+      throw new Error("Teacher not found");
     }
+
+    // Get teacher's PGP goal (stored on teacher record)
+    const pgpGoal = teacher.pgpGoal;
 
     // Get walkthroughs for this teacher
     const walkthroughs = await ctx.db
       .query("walkthroughs")
       .withIndex("by_teacher", (q) => q.eq("teacherId", teacher._id))
+      .order("desc")
       .collect();
 
-    // Get recent walkthroughs (last 5)
-    const recentWalkthroughs = [];
-    const sortedWalkthroughs = walkthroughs
-      .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
-      .slice(0, 5);
+    // Get reflections
+    const allReflections = await ctx.db.query("reflections").collect();
+    const teacherReflections = allReflections.filter(r => 
+      walkthroughs.some(w => w._id === r.walkthroughId)
+    );
 
-    for (const walkthrough of sortedWalkthroughs) {
-      // Check if this walkthrough has a reflection
-      const reflection = await ctx.db
-        .query("reflections")
-        .withIndex("by_walkthrough", (q) =>
-          q.eq("walkthroughId", walkthrough._id),
-        )
-        .first();
-
-      const indicators = [];
-      if (walkthrough.reinforcementIndicator)
-        indicators.push(walkthrough.reinforcementIndicator);
-      if (walkthrough.refinementIndicator)
-        indicators.push(walkthrough.refinementIndicator);
-
-      recentWalkthroughs.push({
-        id: walkthrough._id,
-        date: walkthrough.walkthroughDate,
-        indicators,
-        hasReflection: !!reflection,
-        title: "Classroom Observation", // walkthroughs don't have title field
-        status: walkthrough.status,
-      });
-    }
-
-    // Calculate PGP progress trend (same logic as in getTeacherAnalytics)
-    let trend: "Needs Support" | "Engaged" | "Stable" = "Stable";
-    const completedWalkthroughs = walkthroughs
-      .filter((w) => w.status === "completed")
-      .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
-      .slice(0, 5);
-
-    if (completedWalkthroughs.length >= 3) {
-      const refinementCounts = new Map<string, number>();
-      for (const wt of completedWalkthroughs) {
-        if (wt.refinementIndicator) {
-          const count = refinementCounts.get(wt.refinementIndicator) || 0;
-          refinementCounts.set(wt.refinementIndicator, count + 1);
-        }
-      }
-      for (const count of refinementCounts.values()) {
-        if (count >= 3) {
-          trend = "Needs Support";
-          break;
-        }
-      }
-    }
-
-    if (trend !== "Needs Support") {
-      const reflectionPromises = completedWalkthroughs.map((wt) =>
-        ctx.db
-          .query("reflections")
-          .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", wt._id))
-          .first(),
+    // Calculate trend
+    const recentWalkthroughs = walkthroughs.slice(0, 5);
+    let trend: "Engaged" | "Needs Support" | "Stable" = "Stable";
+    if (recentWalkthroughs.length >= 3) {
+      const refinementIndicators = recentWalkthroughs.map(w => w.refinementIndicator);
+      const repeatedIndicator = refinementIndicators.find((indicator, index) =>
+        refinementIndicators.indexOf(indicator) !== index
       );
-      const reflections = await Promise.all(reflectionPromises);
-      const reflectionCount = reflections.filter(Boolean).length;
-      if (reflectionCount >= 3) {
+      
+      if (repeatedIndicator) {
+        trend = "Needs Support";
+      } else {
         trend = "Engaged";
       }
     }
 
-    // Calculate progress based on completed walkthroughs vs target
-    const targetWalkthroughs = 8; // Assume 8 walkthroughs per year as target
-    const progress = Math.min(
-      Math.round((completedWalkthroughs.length / targetWalkthroughs) * 100),
-      100,
-    );
+    // Get most recent refinement indicator for focus
+    const mostRecentRefinement = recentWalkthroughs[0]?.refinementIndicator || "";
 
-    // Get most recent reflection for reflection prompt
-    const allReflections = await ctx.db.query("reflections").collect();
-
-    const teacherReflections = allReflections.filter((reflection) =>
-      walkthroughs.some((w) => w._id === reflection.walkthroughId),
-    );
-
-    const lastReflection = teacherReflections.sort(
-      (a, b) => b.createdAt - a.createdAt,
-    )[0];
-
-    // Determine if reflection is overdue (more than 7 days since last walkthrough)
-    const lastWalkthrough = completedWalkthroughs[0];
-    const isOverdue = !!(
-      lastWalkthrough &&
-      !lastReflection &&
-      Date.now() - lastWalkthrough.walkthroughDate > 7 * 24 * 60 * 60 * 1000
-    );
-
-    // Get current refinement focus (most common refinement indicator in last 3 walkthroughs)
-    let currentIndicator = "No focus area identified";
-    let refinementDescription =
-      "Complete more walkthroughs to identify specific growth areas.";
-    let refinementProgress = 0;
-    let nextSteps = [
-      "Schedule your next walkthrough",
-      "Review feedback with your coach",
-    ];
-
-    if (completedWalkthroughs.length >= 2) {
-      const recentRefinements = completedWalkthroughs
-        .slice(0, 3)
-        .map((w) => w.refinementIndicator)
-        .filter(Boolean);
-
-      if (recentRefinements.length > 0) {
-        const refinementCounts = new Map<string, number>();
-        for (const indicator of recentRefinements) {
-          const count = refinementCounts.get(indicator!) || 0;
-          refinementCounts.set(indicator!, count + 1);
-        }
-
-        const mostCommon = Array.from(refinementCounts.entries()).sort(
-          (a, b) => b[1] - a[1],
-        )[0];
-
-        if (mostCommon) {
-          currentIndicator = mostCommon[0];
-          refinementProgress = Math.round((mostCommon[1] / 3) * 100);
-
-          // Generate description and next steps based on indicator
-          refinementDescription = `Focus on improving ${currentIndicator.toLowerCase()} based on recent feedback.`;
-          nextSteps = [
-            "Review specific feedback on this indicator",
-            "Plan targeted strategies for improvement",
-            "Practice new approaches in upcoming lessons",
-          ];
-        }
-      }
-    }
-
-    // Calculate strengths (most common reinforcement indicators)
-    const strengths = [];
-    const reinforcementCounts = new Map<string, number>();
-
-    for (const walkthrough of completedWalkthroughs) {
-      if (walkthrough.reinforcementIndicator) {
-        const count =
-          reinforcementCounts.get(walkthrough.reinforcementIndicator) || 0;
-        reinforcementCounts.set(walkthrough.reinforcementIndicator, count + 1);
-      }
-    }
-
-    const topStrengths = Array.from(reinforcementCounts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3);
-
-    for (const [indicator, frequency] of topStrengths) {
-      const lastObserved =
-        completedWalkthroughs
-          .filter((w) => w.reinforcementIndicator === indicator)
-          .sort((a, b) => b.walkthroughDate - a.walkthroughDate)[0]
-          ?.walkthroughDate || Date.now();
-
-      strengths.push({
-        indicator,
-        name: indicator, // In a real app, you'd map this to a human-readable name
-        frequency,
-        lastObserved,
-      });
-    }
+    // Map walkthroughs for timeline
+    const timelineWalkthroughs = walkthroughs.slice(0, 10).map(walkthrough => ({
+        id: walkthrough._id,
+      date: walkthrough.walkthroughDate,
+      indicators: [walkthrough.reinforcementIndicator, walkthrough.refinementIndicator],
+      hasReflection: teacherReflections.some(r => r.walkthroughId === walkthrough._id),
+      title: `Walkthrough ${new Date(walkthrough.walkthroughDate).toLocaleDateString()}`,
+        status: walkthrough.status,
+    }));
 
     return {
       pgpGoal: {
-        title: "Improve Teaching Practice", // teacher.pgpGoal doesn't exist in schema
-        description:
-          "Focus on continuous improvement through regular walkthroughs and reflection.", // teacher.pgpDescription doesn't exist in schema
-        progress,
+        title: pgpGoal?.text || "No PGP Goal Set",
+        description: pgpGoal?.contextNotes || "Work with your coach to set a professional growth goal.",
+        progress: pgpGoal?.progress || Math.min(100, (walkthroughs.length / 10) * 100), // Use stored progress or calculate
         trend,
-        targetDate: undefined, // teacher.pgpTargetDate doesn't exist in schema
-      },
-      recentWalkthroughs,
-      reflectionPrompt: {
-        question:
-          "How did your recent walkthrough feedback influence your lesson planning this week?",
-        lastAnswered: lastReflection?.createdAt,
-        isOverdue,
+        targetDate: pgpGoal?.targetDate || (pgpGoal ? Date.now() + (90 * 24 * 60 * 60 * 1000) : undefined),
       },
       refinementFocus: {
-        currentIndicator,
-        description: refinementDescription,
-        progress: refinementProgress,
-        nextSteps,
+        currentIndicator: mostRecentRefinement || "No recent walkthroughs",
+        description: mostRecentRefinement ? 
+          `Focus area from most recent walkthrough feedback.` : 
+          "Complete a walkthrough to see focus area.",
+        progress: {
+          current: Math.min(100, (walkthroughs.length / 5) * 100),
+          target: 100,
+          trend: trend === "Engaged" ? "improving" : trend === "Needs Support" ? "needs attention" : "stable",
+        },
+        nextSteps: [
+          "Review feedback from latest walkthrough",
+          "Practice implementing suggested strategies",
+          "Discuss progress during next coaching session",
+        ],
       },
-      strengths,
-    };
-  },
-});
-
-/**
- * Get PGP data for a specific teacher (public query for coach dashboard)
- */
-export const getTeacherPgpData = query({
-  args: { teacherId: v.id("teachers") },
-  returns: v.union(
-    v.null(),
-    v.object({
-      pgpGoal: v.object({
-        title: v.string(),
-        description: v.string(),
-        progress: v.float64(),
-        trend: v.union(
-          v.literal("Needs Support"),
-          v.literal("Engaged"),
-          v.literal("Stable"),
-        ),
-        targetDate: v.optional(v.string()),
-      }),
-      recentWalkthroughs: v.array(
-        v.object({
-          id: v.string(),
-          date: v.float64(),
-          indicators: v.array(v.string()),
-          hasReflection: v.boolean(),
-          title: v.string(),
-          status: v.string(),
-        }),
-      ),
-      reflectionPrompt: v.object({
-        question: v.string(),
-        lastAnswered: v.optional(v.float64()),
-        isOverdue: v.boolean(),
-      }),
-      refinementFocus: v.object({
-        currentIndicator: v.string(),
-        description: v.string(),
-        progress: v.float64(),
-        nextSteps: v.array(v.string()),
-      }),
-      strengths: v.array(
-        v.object({
-          indicator: v.string(),
-          name: v.string(),
-          frequency: v.float64(),
-          lastObserved: v.float64(),
-        }),
-      ),
-    }),
-  ),
-  handler: async (ctx, args) => {
-    const user = await getCurrentUserOrThrow(ctx);
-    if (user.role !== "coach") {
-      throw new Error("Only coaches can view teacher PGP data");
-    }
-
-    const teacher = await ctx.db.get(args.teacherId);
-    if (!teacher || teacher.coachId !== user._id) {
-      throw new Error("Teacher not found or not authorized");
-    }
-
-    // Get walkthroughs for this teacher
-    const walkthroughs = await ctx.db
-      .query("walkthroughs")
-      .withIndex("by_teacher", (q) => q.eq("teacherId", args.teacherId))
-      .collect();
-
-    // Get recent walkthroughs (last 5)
-    const recentWalkthroughs = [];
-    const sortedWalkthroughs = walkthroughs
-      .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
-      .slice(0, 5);
-
-    for (const walkthrough of sortedWalkthroughs) {
-      // Check if this walkthrough has a reflection
-      const reflection = await ctx.db
-        .query("reflections")
-        .withIndex("by_walkthrough", (q) =>
-          q.eq("walkthroughId", walkthrough._id),
-        )
-        .first();
-
-      const indicators = [];
-      if (walkthrough.reinforcementIndicator)
-        indicators.push(walkthrough.reinforcementIndicator);
-      if (walkthrough.refinementIndicator)
-        indicators.push(walkthrough.refinementIndicator);
-
-      recentWalkthroughs.push({
-        id: walkthrough._id,
-        date: Number(walkthrough.walkthroughDate),
-        indicators,
-        hasReflection: !!reflection,
-        title: "Classroom Observation",
-        status: walkthrough.status,
-      });
-    }
-
-    // Calculate PGP progress trend
-    let trend: "Needs Support" | "Engaged" | "Stable" = "Stable";
-    const completedWalkthroughs = walkthroughs
-      .filter((w) => w.status === "completed")
-      .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
-      .slice(0, 5);
-
-    if (completedWalkthroughs.length >= 3) {
-      const refinementCounts = new Map<string, number>();
-      for (const wt of completedWalkthroughs) {
-        if (wt.refinementIndicator) {
-          const count = refinementCounts.get(wt.refinementIndicator) || 0;
-          refinementCounts.set(wt.refinementIndicator, count + 1);
-        }
-      }
-      for (const count of refinementCounts.values()) {
-        if (count >= 3) {
-          trend = "Needs Support";
-          break;
-        }
-      }
-    }
-
-    if (trend !== "Needs Support") {
-      const reflectionPromises = completedWalkthroughs.map((wt) =>
-        ctx.db
-          .query("reflections")
-          .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", wt._id))
-          .first(),
-      );
-      const reflections = await Promise.all(reflectionPromises);
-      const reflectionCount = reflections.filter(Boolean).length;
-      if (reflectionCount >= 3) {
-        trend = "Engaged";
-      }
-    }
-
-    // Calculate progress based on completed walkthroughs vs target
-    const targetWalkthroughs = 8; // Assume 8 walkthroughs per year as target
-    const progress = Math.min(
-      Math.round((completedWalkthroughs.length / targetWalkthroughs) * 100),
-      100,
-    );
-
-    // Get most recent reflection for reflection prompt
-    const allReflections = await ctx.db.query("reflections").collect();
-    const teacherReflections = allReflections.filter((reflection) =>
-      completedWalkthroughs.some((w) => w._id === reflection.walkthroughId),
-    );
-    const lastReflection = teacherReflections.sort(
-      (a, b) => b.createdAt - a.createdAt,
-    )[0];
-
-    // Determine if reflection is overdue (more than 7 days since last walkthrough)
-    const lastWalkthrough = completedWalkthroughs[0];
-    const isOverdue = !!(
-      lastWalkthrough &&
-      !lastReflection &&
-      Date.now() - lastWalkthrough.walkthroughDate > 7 * 24 * 60 * 60 * 1000
-    );
-
-    // Get current refinement focus (most common refinement indicator in last 3 walkthroughs)
-    let currentIndicator = "No focus area identified";
-    let refinementDescription =
-      "Complete more walkthroughs to identify specific growth areas.";
-    let refinementProgress = 0;
-    let nextSteps = [
-      "Schedule your next walkthrough",
-      "Review feedback with your coach",
-    ];
-
-    if (completedWalkthroughs.length >= 2) {
-      const recentRefinements = completedWalkthroughs
-        .slice(0, 3)
-        .map((w) => w.refinementIndicator)
-        .filter(Boolean);
-
-      if (recentRefinements.length > 0) {
-        const refinementCounts = new Map<string, number>();
-        for (const indicator of recentRefinements) {
-          const count = refinementCounts.get(indicator!) || 0;
-          refinementCounts.set(indicator!, count + 1);
-        }
-
-        const mostCommon = Array.from(refinementCounts.entries()).sort(
-          (a, b) => b[1] - a[1],
-        )[0];
-
-        if (mostCommon) {
-          currentIndicator = mostCommon[0];
-          refinementProgress = Math.round((mostCommon[1] / 3) * 100);
-
-          // Generate description and next steps based on indicator
-          refinementDescription = `Focus on improving ${currentIndicator.toLowerCase()} based on recent feedback.`;
-          nextSteps = [
-            "Review specific feedback on this indicator",
-            "Plan targeted strategies for improvement",
-            "Practice new approaches in upcoming lessons",
-          ];
-        }
-      }
-    }
-
-    // Calculate strengths (most common reinforcement indicators)
-    const strengths = [];
-    const reinforcementCounts = new Map<string, number>();
-
-    for (const walkthrough of completedWalkthroughs) {
-      if (walkthrough.reinforcementIndicator) {
-        const count =
-          reinforcementCounts.get(walkthrough.reinforcementIndicator) || 0;
-        reinforcementCounts.set(walkthrough.reinforcementIndicator, count + 1);
-      }
-    }
-
-    const topStrengths = Array.from(reinforcementCounts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3);
-
-    for (const [indicator, frequency] of topStrengths) {
-      const lastObserved =
-        completedWalkthroughs
-          .filter((w) => w.reinforcementIndicator === indicator)
-          .sort((a, b) => b.walkthroughDate - a.walkthroughDate)[0]
-          ?.walkthroughDate || Date.now();
-
-      strengths.push({
-        indicator,
-        name: indicator, // In a real app, you'd map this to a human-readable name
-        frequency,
-        lastObserved,
-      });
-    }
-
-    return {
-      pgpGoal: {
-        title: teacher.pgpGoal?.text || "Improve Teaching Practice",
-        description:
-          teacher.pgpGoal?.contextNotes ||
-          "Focus on continuous improvement through regular walkthroughs and reflection.",
-        progress: Number(teacher.pgpGoal?.progress || progress),
-        trend,
-        targetDate: teacher.pgpGoal?.targetDate
-          ? new Date(teacher.pgpGoal.targetDate).toISOString()
-          : undefined,
-      },
-      recentWalkthroughs,
       reflectionPrompt: {
-        question:
-          "How did your recent walkthrough feedback influence your lesson planning this week?",
-        lastAnswered: lastReflection?.createdAt
-          ? Number(lastReflection.createdAt)
-          : undefined,
-        isOverdue,
+        question: walkthroughs.length > 0 ? 
+          "What strategies from recent feedback has this teacher tried implementing?" :
+          "What professional growth goals should this teacher focus on?",
+        lastAnswered: teacherReflections.length > 0 ? 
+          teacherReflections.sort((a, b) => b.createdAt - a.createdAt)[0].createdAt : 
+          undefined,
+        isOverdue: teacherReflections.length === 0 || 
+          (Date.now() - (teacherReflections[0]?.createdAt || 0)) > (7 * 24 * 60 * 60 * 1000), // 7 days
       },
-      refinementFocus: {
-        currentIndicator,
-        description: refinementDescription,
-        progress: Number(refinementProgress),
-        nextSteps,
-        aiInsights: undefined, // TODO: Add AI insights generation for teacher view
-      },
-      strengths: strengths.map((strength) => ({
-        ...strength,
-        frequency: Number(strength.frequency),
-        lastObserved: Number(strength.lastObserved),
-      })),
+      recentWalkthroughs: timelineWalkthroughs,
     };
   },
 });
 
 /**
- * Internal query: Get PGP data for a specific teacher (for AI feedback context)
+ * Get PGP data for the current authenticated teacher
  */
-export const getTeacherPgpDataInternal = internalQuery({
-  args: { teacherId: v.id("teachers") },
-  returns: v.union(
-    v.null(),
-    v.object({
-      pgpGoal: v.object({
-        title: v.string(),
-        description: v.string(),
-        progress: v.float64(),
-        trend: v.union(
-          v.literal("Needs Support"),
-          v.literal("Engaged"),
-          v.literal("Stable"),
-        ),
-        targetDate: v.optional(v.string()),
-      }),
-    }),
-  ),
-  handler: async (ctx, args) => {
-    const teacher = await ctx.db.get(args.teacherId);
-    if (!teacher) return null;
-
-    // Get walkthroughs for this teacher
-    const walkthroughs = await ctx.db
-      .query("walkthroughs")
-      .withIndex("by_teacher", (q) => q.eq("teacherId", args.teacherId))
-      .collect();
-
-    const completedWalkthroughs = walkthroughs
-      .filter((w) => w.status === "completed")
-      .sort((a, b) => b.walkthroughDate - a.walkthroughDate)
-      .slice(0, 5);
-
-    // Calculate PGP progress trend
-    let trend: "Needs Support" | "Engaged" | "Stable" = "Stable";
-
-    if (completedWalkthroughs.length >= 3) {
-      const refinementCounts = new Map<string, number>();
-      for (const wt of completedWalkthroughs) {
-        if (wt.refinementIndicator) {
-          const count = refinementCounts.get(wt.refinementIndicator) || 0;
-          refinementCounts.set(wt.refinementIndicator, count + 1);
-        }
-      }
-      for (const count of refinementCounts.values()) {
-        if (count >= 3) {
-          trend = "Needs Support";
-          break;
-        }
-      }
-    }
-
-    if (trend !== "Needs Support") {
-      const reflectionPromises = completedWalkthroughs.map((wt) =>
-        ctx.db
-          .query("reflections")
-          .withIndex("by_walkthrough", (q) => q.eq("walkthroughId", wt._id))
-          .first(),
-      );
-      const reflections = await Promise.all(reflectionPromises);
-      const reflectionCount = reflections.filter(Boolean).length;
-      if (reflectionCount >= 3) {
-        trend = "Engaged";
-      }
-    }
-
-    // Calculate progress based on completed walkthroughs vs target
-    const targetWalkthroughs = 8; // Assume 8 walkthroughs per year as target
-    const progress = Math.min(
-      Math.round((completedWalkthroughs.length / targetWalkthroughs) * 100),
-      100,
-    );
-
-    return {
-      pgpGoal: {
-        title: "Improve Teaching Practice",
-        description:
-          "Focus on continuous improvement through regular walkthroughs and reflection.",
-        progress: Number(progress),
-        trend,
-        targetDate: undefined,
-      },
-    };
-  },
-});
-
-/**
- * Generate AI-powered insights for a teacher's refinement focus area.
- */
-export const generateRefinementInsights = action({
-  args: {
-    teacherId: v.id("teachers"),
-    currentIndicator: v.string(),
-    recentWalkthroughs: v.array(v.any()),
-    progressTrend: v.union(
-      v.literal("Needs Support"),
-      v.literal("Engaged"),
-      v.literal("Stable"),
-    ),
-  },
+export const getMyPgpData = query({
+  args: {},
   returns: v.object({
-    trendAnalysis: v.string(),
-    strategicRecommendations: v.array(v.string()),
-    progressPrediction: v.string(),
+    pgpGoal: v.object({
+      title: v.string(),
+      description: v.string(),
+      progress: v.number(),
+      trend: v.union(
+        v.literal("Engaged"),
+        v.literal("Needs Support"),
+        v.literal("Stable"),
+      ),
+      targetDate: v.optional(v.number()),
+    }),
+    refinementFocus: v.object({
+      currentIndicator: v.string(),
+      description: v.string(),
+      progress: v.object({
+        current: v.number(),
+        target: v.number(),
+        trend: v.string(),
+      }),
+      nextSteps: v.array(v.string()),
+    }),
+    reflectionPrompt: v.object({
+      question: v.string(),
+      lastAnswered: v.optional(v.number()),
+      isOverdue: v.boolean(),
+    }),
+    recentWalkthroughs: v.array(
+      v.object({
+        id: v.string(),
+        date: v.number(),
+        indicators: v.array(v.string()),
+        hasReflection: v.boolean(),
+        title: v.string(),
+        status: v.string(),
+      }),
+    ),
   }),
-  handler: async (ctx, args) => {
-    // Get teacher data for context
-    const teacher = await ctx.runQuery(api.teachers.getTeacherById, { 
-      teacherId: args.teacherId 
-    });
-    
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+    if (user.role !== "teacher") {
+      throw new Error("Only teachers can view their PGP data");
+    }
+
+    // Get teacher record
+    const teacher = await ctx.db
+      .query("teachers")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .unique();
+
     if (!teacher) {
       throw new Error("Teacher not found");
     }
 
-    // Analyze walkthrough patterns
-    const walkthroughCount = args.recentWalkthroughs.length;
-    const refinementFrequency = args.recentWalkthroughs.filter(
-      (w: any) => w.refinementIndicator === args.currentIndicator
-    ).length;
-    
-    const consistencyRate = walkthroughCount > 0 ? (refinementFrequency / walkthroughCount) * 100 : 0;
+    // Get teacher's PGP goal (stored on teacher record)
+    const pgpGoal = teacher.pgpGoal;
 
-    // Generate trend analysis
-    let trendAnalysis: string;
-    if (consistencyRate >= 75) {
-      trendAnalysis = `${args.currentIndicator} appears consistently in recent observations (${Math.round(consistencyRate)}% of walkthroughs), indicating this is a priority area for focused development.`;
-    } else if (consistencyRate >= 50) {
-      trendAnalysis = `${args.currentIndicator} shows moderate consistency in observations (${Math.round(consistencyRate)}% frequency), suggesting targeted improvement opportunities.`;
-    } else {
-      trendAnalysis = `${args.currentIndicator} appears occasionally in observations, indicating emerging growth opportunities in this area.`;
+    // Get walkthroughs for this teacher
+    const walkthroughs = await ctx.db
+      .query("walkthroughs")
+      .withIndex("by_teacher", (q) => q.eq("teacherId", teacher._id))
+      .order("desc")
+      .collect();
+
+    // Get reflections
+    const allReflections = await ctx.db.query("reflections").collect();
+    const teacherReflections = allReflections.filter(r => 
+      walkthroughs.some(w => w._id === r.walkthroughId)
+    );
+
+    // Calculate trend
+    const recentWalkthroughs = walkthroughs.slice(0, 5);
+    let trend: "Engaged" | "Needs Support" | "Stable" = "Stable";
+    if (recentWalkthroughs.length >= 3) {
+      const refinementIndicators = recentWalkthroughs.map(w => w.refinementIndicator);
+      const repeatedIndicator = refinementIndicators.find((indicator, index) =>
+        refinementIndicators.indexOf(indicator) !== index
+      );
+      
+      if (repeatedIndicator) {
+        trend = "Needs Support";
+      } else {
+        trend = "Engaged";
+      }
     }
 
-    // Generate strategic recommendations based on indicator and trend
-    const strategicRecommendations: string[] = [];
-    
-    if (args.progressTrend === "Needs Support") {
-      strategicRecommendations.push(
-        "Schedule more frequent coaching conversations to provide additional support",
-        "Consider peer observation opportunities with teachers strong in this indicator",
-        "Break down the indicator into smaller, achievable practice goals"
-      );
-    } else if (args.progressTrend === "Engaged") {
-      strategicRecommendations.push(
-        "Leverage this engagement by setting stretch goals in this area",
-        "Consider this teacher as a peer mentor for others developing this skill",
-        "Document successful strategies for replication with other teachers"
-      );
-    } else {
-      strategicRecommendations.push(
-        "Maintain consistent focus with regular check-ins and feedback",
-        "Explore new instructional strategies to reinvigorate growth",
-        "Set specific milestones to track incremental progress"
-      );
-    }
+    // Get most recent refinement indicator for focus
+    const mostRecentRefinement = recentWalkthroughs[0]?.refinementIndicator || "";
 
-    // Generate progress prediction
-    let progressPrediction: string;
-    if (args.progressTrend === "Engaged" && consistencyRate >= 50) {
-      progressPrediction = "Strong likelihood of measurable improvement over the next 4-6 weeks with continued focus and support.";
-    } else if (args.progressTrend === "Needs Support") {
-      progressPrediction = "With intensive support and clear action steps, expect gradual improvement over 6-8 weeks.";
-    } else {
-      progressPrediction = "Steady, consistent progress expected with regular coaching support and practice opportunities.";
-    }
+    // Map walkthroughs for timeline
+    const timelineWalkthroughs = walkthroughs.slice(0, 10).map(walkthrough => ({
+        id: walkthrough._id,
+      date: walkthrough.walkthroughDate,
+      indicators: [walkthrough.reinforcementIndicator, walkthrough.refinementIndicator],
+      hasReflection: teacherReflections.some(r => r.walkthroughId === walkthrough._id),
+      title: `Walkthrough ${new Date(walkthrough.walkthroughDate).toLocaleDateString()}`,
+        status: walkthrough.status,
+    }));
 
     return {
-      trendAnalysis,
-      strategicRecommendations: strategicRecommendations.slice(0, 3), // Limit to 3 recommendations
-      progressPrediction,
+      pgpGoal: {
+        title: pgpGoal?.text || "No PGP Goal Set",
+        description: pgpGoal?.contextNotes || "Work with your coach to set a professional growth goal.",
+        progress: pgpGoal?.progress || Math.min(100, (walkthroughs.length / 10) * 100), // Use stored progress or calculate
+        trend,
+        targetDate: pgpGoal?.targetDate || (pgpGoal ? Date.now() + (90 * 24 * 60 * 60 * 1000) : undefined),
+      },
+      refinementFocus: {
+        currentIndicator: mostRecentRefinement || "No recent walkthroughs",
+        description: mostRecentRefinement ? 
+          `Focus area from your most recent walkthrough feedback.` : 
+          "Complete a walkthrough to see your focus area.",
+        progress: {
+          current: Math.min(100, (walkthroughs.length / 5) * 100),
+          target: 100,
+          trend: trend === "Engaged" ? "improving" : trend === "Needs Support" ? "needs attention" : "stable",
+        },
+        nextSteps: [
+          "Review feedback from your latest walkthrough",
+          "Practice implementing suggested strategies",
+          "Discuss progress with your coach",
+        ],
+      },
+      reflectionPrompt: {
+        question: walkthroughs.length > 0 ? 
+          "What strategies from your recent feedback have you tried implementing?" :
+          "What professional growth goals would you like to focus on?",
+        lastAnswered: teacherReflections.length > 0 ? 
+          teacherReflections.sort((a, b) => b.createdAt - a.createdAt)[0].createdAt : 
+          undefined,
+        isOverdue: teacherReflections.length === 0 || 
+          (Date.now() - (teacherReflections[0]?.createdAt || 0)) > (7 * 24 * 60 * 60 * 1000), // 7 days
+      },
+      recentWalkthroughs: timelineWalkthroughs,
     };
   },
 });

@@ -78,13 +78,16 @@ export default function TeacherPgpDashboardPage() {
       <div className="max-w-3xl mx-auto space-y-6 mt-6">
         
         {/* 1. PgpGoalCard (The Why) - Always at the top, framing the entire experience */}
-        <TeacherPgpGoalCard pgpGoal={pgpData.pgpGoal} />
+        <TeacherPgpGoalCard pgpGoal={{
+          ...pgpData.pgpGoal,
+          targetDate: pgpData.pgpGoal.targetDate ? new Date(pgpData.pgpGoal.targetDate).toLocaleDateString() : undefined
+        }} />
 
         {/* 2. RefinementFocusCard (The What) - Shows the skill they've been working on most recently */}
         <RefinementFocusCard
           currentIndicator={pgpData.refinementFocus.currentIndicator}
           description={pgpData.refinementFocus.description}
-          progress={pgpData.refinementFocus.progress}
+          progress={pgpData.refinementFocus.progress.current}
           nextSteps={pgpData.refinementFocus.nextSteps}
         />
 

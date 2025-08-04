@@ -141,7 +141,7 @@ export default function TeacherDetailsPage() {
                     <div className="text-sm text-muted-foreground">This Month</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{teacherAnalytics?.strengths?.length || 0}</div>
+                    <div className="text-2xl font-bold">{0}</div>
                     <div className="text-sm text-muted-foreground">Strengths</div>
                   </div>
                   <div className="text-center">

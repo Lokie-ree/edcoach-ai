@@ -24,7 +24,7 @@ interface PrioritiesPanelProps {
 export function PrioritiesPanel({ priorities }: PrioritiesPanelProps) {
   const priorityItems: Priority[] = [
     {
-      label: "Draft Walkthroughs Due",
+      label: "Recent Walkthroughs",
       count: priorities.walkthroughsDue,
       href: "/dashboard",
       urgency: priorities.walkthroughsDue > 3 ? "high" : priorities.walkthroughsDue > 0 ? "medium" : "low",

@@ -1,7 +1,7 @@
 export interface Walkthrough {
   _id: string;
   walkthroughDate: number;
-  status: "draft" | "completed";
+  status: "completed";
   evidenceSummary: string;
   reinforcementIndicator: string;
   refinementIndicator: string;

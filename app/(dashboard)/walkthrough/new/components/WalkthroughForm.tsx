@@ -3,14 +3,13 @@
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useUser, useAuth } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { walkthroughSchema } from "@/app/(dashboard)/walkthrough/new/validation";
-import { useMutation, useQuery, useAction } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
-import { useState, useEffect, useRef, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,10 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CalendarInput } from "@/components/ui/calendar-input";
-import { walkthroughFinalSchema } from "@/convex/validation/walkthroughFinalSchema";
-import { Sparkles, Loader2 } from "lucide-react";
-import { useCanCreateWalkthrough } from "@/hooks/usageEnforcer";
-import { AIUsageWarning } from "@/components/common/AiUsageBadge";
+import { Loader2 } from "lucide-react";
 
 // Types
 export type WalkthroughFormData = z.infer<typeof walkthroughSchema>;
@@ -59,18 +55,10 @@ interface Indicator {
   effective_practice?: string | string[] | Record<string, string>;
   development_evidence?: string | string[] | Record<string, string>;
   student_centered_evidence?: string | string[] | Record<string, string>;
-  domain?: string; // Added domain to Indicator interface
+  domain?: string;
 }
 
-// Add after Indicator interface
-type WalkthroughEntry = {
-  indicatorAcronym: string;
-  type: "reinforcement" | "refinement";
-  aiFeedback: string;
-};
-
 export function WalkthroughForm({
-  walkthroughId,
   coachId: propCoachId,
 }: {
   walkthroughId?: Id<"walkthroughs">;
@@ -79,397 +67,87 @@ export function WalkthroughForm({
   const methods = useForm<WalkthroughFormData>({
     resolver: zodResolver(walkthroughSchema),
     defaultValues: {
-      type: "walkthrough",
       teacherId: "",
       walkthroughDate: new Date(),
-      status: "completed",
       evidenceSummary: "",
       reinforcementIndicator: "",
       refinementIndicator: "",
-      walkthroughEntries: [
-        { indicatorAcronym: "", type: "reinforcement", aiFeedback: "" },
-        { indicatorAcronym: "", type: "refinement", aiFeedback: "" },
-      ],
+      reinforcementFeedback: "",
+      refinementFeedback: "",
     },
     mode: "onChange",
   });
+  
   const {
     handleSubmit,
-    setValue,
-    watch,
     formState: { isSubmitting },
-    reset,
   } = methods;
-  const createWalkthrough = useMutation(
-    api.walkthroughs.createWalkthroughAndEntries,
-  );
-  const updateWalkthrough = useMutation(
-    api.walkthroughs.updateWalkthroughAndEntries,
-  );
+  
+  const createWalkthrough = useMutation(api.walkthroughs.createWalkthrough);
   const router = useRouter();
   const { toast } = useToast();
-  const [aiLoading, setAILoading] = useState(false);
-  const lastResetId = useRef<Id<"walkthroughs"> | undefined>(undefined);
-  const [feedbackGenerated, setFeedbackGenerated] = useState(false);
 
   // Use propCoachId if provided, otherwise fetch current user
   const { user } = useUser();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const convexUser = useQuery(
     api.users.current,
     !propCoachId && user ? {} : "skip",
   );
 
-  // Find the appropriate org ID (replace this with your actual org ID logic)
-  const teachers = (useQuery(api.teachers.list) ?? []) as Teacher[];
+  // Get the coach ID from props or current user
+  const coachId = propCoachId || convexUser?._id;
+
+  // Get teachers for selection
+  const teachers = useQuery(
+    api.teachers.list,
+    coachId ? {} : "skip",
+  ) as Teacher[] | undefined;
+
+  // Get indicators
   const rubricData = useQuery(api.rubrics.listRubricWithIndicators);
-  const indicators: Indicator[] = rubricData
+  const indicators = rubricData
     ? rubricData.domains.flatMap(
         (domain: { indicators: Indicator[] }) => domain.indicators,
       )
     : [];
 
-  // Find indicator object by code
-  const getIndicatorByCode = (code: string): Indicator | undefined =>
-    indicators.find((i) => i.indicator_code === code);
-
-  // Fetch draft if editing
-  const drafts = useQuery(api.walkthroughs.listDraftWalkthroughs, {}) ?? [];
-  const draft = walkthroughId
-    ? drafts.find((w) => w._id === walkthroughId)
-    : undefined;
-  // Fetch walkthrough entries if editing
-  const shouldFetchEntries = Boolean(walkthroughId && draft);
-  const rawWalkthroughEntries = useQuery(
-    api.walkthroughEntries.listByWalkthrough,
-    shouldFetchEntries && walkthroughId ? { walkthroughId } : "skip",
-  );
-
-  // Wrap walkthroughEntries initialization in useMemo to fix dependency warning
-  const walkthroughEntries = useMemo(
-    () => rawWalkthroughEntries ?? [],
-    [rawWalkthroughEntries],
-  );
-
-  // Move the logic inside useMemo to fix dependency warning
-  const entryList = useMemo(() => {
-    if (!walkthroughEntries) return [];
-
-    return walkthroughEntries.map((entry) => ({
-      indicatorAcronym: entry.indicatorAcronym ?? "",
-      type: entry.type,
-      aiFeedback: entry.aiFeedback ?? "",
-    }));
-  }, [walkthroughEntries]);
-
-  // Then modify the useEffect to use entryList
-  useEffect(() => {
-    if (
-      draft &&
-      walkthroughId &&
-      entryList.length === 2 &&
-      lastResetId.current !== walkthroughId
-    ) {
-      const reinforcementEntry = entryList.find(
-        (e) => e.type === "reinforcement",
-      );
-      const refinementEntry = entryList.find((e) => e.type === "refinement");
-
-      reset({
-        teacherId: draft.teacherId,
-        walkthroughDate: new Date(draft.walkthroughDate),
-        status: draft.status,
-        evidenceSummary: draft.evidenceSummary,
-        reinforcementIndicator: reinforcementEntry
-          ? reinforcementEntry.indicatorAcronym
-          : draft.reinforcementIndicator,
-        refinementIndicator: refinementEntry
-          ? refinementEntry.indicatorAcronym
-          : draft.refinementIndicator,
-        walkthroughEntries: [
-          {
-            indicatorAcronym: reinforcementEntry?.indicatorAcronym || "",
-            type: "reinforcement" as const,
-            aiFeedback: reinforcementEntry?.aiFeedback || "",
-          },
-          {
-            indicatorAcronym: refinementEntry?.indicatorAcronym || "",
-            type: "refinement" as const,
-            aiFeedback: refinementEntry?.aiFeedback || "",
-          },
-        ],
-      });
-      lastResetId.current = walkthroughId;
-    }
-  }, [draft, walkthroughId, reset, entryList]);
-
-  const { has } = useAuth();
-
-  // Real AI feedback logic
-  const generateAIFeedback = useAction(api.aiFeedback.generateAIFeedback);
-  const handleAIFeedback = async () => {
-    setAILoading(true);
-    try {
-      const evidence = watch("evidenceSummary") || "";
-      const teacherId = watch("teacherId"); // Get the selected teacher ID
-
-      // Check if evidence is provided
-      if (!evidence.trim()) {
-        toast({
-          title: "Evidence Required",
-          description:
-            "Please provide evidence summary before generating AI feedback.",
-          variant: "destructive",
-        });
-        setAILoading(false);
-        return;
-      }
-
-      // Check if teacher is selected
-      if (!teacherId) {
-        toast({
-          title: "Teacher Required",
-          description: "Please select a teacher before generating AI feedback.",
-          variant: "destructive",
-        });
-        setAILoading(false);
-        return;
-      }
-
-      const {
-        reinforcementIndicator: reinforcementCode,
-        refinementIndicator: refinementCode,
-      } = methods.getValues();
-      const reinforcementIndicator = getIndicatorByCode(reinforcementCode);
-      const refinementIndicator = getIndicatorByCode(refinementCode);
-      if (!reinforcementIndicator || !refinementIndicator) {
-        toast({
-          title: "Error",
-          description: "Please select both indicators.",
-          variant: "destructive",
-        });
-        setAILoading(false);
-        return;
-      }
-      // Improved normalization function
-      const normalizeIndicatorField = (val: unknown): string => {
-        if (!val) return "N/A";
-
-        if (Array.isArray(val)) {
-          return val
-            .filter((item) => item && typeof item === "string")
-            .join("; ");
-        }
-
-        if (typeof val === "object" && val !== null) {
-          const values = Object.values(val as Record<string, unknown>);
-          return values
-            .filter((item) => item && typeof item === "string")
-            .join("; ");
-        }
-
-        return (val as string) || "N/A";
-      };
-
-      // Check for PAID Pro plan only - free users get starter plan by default
-      const hasProPlan =
-        (has?.({ plan: "coach_pro" }) ?? false) ||
-        (has?.({ permission: "coach_pro" }) ?? false) ||
-        (has?.({ role: "coach_pro" }) ?? false);
-
-      // All users without a paid Pro plan get starter plan benefits by default
-      const hasStarterPlan = !hasProPlan;
-
-      console.log("🔍 Walkthrough Form plan check:", {
-        hasProPlan,
-        finalPlan: hasProPlan ? "pro" : "starter_free",
-        checks: {
-          "plan:coach_pro": has?.({ plan: "coach_pro" }),
-          "permission:coach_pro": has?.({ permission: "coach_pro" }),
-          "role:coach_pro": has?.({ role: "coach_pro" }),
-          "plan:coach_starter": has?.({ plan: "coach_starter" }),
-          "permission:coach_starter": has?.({ permission: "coach_starter" }),
-          "role:coach_starter": has?.({ role: "coach_starter" }),
-          "role:admin": has?.({ role: "admin" }),
-        },
-      });
-
-      // Use optimized AI feedback generation (single API call for both feedback types)
-      const feedbackResult = (await generateAIFeedback({
-        evidence,
-        mode: "both",
-        reinforcementIndicator: {
-          indicator_name: reinforcementIndicator.indicator_name,
-          indicator_code: reinforcementIndicator.indicator_code,
-          domain: reinforcementIndicator.domain || "N/A",
-          overview: normalizeIndicatorField(reinforcementIndicator.overview),
-          key_terms: normalizeIndicatorField(reinforcementIndicator.key_terms),
-          effective_practice: normalizeIndicatorField(
-            reinforcementIndicator.effective_practice,
-          ),
-          development_evidence: normalizeIndicatorField(
-            reinforcementIndicator.development_evidence,
-          ),
-          student_centered_evidence: normalizeIndicatorField(
-            reinforcementIndicator.student_centered_evidence,
-          ),
-        },
-        refinementIndicator: {
-          indicator_name: refinementIndicator.indicator_name,
-          indicator_code: refinementIndicator.indicator_code,
-          domain: refinementIndicator.domain || "N/A",
-          overview: normalizeIndicatorField(refinementIndicator.overview),
-          key_terms: normalizeIndicatorField(refinementIndicator.key_terms),
-          effective_practice: normalizeIndicatorField(
-            refinementIndicator.effective_practice,
-          ),
-          development_evidence: normalizeIndicatorField(
-            refinementIndicator.development_evidence,
-          ),
-          student_centered_evidence: normalizeIndicatorField(
-            refinementIndicator.student_centered_evidence,
-          ),
-        },
-        hasProPlan,
-        hasStarterPlan,
-        teacherId: teacherId as Id<"teachers">, // Add this line
-      })) as { reinforcement: string; refinement: string };
-      setValue("walkthroughEntries", [
-        {
-          indicatorAcronym: reinforcementCode,
-          type: "reinforcement" as const,
-          aiFeedback: feedbackResult.reinforcement,
-        },
-        {
-          indicatorAcronym: refinementCode,
-          type: "refinement" as const,
-          aiFeedback: feedbackResult.refinement,
-        },
-      ]);
-      setFeedbackGenerated(true);
-    } catch {
+  // Submit handler
+  const onSubmit = async (data: WalkthroughFormData) => {
+    if (!coachId) {
       toast({
         title: "Error",
-        description: "Failed to generate AI feedback.",
-        variant: "destructive",
-      });
-    } finally {
-      setAILoading(false);
-    }
-  };
-
-  // Handler for editable feedback textareas
-  const handleFeedbackChange = (
-    type: "reinforcement" | "refinement",
-    value: string,
-  ) => {
-    const entries = methods.getValues("walkthroughEntries") || [];
-    // Ensure aiFeedback is always a string and cast to WalkthroughEntry[]
-    const normalizedEntries: WalkthroughEntry[] = entries.map((entry) => ({
-      ...entry,
-      aiFeedback: entry.aiFeedback ?? "",
-    }));
-    const updatedEntries = normalizedEntries.map((entry) =>
-      entry.type === type
-        ? { ...entry, type: type as typeof entry.type, aiFeedback: value }
-        : entry,
-    );
-    methods.setValue("walkthroughEntries", updatedEntries);
-  };
-
-  const { allowed: canCreateWalkthrough, reason: walkthroughBlockReason } =
-    useCanCreateWalkthrough();
-
-  // Submit handler (finalize)
-  const onSubmit = async (data: WalkthroughFormData) => {
-    // ENFORCE USAGE LIMITS
-    if (!canCreateWalkthrough) {
-      toast({
-        title: "Walkthrough Limit Reached",
-        description:
-          walkthroughBlockReason ||
-          "You have reached your monthly walkthrough limit. Upgrade to Coach Pro for more.",
+        description: "Coach not found",
         variant: "destructive",
       });
       return;
     }
+
     try {
-      setValue("status", "completed");
-      await methods.trigger(); // ensure freshest form state
       const walkthroughDate =
         data.walkthroughDate instanceof Date
           ? data.walkthroughDate.getTime()
           : Number(data.walkthroughDate);
-      const entries = methods.getValues("walkthroughEntries");
-      console.log("[onSubmit] After trigger, walkthroughEntries:", entries);
-      const finalValidation = walkthroughFinalSchema.safeParse({
-        ...data,
-        status: "completed",
-        walkthroughEntries: entries,
+
+      const walkthroughId = await createWalkthrough({
+        teacherId: data.teacherId as Id<"teachers">,
         walkthroughDate,
-      });
-      if (!finalValidation.success) {
-        toast({
-          title: "Validation Error",
-          description: finalValidation.error.errors
-            .map((e: { message: string }) => e.message)
-            .join(", "),
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Check for PAID Pro plan only - free users get starter plan by default
-      const hasProPlan =
-        (has?.({ plan: "coach_pro" }) ?? false) ||
-        (has?.({ permission: "coach_pro" }) ?? false) ||
-        (has?.({ role: "coach_pro" }) ?? false);
-
-      // All users without a paid Pro plan get starter plan benefits by default
-      const hasStarterPlan = !hasProPlan;
-
-      console.log("🔍 Walkthrough submission plan check:", {
-        hasProPlan,
-        hasStarterPlan,
-        finalPlan: hasProPlan ? "pro" : "starter_free",
+        evidenceSummary: data.evidenceSummary,
+        reinforcementIndicator: data.reinforcementIndicator,
+        refinementIndicator: data.refinementIndicator,
+        reinforcementFeedback: data.reinforcementFeedback,
+        refinementFeedback: data.refinementFeedback,
       });
 
-      if (walkthroughId && draft) {
-        // Update and finalize existing draft
-        await updateWalkthrough({
-          walkthroughId,
-          teacherId: data.teacherId as Id<"teachers">,
-          walkthroughDate,
-          status: "completed",
-          reinforcementIndicator: data.reinforcementIndicator,
-          refinementIndicator: data.refinementIndicator,
-          evidenceSummary: data.evidenceSummary,
-          walkthroughEntries: entries,
-        });
-      } else {
-        // Create new finalized walkthrough
-        await createWalkthrough({
-          teacherId: data.teacherId as Id<"teachers">,
-          walkthroughDate,
-          status: "completed",
-          reinforcementIndicator: data.reinforcementIndicator,
-          refinementIndicator: data.refinementIndicator,
-          evidenceSummary: data.evidenceSummary,
-          walkthroughEntries: entries,
-          hasProPlan,
-          hasStarterPlan,
-        });
-      }
       toast({
         title: "Success",
         description: "Walkthrough created successfully",
-        variant: "success",
       });
-      router.push("/dashboard");
-    } catch {
+
+      router.push(`/walkthrough/${walkthroughId}/view`);
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to create walkthrough. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to create walkthrough",
         variant: "destructive",
       });
     }
@@ -478,292 +156,178 @@ export function WalkthroughForm({
   return (
     <FormProvider {...methods}>
       <Form {...methods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <AIUsageWarning />
-          <Card className="max-w-2xl">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <Card>
             <CardHeader>
-              <CardTitle>
-                {walkthroughId ? "Edit Walkthrough Draft" : "New Walkthrough"}
-              </CardTitle>
+              <CardTitle>Walkthrough Details</CardTitle>
             </CardHeader>
-            <CardContent>
-              {/* Section 1: Teacher, Date, Title */}
-              <div className="mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={methods.control}
-                    name="teacherId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Teacher</FormLabel>
-                        <FormControl>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            disabled={teachers.length === 0}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select a teacher" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {teachers.length === 0 ? (
-                                <SelectItem value="__loading__" disabled>
-                                  Loading...
-                                </SelectItem>
-                              ) : (
-                                teachers.map((teacher: Teacher) => (
-                                  <SelectItem
-                                    key={teacher._id}
-                                    value={teacher._id}
-                                  >
-                                    {teacher.name}
-                                  </SelectItem>
-                                ))
-                              )}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={methods.control}
-                    name="walkthroughDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Date</FormLabel>
-                        <FormControl>
-                          <CalendarInput
-                            date={
-                              field.value instanceof Date
-                                ? field.value
-                                : undefined
-                            }
-                            setDate={field.onChange}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
+            <CardContent className="space-y-6">
+              {/* Teacher Selection */}
+              <FormField
+                control={methods.control}
+                name="teacherId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Select Teacher</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose a teacher..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {teachers?.map((teacher) => (
+                          <SelectItem key={teacher._id} value={teacher._id}>
+                            {teacher.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              {/* Section 2: Indicators, Evidence Notes */}
-              <div className="mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={methods.control}
-                    name="reinforcementIndicator"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Reinforcement Indicator</FormLabel>
-                        <FormControl>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            disabled={indicators.length === 0}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select an indicator" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {indicators.length === 0 ? (
-                                <SelectItem value="__loading__" disabled>
-                                  Loading...
-                                </SelectItem>
-                              ) : (
-                                indicators.map((indicator: Indicator) => (
-                                  <SelectItem
-                                    key={indicator.indicator_code}
-                                    value={indicator.indicator_code}
-                                  >
-                                    {indicator.indicator_name}
-                                  </SelectItem>
-                                ))
-                              )}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={methods.control}
-                    name="refinementIndicator"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Refinement Indicator</FormLabel>
-                        <FormControl>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            disabled={indicators.length === 0}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select an indicator" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {indicators.length === 0 ? (
-                                <SelectItem value="__loading__" disabled>
-                                  Loading...
-                                </SelectItem>
-                              ) : (
-                                indicators.map((indicator: Indicator) => (
-                                  <SelectItem
-                                    key={indicator.indicator_code}
-                                    value={indicator.indicator_code}
-                                  >
-                                    {indicator.indicator_name}
-                                  </SelectItem>
-                                ))
-                              )}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="mt-4">
-                  <FormField
-                    control={methods.control}
-                    name="evidenceSummary"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Evidence Summary</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} className="w-full" rows={4} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
+              {/* Date Selection */}
+              <FormField
+                control={methods.control}
+                name="walkthroughDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Walkthrough Date</FormLabel>
+                    <FormControl>
+                      <CalendarInput
+                        date={field.value instanceof Date ? field.value : new Date(field.value)}
+                        setDate={(date) => field.onChange(date || new Date())}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              {/* AI Feedback and Action Buttons */}
-              {(() => {
-                const entries = watch("walkthroughEntries") || [];
-                const reinforcementFeedback =
-                  entries.find((e) => e.type === "reinforcement")?.aiFeedback ||
-                  "";
-                const refinementFeedback =
-                  entries.find((e) => e.type === "refinement")?.aiFeedback ||
-                  "";
-                if (reinforcementFeedback || refinementFeedback) {
-                  return (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                      {/* Reinforcement Card */}
-                      <Card className="bg-muted/50">
-                        <CardHeader>
-                          <CardTitle className="text-base">
-                            Reinforcement Feedback
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <Textarea
-                            value={reinforcementFeedback}
-                            onChange={(e) =>
-                              handleFeedbackChange(
-                                "reinforcement",
-                                e.target.value,
-                              )
-                            }
-                            rows={4}
-                            className="w-full"
-                            placeholder="AI-generated reinforcement feedback will appear here."
-                          />
-                        </CardContent>
-                      </Card>
-                      {/* Refinement Card */}
-                      <Card className="bg-muted/50">
-                        <CardHeader>
-                          <CardTitle className="text-base">
-                            Refinement Feedback
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <Textarea
-                            value={refinementFeedback}
-                            onChange={(e) =>
-                              handleFeedbackChange("refinement", e.target.value)
-                            }
-                            rows={4}
-                            className="w-full"
-                            placeholder="AI-generated refinement feedback will appear here."
-                          />
-                        </CardContent>
-                      </Card>
-                    </div>
-                  );
-                }
-                return null;
-              })()}
-              <div className="flex flex-col sm:flex-row gap-3 mt-6">
+              {/* Reinforcement Indicator */}
+              <FormField
+                control={methods.control}
+                name="reinforcementIndicator"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Reinforcement Indicator</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose an indicator to reinforce..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {indicators.map((indicator: Indicator) => (
+                          <SelectItem
+                            key={indicator.indicator_code}
+                            value={indicator.indicator_code}
+                          >
+                            {indicator.indicator_code}: {indicator.indicator_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Refinement Indicator */}
+              <FormField
+                control={methods.control}
+                name="refinementIndicator"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Refinement Indicator</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose an indicator to refine..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {indicators.map((indicator: Indicator) => (
+                          <SelectItem
+                            key={indicator.indicator_code}
+                            value={indicator.indicator_code}
+                          >
+                            {indicator.indicator_code}: {indicator.indicator_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Evidence Summary */}
+              <FormField
+                control={methods.control}
+                name="evidenceSummary"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Evidence Summary</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={4} placeholder="Describe what you observed..." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Reinforcement Feedback */}
+              <FormField
+                control={methods.control}
+                name="reinforcementFeedback"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Reinforcement Feedback</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={4} placeholder="Positive feedback for reinforcement..." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Refinement Feedback */}
+              <FormField
+                control={methods.control}
+                name="refinementFeedback"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Refinement Feedback</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={4} placeholder="Constructive feedback for refinement..." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Submit Button */}
+              <div className="flex gap-3">
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1"
-                  onClick={() => {
-                    router.push("/dashboard");
-                  }}
+                  onClick={() => router.push("/dashboard")}
                 >
                   Cancel
                 </Button>
-                {!feedbackGenerated &&
-                !(
-                  watch("walkthroughEntries")?.find(
-                    (e) => e.type === "reinforcement",
-                  )?.aiFeedback &&
-                  watch("walkthroughEntries")?.find(
-                    (e) => e.type === "refinement",
-                  )?.aiFeedback
-                ) ? (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="flex-1"
-                    onClick={handleAIFeedback}
-                    disabled={aiLoading || !watch("evidenceSummary")?.trim()}
-                  >
-                    {aiLoading ? (
-                      "Generating AI Feedback..."
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4" /> AI Feedback
-                      </>
-                    )}
-                  </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    className="flex-1"
-                    disabled={
-                      isSubmitting ||
-                      !(
-                        watch("walkthroughEntries")?.find(
-                          (e) => e.type === "reinforcement",
-                        )?.aiFeedback &&
-                        watch("walkthroughEntries")?.find(
-                          (e) => e.type === "refinement",
-                        )?.aiFeedback
-                      )
-                    }
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Submitting...
-                      </>
-                    ) : (
-                      "Submit"
-                    )}
-                  </Button>
-                )}
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Walkthrough"
+                  )}
+                </Button>
               </div>
             </CardContent>
           </Card>

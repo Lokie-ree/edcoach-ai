@@ -45,7 +45,7 @@ export const QuickInsights = ({
                 <Crown className="h-4 w-4" />
                 Top Team Strengths
               </h4>
-              {analytics.topStrengths.length === 0 ? (
+              {!analytics.topStrengths || analytics.topStrengths.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   No reinforcement data yet
                 </p>
@@ -79,7 +79,7 @@ export const QuickInsights = ({
                 <Target className="h-4 w-4" />
                 Focus Areas
               </h4>
-              {analytics.topGrowthAreas.length === 0 ? (
+              {!analytics.topGrowthAreas || analytics.topGrowthAreas.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   No refinement data yet
                 </p>

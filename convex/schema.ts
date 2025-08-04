@@ -88,25 +88,20 @@ export default defineSchema({
     teacherId: v.id("teachers"),
     observerId: v.id("users"),
     walkthroughDate: v.number(),
-    status: v.union(v.literal("draft"), v.literal("completed")),
+    status: v.literal("completed"),
     evidenceSummary: v.string(),
     reinforcementIndicator: v.string(),
     refinementIndicator: v.string(),
+    reinforcementFeedback: v.string(),
+    refinementFeedback: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_observer", ["observerId"])
     .index("by_teacher", ["teacherId"])
-    .index("by_status", ["status"])
     .index("by_date", ["walkthroughDate"]),
 
-  walkthroughEntries: defineTable({
-    walkthroughId: v.id("walkthroughs"),
-    indicatorAcronym: v.string(),
-    type: v.union(v.literal("reinforcement"), v.literal("refinement")),
-    aiFeedback: v.optional(v.string()),
-    createdAt: v.number(),
-  }).index("by_walkthrough", ["walkthroughId"]),
+
 
   // Reflections: Teacher reflections on walkthroughs
   reflections: defineTable({

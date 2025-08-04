@@ -2,10 +2,8 @@
 
 import { useFormContext } from "react-hook-form";
 import { useState } from "react";
-import { useQuery, useAction } from "convex/react";
-import { useAuth } from "@clerk/nextjs";
+import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,376 +14,240 @@ import {
   Loader2,
   RefreshCw,
   CheckCircle,
-  AlertCircle,
 } from "lucide-react";
-import { WalkthroughFormData } from "../WalkthroughWizard";
-
-interface Indicator {
-  indicator_code: string;
-  indicator_name: string;
-  overview?: string | string[] | Record<string, string>;
-  key_terms?: string | string[] | Record<string, string>;
-  effective_practice?: string | string[] | Record<string, string>;
-  development_evidence?: string | string[] | Record<string, string>;
-  student_centered_evidence?: string | string[] | Record<string, string>;
-  domain?: string;
-}
+import { WalkthroughFormData } from "@/app/(dashboard)/walkthrough/new/validation";
+import { usePlanDetection } from "@/hooks/usePlanDetection";
 
 interface AIFeedbackStepProps {
-  formData: WalkthroughFormData;
-  onNext: () => void;
-  onPrevious: () => void;
-  isFirst: boolean;
   isLast: boolean;
   canProceed: boolean;
 }
 
-type WalkthroughEntry = {
-  indicatorAcronym: string;
-  type: "reinforcement" | "refinement";
-  aiFeedback: string;
-};
-
-export function AIFeedbackStep({}: AIFeedbackStepProps) {
+export function AIFeedbackStep({ isLast }: AIFeedbackStepProps) {
   const methods = useFormContext<WalkthroughFormData>();
   const { toast } = useToast();
-  const { has } = useAuth();
-  const [aiLoading, setAILoading] = useState(false);
+  const { isProPlan, isStarterPlan } = usePlanDetection();
+  
+  const [reinforcementFeedback, setReinforcementFeedback] = useState("");
+  const [refinementFeedback, setRefinementFeedback] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [hasGenerated, setHasGenerated] = useState(false);
 
-  // Get rubric data
-  const rubricData = useQuery(api.rubrics.listRubricWithIndicators);
-  const indicators: Indicator[] = rubricData
-    ? rubricData.domains.flatMap(
-        (domain: { indicators: Indicator[] }) => domain.indicators,
-      )
-    : [];
+  const generateAIFeedback = useAction(api.aiFeedback.generateFeedback);
+  const indicators = useQuery(api.rubricIndicators.getAllIndicators);
 
-  // Get form data
-  const evidenceSummary = methods.watch("evidenceSummary");
-  const teacherId = methods.watch("teacherId");
-  const reinforcementIndicator = methods.watch("reinforcementIndicator");
-  const refinementIndicator = methods.watch("refinementIndicator");
-  const walkthroughEntries = methods.watch("walkthroughEntries") || [];
+  const formData = methods.getValues();
+  
+  const reinforcementIndicator = indicators?.find(
+    i => i.indicator_code === formData.reinforcementIndicator
+  );
+  const refinementIndicator = indicators?.find(
+    i => i.indicator_code === formData.refinementIndicator
+  );
 
-  // Find indicator object by code
-  const getIndicatorByCode = (code: string): Indicator | undefined =>
-    indicators.find((i) => i.indicator_code === code);
-
-  // AI feedback generation
-  const generateAIFeedback = useAction(api.aiFeedback.generateAIFeedback);
-
-  const normalizeIndicatorField = (val: unknown): string => {
-    if (!val) return "N/A";
-
-    if (Array.isArray(val)) {
-      return val.filter((item) => item && typeof item === "string").join("; ");
+  const handleGenerateFeedback = async () => {
+    if (!formData.evidenceSummary || !formData.reinforcementIndicator || !formData.refinementIndicator) {
+      toast({
+        title: "Missing Information",
+        description: "Please complete all previous steps before generating feedback.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    if (typeof val === "object" && val !== null) {
-      const values = Object.values(val as Record<string, unknown>);
-      return values
-        .filter((item) => item && typeof item === "string")
-        .join("; ");
-    }
-
-    return (val as string) || "N/A";
-  };
-
-  const handleGenerateAIFeedback = async () => {
-    setAILoading(true);
+    setIsGenerating(true);
     try {
-      // Validation
-      if (!evidenceSummary?.trim()) {
-        toast({
-          title: "Evidence Required",
-          description:
-            "Please provide evidence summary before generating AI feedback.",
-          variant: "destructive",
-        });
-        return;
-      }
+      const result = await generateAIFeedback({
+        evidenceSummary: formData.evidenceSummary,
+        reinforcementIndicator: formData.reinforcementIndicator,
+        refinementIndicator: formData.refinementIndicator,
+        hasProPlan: isProPlan,
+        hasStarterPlan: isStarterPlan,
+      });
 
-      if (!teacherId) {
-        toast({
-          title: "Teacher Required",
-          description: "Please select a teacher before generating AI feedback.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const reinforcementInd = getIndicatorByCode(reinforcementIndicator);
-      const refinementInd = getIndicatorByCode(refinementIndicator);
-
-      if (!reinforcementInd || !refinementInd) {
-        toast({
-          title: "Error",
-          description: "Please select both indicators.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Check subscription plans
-      const hasProPlan =
-        (has?.({ plan: "coach_pro" }) ?? false) ||
-        (has?.({ permission: "coach_pro" }) ?? false) ||
-        (has?.({ role: "coach_pro" }) ?? false);
-
-      const hasStarterPlan = !hasProPlan;
-
-      // Generate AI feedback
-      const feedbackResult = (await generateAIFeedback({
-        evidence: evidenceSummary,
-        mode: "both",
-        reinforcementIndicator: {
-          indicator_name: reinforcementInd.indicator_name,
-          indicator_code: reinforcementInd.indicator_code,
-          domain: reinforcementInd.domain || "N/A",
-          overview: normalizeIndicatorField(reinforcementInd.overview),
-          key_terms: normalizeIndicatorField(reinforcementInd.key_terms),
-          effective_practice: normalizeIndicatorField(
-            reinforcementInd.effective_practice,
-          ),
-          development_evidence: normalizeIndicatorField(
-            reinforcementInd.development_evidence,
-          ),
-          student_centered_evidence: normalizeIndicatorField(
-            reinforcementInd.student_centered_evidence,
-          ),
-        },
-        refinementIndicator: {
-          indicator_name: refinementInd.indicator_name,
-          indicator_code: refinementInd.indicator_code,
-          domain: refinementInd.domain || "N/A",
-          overview: normalizeIndicatorField(refinementInd.overview),
-          key_terms: normalizeIndicatorField(refinementInd.key_terms),
-          effective_practice: normalizeIndicatorField(
-            refinementInd.effective_practice,
-          ),
-          development_evidence: normalizeIndicatorField(
-            refinementInd.development_evidence,
-          ),
-          student_centered_evidence: normalizeIndicatorField(
-            refinementInd.student_centered_evidence,
-          ),
-        },
-        hasProPlan,
-        hasStarterPlan,
-        teacherId: teacherId as Id<"teachers">,
-      })) as { reinforcement: string; refinement: string };
-
-      // Update form with generated feedback
-      methods.setValue("walkthroughEntries", [
-        {
-          indicatorAcronym: reinforcementIndicator,
-          type: "reinforcement" as const,
-          aiFeedback: feedbackResult.reinforcement,
-        },
-        {
-          indicatorAcronym: refinementIndicator,
-          type: "refinement" as const,
-          aiFeedback: feedbackResult.refinement,
-        },
-      ]);
+      setReinforcementFeedback(result.reinforcementFeedback);
+      setRefinementFeedback(result.refinementFeedback);
+      setHasGenerated(true);
+      
+      // Update the form with the generated feedback
+      methods.setValue("reinforcementFeedback", result.reinforcementFeedback);
+      methods.setValue("refinementFeedback", result.refinementFeedback);
 
       toast({
-        title: "Success",
-        description: "AI feedback generated successfully!",
-        variant: "success",
+        title: "Feedback Generated!",
+        description: "AI feedback has been generated. You can edit it before submitting.",
       });
-    } catch {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: "Failed to generate AI feedback. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate feedback",
         variant: "destructive",
       });
     } finally {
-      setAILoading(false);
+      setIsGenerating(false);
     }
   };
 
-  // Handler for editable feedback textareas
-  const handleFeedbackChange = (
-    type: "reinforcement" | "refinement",
-    value: string,
-  ) => {
-    const entries = methods.getValues("walkthroughEntries") || [];
-    const normalizedEntries: WalkthroughEntry[] = entries.map((entry) => ({
-      ...entry,
-      aiFeedback: entry.aiFeedback ?? "",
-    }));
-    const updatedEntries = normalizedEntries.map((entry) =>
-      entry.type === type
-        ? { ...entry, type: type as typeof entry.type, aiFeedback: value }
-        : entry,
-    );
-    methods.setValue("walkthroughEntries", updatedEntries);
-  };
-
-  const reinforcementFeedback =
-    walkthroughEntries.find((e) => e.type === "reinforcement")?.aiFeedback ||
-    "";
-  const refinementFeedback =
-    walkthroughEntries.find((e) => e.type === "refinement")?.aiFeedback || "";
-  const hasFeedback = reinforcementFeedback && refinementFeedback;
-
   return (
     <div className="space-y-6">
-      {/* Instructions */}
-      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <Sparkles className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
-          <div className="text-sm">
-            <p className="font-medium text-purple-900 mb-1">
-              AI-Powered Feedback Generation
-            </p>
-            <p className="text-purple-700">
-              Generate professional feedback based on your evidence and selected
-              indicators. You can edit and refine the feedback before
-              submitting.
+      {/* Review Summary */}
+      <Card className="border-slate-200 bg-slate-50/50">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            Walkthrough Summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h4 className="font-medium text-green-800 mb-2">Reinforcement</h4>
+              <Badge variant="default" className="bg-green-100 text-green-800">
+                {formData.reinforcementIndicator}
+              </Badge>
+              {reinforcementIndicator && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {reinforcementIndicator.indicator_name}
+                </p>
+              )}
+            </div>
+            <div>
+              <h4 className="font-medium text-blue-800 mb-2">Refinement</h4>
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                {formData.refinementIndicator}
+              </Badge>
+              {refinementIndicator && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {refinementIndicator.indicator_name}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="mt-4">
+            <h4 className="font-medium mb-2">Evidence Summary</h4>
+            <p className="text-sm text-muted-foreground border-l-2 border-slate-300 pl-3">
+              {formData.evidenceSummary.substring(0, 200)}
+              {formData.evidenceSummary.length > 200 && "..."}
             </p>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Generate Button */}
-      {!hasFeedback && (
-        <div className="text-center py-8">
-          <Button
-            onClick={handleGenerateAIFeedback}
-            disabled={aiLoading || !evidenceSummary?.trim()}
-            size="lg"
-            className="w-full md:w-auto"
-          >
-            {aiLoading ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Generating AI Feedback...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5 mr-2" />
-                Generate AI Feedback
-              </>
-            )}
-          </Button>
-
-          {!evidenceSummary?.trim() && (
-            <p className="text-sm text-muted-foreground mt-2">
-              Evidence summary is required to generate feedback
+      {/* AI Feedback Generation */}
+      {!hasGenerated ? (
+        <Card className="border-purple-200 bg-purple-50/50">
+          <CardContent className="p-6 text-center">
+            <Sparkles className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-purple-900 mb-2">
+              Generate AI Feedback
+            </h3>
+            <p className="text-purple-700 mb-4">
+              Generate personalized feedback based on your evidence and selected indicators.
             </p>
-          )}
-        </div>
-      )}
-
-      {/* Generated Feedback */}
-      {hasFeedback && (
-        <div className="space-y-6">
-          {/* Success indicator */}
-          <div className="flex items-center gap-2 text-green-600">
-            <CheckCircle className="w-5 h-5" />
-            <span className="font-medium">
-              AI Feedback Generated Successfully
-            </span>
-          </div>
-
+            <Button
+              onClick={handleGenerateFeedback}
+              disabled={isGenerating}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Generate Feedback
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
           {/* Reinforcement Feedback */}
-          <Card className="bg-green-50 border-green-200">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                Reinforcement Feedback
-                <Badge
-                  variant="secondary"
-                  className="bg-green-100 text-green-700"
+              <CardTitle className="text-lg flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge variant="default" className="bg-green-100 text-green-800">
+                    Reinforcement
+                  </Badge>
+                  Feedback
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleGenerateFeedback}
+                  disabled={isGenerating}
                 >
-                  Strengths
-                </Badge>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <Textarea
                 value={reinforcementFeedback}
-                onChange={(e) =>
-                  handleFeedbackChange("reinforcement", e.target.value)
-                }
-                rows={6}
-                className="w-full bg-white border-green-300 focus:border-green-500 focus:ring-green-500"
-                placeholder="AI-generated reinforcement feedback will appear here."
+                onChange={(e) => {
+                  setReinforcementFeedback(e.target.value);
+                  methods.setValue("reinforcementFeedback", e.target.value);
+                }}
+                className="min-h-[120px]"
+                placeholder="AI-generated reinforcement feedback will appear here..."
               />
             </CardContent>
           </Card>
 
           {/* Refinement Feedback */}
-          <Card className="bg-orange-50 border-orange-200">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                Refinement Feedback
-                <Badge
-                  variant="secondary"
-                  className="bg-orange-100 text-orange-700"
+              <CardTitle className="text-lg flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    Refinement
+                  </Badge>
+                  Feedback
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleGenerateFeedback}
+                  disabled={isGenerating}
                 >
-                  Growth Area
-                </Badge>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <Textarea
                 value={refinementFeedback}
-                onChange={(e) =>
-                  handleFeedbackChange("refinement", e.target.value)
-                }
-                rows={6}
-                className="w-full bg-white border-orange-300 focus:border-orange-500 focus:ring-orange-500"
-                placeholder="AI-generated refinement feedback will appear here."
+                onChange={(e) => {
+                  setRefinementFeedback(e.target.value);
+                  methods.setValue("refinementFeedback", e.target.value);
+                }}
+                className="min-h-[120px]"
+                placeholder="AI-generated refinement feedback will appear here..."
               />
             </CardContent>
           </Card>
 
-          {/* Regenerate Option */}
-          <div className="flex justify-center">
-            <Button
-              variant="outline"
-              onClick={handleGenerateAIFeedback}
-              disabled={aiLoading}
-              size="sm"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Regenerate Feedback
-            </Button>
-          </div>
+          {isLast && (
+            <Card className="border-green-200 bg-green-50/50">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-green-900">Ready to Submit</h4>
+                    <p className="text-sm text-green-700 mt-1">
+                      Review your feedback above and click &quot;Submit Walkthrough&quot; when you&apos;re ready to send it to the teacher.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
-
-      {/* Quality Tips */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-          <div className="text-sm">
-            <p className="font-medium text-blue-900 mb-2">
-              Tips for Quality Feedback
-            </p>
-            <ul className="text-blue-700 space-y-1 text-xs">
-              <li>• Review the AI-generated feedback for accuracy and tone</li>
-              <li>• Add specific examples from your observations if needed</li>
-              <li>• Ensure feedback is constructive and actionable</li>
-              <li>• Personalize the feedback to match your coaching style</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation */}
-      <div className="pt-6">
-        {/* Mobile navigation hint */}
-        <div className="md:hidden text-center mb-4">
-          <p className="text-sm text-muted-foreground">
-            {hasFeedback
-              ? "Feedback ready - proceed to review"
-              : "Generate feedback to continue"}
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

@@ -6,7 +6,7 @@ export type WalkthroughDoc = {
   teacherId: Id<"teachers">;
   observerId: Id<"users">;
   walkthroughDate: number;
-  status: "draft" | "completed";
+  status: "completed";
   evidenceSummary: string;
   reinforcementIndicator: string;
   refinementIndicator: string;
@@ -75,7 +75,7 @@ export interface TeacherProgress {
   teacherName: string;
   totalWalkthroughs: number;
   completedWalkthroughs: number;
-  draftWalkthroughs: number;
+
   lastObservation?: number;
   completionRate: number;
   recentFeedbackCount: number;
@@ -84,7 +84,7 @@ export interface TeacherProgress {
 export interface MonthlyTrend {
   month: string;
   completed: number;
-  draft: number;
+  
   total: number;
 }
 
@@ -94,7 +94,7 @@ export interface AnalyticsData {
   totalWalkthroughs: number;
   thisMonthWalkthroughs: number;
   completedWalkthroughs: number;
-  draftWalkthroughs: number;
+
   totalAiFeedbackGenerated: number;
   totalFeedbackInteractions: number;
   teachersWithRecentActivity: number;

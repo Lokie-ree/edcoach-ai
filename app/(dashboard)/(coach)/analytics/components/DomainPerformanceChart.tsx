@@ -129,7 +129,7 @@ export const DomainPerformanceChart = ({
               <h4 className="text-sm font-medium mb-3 text-green-700 dark:text-green-400">
                 Top Strengths
               </h4>
-              {analytics.topStrengths.length === 0 ? (
+              {!analytics.topStrengths || analytics.topStrengths.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No data yet</p>
               ) : (
                 <div className="space-y-2">
@@ -149,7 +149,7 @@ export const DomainPerformanceChart = ({
                           <div
                             className="bg-green-500 h-2 rounded-full transition-all"
                             style={{
-                              width: `${(item.count / Math.max(...analytics.topStrengths.map((i) => i.count))) * 100}%`,
+                              width: `${analytics.topStrengths && analytics.topStrengths.length > 0 ? (item.count / Math.max(...analytics.topStrengths.map((i) => i.count))) * 100 : 0}%`,
                             }}
                           ></div>
                         </div>
@@ -167,7 +167,7 @@ export const DomainPerformanceChart = ({
               <h4 className="text-sm font-medium mb-3 text-orange-700 dark:text-orange-400">
                 Focus Areas
               </h4>
-              {analytics.topGrowthAreas.length === 0 ? (
+              {!analytics.topGrowthAreas || analytics.topGrowthAreas.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No data yet</p>
               ) : (
                 <div className="space-y-2">
@@ -187,7 +187,7 @@ export const DomainPerformanceChart = ({
                           <div
                             className="bg-orange-500 h-2 rounded-full transition-all"
                             style={{
-                              width: `${(item.count / Math.max(...analytics.topGrowthAreas.map((i) => i.count))) * 100}%`,
+                              width: `${analytics.topGrowthAreas && analytics.topGrowthAreas.length > 0 ? (item.count / Math.max(...analytics.topGrowthAreas.map((i) => i.count))) * 100 : 0}%`,
                             }}
                           ></div>
                         </div>

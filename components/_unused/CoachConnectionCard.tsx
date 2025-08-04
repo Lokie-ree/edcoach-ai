@@ -79,10 +79,7 @@ export default function CoachConnectionCard({ coach, coachingStats }: { coach: C
                 Upcoming
               </p>
               <p className="text-sm text-blue-600 dark:text-blue-400">
-                {coachingStats.draftWalkthroughs && coachingStats.draftWalkthroughs > 0
-                  ? `${coachingStats.draftWalkthroughs} draft walkthrough${coachingStats.draftWalkthroughs === 1 ? '' : 's'} pending completion`
-                  : "Next coaching session: Schedule with your coach"
-                }
+                {"Next coaching session: Schedule with your coach"}
               </p>
             </div>
           </div>

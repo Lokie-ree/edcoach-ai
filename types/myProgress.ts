@@ -20,7 +20,6 @@ export type CoachInfo = {
 export type CoachingStats = {
   totalWalkthroughs: number;
   completedWalkthroughs: number;
-  draftWalkthroughs: number;
   lastObservation: number | null;
   latestFeedback: string | null;
   latestIndicator: string | null;

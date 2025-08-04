@@ -11,7 +11,7 @@ import React from "react";
 import { Id } from "@/convex/_generated/dataModel";
 import { ReflectionCard } from "./components/ReflectionCard";
 import FeedbackSection from "./components/FeedbackSection";
-import DraftMessage from "./components/DraftMessage";
+
 
 export default function ViewWalkthroughPage({
   params,
@@ -87,17 +87,13 @@ export default function ViewWalkthroughPage({
         <FeedbackSection
           walkthrough={walkthrough}
           entries={entries || []}
-          indicatorNames={indicatorNames}
+          indicatorNames={{
+            reinforcementIndicatorName: indicatorNames.reinforcementIndicator,
+            refinementIndicatorName: indicatorNames.refinementIndicator
+          }}
         />
       )}
-      {/* Draft Message */}
-      {walkthrough && (
-        <DraftMessage
-          walkthrough={walkthrough}
-          walkthroughId={walkthroughId}
-          userRole={userRole}
-        />
-      )}
+
     </div>
   );
 }

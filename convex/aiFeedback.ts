@@ -249,3 +249,103 @@ Generate ${isReinforcement ? "reinforcement" : "refinement"} feedback: ${isReinf
     }
   },
 });
+
+/**
+ * Simplified feedback generation for the new walkthrough system
+ */
+export const generateFeedback = action({
+  args: {
+    evidenceSummary: v.string(),
+    reinforcementIndicator: v.string(),
+    refinementIndicator: v.string(),
+    hasProPlan: v.optional(v.boolean()),
+    hasStarterPlan: v.optional(v.boolean()),
+  },
+  returns: v.object({
+    reinforcementFeedback: v.string(),
+    refinementFeedback: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    // Authentication check
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const user = await ctx.runQuery(internal.users.internalGetUserByClerkId, {
+      clerkId: identity.subject,
+    });
+    if (!user) throw new Error("User not found");
+
+    // Usage limits check
+    const usageCheck = await ctx.runQuery(api.plans.getAIUsageThisMonth, {
+      hasProPlan: args.hasProPlan,
+      hasStarterPlan: args.hasStarterPlan,
+    });
+    if (usageCheck.isOverLimit) {
+      throw new Error("You have reached your monthly AI usage limit. Please upgrade your plan.");
+    }
+
+    // Get indicator details
+    const indicators = await ctx.runQuery(api.rubricIndicators.getAllIndicators);
+    const reinforcementIndicatorData = indicators.find((i: any) => i.indicator_code === args.reinforcementIndicator);
+    const refinementIndicatorData = indicators.find((i: any) => i.indicator_code === args.refinementIndicator);
+
+    if (!reinforcementIndicatorData || !refinementIndicatorData) {
+      throw new Error("Invalid indicators selected");
+    }
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    try {
+      const prompt = `You are an expert instructional coach providing feedback to a teacher based on a classroom walkthrough observation.
+
+OBSERVATION EVIDENCE:
+${args.evidenceSummary}
+
+INDICATORS:
+Reinforcement (what went well): ${reinforcementIndicatorData.indicator_code} - ${reinforcementIndicatorData.indicator_name}
+Refinement (area for growth): ${refinementIndicatorData.indicator_code} - ${refinementIndicatorData.indicator_name}
+
+Please provide specific, actionable feedback in exactly this JSON format:
+{
+  "reinforcementFeedback": "Brief, specific feedback celebrating what the teacher did well related to the reinforcement indicator. Be encouraging and cite specific evidence.",
+  "refinementFeedback": "Brief, specific feedback suggesting how the teacher can improve related to the refinement indicator. Be constructive and provide concrete next steps."
+}
+
+Keep each feedback section to 2-3 sentences and focus on actionable insights.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+        max_tokens: 500,
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error("No content in AI response");
+      }
+
+      let result;
+      try {
+        result = JSON.parse(content);
+        if (!result.reinforcementFeedback || !result.refinementFeedback) {
+          throw new Error("Invalid response structure");
+        }
+      } catch {
+        throw new Error("Failed to parse AI response");
+      }
+
+      // Usage is tracked when the walkthrough is created
+
+      return {
+        reinforcementFeedback: result.reinforcementFeedback,
+        refinementFeedback: result.refinementFeedback,
+      };
+    } catch (error) {
+      console.error("AI feedback generation error:", error);
+      throw new Error("Failed to generate feedback. Please try again.");
+    }
+  },
+});

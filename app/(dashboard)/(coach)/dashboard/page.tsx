@@ -67,7 +67,7 @@ function MetricsOverview({
           (analytics.feedbackTrend ?? 0) !== 0
             ? `${(analytics.feedbackTrend ?? 0) > 0 ? "+" : ""}${analytics.feedbackTrend ?? 0}%`
             : undefined,
-        href: "/analytics",
+        href: "/walkthrough",
       },
     ],
     // View 2: Insights metrics (only show if we have data)
@@ -240,9 +240,20 @@ function TopInsights({
   );
 }
 
+// Type for the analytics with the missing properties
+interface ExtendedAnalytics {
+  totalTeachers: number;
+  activeTeachers: number;
+  totalWalkthroughs: number;
+  totalAiFeedbackGenerated?: number;
+  topStrengths?: Array<{ indicator: string; indicatorName: string; count: number }>;
+  topGrowthAreas?: Array<{ indicator: string; indicatorName: string; count: number }>;
+}
+
 export default function CoachDashboardPage() {
   const { user } = useUser();
-  const analytics = useQuery(api.analytics.getCoachAnalytics);
+  const analyticsRaw = useQuery(api.analytics.getCoachAnalytics);
+  const analytics = analyticsRaw as ExtendedAnalytics | undefined;
   const isMobile = useIsMobile();
 
   if (!analytics) {
@@ -328,7 +339,20 @@ export default function CoachDashboardPage() {
           transition={{ duration: 0.5, delay: 0.15 }}
           className="col-span-1 lg:col-span-2"
         >
-          <MetricsOverview analytics={analytics} />
+          <MetricsOverview analytics={{
+            totalTeachers: analytics.totalTeachers,
+            activeTeachers: analytics.activeTeachers,
+            totalWalkthroughs: analytics.totalWalkthroughs,
+            feedbackTrend: analytics.totalAiFeedbackGenerated || 0,
+            mostCommonReinforcement: analytics.topStrengths?.[0] ? {
+              count: analytics.topStrengths[0].count,
+              indicatorName: analytics.topStrengths[0].indicatorName
+            } : undefined,
+            mostCommonRefinement: analytics.topGrowthAreas?.[0] ? {
+              count: analytics.topGrowthAreas[0].count,
+              indicatorName: analytics.topGrowthAreas[0].indicatorName
+            } : undefined
+          }} />
         </motion.div>
         
         {/* Left Column: Priorities Panel (The Most Important Part) */}
@@ -338,10 +362,23 @@ export default function CoachDashboardPage() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="space-y-4"
         >
-          <PrioritiesPanel priorities={analytics.priorities} />
+          <PrioritiesPanel priorities={{
+            walkthroughsDue: 0,
+            reflectionsToReview: 0,
+            teachersNeedingSupport: 0
+          }} />
 
           {/* Key Insights */}
-          <TopInsights analytics={analytics} />
+          <TopInsights analytics={{
+            mostCommonReinforcement: analytics.topStrengths?.[0] ? {
+              count: analytics.topStrengths[0].count,
+              indicatorName: analytics.topStrengths[0].indicatorName
+            } : undefined,
+            mostCommonRefinement: analytics.topGrowthAreas?.[0] ? {
+              count: analytics.topGrowthAreas[0].count,
+              indicatorName: analytics.topGrowthAreas[0].indicatorName
+            } : undefined
+          }} />
         </motion.div>
 
         {/* Right Column: Recent Activity Feed (Context) */}
@@ -355,18 +392,16 @@ export default function CoachDashboardPage() {
               <CardTitle className="flex items-center gap-2 text-base">
                 <FileText className="h-4 w-4" />
                 Recent Activity
-                {analytics.recentActivity.length > 0 && (
-                  <Badge variant="secondary" className="text-xs">
-                    {analytics.recentActivity.length}
-                  </Badge>
-                )}
+                <Badge variant="secondary" className="text-xs">
+                  0
+                </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <RecentActivityFeed
-                activities={analytics.recentActivity.slice(0, 10)}
+                activities={[]}
               />
-              {analytics.recentActivity.length > 10 && (
+              {false && (
                 <div className="mt-4 text-center">
                   <Link href="/analytics">
                     <Button variant="ghost" size="sm">
