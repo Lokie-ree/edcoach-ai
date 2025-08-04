@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 
 interface ActivityItem {
   id: string;
-  type: "walkthrough" | "reflection" | "feedback";
+  type: "walkthrough" | "reflection" | "feedback" | string;
   teacherName: string;
   timestamp: number;
   status: string;
@@ -40,6 +40,8 @@ function ActivityItem({
         return <FileText className="h-4 w-4" />;
       case "feedback":
         return <MessageSquare className="h-4 w-4" />;
+      default:
+        return <BookOpen className="h-4 w-4" />; // Default to walkthrough icon
     }
   };
 

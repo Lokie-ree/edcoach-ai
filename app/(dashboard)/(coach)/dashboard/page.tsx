@@ -245,9 +245,23 @@ interface ExtendedAnalytics {
   totalTeachers: number;
   activeTeachers: number;
   totalWalkthroughs: number;
-  totalAiFeedbackGenerated?: number;
+  totalFeedbackGenerated?: number;
   topStrengths?: Array<{ indicator: string; indicatorName: string; count: number }>;
   topGrowthAreas?: Array<{ indicator: string; indicatorName: string; count: number }>;
+  recentActivity?: Array<{
+    id: string;
+    type: string;
+    teacherName: string;
+    timestamp: number;
+    status: string;
+    title: string;
+    href: string;
+  }>;
+  priorities?: {
+    walkthroughsDue: number;
+    reflectionsToReview: number;
+    teachersNeedingSupport: number;
+  };
 }
 
 export default function CoachDashboardPage() {
@@ -343,7 +357,7 @@ export default function CoachDashboardPage() {
             totalTeachers: analytics.totalTeachers,
             activeTeachers: analytics.activeTeachers,
             totalWalkthroughs: analytics.totalWalkthroughs,
-            feedbackTrend: analytics.totalAiFeedbackGenerated || 0,
+            feedbackTrend: analytics.totalFeedbackGenerated || 0,
             mostCommonReinforcement: analytics.topStrengths?.[0] ? {
               count: analytics.topStrengths[0].count,
               indicatorName: analytics.topStrengths[0].indicatorName
@@ -363,9 +377,9 @@ export default function CoachDashboardPage() {
           className="space-y-4"
         >
           <PrioritiesPanel priorities={{
-            walkthroughsDue: 0,
-            reflectionsToReview: 0,
-            teachersNeedingSupport: 0
+            walkthroughsDue: analytics.priorities?.walkthroughsDue || 0,
+            reflectionsToReview: analytics.priorities?.reflectionsToReview || 0,
+            teachersNeedingSupport: analytics.priorities?.teachersNeedingSupport || 0
           }} />
 
           {/* Key Insights */}
@@ -393,15 +407,15 @@ export default function CoachDashboardPage() {
                 <FileText className="h-4 w-4" />
                 Recent Activity
                 <Badge variant="secondary" className="text-xs">
-                  0
+                  {analytics.recentActivity?.length || 0}
                 </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <RecentActivityFeed
-                activities={[]}
+                activities={analytics.recentActivity || []}
               />
-              {false && (
+              {analytics.recentActivity && analytics.recentActivity.length > 0 && (
                 <div className="mt-4 text-center">
                   <Link href="/analytics">
                     <Button variant="ghost" size="sm">

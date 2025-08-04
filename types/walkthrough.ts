@@ -5,6 +5,8 @@ export interface Walkthrough {
   evidenceSummary: string;
   reinforcementIndicator: string;
   refinementIndicator: string;
+  reinforcementFeedback: string;
+  refinementFeedback: string;
   teacherId: string;
   teacherName?: string;
 }

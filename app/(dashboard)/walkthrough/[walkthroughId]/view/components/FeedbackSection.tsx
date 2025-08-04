@@ -3,10 +3,9 @@ import { BorderBeam } from "@/components/magicui/border-beam";
 import { Award, Target } from "lucide-react";
 import { motion } from "framer-motion";
 import React from "react";
-import { FeedbackEntry, Walkthrough } from "@/types/walkthrough";
+import { Walkthrough } from "@/types/walkthrough";
 
 interface FeedbackSectionProps {
-  entries: FeedbackEntry[];
   walkthrough: Walkthrough;
   indicatorNames: {
     reinforcementIndicatorName: string;
@@ -15,12 +14,12 @@ interface FeedbackSectionProps {
 }
 
 export default function FeedbackSection({
-  entries,
   walkthrough,
   indicatorNames,
 }: FeedbackSectionProps) {
-  const reinforcementEntry = entries?.find((e) => e.type === "reinforcement");
-  const refinementEntry = entries?.find((e) => e.type === "refinement");
+  // Use feedback directly from walkthrough document instead of entries
+  const reinforcementFeedback = walkthrough.reinforcementFeedback;
+  const refinementFeedback = walkthrough.refinementFeedback;
 
   if (walkthrough.status !== "completed") return null;
 
@@ -55,14 +54,14 @@ export default function FeedbackSection({
                 {indicatorNames.reinforcementIndicatorName}
               </p>
             </div>
-            {reinforcementEntry?.aiFeedback && (
+            {reinforcementFeedback && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
                   Feedback
                 </p>
                 <div className="mt-2 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
                   <p className="text-sm whitespace-pre-wrap">
-                    {reinforcementEntry.aiFeedback}
+                    {reinforcementFeedback}
                   </p>
                 </div>
               </div>
@@ -94,14 +93,14 @@ export default function FeedbackSection({
                 {indicatorNames.refinementIndicatorName}
               </p>
             </div>
-            {refinementEntry?.aiFeedback && (
+            {refinementFeedback && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
                   Feedback
                 </p>
                 <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                   <p className="text-sm whitespace-pre-wrap">
-                    {refinementEntry.aiFeedback}
+                    {refinementFeedback}
                   </p>
                 </div>
               </div>

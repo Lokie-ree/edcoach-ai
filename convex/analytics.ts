@@ -89,6 +89,20 @@ export const getCoachAnalytics = query({
         href: v.string(),
       }),
     ),
+    topStrengths: v.array(
+      v.object({
+        indicator: v.string(),
+        indicatorName: v.string(),
+        count: v.number(),
+      })
+    ),
+    topGrowthAreas: v.array(
+      v.object({
+        indicator: v.string(),
+        indicatorName: v.string(),
+        count: v.number(),
+      })
+    ),
   }),
   handler: async (ctx) => {
     const user = await getCurrentUserOrThrow(ctx);
@@ -145,7 +159,7 @@ export const getCoachAnalytics = query({
 
     // Get recent activity (last 10 walkthroughs)
     const recentWalkthroughs = coachWalkthroughs
-      .sort((a, b) => b.createdAt - a.createdAt)
+      .sort((a, b) => b._creationTime - a._creationTime)
       .slice(0, 10);
 
     const recentActivity = [];
@@ -156,10 +170,10 @@ export const getCoachAnalytics = query({
         id: walkthrough._id,
         type: "walkthrough",
         teacherName: teacher?.name || "Unknown Teacher",
-        timestamp: walkthrough.createdAt,
+        timestamp: walkthrough._creationTime,
         status: "completed",
         title: `Walkthrough observation completed`,
-        href: `/walkthrough/${walkthrough._id}`,
+        href: `/walkthrough/${walkthrough._id}/view`,
       });
     }
 
@@ -186,6 +200,47 @@ export const getCoachAnalytics = query({
       t.status === "needs_details" || t.status === "pending"
     ).length;
 
+    // Get all indicators for name lookup
+    const allIndicators = await ctx.db.query("rubricIndicators").collect();
+    const indicatorMap = new Map(
+      allIndicators.map(ind => [ind.indicator_code, ind.indicator_name])
+    );
+
+    // Count reinforcement and refinement indicators
+    const reinforcementCounts: Record<string, number> = {};
+    const refinementCounts: Record<string, number> = {};
+
+    for (const walkthrough of coachWalkthroughs) {
+      if (walkthrough.reinforcementIndicator) {
+        reinforcementCounts[walkthrough.reinforcementIndicator] = 
+          (reinforcementCounts[walkthrough.reinforcementIndicator] || 0) + 1;
+      }
+      if (walkthrough.refinementIndicator) {
+        refinementCounts[walkthrough.refinementIndicator] = 
+          (refinementCounts[walkthrough.refinementIndicator] || 0) + 1;
+      }
+    }
+
+    // Get top strengths (reinforcement indicators)
+    const topStrengths = Object.entries(reinforcementCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([indicator, count]) => ({
+        indicator,
+        indicatorName: indicatorMap.get(indicator) || indicator,
+        count,
+      }));
+
+    // Get top growth areas (refinement indicators)
+    const topGrowthAreas = Object.entries(refinementCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([indicator, count]) => ({
+        indicator,
+        indicatorName: indicatorMap.get(indicator) || indicator,
+        count,
+      }));
+
     return {
       totalTeachers,
       activeTeachers,
@@ -202,6 +257,8 @@ export const getCoachAnalytics = query({
         teachersNeedingSupport,
       },
       recentActivity,
+      topStrengths,
+      topGrowthAreas,
     };
   },
 });
@@ -248,7 +305,7 @@ export const getTeacherAnalytics = query({
 
         // Find most recent activity (latest walkthrough)
       const lastActivity = walkthroughs.length > 0
-        ? walkthroughs.sort((a, b) => b.createdAt - a.createdAt)[0].createdAt
+        ? walkthroughs.sort((a, b) => b._creationTime - a._creationTime)[0]._creationTime
         : undefined;
 
       // PGP Progress Trend Calculation
@@ -331,11 +388,11 @@ export const getMyTeacherAnalytics = query({
 
     // Get recent walkthroughs (last 10)
     const recentWalkthroughs = walkthroughs
-      .sort((a, b) => b.createdAt - a.createdAt)
+      .sort((a, b) => b._creationTime - a._creationTime)
       .slice(0, 10)
       .map(walkthrough => ({
         _id: walkthrough._id,
-        createdAt: walkthrough.createdAt,
+        createdAt: walkthrough._creationTime,
         hasAiFeedback: true, // All walkthroughs now include feedback
       }));
 

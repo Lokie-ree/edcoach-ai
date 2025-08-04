@@ -11,6 +11,7 @@ import React from "react";
 import { Id } from "@/convex/_generated/dataModel";
 import { ReflectionCard } from "./components/ReflectionCard";
 import FeedbackSection from "./components/FeedbackSection";
+import { getIndicatorName } from "@/lib/IndicatorUtils";
 
 
 export default function ViewWalkthroughPage({
@@ -59,7 +60,7 @@ export default function ViewWalkthroughPage({
     );
   }
 
-  const { walkthrough, teacher, entries, userRole, indicatorNames } =
+  const { walkthrough, teacher, userRole, indicatorNames } =
     viewDetails;
 
   return (
@@ -86,10 +87,9 @@ export default function ViewWalkthroughPage({
       {walkthrough && (
         <FeedbackSection
           walkthrough={walkthrough}
-          entries={entries || []}
           indicatorNames={{
-            reinforcementIndicatorName: indicatorNames.reinforcementIndicator,
-            refinementIndicatorName: indicatorNames.refinementIndicator
+            reinforcementIndicatorName: getIndicatorName(indicatorNames.reinforcementIndicator),
+            refinementIndicatorName: getIndicatorName(indicatorNames.refinementIndicator)
           }}
         />
       )}
