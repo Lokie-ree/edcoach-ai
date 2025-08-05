@@ -11,8 +11,11 @@ import {
 } from "@/components/ui/sidebar";
 import { CoachNavItems } from "./CoachNavItems";
 import { TeacherNavItems } from "./TeacherNavItems";
-import { TeamSwitcher } from "@/components/_unused/team-switcher";
-import { AIUsageBadge, TeacherUsageBadge } from "@/components/common/AiUsageBadge";
+import { TeamSwitcher } from "@/components/ui/team-switcher";
+import {
+  AIUsageBadge,
+  TeacherUsageBadge,
+} from "@/components/common/AiUsageBadge";
 
 interface SidebarNavProps {
   userRole?: "coach" | "teacher";
@@ -35,22 +38,19 @@ export function SidebarNav({ userRole }: SidebarNavProps) {
       <SidebarHeader>
         <div className="space-y-3">
           <TeamSwitcher teams={teams} />
-          {userRole === "coach" && state === "expanded" && ( // <-- Only show badges when expanded
-            <div className="space-y-2 flex flex-col">
-              <AIUsageBadge />
-              <TeacherUsageBadge />
-            </div>
-          )}
+          {userRole === "coach" &&
+            state === "expanded" && ( // <-- Only show badges when expanded
+              <div className="space-y-2 flex flex-col">
+                <AIUsageBadge />
+                <TeacherUsageBadge />
+              </div>
+            )}
         </div>
       </SidebarHeader>
       <SidebarContent>
-        {userRole === "coach" ? (
-          <CoachNavItems />
-        ) : (
-          <TeacherNavItems />
-        )}
+        {userRole === "coach" ? <CoachNavItems /> : <TeacherNavItems />}
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
   );
-} 
+}
