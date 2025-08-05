@@ -12,8 +12,16 @@ import { useToast } from "@/components/ui/toast";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight, Send, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Send, Loader2, X } from "lucide-react";
 import { usePlanDetection } from "@/hooks/usePlanDetection";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
 
 // Step Components
 import { IndicatorSelectionStep } from "./wizard-steps/IndicatorSelectionStep";
@@ -44,12 +52,12 @@ const STEPS = [
 
 interface WalkthroughWizardProps {
   preselectedTeacherId?: Id<"teachers">;
-  onClose?: () => void;
 }
 
-export function WalkthroughWizard({ preselectedTeacherId, onClose }: WalkthroughWizardProps) {
+export function WalkthroughWizard({ preselectedTeacherId }: WalkthroughWizardProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
   const { isProPlan, isStarterPlan } = usePlanDetection();
@@ -134,7 +142,7 @@ export function WalkthroughWizard({ preselectedTeacherId, onClose }: Walkthrough
 
       // Navigate to the completed walkthrough
       router.push(`/walkthrough/${walkthroughId}/view`);
-      onClose?.();
+      // onClose?.(); // This line is removed as per the edit hint
     } catch (error: unknown) {
       toast({
         title: "Error",
@@ -146,24 +154,60 @@ export function WalkthroughWizard({ preselectedTeacherId, onClose }: Walkthrough
     }
   };
 
+  // Check if user has started filling out the form
+  const hasStartedForm = (): boolean => {
+    const values = methods.getValues();
+    return !!(values.teacherId || 
+              values.reinforcementIndicator || 
+              values.refinementIndicator || 
+              values.evidenceSummary ||
+              values.reinforcementFeedback ||
+              values.refinementFeedback);
+  };
+
+  const handleCancelClick = () => {
+    if (hasStartedForm()) {
+      setShowCancelDialog(true);
+    } else {
+      router.push('/dashboard');
+    }
+  };
+
+  const handleConfirmCancel = () => {
+    setShowCancelDialog(false);
+    router.push('/dashboard');
+  };
+
   const StepComponent = currentStep.component;
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>New Walkthrough</span>
-            <span className="text-sm font-normal text-muted-foreground">
-              Step {currentStepIndex + 1} of {STEPS.length}
-            </span>
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-normal text-muted-foreground">
+                Step {currentStepIndex + 1} of {STEPS.length}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleCancelClick}
+                className="h-8 w-8 p-0"
+                title="Cancel walkthrough"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </CardTitle>
           <Progress value={progress} className="w-full" />
         </CardHeader>
         
         <CardContent>
           <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">{currentStep.title}</h2>
+            <h2 className="text-lg font-semibold mb-2">{currentStep.title}</h2>
             <p className="text-muted-foreground">{currentStep.description}</p>
           </div>
 
@@ -216,6 +260,32 @@ export function WalkthroughWizard({ preselectedTeacherId, onClose }: Walkthrough
           </FormProvider>
         </CardContent>
       </Card>
+
+      {/* Cancel Confirmation Dialog */}
+      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Walkthrough?</DialogTitle>
+            <DialogDescription>
+              You have unsaved changes. Are you sure you want to cancel? All your progress will be lost.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowCancelDialog(false)}
+            >
+              Continue Editing
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmCancel}
+            >
+              Cancel Walkthrough
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

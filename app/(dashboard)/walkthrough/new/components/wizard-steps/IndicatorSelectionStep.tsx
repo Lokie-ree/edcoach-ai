@@ -104,15 +104,15 @@ export function IndicatorSelectionStep({}: IndicatorSelectionStepProps) {
         )}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Reinforcement Indicator */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="text-base flex items-center gap-2 flex-wrap">
               <Badge variant="default" className="bg-green-100 text-green-800">
                 Reinforcement
               </Badge>
-              What went well?
+              <span className="break-words">What went well?</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -134,7 +134,7 @@ export function IndicatorSelectionStep({}: IndicatorSelectionStepProps) {
                           key={indicator.indicator_code}
                           value={indicator.indicator_code}
                         >
-                          <div>
+                          <div className="break-words">
                             <div className="font-medium">
                               {(indicator as Indicator).indicator_code}: {(indicator as Indicator).indicator_name}
                             </div>
@@ -153,11 +153,11 @@ export function IndicatorSelectionStep({}: IndicatorSelectionStepProps) {
         {/* Refinement Indicator */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="text-base flex items-center gap-2 flex-wrap">
               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                 Refinement
               </Badge>
-              Area for growth?
+              <span className="break-words">Area for growth?</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -179,7 +179,7 @@ export function IndicatorSelectionStep({}: IndicatorSelectionStepProps) {
                           key={indicator.indicator_code}
                           value={indicator.indicator_code}
                         >
-                          <div>
+                          <div className="break-words">
                             <div className="font-medium">
                               {(indicator as Indicator).indicator_code}: {(indicator as Indicator).indicator_name}
                             </div>
