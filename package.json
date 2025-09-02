@@ -13,7 +13,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@anthropic-ai/claude-code": "^1.0.70",
     "@clerk/backend": "^2.6.3",
     "@clerk/clerk-react": "^5.39.0",
     "@clerk/nextjs": "^6.29.0",
