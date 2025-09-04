@@ -1,8 +1,10 @@
 # EdCoach AI - User Personas
 
-**Last Updated:** January 2025  
+**Last Updated:** September 4, 2025  
 **Document Owner:** Product Manager  
 **Reviewers:** UX/UI Designer, System Architect
+
+*This document is structured according to the principles outlined in the [Core Documentation for Project Success](./foundational-documentation.md).*
 
 ## Primary Personas
 

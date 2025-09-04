@@ -1,8 +1,10 @@
 # EdCoach AI - Vision & Goals
 
-**Last Updated:** January 2025  
+**Last Updated:** September 4, 2025 
 **Document Owner:** Product Manager  
 **Reviewers:** System Architect, UX/UI Designer
+
+*This document is structured according to the principles outlined in the [Core Documentation for Project Success](./foundational-documentation.md).*
 
 ## Project Vision Statement
 
