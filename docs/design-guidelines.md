@@ -14,8 +14,8 @@ This document outlines the visual design language and interaction patterns for E
 
 The application uses a combination of fonts to create a clean, readable, and modern aesthetic.
 
-*   **Primary Font (Headings):** [Font Family Name] - Used for all `h1`, `h2`, `h3`, etc.
-*   **Secondary Font (Body):** [Font Family Name] - Used for all paragraphs and standard text.
+*   **Primary Font (Headings):** "Cal Sans" - Used for all `h1`, `h2`, `h3`, etc.
+*   **Secondary Font (Body):** "Inter" - Used for all paragraphs and standard text.
 *   **Usage:** Font styles are managed via Tailwind CSS typography plugins and utility classes. Do not apply manual font styling.
 
 *(Note: Specific font pairings to be finalized and added here.)*
@@ -60,6 +60,6 @@ To ensure a consistent and user-friendly experience, all forms should adhere to 
 
 ## 7. Icon Usage
 
-*   **Library:** [Name of Icon Library, e.g., Lucide React] is the standard icon library for this project.
+*   **Library:** "Lucide React" is the standard icon library for this project.
 *   **Sizing:** Icons should be used with consistent sizing. The default size should be `h-4 w-4` or `h-5 w-5`.
 *   **Color:** Use semantic color classes (`text-primary`, `text-destructive`) to color icons according to their context, rather than hardcoding color values.

@@ -147,6 +147,9 @@ This documents the ideal user experience across the complete 5-phase continuous 
 - **System Response:** Displays feedback with goal context and rubric connections
 - **UI Elements:** Feedback card with PGP goal reminder above
 - **Microcopy:** "This feedback connects to your goal: [PGP Goal]"
+- **UI Elements:** Feedback card with PGP goal reminder above. A small lock icon with tooltip text is present.
+- **Microcopy:** "This feedback connects to your goal: [PGP Goal]"
+- **Tooltip Microcopy:** "Note: Your reflections are private and only visible to you and your instructional coach."
 
 **Step 3: Engage with Reflection Prompts**
 - **User Action:** Teacher responds to guided reflection questions
@@ -315,6 +318,47 @@ This documents the ideal user experience across the complete 5-phase continuous 
 - **Teacher Engagement:** >70% teachers visit growth journal weekly
 - **Action Completion:** >85% priority items addressed within 7 days
 
+---
+
+## Coach Pro Journey: Analyzing Team-Wide Trends
+
+### Journey Overview
+This documents the user experience for a "Coach Pro" user accessing the advanced analytics dashboard to identify team-wide instructional trends.
+
+#### Entry Point
+- **Trigger:** Weekly or monthly review of team performance.
+- **Starting Location:** Coach Dashboard → "Team Analytics" tab.
+
+#### Step-by-Step Journey
+
+**Step 1: Access Analytics Dashboard**
+- **User Action:** Coach clicks on the "[Team Analytics]" navigation item.
+- **System Response:** Loads the analytics dashboard, defaulting to an all-teachers view for the current month.
+- **UI Elements:** Interactive charts, date range filters, indicator filters, export button.
+- **Microcopy:** "Team-Wide Instructional Trends"
+
+**Step 2: Filter and Analyze Data**
+- **User Action:** Coach uses filters to select a specific date range, a rubric indicator, or a group of teachers.
+- **System Response:** Dashboard charts and data visualizations update in real-time.
+- **UI Elements:** Heat maps showing frequently tagged indicators, trend lines showing progress against specific indicators over time.
+- **Microcopy:** "Showing trends for [Indicator Name] between [Start Date] and [End Date]."
+
+**Step 3: Identify a Trend**
+- **User Action:** Coach identifies a pattern (e.g., a specific "refinement" indicator is appearing frequently across multiple teachers).
+- **System Response:** Hovering over data points reveals more detailed information and contributing walkthroughs.
+- **UI Elements:** Tooltips with specific data, links to individual teacher profiles.
+- **Microcopy:** "[Indicator Name] was marked as a refinement area in 7 out of 10 walkthroughs this month."
+
+**Step 4: Formulate a Coaching Strategy**
+- **User Action:** Based on the identified trend, the coach decides on a strategy (e.g., plan a group professional development session).
+- **System Response:** The system provides an option to export the chart or data as a PDF/CSV to share with stakeholders.
+- **UI Elements:** "[Export to PDF]" button.
+- **Microcopy:** "Export this view to share with your team."
+
+#### Exit Points & Outcomes
+- **Success:** The coach gains actionable insight into team-wide strengths and areas for growth, enabling more strategic coaching.
+- **Next Step:** The coach uses these insights to inform their coaching plan for the upcoming week or month.
+
 ## Version History
-- **v1.0** (January 2025) - Initial user journey documentation
-- **Next Review:** February 2025 (after user testing validation)
+- **v1.0** (September 2025) - Initial user journey documentation
+- **Next Review:** November 2025 (after user testing validation)

@@ -54,3 +54,22 @@ Instead of using hardcoded colors, the `Badge` component uses semantic variants 
 *   `secondary`: For less prominent information.
 
 **Guideline:** Always use a semantic variant that matches the meaning of the information being displayed. If a new semantic meaning is required (e.g., "success" or "in-progress"), a new variant should be added to the component's styles in `globals.css` and documented here.
+
+## 6. Journey-Specific Components
+
+To support key moments in the user journey, the following specialized components must be implemented with consistent properties and states.
+
+### 6.1. AchievementBadge
+*   **Purpose:** To visually celebrate a teacher's progress and milestones (e.g., "5 Reflections Completed!").
+*   **Properties:** `icon`, `title`, `description`.
+*   **States:** `default`, `unlocked`.
+
+### 6.2. PriorityIndicator
+*   **Purpose:** To draw a coach's attention to time-sensitive tasks on their dashboard (e.g., a teacher needing a walkthrough).
+*   **Properties:** `level` ('high', 'medium', 'low').
+*   **Variants:** Should be color-coded based on the `level` property (e.g., red for 'high').
+
+### 6.3. GrowthChart
+*   **Purpose:** To visualize a teacher's or a team's progress over time on the analytics dashboards.
+*   **Properties:** `data`, `timeRange`, `indicator`.
+*   **States:** `loading`, `default`, `empty`.

@@ -79,3 +79,40 @@ graph TD
 4.  **Action Calls OpenAI:** The `action` formats a prompt containing the PGP goal, rubric indicators, and observation evidence, then calls the OpenAI API.
 5.  **Action Updates Data:** OpenAI returns the generated feedback. The `action` calls another `mutation` to save this feedback to the walkthrough document in the Convex database.
 6.  **UI Updates in Real-Time:** Because the client has a real-time subscription to the walkthrough data, the UI automatically updates to display the AI-generated feedback as soon as it's saved.
+
+## 6. Data Contracts
+
+The single source of truth for all data models is the `convex/schema.ts` file. All communication between the client and server should adhere to these defined structures.
+
+Below is the type definition for a core entity, the `Walkthrough`, as derived from the schema. Note that the `Id` type would be imported from `"convex/values"`.
+
+```typescript
+interface Walkthrough {
+  _id: Id<"walkthroughs">;
+  _creationTime: number;
+  coachId: string;
+  teacherId: Id<"users">;
+  reinforcement: string;
+  refinement: string;
+  reinforcementEvidence: string;
+  refinementEvidence: string;
+  rawAiFeedback?: string;
+  isFinalized: boolean;
+  pgpGoal?: string;
+  reflection?: string;
+  nextSteps?: string;
+}
+```
+
+## 7. External Integration Strategy
+
+To support the P1 priority of "Integration Readiness" for external systems like a Student Information System (SIS) or Learning Management System (LMS), a versioned, secure API will be created.
+
+*   **Technology:** Convex HTTP Actions will be used to expose API endpoints.
+*   **Authentication:** Endpoints will be secured using API keys or another token-based authentication method managed within Convex.
+*   **Versioning:** The API will be versioned (e.g., `/api/v1/...`) to ensure non-breaking changes for consumers.
+
+## 8. Configuration & Deployment
+
+*   **Environment Variables:** All secrets and environment-specific configurations (e.g., Clerk and OpenAI API keys) are managed through the built-in environment variable systems in Vercel (for the frontend) and Convex (for the backend).
+*   **Promotion Process:** Configurations are managed separately for development and production environments. Any changes must be applied and tested in the development environment before being manually promoted to production.
