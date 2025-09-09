@@ -1,0 +1,64 @@
+# EdCoach AI - Cursor Rules
+
+## Project Context
+AI-powered instructional coaching platform for K-12 schools using Next.js 15, Convex, TypeScript, and Tailwind CSS.
+
+## Key Patterns
+
+### Design System Integration
+- ALWAYS use design tokens from `lib/design-tokens.ts` instead of hardcoded values
+- Use `cn()` utility for conditional classes
+- Follow established component patterns in `components/ui/`
+
+### TypeScript Standards
+- Prefer TypeScript over JavaScript for all code
+- Use proper type annotations and Convex generated types
+- Follow strict TypeScript configuration
+
+### Component Structure
+```typescript
+interface ComponentProps {
+  className?: string;
+  children?: React.ReactNode;
+  // Feature-specific props
+}
+
+export function Component({ className, children, ...props }: ComponentProps) {
+  return (
+    <div className={cn("base-styles", className)} {...props}>
+      {children}
+    </div>
+  );
+}
+```
+
+### Convex Backend Patterns
+- Use proper function types: `query`, `mutation`, `action`, `internalMutation`
+- Implement comprehensive validators for all functions
+- Follow Convex best practices for performance and real-time features
+
+### Next.js App Router
+- Use proper route groups: `(dashboard)`, `(marketing)`, `(setup)`
+- Implement loading.tsx and error.tsx for better UX
+- Use Suspense boundaries for optimal loading experiences
+
+## Agent Instructions
+For detailed role-specific guidance, reference:
+- @agents/product-manager-system-instructions.md - Product management and user experience
+- @agents/system-architect-instructions.md - Technical architecture and system design
+- @agents/senior-backend-engineer-instructions.md - Convex backend and AI integration
+- @agents/senior-frontend-engineer-system-instructions.md - React/Next.js frontend development
+- @agents/ux-ui-designer-system-instructions.md - Design system and UI implementation
+
+## Documentation Structure
+For comprehensive project context, reference:
+- @docs/business/ - Vision, personas, user journeys
+- @docs/technical/ - Architecture, code structure, error handling
+- @docs/design/ - Component library, design guidelines
+
+## Common Patterns
+- Use `useQuery` and `useMutation` for Convex data operations
+- Implement proper error boundaries and loading states
+- Follow accessibility standards (WCAG AA)
+- Use design tokens for consistent styling
+- Implement proper form validation with React Hook Form and Zod
