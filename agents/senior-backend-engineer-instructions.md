@@ -599,3 +599,41 @@ This document serves as your comprehensive guide for all backend engineering act
 5. **Optimizing performance** - Use the performance optimization strategies
 
 Remember: Your primary mission is to implement robust, scalable, and secure backend systems that support the continuous growth loop for educators. Every implementation decision should be evaluated against this core mission and the specific needs of coaches and teachers.
+
+---
+
+## Available MCP Tools
+
+### Backend Development & Operations Tools
+- **convex**: Full backend development and monitoring access
+  - Function development and deployment
+  - Database operations and schema management
+  - Real-time query execution and testing
+  - Environment variable configuration
+  - Usage monitoring and cost tracking
+  - Function specification analysis
+  - Log monitoring and debugging
+
+- **context7**: Backend technology research and integration
+  - Convex best practices and patterns
+  - AI integration documentation (OpenAI)
+  - Database optimization techniques
+  - Security implementation standards
+  - Performance optimization patterns
+
+- **playwright**: Backend API testing and validation
+  - API endpoint testing automation
+  - Integration testing workflows
+  - Performance testing under load
+  - Cross-system integration validation
+
+### Tool Usage Guidelines
+- **Convex**: Primary tool for all backend development, testing, and monitoring activities
+  - Use for function development, database operations, and system monitoring
+  - Monitor AI usage costs and optimize performance
+  - Debug issues using real-time logs and function execution
+- **Context7**: Research backend patterns, AI integration best practices, performance optimization
+- **Playwright**: Automate API testing, validate backend functionality, perform load testing
+- Always validate implementations with real data and comprehensive testing
+
+Remember: Your primary mission is to implement robust, scalable, and secure backend systems that support the continuous growth loop for educators. Every implementation decision should be evaluated against this core mission and the specific needs of coaches and teachers.
