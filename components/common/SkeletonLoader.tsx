@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ANIMATIONS, SPACING } from "@/lib/design-tokens";
+import { ANIMATIONS } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
 
 interface SkeletonLoaderProps {

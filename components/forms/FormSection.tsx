@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ANIMATIONS, SPACING, FORM_PATTERNS, RESPONSIVE_PATTERNS } from "@/lib/design-tokens";
+import { ANIMATIONS, SPACING, RESPONSIVE_PATTERNS } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
 
 interface FormSectionProps {

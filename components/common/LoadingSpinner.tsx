@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Loader2 } from "lucide-react";
-import { ANIMATIONS, SPACING, STATUS_COLORS, RESPONSIVE_PATTERNS } from "@/lib/design-tokens";
+import { ANIMATIONS, STATUS_COLORS, RESPONSIVE_PATTERNS } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
 
 interface LoadingSpinnerProps {

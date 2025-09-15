@@ -2,24 +2,25 @@
 
 import React from "react";
 import { Form } from "@/components/ui/form";
-import { ANIMATIONS, SPACING, FORM_PATTERNS } from "@/lib/design-tokens";
+import { ANIMATIONS } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
+import { UseFormReturn, FieldValues } from "react-hook-form";
 
-interface FormWrapperProps {
-  form: any;
-  onSubmit: (values: any) => void;
+interface FormWrapperProps<TFieldValues extends FieldValues = FieldValues> {
+  form: UseFormReturn<TFieldValues>;
+  onSubmit: (values: TFieldValues) => void;
   children: React.ReactNode;
   className?: string;
   variant?: "default" | "card" | "minimal";
 }
 
-export function FormWrapper({
+export function FormWrapper<TFieldValues extends FieldValues = FieldValues>({
   form,
   onSubmit,
   children,
   className,
   variant = "default"
-}: FormWrapperProps) {
+}: FormWrapperProps<TFieldValues>) {
   const variants = {
     default: "space-y-6",
     card: "space-y-4",

@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Form } from "@/components/ui/form";
-import { FormField, FormActions, FormSection, FormWrapper } from "@/components/forms";
+import { FormField, FormActions, FormWrapper } from "@/components/forms";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -15,14 +14,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, CheckCircle, Loader2, Target, ArrowRight } from "lucide-react";
+import { Sparkles, Loader2, Target, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { usePgpForm } from "./use-pgp-form";
-import { ANIMATIONS, SPACING, FORM_PATTERNS, RESPONSIVE_PATTERNS, STATUS_COLORS, ACCESSIBILITY } from "@/lib/design-tokens";
+import { ANIMATIONS, SPACING, RESPONSIVE_PATTERNS, STATUS_COLORS } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
 
 const formSchema = z.object({

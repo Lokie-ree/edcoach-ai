@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { LoadingSpinner, LoadingSpinnerVariants } from "./LoadingSpinner";
-import { SkeletonLoader, SkeletonLoaderVariants } from "./SkeletonLoader";
-import { ANIMATIONS, SPACING } from "@/lib/design-tokens";
+import { LoadingSpinner } from "./LoadingSpinner";
+import { SkeletonLoader } from "./SkeletonLoader";
+import { ANIMATIONS } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
 
 interface LoadingStateProps {

@@ -1,6 +1,5 @@
 import React, { forwardRef, ElementType } from "react";
 import { cn } from "@/lib/utils";
-import { SPACING, RESPONSIVE_PATTERNS } from "@/lib/design-tokens";
 
 export type SectionVariant = "default" | "full-bleed" | "offset";
 export type SectionSpacing = "default" | "compact" | "spacious" | "hero" | "landing";

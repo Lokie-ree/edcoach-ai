@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ANIMATIONS, SPACING } from "@/lib/design-tokens";
+import { ANIMATIONS } from "@/lib/design-tokens";
 
 export default function GridDistortion() {
   return (
@@ -15,7 +15,7 @@ export default function GridDistortion() {
               scale: 1.2,
               backgroundColor: "rgba(var(--primary), 0.15)",
             }}
-            transition={{ duration: ANIMATIONS.duration.fast }}
+            transition={{ duration: ANIMATIONS.durations.fast }}
           />
         ))}
       </div>

@@ -13,7 +13,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { PrioritiesPanel } from "@/components/dashboard/PrioritiesPanel";
-import { LoadingState, LoadingStateVariants } from "@/components/common/LoadingState";
+import { LoadingStateVariants } from "@/components/common/LoadingState";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";

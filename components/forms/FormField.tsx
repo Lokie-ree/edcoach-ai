@@ -2,20 +2,27 @@
 
 import React from "react";
 import { FormField as ShadcnFormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
-import { ANIMATIONS, SPACING, FORM_PATTERNS, RESPONSIVE_PATTERNS, ACCESSIBILITY } from "@/lib/design-tokens";
+import { FORM_PATTERNS, RESPONSIVE_PATTERNS } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
+import { Control, FieldPath, FieldValues, ControllerRenderProps } from "react-hook-form";
 
-interface FormFieldProps {
-  control: any;
-  name: string;
+interface FormFieldProps<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+> {
+  control: Control<TFieldValues>;
+  name: TName;
   label: string;
   description?: string;
-  children: React.ReactNode | ((props: { field: any }) => React.ReactNode);
+  children: React.ReactNode | ((props: { field: ControllerRenderProps<TFieldValues, TName> }) => React.ReactNode);
   className?: string;
   required?: boolean;
 }
 
-export function FormField({
+export function FormField<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+>({
   control,
   name,
   label,
@@ -23,7 +30,7 @@ export function FormField({
   children,
   className,
   required = false
-}: FormFieldProps) {
+}: FormFieldProps<TFieldValues, TName>) {
   return (
     <ShadcnFormField
       control={control}

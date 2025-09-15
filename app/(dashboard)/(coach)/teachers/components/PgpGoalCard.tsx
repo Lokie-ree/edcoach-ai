@@ -14,7 +14,7 @@ import Modal from "@/components/mage-ui/modal";
 import { toast } from "sonner";
 import { ANIMATIONS, SPACING, STATUS_COLORS, RESPONSIVE_PATTERNS, ICONS } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
-import { LoadingState, LoadingStateVariants } from "@/components/common/LoadingState";
+import { LoadingStateVariants } from "@/components/common/LoadingState";
 
 interface PgpGoalCardProps {
   teacherId: string;
@@ -118,7 +118,7 @@ export function PgpGoalCard({
             )}>
               <Sparkles className={cn("w-8 h-8 mx-auto mb-2 text-muted-foreground")} />
               <p className="text-sm text-muted-foreground mb-4">
-                Set a Professional Growth Plan goal to track {teacherName}'s development
+                Set a Professional Growth Plan goal to track {teacherName}&apos;s development
               </p>
               <Button 
                 onClick={() => setIsModalOpen(true)}
