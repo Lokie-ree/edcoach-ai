@@ -11,9 +11,9 @@ import {
 } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { RecentActivityFeed } from "@/app/(dashboard)/(coach)/dashboard/components/RecentActivityFeed";
-import { PrioritiesPanel } from "@/app/(dashboard)/(coach)/dashboard/components/PrioritiesPanel";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
+import { PrioritiesPanel } from "@/components/dashboard/PrioritiesPanel";
+import { LoadingStateVariants } from "@/components/common/LoadingState";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
@@ -274,25 +274,37 @@ export default function CoachDashboardPage() {
     return (
       <div className="py-3 md:py-4 space-y-4">
         {/* Mobile-first loading skeleton */}
-        <div className="space-y-3">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-72" />
-        </div>
+        <LoadingStateVariants.Card isLoading={true}>
+          <div className="space-y-3">
+            <div className="h-8 w-48" />
+            <div className="h-4 w-72" />
+          </div>
+        </LoadingStateVariants.Card>
 
         {/* Quick actions skeleton */}
         <div className="space-y-3">
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-20 w-full" />
+          <LoadingStateVariants.Card isLoading={true}>
+            <div className="h-20 w-full" />
+          </LoadingStateVariants.Card>
+          <LoadingStateVariants.Card isLoading={true}>
+            <div className="h-20 w-full" />
+          </LoadingStateVariants.Card>
         </div>
 
         {/* Layout skeleton */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-4">
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-24 w-full" />
+            <LoadingStateVariants.Card isLoading={true}>
+              <div className="h-32 w-full" />
+            </LoadingStateVariants.Card>
+            <LoadingStateVariants.Card isLoading={true}>
+              <div className="h-24 w-full" />
+            </LoadingStateVariants.Card>
           </div>
           <div>
-            <Skeleton className="h-64 w-full" />
+            <LoadingStateVariants.Card isLoading={true}>
+              <div className="h-64 w-full" />
+            </LoadingStateVariants.Card>
           </div>
         </div>
       </div>
@@ -376,11 +388,7 @@ export default function CoachDashboardPage() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="space-y-4"
         >
-          <PrioritiesPanel priorities={{
-            walkthroughsDue: analytics.priorities?.walkthroughsDue || 0,
-            reflectionsToReview: analytics.priorities?.reflectionsToReview || 0,
-            teachersNeedingSupport: analytics.priorities?.teachersNeedingSupport || 0
-          }} />
+          <PrioritiesPanel />
 
           {/* Key Insights */}
           <TopInsights analytics={{
@@ -412,9 +420,7 @@ export default function CoachDashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <RecentActivityFeed
-                activities={analytics.recentActivity || []}
-              />
+              <ActivityFeed />
               {analytics.recentActivity && analytics.recentActivity.length > 0 && (
                 <div className="mt-4 text-center">
                   <Link href="/analytics">

@@ -1,6 +1,6 @@
 "use client"
 import React from "react"
-import { Section } from "@/components/ui/section"
+import { Container } from "@/components/ui/container"
 import { Card } from "@/components/ui/card"
 import { BorderBeam } from "@/components/magicui/border-beam"
 import landingContent from "@/data/landing-content.json"
@@ -36,12 +36,11 @@ export default function HowItWorksSection() {
   }
 
   return (
-    <Section 
+    <section 
       id="how-it-works"
-      spacing="landing"
-      className="relative"
+      className="relative py-12 md:py-16"
     >
-      <div className="mx-auto max-w-6xl px-6">
+      <Container size="lg" padding="normal">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -105,7 +104,7 @@ export default function HowItWorksSection() {
             )
           })}
         </div>
-      </div>
-    </Section>
+      </Container>
+    </section>
   )
 } 

@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Target, TrendingUp, TrendingDown, Minus, Calendar } from "lucide-react";
+import { ANIMATIONS, SPACING, STATUS_COLORS, RESPONSIVE_PATTERNS, ICONS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface TeacherPgpGoalCardProps {
   pgpGoal: {
@@ -17,29 +19,29 @@ interface TeacherPgpGoalCardProps {
 
 export function TeacherPgpGoalCard({ pgpGoal }: TeacherPgpGoalCardProps) {
   const getProgressColor = (progress: number) => {
-    if (progress >= 80) return "text-green-600";
-    if (progress >= 60) return "text-yellow-600";
-    if (progress >= 40) return "text-orange-600";
-    return "text-red-600";
+    if (progress >= 80) return STATUS_COLORS.success.text;
+    if (progress >= 60) return STATUS_COLORS.warning.text;
+    if (progress >= 40) return STATUS_COLORS.warning.text;
+    return STATUS_COLORS.error.text;
   };
 
   const getProgressIcon = (progress: number) => {
-    if (progress >= 80) return <TrendingUp className="w-4 h-4 text-green-600" />;
-    if (progress >= 60) return <TrendingUp className="w-4 h-4 text-yellow-600" />;
-    if (progress >= 40) return <Minus className="w-4 h-4 text-orange-600" />;
-    return <TrendingDown className="w-4 h-4 text-red-600" />;
+    if (progress >= 80) return <TrendingUp className={cn("w-4 h-4", STATUS_COLORS.success.text)} />;
+    if (progress >= 60) return <TrendingUp className={cn("w-4 h-4", STATUS_COLORS.warning.text)} />;
+    if (progress >= 40) return <Minus className={cn("w-4 h-4", STATUS_COLORS.warning.text)} />;
+    return <TrendingDown className={cn("w-4 h-4", STATUS_COLORS.error.text)} />;
   };
 
   const getTrendColor = (trend: string) => {
     switch (trend) {
       case "Engaged":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+        return cn(STATUS_COLORS.success.bg, STATUS_COLORS.success.text);
       case "Needs Support":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+        return cn(STATUS_COLORS.error.bg, STATUS_COLORS.error.text);
       case "Stable":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+        return cn(STATUS_COLORS.info.bg, STATUS_COLORS.info.text);
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+        return cn(STATUS_COLORS.neutral.bg, STATUS_COLORS.neutral.text);
     }
   };
 
@@ -52,14 +54,19 @@ export function TeacherPgpGoalCard({ pgpGoal }: TeacherPgpGoalCardProps) {
   };
 
   return (
-    <Card className="border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+    <Card className={cn(
+      "border-2 transition-all hover:shadow-md",
+      ANIMATIONS.classes.normal,
+      "border-primary/20",
+      "bg-gradient-to-r from-primary/5 to-primary/10"
+    )}>
+      <CardHeader className={cn("space-y-3", SPACING.component.md)}>
+        <CardTitle className={cn("flex items-center justify-between", RESPONSIVE_PATTERNS.text.subheading)}>
           <div className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-primary" />
-            <span className="text-lg font-semibold">My Professional Growth Goal</span>
+            <Target className={cn("w-5 h-5", "text-primary", ICONS.semantic.header)} />
+            <span className="font-semibold">My Professional Growth Goal</span>
           </div>
-          <Badge className={getTrendColor(pgpGoal.trend)}>
+          <Badge className={cn("transition-all", ANIMATIONS.classes.normal, getTrendColor(pgpGoal.trend))}>
             {pgpGoal.trend}
           </Badge>
         </CardTitle>

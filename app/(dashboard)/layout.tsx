@@ -6,7 +6,9 @@ import { api } from "@/convex/_generated/api";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SidebarNav } from "@/components/layout/SidebarNav";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import MaxWidthWrapper from "@/components/common/MaxWidthWrapper";
+import { Container } from "@/components/ui/container";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function DashboardLayout({
   children,
@@ -15,6 +17,14 @@ export default function DashboardLayout({
 }) {
   const { user, isLoaded } = useUser();
   const currentUser = useQuery(api.users.current);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (currentUser && !currentUser.onboardingComplete) {
+      // Redirect to onboarding
+      router.push("/onboarding");
+    }
+  }, [currentUser, router]);
 
   if (!isLoaded || !user) {
     return (
@@ -26,8 +36,6 @@ export default function DashboardLayout({
 
   // Check if user needs to complete onboarding
   if (currentUser && !currentUser.onboardingComplete) {
-    // Redirect to onboarding
-    window.location.href = "/onboarding";
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -42,7 +50,7 @@ export default function DashboardLayout({
     <SidebarProvider>
       <SidebarNav userRole={currentUser?.role} />
       <SidebarInset>
-        <MaxWidthWrapper className="h-full flex flex-col">
+        <Container size="full" padding="compact" className="h-full flex flex-col">
           <header className="flex h-16 shrink-0 items-center justify-between gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-4">
@@ -54,7 +62,7 @@ export default function DashboardLayout({
             </div>
           </header>
           <div className="flex flex-1 flex-col">{children}</div>
-        </MaxWidthWrapper>
+        </Container>
       </SidebarInset>
     </SidebarProvider>
   );

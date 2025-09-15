@@ -239,7 +239,7 @@ export function usePlanDetection(): PlanDetectionResult {
     }
 
     detectPlan();
-  }, [userId, user, has, detectPlan]);
+  }, [userId, user, has]);
 
   return result;
 }

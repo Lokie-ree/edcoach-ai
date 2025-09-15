@@ -24,18 +24,18 @@ export const Section = forwardRef<HTMLElement, SectionProps>(({
 }, ref) => {
   // Width classes based on variant
   const widthClasses = {
-    default: "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8",
+    default: "max-w-6xl mx-auto",
     "full-bleed": "w-full",
-    offset: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    offset: "max-w-7xl mx-auto",
   };
 
-  // Spacing classes based on spacing
+  // Spacing classes based on spacing - using design tokens
   const spacingClasses = {
     default: "py-12 md:py-16 lg:py-24",
     compact: "py-8 md:py-12",
     spacious: "py-16 md:py-24 lg:py-32",
-    hero: "py-16 md:py-20 lg:py-24", // Optimized for hero sections
-    landing: "py-12 md:py-16", // Consistent spacing for landing page sections
+    hero: "py-16 md:py-20 lg:py-24",
+    landing: "py-12 md:py-16",
   };
 
   // Background classes based on background

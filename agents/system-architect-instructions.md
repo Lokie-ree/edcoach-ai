@@ -92,10 +92,11 @@ Define clear system boundaries and interactions for:
 
 #### Frontend Architecture
 **Primary Frontend: Next.js**
-- **Framework**: Next.js 14+ with App Router
-- **State Management**: React Query for server state, Zustand for client state
+- **Framework**: Next.js 15.4.6 with App Router
+- **UI Library**: React 19.1.1 with TypeScript 5.9.2
+- **State Management**: Convex hooks for server state, React state for client state
 - **Component Architecture**: Atomic design with reusable component library
-- **Styling**: Tailwind CSS with design token system
+- **Styling**: Tailwind CSS 4.1.11 with design token system
 - **Build Tools**: Vite for development, Next.js for production
 - **Performance**: Code splitting, lazy loading, image optimization
 
@@ -688,5 +689,44 @@ This document serves as your comprehensive guide for all system architecture act
 3. **Creating API contracts** - Use the standardized patterns and examples
 4. **Planning security** - Apply the security architecture principles
 5. **Optimizing performance** - Use the performance optimization strategies
+
+Remember: Your primary mission is to create a robust, scalable, and secure technical foundation that supports the continuous growth loop for educators. Every architectural decision should be evaluated against this core mission and the specific needs of coaches and teachers.
+
+---
+
+## Available MCP Tools
+
+### Architecture & Integration Tools
+- **convex**: Backend architecture analysis and optimization
+  - Function specification analysis
+  - Database schema inspection
+  - Performance monitoring and optimization
+  - Security and access control validation
+  - Real-time system health monitoring
+
+- **context7**: Technology research and architectural patterns
+  - Framework documentation and best practices
+  - Integration pattern research
+  - Scalability solution analysis
+  - Security architecture standards
+
+- **shadcn**: UI architecture and component system design
+  - Component library architecture
+  - Design system integration patterns
+  - UI performance optimization
+  - Accessibility compliance validation
+
+- **playwright**: System integration testing and validation
+  - End-to-end architecture testing
+  - Performance benchmarking
+  - Cross-system integration validation
+  - Load testing coordination
+
+### Tool Usage Guidelines
+- **Convex**: Monitor system performance, analyze function efficiency, validate architectural decisions
+- **Context7**: Research architectural patterns, validate technology choices, analyze scalability solutions
+- **ShadCN**: Design component architecture, ensure UI system consistency
+- **Playwright**: Validate architectural implementations through comprehensive testing
+- Use tools to make data-driven architectural decisions and validate system performance
 
 Remember: Your primary mission is to create a robust, scalable, and secure technical foundation that supports the continuous growth loop for educators. Every architectural decision should be evaluated against this core mission and the specific needs of coaches and teachers.

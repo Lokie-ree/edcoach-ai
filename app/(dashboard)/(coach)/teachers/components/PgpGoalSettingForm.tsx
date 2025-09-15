@@ -4,14 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormField, FormActions, FormWrapper } from "@/components/forms";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -21,13 +14,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, CheckCircle, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, Target, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { usePgpForm } from "./use-pgp-form";
+import { ANIMATIONS, SPACING, RESPONSIVE_PATTERNS, STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   indicatorCode: z.string().min(1, "Please select an indicator"),
@@ -204,137 +199,185 @@ export default function PgpGoalSettingForm({
   };
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-foreground mb-2">
-        {existingGoal ? "Edit" : "Set"} PGP Goal for {teacherName}
-      </h2>
-      <p className="text-foreground mb-4">
-        {existingGoal
-          ? "Update the Professional Growth Plan goal for this teacher."
-          : "Create a Professional Growth Plan goal focused on improving specific teaching practices."}
-      </p>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="indicatorCode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Focus Indicator</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose an indicator to focus on..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {indicators?.map((indicator) => (
-                      <SelectItem
-                        key={indicator.indicator_code}
-                        value={indicator.indicator_code}
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-medium">
-                            {indicator.indicator_name}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <div className={cn("space-y-6", SPACING.layout.section)}>
+      {/* Header Section with Progress Indicator */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "p-2 rounded-lg",
+            existingGoal ? STATUS_COLORS.info.bg : STATUS_COLORS.success.bg
+          )}>
+            <Target className={cn(
+              "w-6 h-6",
+              existingGoal ? STATUS_COLORS.info.text : STATUS_COLORS.success.text
+            )} />
+          </div>
+          <div>
+            <h2 className={cn("font-bold text-foreground", RESPONSIVE_PATTERNS.text.heading)}>
+              {existingGoal ? "Edit" : "Set"} PGP Goal for {teacherName}
+            </h2>
+            <p className={cn("text-muted-foreground", RESPONSIVE_PATTERNS.text.body)}>
+              {existingGoal
+                ? "Update the Professional Growth Plan goal for this teacher."
+                : "Create a Professional Growth Plan goal focused on improving specific teaching practices."}
+            </p>
+          </div>
+        </div>
+        
+        {/* Progress Steps Indicator */}
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <div className={cn(
+              "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
+              selectedIndicator ? STATUS_COLORS.success.bg : "bg-muted",
+              selectedIndicator ? STATUS_COLORS.success.text : "text-muted-foreground"
+            )}>
+              1
+            </div>
+            <span className={cn("text-sm font-medium", selectedIndicator ? "text-foreground" : "text-muted-foreground")}>
+              Select Indicator
+            </span>
+          </div>
+          <ArrowRight className="w-4 h-4 text-muted-foreground" />
+          <div className="flex items-center space-x-2">
+            <div className={cn(
+              "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
+              form.getValues("goalText") ? STATUS_COLORS.success.bg : "bg-muted",
+              form.getValues("goalText") ? STATUS_COLORS.success.text : "text-muted-foreground"
+            )}>
+              2
+            </div>
+            <span className={cn("text-sm font-medium", form.getValues("goalText") ? "text-foreground" : "text-muted-foreground")}>
+              Generate Goal
+            </span>
+          </div>
+        </div>
+      </div>
 
-          <FormField
-            control={form.control}
-            name="contextNotes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Additional Context (Optional)</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Add any specific context about the teacher's current practice, recent observations, or areas of focus..."
-                    className="min-h-[100px]"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <FormWrapper form={form} onSubmit={onSubmit}>
+        <FormField
+          control={form.control}
+          name="indicatorCode"
+          label="Focus Indicator"
+          description="Choose an indicator to focus on for this PGP goal"
+        >
+          {({ field }) => (
+            <Select onValueChange={field.onChange} value={field.value}>
+              <SelectTrigger className="h-12">
+                <SelectValue placeholder="Choose an indicator to focus on..." />
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                {indicators?.map((indicator) => (
+                  <SelectItem
+                    key={indicator.indicator_code}
+                    value={indicator.indicator_code}
+                    className="py-3"
+                  >
+                    <div className="flex flex-col space-y-1">
+                      <span className="font-medium text-sm">
+                        {indicator.indicator_name}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {indicator.indicator_code}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </FormField>
 
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              onClick={handleDraftGoal}
-              disabled={isDrafting || !selectedIndicator}
-              variant="outline"
-            >
-              {isDrafting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Generate Goal
-                </>
-              )}
-            </Button>
+        <FormField
+          control={form.control}
+          name="contextNotes"
+          label="Additional Context (Optional)"
+          description="Add any specific context about the teacher's current practice, recent observations, or areas of focus"
+        >
+          {({ field }) => (
+            <Textarea
+              placeholder="Add any specific context about the teacher's current practice, recent observations, or areas of focus..."
+              className="min-h-[100px]"
+              {...field}
+            />
+          )}
+        </FormField>
+
+          {/* AI Generation Section */}
+          <div className={cn(
+            "p-4 rounded-lg border-2 border-dashed transition-all",
+            ANIMATIONS.classes.normal,
+            selectedIndicator ? "border-primary bg-primary/5" : "border-muted bg-muted/20"
+          )}>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <h4 className="font-medium text-sm">AI-Assisted Goal Generation</h4>
+                <p className="text-xs text-muted-foreground">
+                  {selectedIndicator 
+                    ? "Ready to generate a SMART goal based on the selected indicator"
+                    : "Select an indicator above to enable AI goal generation"
+                  }
+                </p>
+              </div>
+              <Button
+                type="button"
+                onClick={handleDraftGoal}
+                disabled={isDrafting || !selectedIndicator}
+                variant={selectedIndicator ? "default" : "outline"}
+                className={cn(
+                  "transition-all",
+                  ANIMATIONS.classes.normal,
+                  selectedIndicator ? "hover:bg-primary/90" : ""
+                )}
+              >
+                {isDrafting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Generate Goal
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
 
-          <FormField
-            control={form.control}
-            name="goalText"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>PGP Goal</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="The AI-generated goal will appear here. You can edit it to better fit your needs."
-                    className="min-h-[120px]"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={form.control}
+          name="goalText"
+          label="PGP Goal"
+          description="The AI-generated goal will appear here. You can edit it to better fit your needs."
+        >
+          {({ field }) => (
+            <div className="space-y-2">
+              <Textarea
+                placeholder="The AI-generated goal will appear here. You can edit it to better fit your needs."
+                className="min-h-[120px]"
+                {...field}
+              />
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Minimum 10 characters required</span>
+                <span className={cn(
+                  field.value && field.value.length >= 10 ? STATUS_COLORS.success.text : ""
+                )}>
+                  {field.value?.length || 0} characters
+                </span>
+              </div>
+            </div>
+          )}
+        </FormField>
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={handleClose}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={
-                form.formState.isSubmitting || !form.getValues("goalText")
-              }
-              className="flex-1"
-            >
-              {form.formState.isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {existingGoal ? "Updating..." : "Setting Goal..."}
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  {existingGoal ? "Update PGP Goal" : "Set PGP Goal"}
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
-      </Form>
+        <FormActions
+          onCancel={handleClose}
+          isSubmitting={form.formState.isSubmitting}
+          submitText={existingGoal ? "Update PGP Goal" : "Set PGP Goal"}
+          cancelText="Cancel"
+          disabled={!form.getValues("goalText")}
+        />
+      </FormWrapper>
 
       {/* Confirmation Dialog */}
       <ConfirmDialog

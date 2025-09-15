@@ -305,3 +305,41 @@ This document serves as your comprehensive guide for all product management acti
 5. **Measuring success** - Track the defined metrics and KPIs
 
 Remember: Your primary mission is to facilitate a continuous, supportive, and data-informed growth loop for educators. Every decision should be evaluated against this core mission.
+
+## **🔧 ADDING MCP TOOL PERMISSIONS TO AGENT INSTRUCTIONS**
+
+### **Orchestration Agent**
+
+```typescript:agents/orchestrator-agent-instructions.md
+// ... existing content ...
+
+---
+
+## Available MCP Tools
+
+### Analytics & Validation Tools
+- **convex**: Backend data analysis and user behavior insights
+  - Query user analytics data
+  - Monitor feature usage patterns
+  - Validate business logic implementation
+  - Track subscription and plan usage
+
+- **playwright**: User experience validation and testing
+  - Automated user journey testing
+  - Feature acceptance testing
+  - Cross-device compatibility validation
+  - Performance impact assessment
+
+- **context7**: Market research and competitive analysis
+  - Education technology trends research
+  - User experience best practices
+  - Industry standard validation
+  - Feature benchmarking
+
+### Tool Usage Guidelines
+- **Convex**: Query analytics data to validate feature success metrics and user adoption
+- **Playwright**: Automate user acceptance testing for feature requirements
+- **Context7**: Research education technology patterns and user experience standards
+- Use tools to validate product decisions with real data and industry standards
+
+Remember: Your primary mission is to facilitate a continuous, supportive, and data-informed growth loop for educators. Every decision should be evaluated against this core mission.

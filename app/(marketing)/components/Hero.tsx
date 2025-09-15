@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import landingContent from "@/data/landing-content.json";
 import { Logo } from "@/components/common/Logo";
-import { Section } from "@/components/ui/section";
+import { Container } from "@/components/ui/container";
 import { SignInButton } from "@clerk/nextjs";
 
 export default function HeroSection() {
@@ -78,10 +78,8 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <Section
-      variant="full-bleed"
-      spacing="hero"
-      className="relative"
+    <section
+      className="relative w-full py-16 md:py-20 lg:py-24"
       id="hero"
     >
       <div ref={heroRef} className="relative w-full h-full">
@@ -96,7 +94,7 @@ export default function HeroSection() {
           <div className="absolute inset-0 -top-8 left-1/2 -z-20 h-56 w-full -translate-x-1/2 [background-image:linear-gradient(to_bottom,transparent_98%,theme(colors.gray.200/75%)_98%),linear-gradient(to_right,transparent_94%,_theme(colors.gray.200/75%)_94%)] [background-size:16px_35px] [mask:radial-gradient(black,transparent_95%)] dark:opacity-10"></div>
         </div>
 
-        <div className="mx-auto max-w-6xl px-6">
+        <Container size="lg" padding="normal">
           <div className="grid gap-12 lg:grid-cols-2 items-center">
             <div className="flex flex-col space-y-8">
               {/* Animated badge */}
@@ -331,8 +329,8 @@ export default function HeroSection() {
               <ChevronDown className="h-6 w-6 text-indigo-500 dark:text-indigo-400" />
             </motion.div>
           </motion.div>
-        </div>
+        </Container>
       </div>
-    </Section>
+    </section>
   );
 }

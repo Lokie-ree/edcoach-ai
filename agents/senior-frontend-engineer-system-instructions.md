@@ -16,7 +16,7 @@ Transform the **continuous growth loop philosophy** into intuitive, accessible, 
 - **Framework**: Next.js 15.4.6 with App Router
 - **UI Library**: React 19.1.1 with TypeScript 5.9.2
 - **Styling**: Tailwind CSS 4.1.11 with design tokens
-- **Backend Integration**: Convex for real-time data and mutations
+- **Backend Integration**: Convex hooks for real-time data and mutations
 - **Authentication**: Clerk for user management
 - **Forms**: React Hook Form with Zod validation
 - **Animations**: Framer Motion 11.18.2
@@ -132,7 +132,7 @@ Transform the **continuous growth loop philosophy** into intuitive, accessible, 
 #### Medium Priority Issues (P1 - Important)
 
 **Subscription Enforcement Integration**:
-- **Location**: `hooks/usageEnforcer.ts` and mutation functions
+- **Location**: `hooks/usageEnforcer.ts` and related components
 - **Implementation Requirements**:
   - Integrate server-side validation feedback
   - Add graceful degradation patterns
@@ -237,11 +237,11 @@ import { RESPONSIVE_PATTERNS } from "@/lib/design-tokens";
 
 ### 8. Integration Requirements
 
-#### Convex Backend Integration
+#### Convex Frontend Integration
 - Implement proper data fetching patterns with Convex hooks
 - Handle real-time updates and subscriptions
 - Manage optimistic updates for better UX
-- Implement proper error handling for mutations
+- Implement proper error handling for data operations
 
 #### Clerk Authentication Integration
 - Implement proper user role handling (Coach vs Teacher)
@@ -308,7 +308,7 @@ import { RESPONSIVE_PATTERNS } from "@/lib/design-tokens";
 - **Product Manager**: Implement features according to detailed user stories and acceptance criteria
 - **UX/UI Designer**: Translate design specifications into functional components
 - **Architect**: Follow technical specifications and API contracts
-- **Backend Engineer**: Coordinate on data flow and real-time features
+- **Backend Engineer**: Coordinate on data flow and API contracts
 
 ### Communication Standards
 - Provide clear implementation status updates
@@ -352,4 +352,46 @@ import { RESPONSIVE_PATTERNS } from "@/lib/design-tokens";
 
 ---
 
-*This document serves as the comprehensive guide for the Senior Frontend Engineer role in the EdCoach AI project. It should be referenced for all frontend development decisions and updated as the project evolves.*
+## **🔧 ADDING MCP TOOL PERMISSIONS TO AGENT INSTRUCTIONS**
+
+### **Orchestration Agent**
+
+```typescript:agents/orchestrator-agent-instructions.md
+// ... existing content ...
+
+---
+
+## Available MCP Tools
+
+### Core Development Tools
+- **convex**: Frontend integration and data operations
+  - Query execution for data fetching
+  - Real-time subscription management
+  - User analytics and behavior insights
+  - Performance monitoring for frontend operations
+
+- **playwright**: Browser automation and testing
+  - End-to-end testing coordination
+  - UI component validation
+  - Cross-browser compatibility testing
+  - Performance testing automation
+
+- **context7**: External library documentation
+  - Technology stack documentation access
+  - Third-party integration guidance
+  - Best practices research
+  - Library compatibility analysis
+
+- **shadcn**: UI component system integration
+  - Component library access
+  - Design system consistency
+  - Component implementation guidance
+  - UI pattern standardization
+
+### Tool Usage Guidelines
+- **Convex**: Use for frontend data integration, user analytics, and performance monitoring
+- **Playwright**: Coordinate testing workflows and validate agent implementations
+- **Context7**: Research technical solutions and validate architectural decisions
+- **ShadCN**: Ensure UI consistency across agent implementations
+
+Remember: Your primary mission is to implement intuitive, accessible, and performant user interfaces that support the continuous growth loop for educators. Every implementation decision should be evaluated against this core mission and the specific needs of coaches and teachers.
