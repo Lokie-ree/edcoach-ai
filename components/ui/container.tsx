@@ -1,5 +1,6 @@
 import { forwardRef, ElementType } from "react";
 import { cn } from "@/lib/utils";
+import { SPACING, RESPONSIVE_PATTERNS } from "@/lib/design-tokens";
 
 // Standardized container sizes
 export const CONTAINER_SIZES = {
@@ -10,22 +11,22 @@ export const CONTAINER_SIZES = {
   full: "max-w-[1400px]", // Maximum application width
 } as const;
 
-// Standardized spacing scale
+// Standardized spacing scale - using design tokens
 export const SPACING_SCALE = {
   none: "",
-  xs: "p-3",
-  sm: "p-4",
-  md: "p-6", 
-  lg: "p-8",
-  xl: "p-12",
-  "2xl": "p-16"
+  xs: SPACING.component.xs,
+  sm: SPACING.component.sm,
+  md: SPACING.component.md, 
+  lg: SPACING.component.lg,
+  xl: SPACING.component.xl,
+  "2xl": SPACING.component["2xl"]
 } as const;
 
-// Responsive padding for consistent mobile-first approach
+// Responsive padding for consistent mobile-first approach - using design tokens
 export const RESPONSIVE_PADDING = {
-  compact: "px-3 sm:px-4 lg:px-6",    // Tight spacing for mobile
-  normal: "px-4 sm:px-6 lg:px-8",     // Standard responsive padding
-  spacious: "px-6 sm:px-8 lg:px-12",  // Extra spacing for hero sections
+  compact: RESPONSIVE_PATTERNS.padding.compact,
+  normal: RESPONSIVE_PATTERNS.padding.container,
+  spacious: RESPONSIVE_PATTERNS.padding.page
 } as const;
 
 export type ContainerSize = keyof typeof CONTAINER_SIZES;

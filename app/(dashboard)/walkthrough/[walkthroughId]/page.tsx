@@ -3,10 +3,11 @@
 import { WalkthroughForm } from "@/app/(dashboard)/walkthrough/new/components/WalkthroughForm";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Id } from "@/convex/_generated/dataModel";
-import React from "react";
+import { useParams } from "next/navigation";
 
-export default function EditWalkthroughPage({ params }: { params: Promise<{ walkthroughId: string }> }) {
-  const { walkthroughId } = React.use(params);
+export default function EditWalkthroughPage() {
+  const params = useParams();
+  const walkthroughId = params.walkthroughId as string;
   return (
     <div className="py-4 md:py-6 space-y-4">
       <div className="space-y-6">

@@ -7,19 +7,16 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 import { Id } from "@/convex/_generated/dataModel";
 import { ReflectionCard } from "./components/ReflectionCard";
 import FeedbackSection from "./components/FeedbackSection";
 import { getIndicatorName } from "@/lib/IndicatorUtils";
+import { useParams } from "next/navigation";
 
 
-export default function ViewWalkthroughPage({
-  params,
-}: {
-  params: Promise<{ walkthroughId: string }>;
-}) {
-  const { walkthroughId } = React.use(params);
+export default function ViewWalkthroughPage() {
+  const params = useParams();
+  const walkthroughId = params.walkthroughId as string;
   const { user, isLoaded } = useUser();
 
   // Get all walkthrough view details from backend

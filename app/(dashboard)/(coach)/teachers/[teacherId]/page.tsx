@@ -1,18 +1,17 @@
 "use client";
 
-import React from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useParams } from "next/navigation";
 import { PageHeader } from "@/components/common/PageHeader";
 import { PgpGoalCard } from "@/app/(dashboard)/(coach)/teachers/components/PgpGoalCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, BookOpen, MessageSquare } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingStateVariants } from "@/components/common/LoadingState";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useParams } from "next/navigation";
 
 export default function TeacherDetailsPage() {
   const params = useParams();
@@ -24,15 +23,23 @@ export default function TeacherDetailsPage() {
   if (!teacher) {
     return (
       <div className="py-3 md:py-4 space-y-4">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-96" />
-        </div>
+        <LoadingStateVariants.Card isLoading={true}>
+          <div className="space-y-2">
+            <div className="h-8 w-48" />
+            <div className="h-4 w-96" />
+          </div>
+        </LoadingStateVariants.Card>
         <div className="grid gap-4 lg:gap-6 grid-cols-1 xl:grid-cols-3">
-          <Skeleton className="h-64" />
+          <LoadingStateVariants.Card isLoading={true}>
+            <div className="h-64" />
+          </LoadingStateVariants.Card>
           <div className="xl:col-span-2 space-y-4">
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
+            <LoadingStateVariants.Card isLoading={true}>
+              <div className="h-32" />
+            </LoadingStateVariants.Card>
+            <LoadingStateVariants.Card isLoading={true}>
+              <div className="h-32" />
+            </LoadingStateVariants.Card>
           </div>
         </div>
       </div>

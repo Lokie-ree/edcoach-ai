@@ -3,7 +3,7 @@
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function TeacherLayout({
@@ -13,6 +13,7 @@ export default function TeacherLayout({
 }) {
   const { user, isLoaded } = useUser();
   const currentUser = useQuery(api.users.current);
+  const router = useRouter();
 
   useEffect(() => {
     if (isLoaded && user && currentUser) {
@@ -20,16 +21,25 @@ export default function TeacherLayout({
       if (currentUser.role !== "teacher") {
         // Redirect to appropriate page based on role
         if (currentUser.role === "coach") {
-          redirect("/dashboard");
+          router.push("/dashboard");
         } else {
-          redirect("/dashboard");
+          router.push("/dashboard");
         }
       }
     }
-  }, [isLoaded, user, currentUser]);
+  }, [isLoaded, user, currentUser, router]);
 
   // Show loading while checking permissions
-  if (!isLoaded || !user || !currentUser || currentUser.role !== "teacher") {
+  if (!isLoaded || !user || !currentUser) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // If user is not a teacher, show loading while redirecting
+  if (currentUser.role !== "teacher") {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

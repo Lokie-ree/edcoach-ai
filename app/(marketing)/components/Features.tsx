@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Section } from "@/components/ui/section";
+import { Container } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import landingContent from "@/data/landing-content.json";
@@ -51,12 +51,11 @@ export default function FeaturesSection() {
   };
 
   return (
-    <Section
+    <section
       id="features"
-      spacing="landing"
-      className="relative"
+      className="relative py-12 md:py-16"
     >
-      <div className="mx-auto max-w-4xl px-6">
+      <Container size="md" padding="normal">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -110,7 +109,7 @@ export default function FeaturesSection() {
             );
           })}
         </div>
-      </div>
-    </Section>
+      </Container>
+    </section>
   );
 }
