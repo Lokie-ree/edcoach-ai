@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Section } from "@/components/ui/section";
+import { Container } from "@/components/ui/container";
 import { motion, AnimatePresence } from "framer-motion";
 import landingContent from "@/data/landing-content.json";
 import { ChevronDown } from "lucide-react";
@@ -14,7 +14,7 @@ export default function FAQSection() {
   };
 
   return (
-    <Section id="faq" spacing="landing" className="relative overflow-hidden">
+    <section id="faq" className="relative overflow-hidden py-12 md:py-16">
       {/* Decorative background elements */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-white via-indigo-50/30 to-purple-50/30 dark:from-zinc-950 dark:via-indigo-950/10 dark:to-purple-950/10"></div>
@@ -22,7 +22,7 @@ export default function FAQSection() {
         <div className="absolute inset-0 -top-8 left-1/2 -z-20 h-56 w-full -translate-x-1/2 [background-image:linear-gradient(to_bottom,transparent_98%,theme(colors.gray.200/75%)_98%),linear-gradient(to_right,transparent_94%,_theme(colors.gray.200/75%)_94%)] [background-size:16px_35px] [mask:radial-gradient(black,transparent_95%)] dark:opacity-10"></div>
       </div>
 
-      <div className="mx-auto max-w-4xl px-6">
+      <Container size="md" padding="normal">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -88,7 +88,7 @@ export default function FAQSection() {
           className="mt-12 text-center"
         >
         </motion.div>
-      </div>
-    </Section>
+      </Container>
+    </section>
   );
 }

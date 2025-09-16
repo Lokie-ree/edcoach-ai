@@ -12,6 +12,7 @@ import { useToast } from "@/components/ui/toast";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Container } from "@/components/ui/container";
 import { ChevronLeft, ChevronRight, Send, Loader2, X } from "lucide-react";
 import { usePlanDetection } from "@/hooks/usePlanDetection";
 import {
@@ -181,7 +182,7 @@ export function WalkthroughWizard({ preselectedTeacherId }: WalkthroughWizardPro
   const StepComponent = currentStep.component;
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <Container size="xl" padding="normal">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -286,6 +287,6 @@ export function WalkthroughWizard({ preselectedTeacherId }: WalkthroughWizardPro
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </Container>
   );
 }

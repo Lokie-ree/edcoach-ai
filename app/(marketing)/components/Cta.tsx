@@ -1,6 +1,6 @@
 import { NeonGradientCard } from "@/components/magicui/neon-gradient-card";
 import { BorderBeam } from "@/components/magicui/border-beam";
-import { Section } from "@/components/ui/section";
+import { Container } from "@/components/ui/container";
 import { SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import ctaData from "@/data/landing-content.json";
@@ -9,8 +9,8 @@ export default function CTASection() {
   const { headline, sub_headline, cta } = ctaData.cta;
 
   return (
-    <Section id="cta" spacing="landing" className="relative overflow-hidden">
-      <div className="mx-auto max-w-4xl px-6">
+    <section id="cta" className="relative overflow-hidden py-12 md:py-16">
+      <Container size="md" padding="normal">
         <NeonGradientCard
           borderRadius={24}
           neonColors={{
@@ -37,7 +37,7 @@ export default function CTASection() {
             colorTo="#7c3aed"
           />
         </NeonGradientCard>
-      </div>
-    </Section>
+      </Container>
+    </section>
   );
 }
