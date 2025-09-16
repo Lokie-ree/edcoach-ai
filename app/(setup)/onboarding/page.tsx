@@ -21,6 +21,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
+import { Container } from "@/components/ui/container";
 import { toast } from "sonner";
 import { usePlanDetection } from "@/hooks/usePlanDetection";
 import { AIUsageBadge, AIUsageWarning } from "@/components/common/AiUsageBadge";
@@ -304,7 +305,7 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="container max-w-4xl mx-auto px-4 py-8">
+      <Container size="md" padding="normal" className="py-8">
         <PageHeader
           title={
             convexUser?.role === "teacher"
@@ -369,9 +370,9 @@ export default function OnboardingPage() {
             </div>
           )}
 
-        <div className="mt-8 space-y-6">
-          {/* Progress Steps */}
-          <div className="flex items-center justify-center space-x-4 mb-8">
+          <div className="mt-8 space-y-6">
+            {/* Progress Steps */}
+            <div className="flex items-center justify-center space-x-4 mb-8">
             <div
               className={`flex items-center space-x-2 ${step === "role-detection" ? "text-primary" : "text-muted-foreground"}`}
             >
@@ -528,8 +529,8 @@ export default function OnboardingPage() {
               </CardContent>
             </Card>
           )}
-        </div>
+          </div>
+        </Container>
       </div>
-    </div>
   );
 }

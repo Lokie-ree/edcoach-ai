@@ -1,7 +1,7 @@
  "use client"
 
 import Link from "next/link"
-import { Section } from "@/components/ui/section"
+import { Container } from "@/components/ui/container"
 import landingContent from "@/data/landing-content.json"
 
 
@@ -19,12 +19,11 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <Section 
+    <footer 
       id="footer"
-      spacing="landing"
-      className="relative before:absolute before:top-0 before:left-0 before:right-0 before:h-[1px] before:bg-gradient-to-r before:from-blue-500/50 before:via-purple-500/50 before:to-pink-500/50"
+      className="relative py-12 md:py-16 before:absolute before:top-0 before:left-0 before:right-0 before:h-[1px] before:bg-gradient-to-r before:from-blue-500/50 before:via-purple-500/50 before:to-pink-500/50"
     >
-      <div className="mx-auto max-w-7xl px-6">
+      <Container size="xl" padding="normal">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {footer.columns.map((column, columnIndex) => (
             <div key={columnIndex} className="text-center md:text-left">
@@ -48,7 +47,7 @@ export default function Footer() {
             {footer.copyright.replace("2025", currentYear.toString())}
           </p>
         </div>
-      </div>
-    </Section>
+      </Container>
+    </footer>
   );
 } 

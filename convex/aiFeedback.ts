@@ -316,7 +316,7 @@ Please provide specific, actionable feedback in exactly this JSON format:
 Keep each feedback section to 2-3 sentences and focus on actionable insights.`;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4.1-mini",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
         max_tokens: 500,

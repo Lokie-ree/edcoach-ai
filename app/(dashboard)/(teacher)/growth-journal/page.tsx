@@ -8,6 +8,7 @@ import { RefinementFocusCard } from "@/app/(dashboard)/(teacher)/growth-journal/
 import { ReflectionPromptCard } from "@/app/(dashboard)/(teacher)/growth-journal/components/ReflectionPromptCard";
 import { WalkthroughTimeline } from "@/app/(dashboard)/(teacher)/growth-journal/components/WalkthroughTimeline";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Container } from "@/components/ui/container";
 
 export default function TeacherPgpDashboardPage() {
   const pgpData = useQuery(api.analytics.getMyPgpData);
@@ -20,7 +21,7 @@ export default function TeacherPgpDashboardPage() {
           description="Your personal space for professional development and reflection"
         />
         
-        <div className="max-w-3xl mx-auto space-y-6 mt-6">
+        <Container size="md" className="space-y-6 mt-6">
           {/* PGP Goal Card Skeleton */}
           <div className="p-6 border rounded-lg">
             <Skeleton className="h-6 w-48 mb-4" />
@@ -62,9 +63,13 @@ export default function TeacherPgpDashboardPage() {
               ))}
             </div>
           </div>
-        </div>
+        </Container>
       </div>
     );
+  }
+
+  if (!pgpData) {
+    return null; // This should not happen since we already checked above
   }
 
   return (
@@ -75,7 +80,7 @@ export default function TeacherPgpDashboardPage() {
       />
       
       {/* Single-column layout that tells a story (Documented Design) */}
-      <div className="max-w-3xl mx-auto space-y-6 mt-6">
+      <Container size="md" className="space-y-6 mt-6">
         
         {/* 1. PgpGoalCard (The Why) - Always at the top, framing the entire experience */}
         <TeacherPgpGoalCard pgpGoal={{
@@ -100,7 +105,7 @@ export default function TeacherPgpDashboardPage() {
 
         {/* 4. WalkthroughTimeline (The How Far) - Visual history showing their journey over time */}
         <WalkthroughTimeline walkthroughs={pgpData.recentWalkthroughs} />
-      </div>
+      </Container>
     </div>
   );
 }

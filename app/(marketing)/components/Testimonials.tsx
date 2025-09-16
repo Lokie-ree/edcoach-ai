@@ -1,6 +1,6 @@
 "use client"
 import React from "react"
-import { Section } from "@/components/ui/section"
+import { Container } from "@/components/ui/container"
 import { Card } from "@/components/ui/card"
 import { BorderBeam } from "@/components/magicui/border-beam"
 import landingContent from "@/data/landing-content.json"
@@ -22,10 +22,9 @@ export default function TestimonialsSection() {
   const { testimonials } = landingContent;
   
   return (
-    <Section 
+    <section 
       id="testimonials"
-      spacing="landing"
-      className="relative overflow-hidden"
+      className="relative overflow-hidden py-12 md:py-16"
     >
       {/* Decorative background elements */}
       <div className="absolute inset-0 -z-10">
@@ -34,7 +33,7 @@ export default function TestimonialsSection() {
         <div className="absolute inset-0 -top-8 left-1/2 -z-20 h-56 w-full -translate-x-1/2 [background-image:linear-gradient(to_bottom,transparent_98%,theme(colors.gray.200/75%)_98%),linear-gradient(to_right,transparent_94%,_theme(colors.gray.200/75%)_94%)] [background-size:16px_35px] [mask:radial-gradient(black,transparent_95%)] dark:opacity-10"></div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-6">
+      <Container size="lg" padding="normal">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -95,7 +94,7 @@ export default function TestimonialsSection() {
             )
           })}
         </div>
-      </div>
-    </Section>
+      </Container>
+    </section>
   )
 } 

@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
-import MaxWidthWrapper from "@/components/common/MaxWidthWrapper";
+import { Container } from "@/components/ui/container";
 import { Logo } from "@/components/common/Logo";
 
 const Header = () => {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-background/95 supports-[backdrop-filter]:bg-background/60 before:absolute before:bottom-0 before:left-0 before:right-0 before:h-[1px] before:bg-gradient-to-r before:from-blue-500/50 before:via-purple-500/50 before:to-pink-500/50">
-      <MaxWidthWrapper>
+      <Container size="full" padding="compact">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Logo />
@@ -28,7 +28,7 @@ const Header = () => {
             </SignedOut>
           </div>
         </div>
-      </MaxWidthWrapper>
+      </Container>
     </header>
   );
 };

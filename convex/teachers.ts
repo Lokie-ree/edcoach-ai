@@ -670,7 +670,7 @@ Return only the goal text, no additional formatting or explanations.`;
       await ctx.runMutation(internal.aiFeedbackMutations.logTokenUsage, {
         userId: user._id,
         action: "draftPgpGoal",
-        model: "gpt-4o-mini",
+        model: "gpt-4.1-mini",
         promptTokens,
         completionTokens,
         totalTokens,
