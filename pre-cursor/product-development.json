@@ -1,0 +1,211 @@
+{
+  "user_flows": [
+    {
+      "steps": [
+        "Daily Login & Dashboard Review",
+        "Initiate Walkthrough",
+        "Conduct Observation",
+        "Generate AI Feedback",
+        "Send & Monitor"
+      ],
+      "flow_name": "Coach Flow: Login to Feedback Generation",
+      "entry_point": "Coach dashboard upon login"
+    },
+    {
+      "steps": [
+        "Receive Notification",
+        "Review Feedback in Context",
+        "Complete Reflection",
+        "Submit & Track Progress",
+        "Monitor Growth"
+      ],
+      "flow_name": "Teacher Flow: Feedback to Action Planning",
+      "entry_point": "Email notification and Growth Journal access"
+    }
+  ],
+  "target_audience": {
+    "user_needs": [
+      "Immediate actionable feedback",
+      "Goal alignment with professional growth objectives",
+      "Reflective practices for personal and professional development"
+    ],
+    "pain_points": [
+      "Delayed feedback from coaches",
+      "Difficulty in tracking progress over time",
+      "Lack of personalized professional development resources"
+    ],
+    "primary_users": [
+      "Coaches",
+      "Teachers"
+    ],
+    "user_demographics": "K-12 educational institutions, including public and private schools in the United States."
+  },
+  "project_overview": {
+    "app_name": "EdCoach AI",
+    "concept_summary": "EdCoach AI is an AI-powered instructional coaching platform for K-12 schools that transforms classroom walkthroughs into a continuous growth loop, enabling coaches to conduct rapid observations, generate personalized feedback, and support teacher reflection and growth.",
+    "problem_statement": "Teachers often lack immediate and actionable feedback in professional development, which hinders their growth and the overall effectiveness of instructional practices.",
+    "solution_approach": "Our platform leverages AI to provide targeted feedback based on classroom observations aligned with teacher goals, fostering a supportive environment for continuous improvement."
+  },
+  "value_proposition": {
+    "user_benefits": [
+      "Empowered teachers with immediate feedback",
+      "Data-driven decision-making for coaching practices",
+      "Collaborative growth through reflective journaling"
+    ],
+    "unique_selling_points": [
+      "AI-powered feedback tailored to individual teacher goals",
+      "Real-time tracking of progress and analytics",
+      "User-friendly interface for seamless navigation"
+    ],
+    "competitive_advantages": [
+      "Integration with existing school systems (SIS/LMS)",
+      "FERPA compliance and secure data management",
+      "Engagement with detailed analytics and growth metrics"
+    ]
+  },
+  "core_functionality": {
+    "key_user_actions": [
+      "Login to platform",
+      "Conduct walkthrough",
+      "Generate and send feedback",
+      "Reflect on feedback",
+      "Track personal growth"
+    ],
+    "primary_features": [
+      {
+        "priority": "High",
+        "user_story": "As a coach, I want to set clear goals for my teachers so that they can focus on their professional development.",
+        "description": "AI-assisted SMART goal creation aligned with Louisiana Educator Rubric",
+        "feature_name": "PGP Goal-Setting",
+        "acceptance_criteria": [
+          "Coaches can create PGP goals with AI guidance",
+          "Goals are trackable within the system"
+        ]
+      },
+      {
+        "priority": "High",
+        "user_story": "As a coach, I want to conduct quick walkthroughs to capture essential evidence of teaching practices.",
+        "description": "Mobile-friendly evidence collection with rubric indicators",
+        "feature_name": "5-Minute Walkthroughs",
+        "acceptance_criteria": [
+          "Walkthrough can be completed in under 5 minutes",
+          "All evidence collected is tied to the rubric indicators"
+        ]
+      },
+      {
+        "priority": "High",
+        "user_story": "As a coach, I want AI to generate tailored feedback based on my observations so that I can provide immediate support to teachers.",
+        "description": "GPT-4 powered, context-aware feedback based on teacher goals",
+        "feature_name": "AI Feedback Generation",
+        "acceptance_criteria": [
+          "Feedback is generated in less than 10 seconds",
+          "Feedback is relevant to the specific PGP goal and observation"
+        ]
+      },
+      {
+        "priority": "High",
+        "user_story": "As a teacher, I want a private space to reflect on feedback and set next steps for improvement.",
+        "description": "Private growth journal with guided prompts",
+        "feature_name": "Teacher Reflection Portal",
+        "acceptance_criteria": [
+          "Teachers can answer guided prompts in a secure environment",
+          "Reflections are only visible to the teacher and their coach"
+        ]
+      },
+      {
+        "priority": "High",
+        "user_story": "As a coach, I want to track teacher progress over time to provide tailored support.",
+        "description": "Real-time tracking for coaches and teachers",
+        "feature_name": "Progress Dashboards",
+        "acceptance_criteria": [
+          "Dashboards load in under 2 seconds",
+          "Progress is visually represented in an easy-to-understand format"
+        ]
+      }
+    ]
+  },
+  "feature_specifications": {
+    "core_features": [
+      {
+        "priority": "High",
+        "user_story": "As a coach, I want to set clear goals for my teachers so that they can focus on their professional development.",
+        "description": "AI-assisted SMART goal creation aligned with Louisiana Educator Rubric",
+        "feature_name": "PGP Goal-Setting",
+        "acceptance_criteria": [
+          "Coaches can create PGP goals with AI guidance",
+          "Goals are trackable within the system"
+        ]
+      },
+      {
+        "priority": "High",
+        "user_story": "As a coach, I want to conduct quick walkthroughs to capture essential evidence of teaching practices.",
+        "description": "Mobile-friendly evidence collection with rubric indicators",
+        "feature_name": "5-Minute Walkthroughs",
+        "acceptance_criteria": [
+          "Walkthrough can be completed in under 5 minutes",
+          "All evidence collected is tied to the rubric indicators"
+        ]
+      },
+      {
+        "priority": "High",
+        "user_story": "As a coach, I want AI to generate tailored feedback based on my observations so that I can provide immediate support to teachers.",
+        "description": "GPT-4 powered, context-aware feedback based on teacher goals",
+        "feature_name": "AI Feedback Generation",
+        "acceptance_criteria": [
+          "Feedback is generated in less than 10 seconds",
+          "Feedback is relevant to the specific PGP goal and observation"
+        ]
+      },
+      {
+        "priority": "High",
+        "user_story": "As a teacher, I want a private space to reflect on feedback and set next steps for improvement.",
+        "description": "Private growth journal with guided prompts",
+        "feature_name": "Teacher Reflection Portal",
+        "acceptance_criteria": [
+          "Teachers can answer guided prompts in a secure environment",
+          "Reflections are only visible to the teacher and their coach"
+        ]
+      },
+      {
+        "priority": "High",
+        "user_story": "As a coach, I want to track teacher progress over time to provide tailored support.",
+        "description": "Real-time tracking for coaches and teachers",
+        "feature_name": "Progress Dashboards",
+        "acceptance_criteria": [
+          "Dashboards load in under 2 seconds",
+          "Progress is visually represented in an easy-to-understand format"
+        ]
+      }
+    ],
+    "nice_to_have_features": [
+      {
+        "description": "Heat maps and trend analysis for coaches",
+        "feature_name": "Team Analytics"
+      },
+      {
+        "description": "Connect with existing school systems",
+        "feature_name": "SIS/LMS Integration"
+      },
+      {
+        "description": "Native iOS/Android applications",
+        "feature_name": "Mobile Apps"
+      },
+      {
+        "description": "Predictive insights and recommendations",
+        "feature_name": "Advanced AI Features"
+      },
+      {
+        "description": "Expand beyond English-speaking schools",
+        "feature_name": "Multi-language Support"
+      }
+    ]
+  },
+  "technical_requirements": {
+    "integrations": [
+      "Clerk for authentication",
+      "SIS/LMS for data synchronization"
+    ],
+    "ai_ide_preference": "GPT-4 for AI feedback generation.",
+    "development_approach": "Next.js for frontend, Convex for real-time database and serverless functions, TypeScript for improved type safety."
+  }
+}
