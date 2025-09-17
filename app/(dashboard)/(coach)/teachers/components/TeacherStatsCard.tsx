@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, GraduationCap, Pencil } from "lucide-react";
+import { ICONS, STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface TeacherStatsCardProps {
   total: number;
@@ -23,7 +25,7 @@ export default function TeacherStatsCard({ total, active, needsDetails, pending 
         <div className="grid gap-6 sm:grid-cols-3">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Users className="h-5 w-5 text-primary" />
+              <Users className={cn(ICONS.semantic.header, "text-primary")} />
             </div>
             <div>
               <div className="text-2xl font-bold text-foreground">{total}</div>
@@ -32,7 +34,7 @@ export default function TeacherStatsCard({ total, active, needsDetails, pending 
           </div>
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10">
-              <GraduationCap className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <GraduationCap className={cn(ICONS.semantic.header, STATUS_COLORS.success.text)} />
             </div>
             <div>
               <div className="text-2xl font-bold text-foreground">{active}</div>
@@ -41,7 +43,7 @@ export default function TeacherStatsCard({ total, active, needsDetails, pending 
           </div>
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10">
-              <Pencil className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              <Pencil className={cn(ICONS.semantic.header, STATUS_COLORS.warning.text)} />
             </div>
             <div>
               <div className="text-2xl font-bold text-foreground">{needsDetails + pending}</div>

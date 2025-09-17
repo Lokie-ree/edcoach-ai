@@ -13,6 +13,8 @@ import landingContent from "@/data/landing-content.json";
 import { Logo } from "@/components/common/Logo";
 import { Container } from "@/components/ui/container";
 import { SignInButton } from "@clerk/nextjs";
+import { ICONS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 export default function HeroSection() {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -103,7 +105,7 @@ export default function HeroSection() {
                     Start free today - no credit card required
                   </span>
                   <span className="block h-4 w-px bg-gray-300 dark:bg-gray-700"></span>
-                  <ArrowRight className="size-4 text-indigo-600 dark:text-indigo-400" />
+                  <ArrowRight className={cn(ICONS.semantic.inline, "text-indigo-600 dark:text-indigo-400")} />
                 </div>
               </motion.div>
 
@@ -141,7 +143,7 @@ export default function HeroSection() {
                     className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg group"
                   >
                     <span>{hero.cta_primary.label}</span>
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className={cn(ICONS.semantic.inline, "ml-2 transition-transform group-hover:translate-x-1")} />
                   </Button>
                 </SignInButton>
               </motion.div>
@@ -209,7 +211,7 @@ export default function HeroSection() {
 
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-800/30">
-                      <ClipboardList className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+                      <ClipboardList className={cn(ICONS.sizes.lg, "text-indigo-600 dark:text-indigo-400")} />
                       <div>
                         <h4 className="font-medium">Observe & Align</h4>
                         <p className="text-xs text-gray-600 dark:text-gray-300">
@@ -219,7 +221,7 @@ export default function HeroSection() {
                     </div>
 
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-800/30">
-                      <MessageSquareText className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                      <MessageSquareText className={cn(ICONS.sizes.lg, "text-purple-600 dark:text-purple-400")} />
                       <div>
                         <h4 className="font-medium">
                           Generate & Refine Feedback
@@ -231,7 +233,7 @@ export default function HeroSection() {
                     </div>
 
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800/30">
-                      <LineChart className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                      <LineChart className={cn(ICONS.sizes.lg, "text-blue-600 dark:text-blue-400")} />
                       <div>
                         <h4 className="font-medium">Track & Support Growth</h4>
                         <p className="text-xs text-gray-600 dark:text-gray-300">
@@ -273,7 +275,7 @@ export default function HeroSection() {
               >
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                    <ArrowRight className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <ArrowRight className={cn(ICONS.semantic.inline, "text-green-600 dark:text-green-400")} />
                   </div>
                   <span className="text-sm font-medium">AI-Generated</span>
                 </div>
@@ -317,7 +319,7 @@ export default function HeroSection() {
               animate={{ y: [0, 8, 0] }}
               transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
             >
-              <ChevronDown className="h-6 w-6 text-indigo-500 dark:text-indigo-400" />
+              <ChevronDown className={cn(ICONS.sizes.md, "text-indigo-500 dark:text-indigo-400")} />
             </motion.div>
           </motion.div>
         </Container>

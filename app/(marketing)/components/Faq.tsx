@@ -4,6 +4,8 @@ import { Container } from "@/components/ui/container";
 import { motion, AnimatePresence } from "framer-motion";
 import landingContent from "@/data/landing-content.json";
 import { ChevronDown } from "lucide-react";
+import { ICONS, ANIMATIONS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 export default function FAQSection() {
   const { faq } = landingContent;
@@ -55,9 +57,12 @@ export default function FAQSection() {
                   {item.question}
                 </span>
                 <ChevronDown
-                  className={`h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
+                  className={cn(
+                    ICONS.semantic.header,
+                    "text-gray-500 dark:text-gray-400",
+                    ANIMATIONS.classes.normal,
                     openIndex === index ? "rotate-180" : ""
-                  }`}
+                  )}
                 />
               </button>
 

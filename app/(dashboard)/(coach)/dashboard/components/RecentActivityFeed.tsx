@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ANIMATIONS, ICONS, STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface ActivityItem {
   id: string;
@@ -33,28 +35,29 @@ function ActivityItem({
   index: number;
 }) {
   const getActivityIcon = (type: ActivityItem["type"]) => {
+    const iconClass = ICONS.semantic.inline;
     switch (type) {
       case "walkthrough":
-        return <BookOpen className="h-4 w-4" />;
+        return <BookOpen className={iconClass} />;
       case "reflection":
-        return <FileText className="h-4 w-4" />;
+        return <FileText className={iconClass} />;
       case "feedback":
-        return <MessageSquare className="h-4 w-4" />;
+        return <MessageSquare className={iconClass} />;
       default:
-        return <BookOpen className="h-4 w-4" />; // Default to walkthrough icon
+        return <BookOpen className={iconClass} />; // Default to walkthrough icon
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+        return cn(STATUS_COLORS.success.bg, STATUS_COLORS.success.text);
       case "pending":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+        return cn(STATUS_COLORS.warning.bg, STATUS_COLORS.warning.text);
       case "scheduled":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+        return cn(STATUS_COLORS.info.bg, STATUS_COLORS.info.text);
       case "generated":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"; // Keep for now
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
     }
@@ -83,7 +86,10 @@ function ActivityItem({
       whileTap={{ scale: 0.98 }}
     >
       <Link href={activity.href || "#"} className="block">
-        <div className="flex items-start gap-3 p-4 border rounded-lg hover:bg-muted/50 transition-all duration-200 cursor-pointer touch-manipulation min-h-[64px] active:bg-muted/70">
+        <div className={cn(
+          "flex items-start gap-3 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer touch-manipulation min-h-[64px] active:bg-muted/70",
+          ANIMATIONS.classes.normal
+        )}>
           <Avatar className="h-10 w-10 flex-shrink-0">
             <AvatarFallback className="text-xs font-medium">
               {activity.teacherName
@@ -115,10 +121,10 @@ function ActivityItem({
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
+                <Clock className={ICONS.sizes.xs} />
                 {formatTimeAgo(activity.timestamp)}
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground opacity-60" />
+              <ChevronRight className={cn(ICONS.semantic.inline, "text-muted-foreground opacity-60")} />
             </div>
           </div>
         </div>

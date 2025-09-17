@@ -18,6 +18,8 @@ import {
   X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ICONS, STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface CoachTutorialProps {
   onComplete: () => void;
@@ -40,7 +42,7 @@ export default function CoachTutorial({
         <div className="space-y-4">
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
-              <Users className="h-8 w-8 text-white" />
+              <Users className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
             <h3 className="text-lg font-semibold mb-2">You&apos;re All Set!</h3>
             <p className="text-muted-foreground">
@@ -50,11 +52,11 @@ export default function CoachTutorial({
           </div>
           <div className="grid gap-2 text-sm">
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
+              <CheckCircle className={cn(ICONS.semantic.inline, STATUS_COLORS.success.text)} />
               <span>Coach account activated</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
+              <CheckCircle className={cn(ICONS.semantic.inline, STATUS_COLORS.success.text)} />
               <span>Ready to invite teachers to your group</span>
             </div>
           </div>
@@ -77,7 +79,7 @@ export default function CoachTutorial({
         <div className="space-y-4">
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mb-4">
-              <Users className="h-8 w-8 text-white" />
+              <Users className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
             <h3 className="text-lg font-semibold mb-2">Building Your Team</h3>
             <p className="text-muted-foreground">
@@ -106,7 +108,7 @@ export default function CoachTutorial({
         <div className="space-y-4">
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mb-4">
-              <ClipboardList className="h-8 w-8 text-white" />
+              <ClipboardList className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
             <h3 className="text-lg font-semibold mb-2">Smart Walkthroughs</h3>
             <p className="text-muted-foreground">
@@ -136,7 +138,7 @@ export default function CoachTutorial({
         <div className="space-y-3">
           <div className="text-center">
             <div className="mx-auto w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mb-3">
-              <BarChart3 className="h-6 w-6 text-white" />
+              <BarChart3 className={cn(ICONS.sizes.md, "text-white")} />
             </div>
             <h3 className="text-base font-semibold mb-1">
               Data-Driven Coaching
@@ -207,7 +209,7 @@ export default function CoachTutorial({
                 <CardDescription>{currentStepData.description}</CardDescription>
               </div>
               <Button variant="ghost" size="sm" onClick={onSkip}>
-                <X className="h-4 w-4" />
+                <X className={ICONS.semantic.inline} />
               </Button>
             </div>
 
@@ -257,7 +259,7 @@ export default function CoachTutorial({
                   {currentStep === steps.length - 1 ? (
                     <>
                       Get Started
-                      <ArrowRight className="h-4 w-4 ml-2" />
+                      <ArrowRight className={cn(ICONS.semantic.inline, "ml-2")} />
                     </>
                   ) : (
                     "Next"

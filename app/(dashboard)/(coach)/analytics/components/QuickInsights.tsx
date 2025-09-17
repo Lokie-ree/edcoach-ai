@@ -2,6 +2,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { TrendingUp, Crown, Target } from "lucide-react";
 import { AnalyticsData } from "@/types/dashboard";
+import { ICONS, STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 export const QuickInsights = ({
   analytics,
@@ -33,7 +35,7 @@ export const QuickInsights = ({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
+            <TrendingUp className={ICONS.semantic.header} />
             Quick Insights
           </CardTitle>
         </CardHeader>
@@ -41,8 +43,8 @@ export const QuickInsights = ({
           <div className="grid gap-4 md:grid-cols-2">
             {/* Team Strengths */}
             <div className="space-y-3">
-              <h4 className="font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
-                <Crown className="h-4 w-4" />
+              <h4 className={cn("font-medium flex items-center gap-2", STATUS_COLORS.success.text)}>
+                <Crown className={ICONS.semantic.inline} />
                 Top Team Strengths
               </h4>
               {!analytics.topStrengths || analytics.topStrengths.length === 0 ? (
@@ -64,7 +66,7 @@ export const QuickInsights = ({
                           ({strength.indicator})
                         </span>
                       </div>
-                      <span className="text-sm font-bold text-green-600">
+                      <span className={cn("text-sm font-bold", STATUS_COLORS.success.text)}>
                         {strength.count}
                       </span>
                     </div>
@@ -75,8 +77,8 @@ export const QuickInsights = ({
 
             {/* Growth Areas */}
             <div className="space-y-3">
-              <h4 className="font-medium text-orange-700 dark:text-orange-300 flex items-center gap-2">
-                <Target className="h-4 w-4" />
+              <h4 className={cn("font-medium flex items-center gap-2", STATUS_COLORS.warning.text)}>
+                <Target className={ICONS.semantic.inline} />
                 Focus Areas
               </h4>
               {!analytics.topGrowthAreas || analytics.topGrowthAreas.length === 0 ? (
@@ -98,7 +100,7 @@ export const QuickInsights = ({
                           ({area.indicator})
                         </span>
                       </div>
-                      <span className="text-sm font-bold text-orange-600">
+                      <span className={cn("text-sm font-bold", STATUS_COLORS.warning.text)}>
                         {area.count}
                       </span>
                     </div>

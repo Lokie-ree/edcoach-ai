@@ -6,6 +6,8 @@ import { BorderBeam } from "@/components/magicui/border-beam"
 import landingContent from "@/data/landing-content.json"
 import { motion } from "framer-motion"
 import { Quote } from "lucide-react"
+import { ICONS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 // Generate gradient colors based on index
 const getGradientColors = (index: number) => {
@@ -60,7 +62,7 @@ export default function TestimonialsSection() {
                 <Card className="group p-6 rounded-xl shadow-sm h-full relative overflow-hidden transition-all duration-300 hover:shadow-lg">
                   <div className="flex flex-col h-full">
                     <div className="mb-6">
-                      <Quote className="h-8 w-8 text-indigo-600 dark:text-indigo-400 mb-4" />
+                      <Quote className={cn(ICONS.sizes.lg, "text-indigo-600 dark:text-indigo-400 mb-4")} />
                       <p className="text-gray-600 dark:text-gray-300 italic">
                         {testimonial.quote}
                       </p>

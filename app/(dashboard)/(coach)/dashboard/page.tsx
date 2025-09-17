@@ -26,6 +26,8 @@ import { useState } from "react";
 import { useSwipe } from "@/hooks/use-swipe";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { QuickActions } from "@/app/(dashboard)/(coach)/dashboard/components/QuickActions";
+import { ANIMATIONS, ICONS, STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 // Mobile-first coach dashboard with card-based layout
 
@@ -143,10 +145,13 @@ function MetricsOverview({
               transition={{ duration: 0.3, delay: index * 0.1 }}
             >
               <Link href={metric.href}>
-                <Card className="text-center cursor-pointer hover:shadow-md transition-all active:scale-95">
+                <Card className={cn(
+                  "text-center cursor-pointer hover:shadow-md active:scale-95",
+                  ANIMATIONS.classes.normal
+                )}>
                   <CardContent className="p-4">
                     <div className="flex flex-col items-center gap-2">
-                      <metric.icon className="h-5 w-5 text-muted-foreground" />
+                      <metric.icon className={cn(ICONS.semantic.button, "text-muted-foreground")} />
                       <div>
                         <div className="text-2xl font-bold">{metric.value}</div>
                         <div className="text-xs text-muted-foreground">
@@ -174,9 +179,11 @@ function MetricsOverview({
             <button
               key={index}
               onClick={() => setCurrentView(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${
+              className={cn(
+                "w-2 h-2 rounded-full",
+                ANIMATIONS.classes.normal,
                 index === currentView ? "bg-primary" : "bg-muted"
-              }`}
+              )}
               aria-label={`View metrics page ${index + 1}`}
             />
           ))}
@@ -204,7 +211,7 @@ function TopInsights({
       value: analytics.mostCommonReinforcement.indicatorName,
       count: analytics.mostCommonReinforcement.count,
       icon: ThumbsUp,
-      color: "text-green-600 dark:text-green-400",
+      color: STATUS_COLORS.success.text,
     });
   }
 
@@ -215,7 +222,7 @@ function TopInsights({
       value: analytics.mostCommonRefinement.indicatorName,
       count: analytics.mostCommonRefinement.count,
       icon: Target,
-      color: "text-amber-600 dark:text-amber-400",
+      color: STATUS_COLORS.warning.text,
     });
   }
 
@@ -227,7 +234,7 @@ function TopInsights({
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
-          <TrendingUp className="h-4 w-4" />
+          <TrendingUp className={ICONS.semantic.inline} />
           Key Insights
         </CardTitle>
       </CardHeader>
@@ -235,7 +242,7 @@ function TopInsights({
         {insights.map((insight, index) => (
           <div key={index} className="flex items-start gap-3">
             <div className={`p-1.5 rounded-full bg-muted ${insight.color}`}>
-              <insight.icon className="h-3 w-3" />
+              <insight.icon className={ICONS.sizes.xs} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-xs text-muted-foreground">
@@ -431,7 +438,7 @@ export default function CoachDashboardPage() {
           <Card className="h-fit">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <FileText className="h-4 w-4" />
+                <FileText className={ICONS.semantic.inline} />
                 Recent Activity
                 <Badge variant="secondary" className="text-xs">
                   {analytics.recentActivity?.length || 0}
@@ -455,7 +462,7 @@ export default function CoachDashboardPage() {
                   <Link href="/analytics">
                     <Button variant="ghost" size="sm">
                       View All Activity
-                      <ChevronRight className="h-3 w-3 ml-1" />
+                      <ChevronRight className={cn(ICONS.sizes.xs, "ml-1")} />
                     </Button>
                   </Link>
                 </div>

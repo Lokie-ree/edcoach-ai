@@ -4,6 +4,8 @@ import { Clock, Users, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ANIMATIONS, STATUS_COLORS, ICONS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface Priority {
   label: string;
@@ -24,47 +26,47 @@ interface PrioritiesPanelProps {
 export function PrioritiesPanel({ priorities }: PrioritiesPanelProps) {
   const priorityItems: Priority[] = [
     {
-      label: "Recent Walkthroughs",
+      label: "Teachers Needing Walkthrough",
       count: priorities.walkthroughsDue,
-      href: "/dashboard",
+      href: "/walkthrough/new",
       urgency: priorities.walkthroughsDue > 3 ? "high" : priorities.walkthroughsDue > 0 ? "medium" : "low",
-      icon: <Clock className="h-5 w-5" />,
+      icon: <Clock className={ICONS.sizes.md} />,
     },
     {
       label: "New Reflections to Review",
       count: priorities.reflectionsToReview,
-      href: "/dashboard",
+      href: "/teachers",
       urgency: priorities.reflectionsToReview > 5 ? "high" : priorities.reflectionsToReview > 0 ? "medium" : "low",
-      icon: <CheckCircle className="h-5 w-5" />,
+      icon: <CheckCircle className={ICONS.sizes.md} />,
     },
     {
       label: "Teachers Needing Support",
       count: priorities.teachersNeedingSupport,
       href: "/teachers",
       urgency: priorities.teachersNeedingSupport > 2 ? "high" : priorities.teachersNeedingSupport > 0 ? "medium" : "low",
-      icon: <Users className="h-5 w-5" />,
+      icon: <Users className={ICONS.sizes.md} />,
     },
   ];
 
   const getUrgencyStyles = (urgency: Priority["urgency"]) => {
     switch (urgency) {
       case "high":
-        return "border-destructive/20 bg-destructive/5 text-destructive hover:bg-destructive/10";
+        return cn(STATUS_COLORS.error.bg, STATUS_COLORS.error.border, STATUS_COLORS.error.text);
       case "medium":
-        return "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/20 dark:text-amber-300 dark:hover:bg-amber-950/30";
+        return cn(STATUS_COLORS.warning.bg, STATUS_COLORS.warning.border, STATUS_COLORS.warning.text);
       case "low":
-        return "border-green-200 bg-green-50 text-green-800 hover:bg-green-100 dark:border-green-800 dark:bg-green-950/20 dark:text-green-300 dark:hover:bg-green-950/30";
+        return cn(STATUS_COLORS.success.bg, STATUS_COLORS.success.border, STATUS_COLORS.success.text);
     }
   };
 
   const getCountStyles = (urgency: Priority["urgency"]) => {
     switch (urgency) {
       case "high":
-        return "bg-destructive/10 text-destructive";
+        return cn(STATUS_COLORS.error.bg, STATUS_COLORS.error.text);
       case "medium":
-        return "bg-amber-100 text-amber-800 dark:bg-amber-950/30 dark:text-amber-300";
+        return cn(STATUS_COLORS.warning.bg, STATUS_COLORS.warning.text);
       case "low":
-        return "bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-300";
+        return cn(STATUS_COLORS.success.bg, STATUS_COLORS.success.text);
     }
   };
 
@@ -77,7 +79,7 @@ export function PrioritiesPanel({ priorities }: PrioritiesPanelProps) {
     <Card className="h-fit">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Clock className="h-4 w-4" />
+          <Clock className={ICONS.semantic.header} />
           Action Items
           {totalActionItems > 0 && (
             <Badge variant="secondary" className="text-xs">
@@ -89,9 +91,9 @@ export function PrioritiesPanel({ priorities }: PrioritiesPanelProps) {
       <CardContent>
         {!hasActivePriorities ? (
           <div className="text-center py-4">
-            <CheckCircle className="mx-auto h-8 w-8 text-green-600 mb-2 dark:text-green-400" />
-            <p className="text-sm font-medium text-green-800 dark:text-green-300">All caught up!</p>
-            <p className="text-xs text-green-600 mt-1 dark:text-green-400">
+            <CheckCircle className={cn("mx-auto mb-2", ICONS.sizes.xl, STATUS_COLORS.success.text)} />
+            <p className={cn("text-sm font-medium", STATUS_COLORS.success.text)}>All caught up!</p>
+            <p className={cn("text-xs mt-1", STATUS_COLORS.success.text)}>
               No urgent action items right now.
             </p>
           </div>
@@ -106,9 +108,11 @@ export function PrioritiesPanel({ priorities }: PrioritiesPanelProps) {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`flex items-center justify-between rounded-lg border p-4 transition-colors ${getUrgencyStyles(
-                    item.urgency
-                  )}`}
+                  className={cn(
+                    "flex items-center justify-between rounded-lg border p-4",
+                    ANIMATIONS.classes.normal,
+                    getUrgencyStyles(item.urgency)
+                  )}
                 >
                   <div className="flex items-center space-x-3">
                     <div className="flex-shrink-0">{item.icon}</div>
@@ -122,9 +126,11 @@ export function PrioritiesPanel({ priorities }: PrioritiesPanelProps) {
                     </div>
                   </div>
                   <div
-                    className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${getCountStyles(
-                      item.urgency
-                    )}`}
+                    className={cn(
+                      "flex items-center justify-center rounded-full text-sm font-bold",
+                      ICONS.sizes.lg, // Using lg size (w-6 h-6) instead of hardcoded w-8 h-8
+                      getCountStyles(item.urgency)
+                    )}
                   >
                     {item.count}
                   </div>

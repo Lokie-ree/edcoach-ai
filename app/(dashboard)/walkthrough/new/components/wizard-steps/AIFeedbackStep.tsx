@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { WalkthroughFormData } from "@/app/(dashboard)/walkthrough/new/validation";
 import { usePlanDetection } from "@/hooks/usePlanDetection";
+import { ICONS, STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface AIFeedbackStepProps {
   isLast: boolean;
@@ -93,7 +95,7 @@ export function AIFeedbackStep({ isLast }: AIFeedbackStepProps) {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-green-600" />
+            <CheckCircle className={cn(ICONS.semantic.header, STATUS_COLORS.success.text)} />
             Walkthrough Summary
           </CardTitle>
         </CardHeader>
@@ -101,7 +103,7 @@ export function AIFeedbackStep({ isLast }: AIFeedbackStepProps) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
               <h4 className="font-medium text-green-800 mb-2">Reinforcement</h4>
-              <Badge variant="default" className="bg-green-100 text-green-800 break-words">
+              <Badge variant="default" className={cn(STATUS_COLORS.success.bg, STATUS_COLORS.success.text, "break-words")}>
                 {formData.reinforcementIndicator}
               </Badge>
               {reinforcementIndicator && (
@@ -112,7 +114,7 @@ export function AIFeedbackStep({ isLast }: AIFeedbackStepProps) {
             </div>
             <div>
               <h4 className="font-medium text-blue-800 mb-2">Refinement</h4>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800 break-words">
+              <Badge variant="secondary" className={cn(STATUS_COLORS.info.bg, STATUS_COLORS.info.text, "break-words")}>
                 {formData.refinementIndicator}
               </Badge>
               {refinementIndicator && (
@@ -136,7 +138,7 @@ export function AIFeedbackStep({ isLast }: AIFeedbackStepProps) {
       {!hasGenerated ? (
         <Card>
           <CardContent className="p-6 text-center">
-            <Sparkles className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <Sparkles className={cn(ICONS.sizes.xl, "text-muted-foreground mx-auto mb-4")} />
             <h3 className="text-base font-semibold text-foreground mb-2 break-words">
               Generate AI Feedback
             </h3>
@@ -154,7 +156,7 @@ export function AIFeedbackStep({ isLast }: AIFeedbackStepProps) {
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4 mr-2" />
+                  <Sparkles className={cn(ICONS.semantic.inline, "mr-2")} />
                   Generate Feedback
                 </>
               )}
@@ -167,7 +169,7 @@ export function AIFeedbackStep({ isLast }: AIFeedbackStepProps) {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Badge variant="default" className="bg-green-100 text-green-800">
+                <Badge variant="default" className={cn(STATUS_COLORS.success.bg, STATUS_COLORS.success.text)}>
                   Reinforcement
                 </Badge>
                 Feedback
@@ -190,7 +192,7 @@ export function AIFeedbackStep({ isLast }: AIFeedbackStepProps) {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                <Badge variant="secondary" className={cn(STATUS_COLORS.info.bg, STATUS_COLORS.info.text)}>
                   Refinement
                 </Badge>
                 Feedback
@@ -213,7 +215,7 @@ export function AIFeedbackStep({ isLast }: AIFeedbackStepProps) {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <CheckCircle className={cn(ICONS.semantic.header, "text-muted-foreground mt-0.5")} />
                   <div>
                     <h4 className="font-medium text-foreground break-words">Ready to Submit</h4>
                     <p className="text-sm text-muted-foreground mt-1 break-words">

@@ -3,6 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Crown, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ICONS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 export const UpgradePrompt = ({ feature }: { feature: string }) => (
   <motion.div
@@ -12,7 +14,7 @@ export const UpgradePrompt = ({ feature }: { feature: string }) => (
   >
     <Card className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-purple-200 dark:border-purple-800">
       <CardContent className="p-8 text-center">
-        <Crown className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+        <Crown className={cn(ICONS.sizes.xl, "text-purple-600 mx-auto mb-4")} />
         <h3 className="text-xl font-semibold text-purple-900 dark:text-purple-100 mb-2">
           {feature} Available in Coach Pro
         </h3>
@@ -23,7 +25,7 @@ export const UpgradePrompt = ({ feature }: { feature: string }) => (
         <Link href="/settings/billing">
           <Button className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white">
             Upgrade to Coach Pro
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className={cn(ICONS.semantic.inline, "ml-2")} />
           </Button>
         </Link>
       </CardContent>

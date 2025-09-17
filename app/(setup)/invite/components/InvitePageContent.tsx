@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useUser, SignInButton } from "@clerk/nextjs";
+import { ICONS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 export default function InvitePageContent() {
   const searchParams = useSearchParams();
@@ -51,7 +53,7 @@ export default function InvitePageContent() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
+          <Loader2 className={cn(ICONS.sizes.md, "animate-spin")} />
           Loading...
         </div>
       </div>
@@ -64,7 +66,7 @@ export default function InvitePageContent() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <UserCheck className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+            <UserCheck className={cn(ICONS.sizes.xl, "text-blue-500 mx-auto mb-4")} />
             <CardTitle>Sign In Required</CardTitle>
             <CardDescription>
               To accept this teaching invitation from{" "}
@@ -76,7 +78,7 @@ export default function InvitePageContent() {
           <CardContent className="text-center space-y-4">
             <div className="p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">
-                <Mail className="h-4 w-4 inline mr-1" />
+                <Mail className={cn(ICONS.semantic.inline, "inline mr-1")} />
                 {invitation?.teacherEmail || "(invited email)"}
               </p>
               {invitation?.coachName && (
@@ -91,7 +93,7 @@ export default function InvitePageContent() {
             </p>
             <SignInButton mode="modal">
               <Button className="w-full">
-                <Mail className="mr-2 h-4 w-4" />
+                <Mail className={cn(ICONS.semantic.inline, "mr-2")} />
                 Sign In to Accept Invitation
               </Button>
             </SignInButton>
@@ -132,7 +134,7 @@ export default function InvitePageContent() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
+          <Loader2 className={cn(ICONS.sizes.md, "animate-spin")} />
           Loading invitation...
         </div>
       </div>
@@ -144,7 +146,7 @@ export default function InvitePageContent() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <XCircle className={cn(ICONS.sizes.xl, "text-red-500 mx-auto mb-4")} />
             <CardTitle>Invitation Not Found</CardTitle>
             <CardDescription>
               This invitation link is invalid or has been removed.
@@ -165,7 +167,7 @@ export default function InvitePageContent() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <Clock className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+            <Clock className={cn(ICONS.sizes.xl, "text-yellow-500 mx-auto mb-4")} />
             <CardTitle>Invitation Expired</CardTitle>
             <CardDescription>
               This invitation from {invitation.coachName} has expired. Please
@@ -175,7 +177,7 @@ export default function InvitePageContent() {
           <CardContent className="text-center space-y-4">
             <div className="p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">
-                <Mail className="h-4 w-4 inline mr-1" />
+                <Mail className={cn(ICONS.semantic.inline, "inline mr-1")} />
                 {invitation.teacherEmail}
               </p>
             </div>
@@ -193,7 +195,7 @@ export default function InvitePageContent() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+            <CheckCircle className={cn(ICONS.sizes.xl, "text-green-500 mx-auto mb-4")} />
             <CardTitle>Already Accepted</CardTitle>
             <CardDescription>
               This invitation has already been accepted. You can access your
@@ -214,7 +216,7 @@ export default function InvitePageContent() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <UserCheck className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+          <UserCheck className={cn(ICONS.sizes.xl, "text-blue-500 mx-auto mb-4")} />
           <CardTitle>Teacher Invitation</CardTitle>
           <CardDescription>
             You&apos;ve been invited to join {invitation.coachName}&apos;s
@@ -235,7 +237,7 @@ export default function InvitePageContent() {
               <div className="flex items-center justify-between mt-2">
                 <span className="text-sm font-medium">Status:</span>
                 <Badge variant="outline">
-                  <Clock className="h-3 w-3 mr-1" />
+                  <Clock className={cn(ICONS.sizes.xs, "mr-1")} />
                   Pending
                 </Badge>
               </div>
@@ -269,7 +271,7 @@ export default function InvitePageContent() {
                 </>
               ) : (
                 <>
-                  <CheckCircle className="mr-2 h-4 w-4" />
+                  <CheckCircle className={cn(ICONS.semantic.inline, "mr-2")} />
                   Accept Invitation
                 </>
               )}

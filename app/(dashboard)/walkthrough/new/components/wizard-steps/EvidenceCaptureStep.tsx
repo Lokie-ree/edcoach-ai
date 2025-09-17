@@ -13,6 +13,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Lightbulb } from "lucide-react";
 import { WalkthroughFormData } from "@/app/(dashboard)/walkthrough/new/validation";
 import { useState, useEffect } from "react";
+import { ICONS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface EvidenceCaptureStepProps {
   isLast: boolean;
@@ -43,7 +45,7 @@ export function EvidenceCaptureStep({}: EvidenceCaptureStepProps) {
       <Card>
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            <Lightbulb className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+            <Lightbulb className={cn(ICONS.semantic.header, "text-muted-foreground mt-0.5 flex-shrink-0")} />
             <div className="min-w-0 flex-1">
               <h4 className="font-medium text-foreground break-words">Evidence Collection Tips</h4>
               <p className="text-sm text-muted-foreground mt-1 break-words">

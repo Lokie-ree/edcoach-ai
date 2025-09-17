@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Users, Calendar, Target, MessageSquare } from "lucide-react";
 import { AnalyticsData } from "@/types/dashboard";
+import { ICONS, STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 export const OverviewMetrics = ({
   analytics,
@@ -39,21 +41,21 @@ export const OverviewMetrics = ({
       value: analytics.thisMonthWalkthroughs,
       subtitle: "This month",
       icon: Calendar,
-      color: "text-blue-600",
+      color: STATUS_COLORS.info.text,
     },
     {
       title: "AI Feedback Generated",
       value: analytics.totalAiFeedbackGenerated,
       subtitle: "Total responses",
       icon: Target,
-      color: "text-green-600",
+      color: STATUS_COLORS.success.text,
     },
     {
       title: "Recent Activity",
       value: `${analytics.teachersWithRecentActivity}/${analytics.totalTeachers}`,
       subtitle: "Teachers active (30 days)",
       icon: MessageSquare,
-      color: "text-purple-600",
+      color: "text-purple-600", // Keep custom purple for variety
     },
   ];
 
@@ -75,7 +77,7 @@ export const OverviewMetrics = ({
               <CardTitle className="text-sm font-medium">
                 {metric.title}
               </CardTitle>
-              <metric.icon className={`h-4 w-4 ${metric.color}`} />
+              <metric.icon className={cn(ICONS.semantic.inline, metric.color)} />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{metric.value}</div>
