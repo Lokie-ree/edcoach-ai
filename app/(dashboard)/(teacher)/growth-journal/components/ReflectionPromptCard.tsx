@@ -1,15 +1,32 @@
+"use client";
+
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Clock, Edit3 } from "lucide-react";
+import { MessageSquare, Clock, Edit3, Eye } from "lucide-react";
+import { ReflectionModal } from "./ReflectionModal";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface ReflectionPromptCardProps {
   question: string;
   lastAnswered: number | null;
   isOverdue: boolean;
+  walkthroughId?: Id<"walkthroughs">;
+  existingReflectionContent?: string;
+  existingReflectionId?: Id<"reflections">;
 }
 
-export function ReflectionPromptCard({ question, lastAnswered, isOverdue }: ReflectionPromptCardProps) {
+export function ReflectionPromptCard({ 
+  question, 
+  lastAnswered, 
+  isOverdue, 
+  walkthroughId,
+  existingReflectionContent,
+  existingReflectionId 
+}: ReflectionPromptCardProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const formatTimeAgo = (timestamp: number) => {
     const now = Date.now();
     const diff = now - timestamp;
@@ -52,17 +69,31 @@ export function ReflectionPromptCard({ question, lastAnswered, isOverdue }: Refl
         )}
 
         <div className="flex gap-2">
-          <Button size="sm" className="flex-1">
+          <Button size="sm" className="flex-1" onClick={() => setIsModalOpen(true)}>
             <Edit3 className="h-4 w-4 mr-2" />
             Write Reflection
           </Button>
           {lastAnswered && (
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => console.log("View previous reflection - to be implemented")}>
+              <Eye className="h-4 w-4 mr-2" />
               View Previous
             </Button>
           )}
         </div>
       </CardContent>
+
+      <ReflectionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        question={question}
+        walkthroughId={walkthroughId}
+        isOverdue={isOverdue}
+        existingReflection={lastAnswered && existingReflectionContent ? {
+          content: existingReflectionContent,
+          createdAt: lastAnswered,
+          reflectionId: existingReflectionId
+        } : null}
+      />
     </Card>
   );
 } 

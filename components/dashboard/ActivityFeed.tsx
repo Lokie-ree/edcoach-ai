@@ -38,66 +38,8 @@ interface ActivityFeedProps {
 }
 
 export function ActivityFeed({ activities = [], className }: ActivityFeedProps) {
-  // Mock data for demonstration - in real app, this would come from props or API
-  const mockActivities: ActivityItem[] = [
-    {
-      id: "1",
-      type: "walkthrough",
-      title: "Completed Classroom Observation",
-      description: "Observed Sarah Martinez's math lesson on fractions",
-      teacherName: "Sarah Martinez",
-      teacherAvatar: "/avatars/sarah.jpg",
-      timestamp: "2 hours ago",
-      status: "completed",
-      priority: "high"
-    },
-    {
-      id: "2",
-      type: "feedback",
-      title: "AI Feedback Generated",
-      description: "Generated feedback for Michael Thompson's walkthrough",
-      teacherName: "Michael Thompson",
-      teacherAvatar: "/avatars/michael.jpg",
-      timestamp: "4 hours ago",
-      status: "pending",
-      priority: "medium"
-    },
-    {
-      id: "3",
-      type: "pgp_goal",
-      title: "PGP Goal Set",
-      description: "Set new Professional Growth Plan goal for Jennifer Lee",
-      teacherName: "Jennifer Lee",
-      teacherAvatar: "/avatars/jennifer.jpg",
-      timestamp: "1 day ago",
-      status: "completed",
-      priority: "high"
-    },
-    {
-      id: "4",
-      type: "reflection",
-      title: "Growth Journal Entry",
-      description: "Teacher completed reflection on recent feedback",
-      teacherName: "David Chen",
-      teacherAvatar: "/avatars/david.jpg",
-      timestamp: "2 days ago",
-      status: "completed",
-      priority: "medium"
-    },
-    {
-      id: "5",
-      type: "milestone",
-      title: "Progress Milestone Reached",
-      description: "Teacher achieved 80% progress on PGP goal",
-      teacherName: "Sarah Martinez",
-      teacherAvatar: "/avatars/sarah.jpg",
-      timestamp: "3 days ago",
-      status: "completed",
-      priority: "high"
-    }
-  ];
-
-  const displayActivities = activities.length > 0 ? activities : mockActivities;
+  // Use real activities data - no more mock data
+  const displayActivities = activities;
 
   const getActivityIcon = (type: ActivityItem["type"]) => {
     switch (type) {

@@ -296,6 +296,7 @@ Users aren't just buying software—they're buying transformation:
 - **Primary Concern:** Scalable professional development systems
 - **Key Need:** District-wide data and compliance reporting
 - **Decision Influence:** Very High (district-wide adoption decisions)
+- **Coach Pro Target:** Primary buyer for premium analytics and team-wide insights
 
 ### Persona Usage Guidelines
 
@@ -652,18 +653,20 @@ This documents the user experience for a "Coach Pro" user accessing the advanced
 
 ### P0 - Critical
 1. **AI Feedback System Reliability** - Ensure 99.9% uptime and fallback mechanisms
-2. **Onboarding Experience** - Complete state machine implementation
-3. **Mobile Optimization** - Ensure seamless tablet/phone experience
+2. **Mobile Optimization** - Ensure seamless tablet/phone experience for coach workflows
+3. **Onboarding Experience** - Complete state machine implementation
 
 ### P1 - Important  
-1. **Advanced Analytics** - Heat maps and trend reporting for Coach Pro
-2. **Teacher Dashboard Enhancement** - Expand functionality and engagement
-3. **Integration Readiness** - Prepare for SIS and LMS integrations
+1. **Real-time Collaboration Features** - Multi-user conflict resolution and presence indicators
+2. **Advanced Analytics (Coach Pro)** - Heat maps and trend reporting for premium tier
+3. **Teacher Dashboard Enhancement** - Expand functionality and engagement
+4. **Integration Readiness** - Prepare for SIS and LMS integrations
 
 ### P2 - Future
 1. **Multi-language Support** - Expand to non-English speaking schools
 2. **Advanced AI Features** - Predictive insights and recommendations
-3. **Mobile Apps** - Native iOS/Android applications
+3. **Native Mobile Apps** - iOS/Android applications (after web mobile optimization complete)
+4. **Advanced Collaboration** - Multi-stakeholder coaching scenarios
 
 ---
 
@@ -739,10 +742,50 @@ Each strategic priority has corresponding technical implementation metrics:
 2. **Feature Complexity** - Mitigation: User research, iterative design
 3. **Integration Demands** - Mitigation: API-first architecture, partnerships
 
+## Business Model & Monetization Strategy
+
+### Pricing Tiers
+
+#### **Coach Starter (Free)**
+- Up to 5 teachers
+- Basic walkthrough functionality
+- Standard AI feedback generation
+- Basic teacher growth journal
+- Email support
+
+#### **Coach Pro (Paid)**
+- Unlimited teachers
+- Advanced analytics dashboard
+- Team-wide heat maps and trends
+- Export functionality (PDF/CSV)
+- Priority support
+- Custom rubric indicators
+- Advanced reporting features
+
+#### **District Enterprise (Custom)**
+- Multi-school deployment
+- District-wide analytics
+- SIS/LMS integrations
+- Custom training and onboarding
+- Dedicated success manager
+- Compliance reporting
+
+### Revenue Model
+- **Freemium Strategy**: Free tier drives adoption, paid tier captures value
+- **Target Conversion**: 15% free-to-paid conversion rate
+- **ARPU Goals**: $50/month Coach Pro, $500/month District Enterprise
+- **Growth Strategy**: Land with coaches, expand to school/district level
+
+### Success Metrics by Tier
+- **Free Tier**: User activation, feature adoption, upgrade triggers
+- **Coach Pro**: Usage depth, analytics engagement, retention
+- **Enterprise**: Multi-school adoption, compliance usage, renewal rates
+
 ---
 
 ## Version History
 - **v1.0** (September 2025) - Initial comprehensive business context document
+- **v1.1** (September 2025) - Added business model clarity and refined strategic priorities based on team analysis
 - **Next Review:** November 2025 (after user testing validation)
 
 ---

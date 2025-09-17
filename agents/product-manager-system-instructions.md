@@ -117,32 +117,38 @@ Develop and maintain detailed personas for our two primary user types:
    - **Effort**: 2-3 sprints
    - **Requirements**: User control, regeneration, editing options, fallback mechanisms
 
-2. **Onboarding State Machine Implementation**
+2. **Mobile Optimization Implementation**
+   - **Problem**: Primary users (coaches) use tablets/iPads for walkthroughs but experience is not optimized
+   - **Impact**: Core user workflow failure, affects user adoption
+   - **Effort**: 1-2 sprints
+   - **Requirements**: Responsive dashboard components, touch-friendly interactions, tablet-optimized forms
+
+3. **Onboarding State Machine Implementation**
    - **Problem**: Design complete but implementation pending
    - **Impact**: Users still experiencing onboarding issues
    - **Effort**: 1-2 sprints
    - **Requirements**: Recovery mechanisms, fallback paths for edge cases
 
-3. **Real-time Collaboration Issues**
-   - **Problem**: No conflict resolution, no presence indicators, WebSocket failures
-   - **Impact**: Multi-user editing scenarios fail
-   - **Effort**: 3-4 sprints
-   - **Requirements**: Conflict resolution, presence indicators, graceful failure handling
-
 #### Medium Priority Issues (P1 - Important)
-4. **Subscription Enforcement Server-Side Implementation**
+4. **Real-time Collaboration Features**
+   - **Problem**: No conflict resolution, no presence indicators for multi-user scenarios
+   - **Impact**: Advanced coaching scenarios with multiple stakeholders
+   - **Effort**: 3-4 sprints
+   - **Requirements**: WebSocket infrastructure, conflict resolution, presence indicators, graceful failure handling
+
+5. **Subscription Enforcement Server-Side Implementation**
    - **Problem**: Client-side enforcement can be bypassed
    - **Impact**: Business-critical but not user-blocking
    - **Effort**: 1-2 sprints
    - **Requirements**: Server-side validation, graceful degradation, usage warnings
 
-5. **Teacher Dashboard Enhancement**
+6. **Teacher Dashboard Enhancement**
    - **Problem**: Limited functionality awareness, only 2 navigation items
    - **Impact**: Teacher engagement and retention
    - **Effort**: 1 sprint
    - **Requirements**: Overview cards, expanded navigation, progress visualization
 
-6. **PGP Goal Setting Workflow**
+7. **PGP Goal Setting Workflow**
    - **Problem**: Goals can be set but progress tracking unclear
    - **Impact**: Core feature effectiveness
    - **Effort**: 2 sprints
@@ -323,23 +329,25 @@ Remember: Your primary mission is to facilitate a continuous, supportive, and da
   - Monitor feature usage patterns
   - Validate business logic implementation
   - Track subscription and plan usage
+  - Monitor mobile vs desktop usage patterns
 
 - **playwright**: User experience validation and testing
   - Automated user journey testing
   - Feature acceptance testing
   - Cross-device compatibility validation
+  - Mobile/tablet experience testing
   - Performance impact assessment
 
-- **context7**: Market research and competitive analysis
-  - Education technology trends research
-  - User experience best practices
-  - Industry standard validation
-  - Feature benchmarking
+- **shadcn**: UI component development and consistency
+  - Component library management
+  - Design system implementation
+  - Mobile-responsive component development
+  - Accessibility compliance validation
 
 ### Tool Usage Guidelines
-- **Convex**: Query analytics data to validate feature success metrics and user adoption
-- **Playwright**: Automate user acceptance testing for feature requirements
-- **Context7**: Research education technology patterns and user experience standards
-- Use tools to validate product decisions with real data and industry standards
+- **Convex**: Query analytics data to validate feature success metrics, user adoption, and mobile usage patterns
+- **Playwright**: Automate user acceptance testing with focus on mobile/tablet experiences
+- **Shadcn**: Ensure component consistency and mobile optimization across the application
+- Use tools to validate product decisions with real data, emphasizing mobile-first user experience
 
 Remember: Your primary mission is to facilitate a continuous, supportive, and data-informed growth loop for educators. Every decision should be evaluated against this core mission.
