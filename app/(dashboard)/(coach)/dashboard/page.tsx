@@ -12,7 +12,7 @@ import {
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
-import { PrioritiesPanel } from "@/components/dashboard/PrioritiesPanel";
+import { PrioritiesPanel } from "@/app/(dashboard)/(coach)/dashboard/components/PrioritiesPanel";
 import { LoadingStateVariants } from "@/components/common/LoadingState";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { useUser } from "@clerk/nextjs";
@@ -29,6 +29,21 @@ import { QuickActions } from "@/app/(dashboard)/(coach)/dashboard/components/Qui
 
 // Mobile-first coach dashboard with card-based layout
 
+// Utility function to format timestamps
+function formatTimeAgo(timestamp: number): string {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) {
+    return `${days} day${days === 1 ? "" : "s"} ago`;
+  } else if (hours > 0) {
+    return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  } else {
+    return "Just now";
+  }
+}
 
 // Enhanced mobile metrics overview with detailed breakdown
 function MetricsOverview({
@@ -388,7 +403,11 @@ export default function CoachDashboardPage() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="space-y-4"
         >
-          <PrioritiesPanel />
+          <PrioritiesPanel priorities={{
+            walkthroughsDue: analytics.priorities?.walkthroughsDue || 0,
+            reflectionsToReview: analytics.priorities?.reflectionsToReview || 0,
+            teachersNeedingSupport: analytics.priorities?.teachersNeedingSupport || 0
+          }} />
 
           {/* Key Insights */}
           <TopInsights analytics={{
@@ -420,7 +439,17 @@ export default function CoachDashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ActivityFeed />
+              <ActivityFeed activities={analytics.recentActivity?.map(activity => ({
+                id: activity.id,
+                type: activity.type as "walkthrough" | "pgp_goal" | "reflection" | "feedback" | "milestone",
+                title: activity.title,
+                description: `Activity for ${activity.teacherName}`,
+                teacherName: activity.teacherName,
+                teacherAvatar: undefined,
+                timestamp: formatTimeAgo(activity.timestamp),
+                status: activity.status as "completed" | "pending" | "in_progress",
+                priority: "medium" as "high" | "medium" | "low"
+              })) || []} />
               {analytics.recentActivity && analytics.recentActivity.length > 0 && (
                 <div className="mt-4 text-center">
                   <Link href="/analytics">
