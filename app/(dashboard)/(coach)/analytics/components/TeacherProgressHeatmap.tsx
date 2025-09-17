@@ -2,6 +2,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Users } from "lucide-react";
 import { AnalyticsData } from "@/types/dashboard";
+import { ANIMATIONS, ICONS, STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 export const TeacherProgressHeatmap = ({
   analytics,
@@ -34,11 +36,11 @@ export const TeacherProgressHeatmap = ({
   ) => {
     switch (status) {
       case "strength":
-        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800";
+        return cn(STATUS_COLORS.success.bg, STATUS_COLORS.success.text, STATUS_COLORS.success.border);
       case "developing":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800";
+        return cn(STATUS_COLORS.warning.bg, STATUS_COLORS.warning.text, STATUS_COLORS.warning.border);
       case "needs_focus":
-        return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800";
+        return cn(STATUS_COLORS.error.bg, STATUS_COLORS.error.text, STATUS_COLORS.error.border);
       default:
         return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-300 dark:border-gray-800";
     }
@@ -66,7 +68,7 @@ export const TeacherProgressHeatmap = ({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
+            <Users className={ICONS.semantic.header} />
             Teacher Progress Heatmap
           </CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -76,7 +78,7 @@ export const TeacherProgressHeatmap = ({
         <CardContent>
           {analytics.teacherProgressMatrix.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <Users className={cn(ICONS.sizes.xl, "mx-auto mb-4 opacity-50")} />
               <p>No teacher progress data available</p>
               <p className="text-xs">
                 Complete walkthroughs to see progress insights
@@ -107,7 +109,7 @@ export const TeacherProgressHeatmap = ({
                 {analytics.teacherProgressMatrix.map((teacher) => (
                   <div
                     key={teacher.teacherId}
-                    className="grid grid-cols-[1fr,repeat(4,1fr),auto] gap-2 items-center p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                    className={cn("grid grid-cols-[1fr,repeat(4,1fr),auto] gap-2 items-center p-2 rounded-lg hover:bg-muted/50", ANIMATIONS.classes.normal)}
                   >
                     {/* Teacher name */}
                     <div className="text-sm font-medium truncate">
@@ -135,7 +137,7 @@ export const TeacherProgressHeatmap = ({
                       return (
                         <div
                           key={domain}
-                          className={`h-8 rounded border-2 flex items-center justify-center cursor-help transition-all hover:scale-105 ${getStatusStyle(domainScore.status)}`}
+                          className={cn("h-8 rounded border-2 flex items-center justify-center cursor-help hover:scale-105", ANIMATIONS.classes.normal, getStatusStyle(domainScore.status))}
                           title={`${formatDomainName(domain)}: ${domainScore.status.replace("_", " ")} | Reinforcement: ${domainScore.reinforcementCount} | Refinement: ${domainScore.refinementCount}`}
                         >
                           <span className="text-xs">

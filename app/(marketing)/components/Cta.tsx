@@ -4,6 +4,8 @@ import { Container } from "@/components/ui/container";
 import { SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import ctaData from "@/data/landing-content.json";
+import { ANIMATIONS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 export default function CTASection() {
   const { headline, sub_headline, cta } = ctaData.cta;
@@ -25,7 +27,7 @@ export default function CTASection() {
               {sub_headline}
             </p>
             <SignInButton mode="modal">
-              <Button className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 px-8 py-3 text-md font-medium shadow hover:shadow-lg transition-all duration-300">
+              <Button className={cn("bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 px-8 py-3 text-md font-medium shadow hover:shadow-lg", ANIMATIONS.classes.normal)}>
                 {cta.label}
               </Button>
             </SignInButton>

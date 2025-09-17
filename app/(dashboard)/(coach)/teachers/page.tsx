@@ -9,7 +9,6 @@ import { motion } from "framer-motion";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { PageHeader } from "@/components/common/PageHeader";
 import TeacherList from "./components/TeacherList";
-import GridDistortion from "./components/GridDistortion";
 import { Teacher } from "@/types/teacher";
 import TeacherStatsCard from "./components/TeacherStatsCard";
 import { TeacherInvitationForm } from "./components/TeacherInvitationForm";
@@ -30,7 +29,6 @@ export default function TeachersPage() {
       <div className="space-y-4 relative">
         {" "}
         {/* Reduced spacing */}
-        <GridDistortion />
         <PageHeader
           title="Teachers"
           description={

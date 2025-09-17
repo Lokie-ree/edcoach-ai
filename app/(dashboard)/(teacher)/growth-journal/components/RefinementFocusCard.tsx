@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Lightbulb, Sparkles, TrendingUp } from "lucide-react";
+import { ICONS, STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface RefinementFocusCardProps {
   currentIndicator: string;
@@ -23,21 +25,21 @@ export function RefinementFocusCard({
   aiInsights
 }: RefinementFocusCardProps) {
   const getProgressColor = () => {
-    if (progress >= 75) return "text-green-600";
-    if (progress >= 50) return "text-yellow-600";
-    if (progress >= 25) return "text-orange-600";
-    return "text-red-600";
+    if (progress >= 75) return STATUS_COLORS.success.text;
+    if (progress >= 50) return STATUS_COLORS.warning.text;
+    if (progress >= 25) return STATUS_COLORS.warning.text;
+    return STATUS_COLORS.error.text;
   };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Lightbulb className="h-5 w-5" />
+          <Lightbulb className={ICONS.semantic.header} />
           Current Focus Area
           {aiInsights && (
             <Badge variant="secondary" className="ml-auto">
-              <Sparkles className="h-3 w-3 mr-1" />
+              <Sparkles className={cn(ICONS.sizes.xs, "mr-1")} />
               AI Insights
             </Badge>
           )}
@@ -65,7 +67,7 @@ export function RefinementFocusCard({
               {/* Trend Analysis */}
               <div>
                 <h4 className="font-medium text-sm text-blue-900 mb-1 flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" />
+                  <TrendingUp className={ICONS.sizes.xs} />
                   Trend Analysis
                 </h4>
                 <p className="text-sm text-blue-800">{aiInsights.trendAnalysis}</p>
@@ -84,7 +86,7 @@ export function RefinementFocusCard({
                   <ul className="space-y-1">
                     {aiInsights.strategicRecommendations.map((recommendation, index) => (
                       <li key={index} className="flex items-start gap-2 text-sm text-blue-800">
-                        <Sparkles className="h-3 w-3 text-blue-500 mt-0.5 flex-shrink-0" />
+                        <Sparkles className={cn(ICONS.sizes.xs, "text-blue-500 mt-0.5 flex-shrink-0")} />
                         <span>{recommendation}</span>
                       </li>
                     ))}
@@ -100,7 +102,7 @@ export function RefinementFocusCard({
           <ul className="space-y-2">
             {nextSteps.map((step, index) => (
               <li key={index} className="flex items-start gap-2 text-sm">
-                <CheckCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <CheckCircle className={cn(ICONS.semantic.inline, "text-muted-foreground mt-0.5 flex-shrink-0")} />
                 <span>{step}</span>
               </li>
             ))}

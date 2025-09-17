@@ -6,6 +6,8 @@ import { Plus, UserPlus, BarChart3, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { TeacherInvitationForm } from "@/app/(dashboard)/(coach)/teachers/components/TeacherInvitationForm";
 import { Badge } from "@/components/ui/badge";
+import { ANIMATIONS, ICONS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 // Mobile-first quick action card component
 function QuickActionCard({
@@ -25,9 +27,11 @@ function QuickActionCard({
 }) {
   const cardContent = (
     <Card
-      className={`h-20 cursor-pointer transition-all hover:shadow-md active:scale-95 ${
+      className={cn(
+        "h-20 cursor-pointer hover:shadow-md active:scale-95",
+        ANIMATIONS.classes.normal,
         variant === "primary" ? "bg-primary text-primary-foreground" : ""
-      }`}
+      )}
     >
       <CardContent className="flex items-center justify-between p-4 h-full">
         <div className="flex items-center gap-3">
@@ -36,7 +40,7 @@ function QuickActionCard({
               variant === "primary" ? "bg-primary-foreground/20" : "bg-muted"
             }`}
           >
-            <Icon className="h-5 w-5" />
+            <Icon className={ICONS.semantic.button} />
           </div>
           <span className="font-medium text-sm">{title}</span>
         </div>
@@ -46,7 +50,7 @@ function QuickActionCard({
               {notification}
             </Badge>
           )}
-          <ChevronRight className="h-4 w-4 opacity-60" />
+          <ChevronRight className={cn(ICONS.semantic.inline, "opacity-60")} />
         </div>
       </CardContent>
     </Card>
@@ -101,7 +105,7 @@ export function QuickActions({ isMobile }: QuickActionsProps) {
     <div className="flex flex-col md:flex-row gap-3">
       <Link href="/walkthrough/new" className="flex-1">
         <Button className="w-full" size="sm">
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className={cn(ICONS.semantic.inline, "mr-2")} />
           Start Walkthrough
         </Button>
       </Link>
@@ -109,7 +113,7 @@ export function QuickActions({ isMobile }: QuickActionsProps) {
         <TeacherInvitationForm
           trigger={
             <Button variant="outline" className="w-full" size="sm">
-              <UserPlus className="h-4 w-4 mr-2" />
+              <UserPlus className={cn(ICONS.semantic.inline, "mr-2")} />
               Invite Teacher
             </Button>
           }
@@ -117,7 +121,7 @@ export function QuickActions({ isMobile }: QuickActionsProps) {
       </div>
       <Link href="/analytics" className="flex-1">
         <Button variant="outline" className="w-full" size="sm">
-          <BarChart3 className="h-4 w-4 mr-2" />
+          <BarChart3 className={cn(ICONS.semantic.inline, "mr-2")} />
           View Analytics
         </Button>
       </Link>

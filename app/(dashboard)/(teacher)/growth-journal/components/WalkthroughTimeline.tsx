@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookOpen, FileText, Calendar, Eye } from "lucide-react";
+import { ICONS, STATUS_COLORS, ANIMATIONS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface WalkthroughItem {
   id: string;
@@ -30,11 +32,11 @@ export function WalkthroughTimeline({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-100 text-green-800";
+        return cn(STATUS_COLORS.success.bg, STATUS_COLORS.success.text);
       case "scheduled":
-        return "bg-blue-100 text-blue-800";
+        return cn(STATUS_COLORS.info.bg, STATUS_COLORS.info.text);
       default:
-        return "bg-gray-100 text-gray-800";
+        return cn(STATUS_COLORS.neutral.bg, STATUS_COLORS.neutral.text);
     }
   };
 
@@ -42,7 +44,7 @@ export function WalkthroughTimeline({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <BookOpen className="h-5 w-5" />
+          <BookOpen className={ICONS.semantic.header} />
           Recent Walkthroughs
         </CardTitle>
       </CardHeader>
@@ -50,7 +52,7 @@ export function WalkthroughTimeline({
         {walkthroughs.map((walkthrough) => (
           <div
             key={walkthrough.id}
-            className="flex items-start gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+            className={cn("flex items-start gap-3 p-3 border rounded-lg hover:bg-muted/50", ANIMATIONS.classes.normal)}
           >
             <div className="flex-shrink-0">
               <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
@@ -68,12 +70,12 @@ export function WalkthroughTimeline({
 
               <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
                 <div className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
+                  <Calendar className={ICONS.sizes.xs} />
                   {formatDate(walkthrough.date)}
                 </div>
                 {walkthrough.hasReflection && (
                   <div className="flex items-center gap-1">
-                    <FileText className="h-3 w-3" />
+                    <FileText className={ICONS.sizes.xs} />
                     Reflection
                   </div>
                 )}
@@ -95,7 +97,7 @@ export function WalkthroughTimeline({
               </div>
 
               <Button variant="outline" size="sm">
-                <Eye className="h-3 w-3 mr-1" />
+                <Eye className={cn(ICONS.sizes.xs, "mr-1")} />
                 View Details
               </Button>
             </div>

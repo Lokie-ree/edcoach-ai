@@ -22,6 +22,8 @@ import {
   Goal,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ICONS, STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface TeacherTutorialProps {
   onComplete: () => void;
@@ -45,7 +47,7 @@ export default function TeacherTutorial({
           {/* Keep icon centered for visual impact */}
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
-              <BookOpen className="h-8 w-8 text-white" />
+              <BookOpen className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
           </div>
 
@@ -60,15 +62,15 @@ export default function TeacherTutorial({
 
             <div className="grid gap-2 text-sm">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                <CheckCircle className={cn(ICONS.semantic.inline, STATUS_COLORS.success.text, "flex-shrink-0")} />
                 <span>Connected directly to your coach</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                <CheckCircle className={cn(ICONS.semantic.inline, STATUS_COLORS.success.text, "flex-shrink-0")} />
                 <span>Personalized feedback aligned with your PGP goals</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                <CheckCircle className={cn(ICONS.semantic.inline, STATUS_COLORS.success.text, "flex-shrink-0")} />
                 <span>Two-way reflection system for deeper learning</span>
               </div>
             </div>
@@ -85,7 +87,7 @@ export default function TeacherTutorial({
         <div className="space-y-6">
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-full flex items-center justify-center mb-4">
-              <Goal className="h-8 w-8 text-white" />
+              <Goal className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
           </div>
 
@@ -143,7 +145,7 @@ export default function TeacherTutorial({
         <div className="space-y-6">
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mb-4">
-              <Users className="h-8 w-8 text-white" />
+              <Users className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
           </div>
 
@@ -194,7 +196,7 @@ export default function TeacherTutorial({
         <div className="space-y-6">
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mb-4">
-              <Award className="h-8 w-8 text-white" />
+              <Award className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
           </div>
 
@@ -210,7 +212,7 @@ export default function TeacherTutorial({
             <div className="grid gap-3">
               <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
                 <div className="flex items-center gap-2 mb-1">
-                  <Award className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <Award className={cn(ICONS.semantic.inline, STATUS_COLORS.success.text, "flex-shrink-0")} />
                   <span className="font-medium text-green-800 dark:text-green-200">
                     Reinforcement
                   </span>
@@ -222,7 +224,7 @@ export default function TeacherTutorial({
               </div>
               <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
                 <div className="flex items-center gap-2 mb-1">
-                  <Target className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                  <Target className={cn(ICONS.semantic.inline, STATUS_COLORS.info.text, "flex-shrink-0")} />
                   <span className="font-medium text-blue-800 dark:text-blue-200">
                     Refinement
                   </span>
@@ -245,7 +247,7 @@ export default function TeacherTutorial({
         <div className="space-y-6">
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mb-4">
-              <MessageSquare className="h-8 w-8 text-white" />
+              <MessageSquare className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
           </div>
 
@@ -298,7 +300,7 @@ export default function TeacherTutorial({
         <div className="space-y-6">
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-teal-500 to-green-600 rounded-full flex items-center justify-center mb-4">
-              <TrendingUp className="h-8 w-8 text-white" />
+              <TrendingUp className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
           </div>
 
@@ -383,7 +385,7 @@ export default function TeacherTutorial({
                 <CardDescription>{currentStepData.description}</CardDescription>
               </div>
               <Button variant="ghost" size="sm" onClick={onSkip}>
-                <X className="h-4 w-4" />
+                <X className={ICONS.semantic.inline} />
               </Button>
             </div>
 
@@ -433,7 +435,7 @@ export default function TeacherTutorial({
                   {currentStep === steps.length - 1 ? (
                     <>
                       Start Learning
-                      <ArrowRight className="h-4 w-4 ml-2" />
+                      <ArrowRight className={cn(ICONS.semantic.inline, "ml-2")} />
                     </>
                   ) : (
                     "Next"

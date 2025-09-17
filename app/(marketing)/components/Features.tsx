@@ -16,6 +16,7 @@ import {
   TrendingUp,
   LayoutDashboard
 } from "lucide-react";
+import { ICONS } from "@/lib/design-tokens";
 
 // Map icon strings to components
 const iconMap = {
@@ -36,7 +37,7 @@ export default function FeaturesSection() {
   // Function to get icon component based on string name
   const getIconComponent = (iconName: string) => {
     const IconComponent = iconMap[iconName as keyof typeof iconMap];
-    return IconComponent ? <IconComponent className="h-8 w-8" /> : null;
+    return IconComponent ? <IconComponent className={ICONS.sizes.lg} /> : null;
   };
 
   // Generate gradient colors based on index

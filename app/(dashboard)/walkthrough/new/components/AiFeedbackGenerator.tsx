@@ -18,6 +18,7 @@ import { AIUsageBadge, AIUsageWarning } from "@/components/common/AiUsageBadge";
 import { Sparkles, AlertTriangle, Crown, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ICONS, STATUS_COLORS } from "@/lib/design-tokens";
 
 interface AIFeedbackGeneratorProps {
   evidence: string;
@@ -183,7 +184,7 @@ export function AIFeedbackGenerator({
       <CardHeader className="space-y-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-purple-500" />
+            <Sparkles className={cn(ICONS.semantic.header, "text-purple-500")} />
             AI Feedback Generator
           </CardTitle>
           <AIUsageBadge />
@@ -220,8 +221,8 @@ export function AIFeedbackGenerator({
               className={cn(
                 "flex items-center gap-2",
                 promptType === "reinforcement"
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-blue-600 hover:bg-blue-700",
+                  ? cn(STATUS_COLORS.success.bg, "hover:bg-green-700")
+                  : cn(STATUS_COLORS.info.bg, "hover:bg-blue-700"),
               )}
             >
               {isGenerating ? (
@@ -231,7 +232,7 @@ export function AIFeedbackGenerator({
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className={ICONS.semantic.inline} />
                   Generate{" "}
                   {promptType === "reinforcement"
                     ? "Reinforcement"
@@ -243,7 +244,7 @@ export function AIFeedbackGenerator({
 
             {!canGenerate && !isPro && (
               <Badge variant="destructive" className="flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" />
+                <AlertTriangle className={ICONS.sizes.xs} />
                 Limit reached
               </Badge>
             )}
@@ -252,7 +253,7 @@ export function AIFeedbackGenerator({
           {!canGenerate && (
             <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
               <div className="flex items-start gap-2">
-                <Zap className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                <Zap className={cn(ICONS.semantic.inline, "text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0")} />
                 <div className="text-sm">
                   <p className="text-amber-800 dark:text-amber-200 font-medium">
                     AI Generation Limit Reached
@@ -266,7 +267,7 @@ export function AIFeedbackGenerator({
                     size="sm"
                     className="mt-2 bg-purple-600 hover:bg-purple-700"
                   >
-                    <Crown className="w-3 h-3 mr-1" />
+                    <Crown className={cn(ICONS.sizes.xs, "mr-1")} />
                     Upgrade to Pro
                   </Button>
                 </div>
@@ -288,8 +289,8 @@ export function AIFeedbackGenerator({
                   variant="secondary"
                   className={cn(
                     promptType === "reinforcement"
-                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                      : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+                      ? cn(STATUS_COLORS.success.bg, STATUS_COLORS.success.text)
+                      : cn(STATUS_COLORS.info.bg, STATUS_COLORS.info.text),
                   )}
                 >
                   {promptType === "reinforcement"
@@ -325,7 +326,7 @@ export function AIFeedbackGenerator({
         {!isPro && (
           <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
             <div className="flex items-start gap-2">
-              <Crown className="w-4 h-4 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+              <Crown className={cn(ICONS.semantic.inline, "text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0")} />
               <div className="text-sm">
                 <p className="text-purple-800 dark:text-purple-200 font-medium">
                   Upgrade to Pro for unlimited AI generations
