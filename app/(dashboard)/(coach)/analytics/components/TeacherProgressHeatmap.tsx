@@ -14,10 +14,10 @@ export const TeacherProgressHeatmap = ({
     return (
       <Card className="animate-pulse">
         <CardHeader>
-          <div className="h-6 bg-gray-200 rounded w-48"></div>
+          <div className="h-6 bg-muted rounded w-48"></div>
         </CardHeader>
         <CardContent>
-          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-64 bg-muted rounded"></div>
         </CardContent>
       </Card>
     );
@@ -42,7 +42,7 @@ export const TeacherProgressHeatmap = ({
       case "needs_focus":
         return cn(STATUS_COLORS.error.bg, STATUS_COLORS.error.text, STATUS_COLORS.error.border);
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-300 dark:border-gray-800";
+        return cn(STATUS_COLORS.neutral.bg, STATUS_COLORS.neutral.text, STATUS_COLORS.neutral.border);
     }
   };
 
@@ -125,7 +125,7 @@ export const TeacherProgressHeatmap = ({
                         return (
                           <div
                             key={domain}
-                            className="h-8 rounded border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center"
+                            className="h-8 rounded border-2 border-dashed border-muted-foreground/30 flex items-center justify-center"
                           >
                             <span className="text-xs text-muted-foreground">
                               —
@@ -196,7 +196,7 @@ export const TeacherProgressHeatmap = ({
                     <span>🎯 Needs Focus</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded border-2 border-dashed border-gray-300 dark:border-gray-600"></div>
+                    <div className="w-4 h-4 rounded border-2 border-dashed border-muted-foreground/30"></div>
                     <span>— No Data</span>
                   </div>
                 </div>

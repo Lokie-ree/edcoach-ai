@@ -41,7 +41,7 @@ export default function CoachTutorial({
       content: (
         <div className="space-y-4">
           <div className="text-center">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mb-4">
               <Users className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
             <h3 className="text-lg font-semibold mb-2">You&apos;re All Set!</h3>
@@ -60,8 +60,8 @@ export default function CoachTutorial({
               <span>Ready to invite teachers to your group</span>
             </div>
           </div>
-          <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
+          <div className={cn("p-4 rounded-lg border", STATUS_COLORS.info.bg, STATUS_COLORS.info.border)}>
+            <p className={cn("text-sm", STATUS_COLORS.info.text)}>
               <strong>Coach Free Plan</strong> - Start with 2 teachers and 4
               walkthroughs total (lifetime). Upgrade to Coach Starter
               ($19/month) for 15 teachers and 50 walkthroughs/month, or Coach
@@ -78,7 +78,7 @@ export default function CoachTutorial({
       content: (
         <div className="space-y-4">
           <div className="text-center">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-success to-primary rounded-full flex items-center justify-center mb-4">
               <Users className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
             <h3 className="text-lg font-semibold mb-2">Building Your Team</h3>
@@ -107,7 +107,7 @@ export default function CoachTutorial({
       content: (
         <div className="space-y-4">
           <div className="text-center">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-secondary to-accent rounded-full flex items-center justify-center mb-4">
               <ClipboardList className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
             <h3 className="text-lg font-semibold mb-2">Smart Walkthroughs</h3>
@@ -137,7 +137,7 @@ export default function CoachTutorial({
       content: (
         <div className="space-y-3">
           <div className="text-center">
-            <div className="mx-auto w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mb-3">
+            <div className="mx-auto w-12 h-12 bg-gradient-to-r from-warning to-destructive rounded-full flex items-center justify-center mb-3">
               <BarChart3 className={cn(ICONS.sizes.md, "text-white")} />
             </div>
             <h3 className="text-base font-semibold mb-1">
@@ -159,11 +159,11 @@ export default function CoachTutorial({
                 <li>• Growth trends</li>
               </ul>
             </div>
-            <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
-              <h4 className="font-medium text-sm mb-2 text-green-800 dark:text-green-200">
+            <div className={cn("rounded-lg p-3 border", STATUS_COLORS.success.bg, STATUS_COLORS.success.border)}>
+              <h4 className={cn("font-medium text-sm mb-2", STATUS_COLORS.success.text)}>
                 Ready to start!
               </h4>
-              <p className="text-xs text-green-700 dark:text-green-300">
+              <p className={cn("text-xs", STATUS_COLORS.success.text)}>
                 Coach Free Plan: 2 teachers, 4 walkthroughs total. Upgrade
                 anytime from settings.
               </p>

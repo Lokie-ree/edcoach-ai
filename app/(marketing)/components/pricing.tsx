@@ -4,6 +4,9 @@ import { Container } from "@/components/ui/container";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import { motion } from "framer-motion";
 import landingContent from "@/data/landing-content.json";
+import { STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
+
 
 // Generate gradient colors based on index
 const getGradientColors = (index: number) => {
@@ -26,8 +29,8 @@ export default function Pricing() {
     >
       {/* Decorative background elements */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-indigo-50/30 to-purple-50/30 dark:from-zinc-950 dark:via-indigo-950/10 dark:to-purple-950/10"></div>
-        <div className="absolute inset-x-0 top-12 -z-[1] mx-auto h-1/3 w-2/3 rounded-full bg-indigo-300/20 blur-3xl dark:bg-indigo-700/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-secondary/5"></div>
+        <div className="absolute inset-x-0 top-12 -z-[1] mx-auto h-1/3 w-2/3 rounded-full bg-primary/20 blur-3xl dark:bg-primary/10"></div>
         <div className="absolute inset-0 -top-8 left-1/2 -z-20 h-56 w-full -translate-x-1/2 [background-image:linear-gradient(to_bottom,transparent_98%,theme(colors.gray.200/75%)_98%),linear-gradient(to_right,transparent_94%,_theme(colors.gray.200/75%)_94%)] [background-size:16px_35px] [mask:radial-gradient(black,transparent_95%)] dark:opacity-10"></div>
       </div>
 
@@ -39,11 +42,11 @@ export default function Pricing() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl xl:text-4xl mb-6">
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent dark:from-primary dark:to-accent">
               {pricing.headline}
             </span>
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             {pricing.sub_headline}
           </p>
         </motion.div>
@@ -59,10 +62,13 @@ export default function Pricing() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <Card
-                  className={`group p-6 rounded-xl shadow-sm h-full relative overflow-hidden transition-all duration-300 hover:shadow-lg ${tier.highlight ? "border-2 border-indigo-500" : ""}`}
+                  className={cn(
+                    "group p-6 rounded-xl shadow-sm h-full relative overflow-hidden transition-all duration-300 hover:shadow-lg",
+                    tier.highlight ? "border-2 border-primary" : ""
+                  )}
                 >
                   {tier.highlight && (
-                    <span className="absolute top-3 right-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-1.5 rounded-full text-sm font-medium shadow-lg z-10">
+                    <span className="absolute top-3 right-3 bg-gradient-to-r from-primary to-accent text-white px-4 py-1.5 rounded-full text-sm font-medium shadow-lg z-10">
                       Most Popular
                     </span>
                   )}
@@ -74,7 +80,7 @@ export default function Pricing() {
                       <div className="text-4xl font-bold mb-2">
                         {tier.price}
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                      <p className="text-sm text-muted-foreground">
                         {tier.price_description}
                       </p>
                     </div>
@@ -86,10 +92,10 @@ export default function Pricing() {
                             key={featureIndex}
                             className="flex items-center gap-3 text-sm"
                           >
-                            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                              <Check className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
+                            <div className={cn("flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center", STATUS_COLORS.success.bg)}>
+                              <Check className={cn("h-3 w-3", STATUS_COLORS.success.text)} />
                             </div>
-                            <span className="text-gray-600 dark:text-gray-300">
+                            <span className="text-muted-foreground">
                               {feature}
                             </span>
                           </li>

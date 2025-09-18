@@ -184,7 +184,7 @@ export function AIFeedbackGenerator({
       <CardHeader className="space-y-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className={cn(ICONS.semantic.header, "text-purple-500")} />
+            <Sparkles className={cn(ICONS.semantic.header, "text-accent")} />
             AI Feedback Generator
           </CardTitle>
           <AIUsageBadge />
@@ -221,8 +221,8 @@ export function AIFeedbackGenerator({
               className={cn(
                 "flex items-center gap-2",
                 promptType === "reinforcement"
-                  ? cn(STATUS_COLORS.success.bg, "hover:bg-green-700")
-                  : cn(STATUS_COLORS.info.bg, "hover:bg-blue-700"),
+                  ? cn(STATUS_COLORS.success.solid, "hover:bg-success/90")
+                  : cn(STATUS_COLORS.info.solid, "hover:bg-info/90"),
               )}
             >
               {isGenerating ? (
@@ -251,21 +251,21 @@ export function AIFeedbackGenerator({
           </div>
 
           {!canGenerate && (
-            <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+            <div className={cn("rounded-lg p-3 border", STATUS_COLORS.warning.bg, STATUS_COLORS.warning.border)}>
               <div className="flex items-start gap-2">
-                <Zap className={cn(ICONS.semantic.inline, "text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0")} />
+                <Zap className={cn(ICONS.semantic.inline, STATUS_COLORS.warning.text, "mt-0.5 flex-shrink-0")} />
                 <div className="text-sm">
-                  <p className="text-amber-800 dark:text-amber-200 font-medium">
+                  <p className={cn(STATUS_COLORS.warning.text, "font-medium")}>
                     AI Generation Limit Reached
                   </p>
-                  <p className="text-amber-700 dark:text-amber-300 mt-1">
+                  <p className={cn(STATUS_COLORS.warning.text, "mt-1")}>
                     You&apos;ve used all {usageInfo?.limit} AI generations for
                     this month. Upgrade to Pro for unlimited AI generations and
                     advanced features.
                   </p>
                   <Button
                     size="sm"
-                    className="mt-2 bg-purple-600 hover:bg-purple-700"
+                    className="mt-2 bg-primary hover:bg-primary/90"
                   >
                     <Crown className={cn(ICONS.sizes.xs, "mr-1")} />
                     Upgrade to Pro
@@ -324,7 +324,7 @@ export function AIFeedbackGenerator({
 
         {/* Pro Features Hint */}
         {!isPro && (
-          <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
+          <div className={cn("bg-gradient-to-r rounded-lg p-3 border", STATUS_COLORS.teacher.bg, STATUS_COLORS.teacher.border)}>
             <div className="flex items-start gap-2">
               <Crown className={cn(ICONS.semantic.inline, "text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0")} />
               <div className="text-sm">

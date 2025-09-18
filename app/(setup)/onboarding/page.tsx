@@ -20,6 +20,8 @@ import {
   ArrowRight,
   Loader2,
 } from "lucide-react";
+import { STATUS_COLORS, ICONS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Container } from "@/components/ui/container";
 import { toast } from "sonner";
@@ -345,7 +347,12 @@ export default function OnboardingPage() {
         {convexUser?.role === "coach" &&
           (isNearTeacherLimit || isAtTeacherLimit) && (
             <div
-              className={`mb-6 p-4 rounded border ${isAtTeacherLimit ? "border-red-300 bg-red-50 text-red-800" : "border-orange-200 bg-orange-50 text-orange-800"}`}
+              className={cn(
+                "mb-6 p-4 rounded border",
+                isAtTeacherLimit 
+                  ? cn(STATUS_COLORS.error.bg, STATUS_COLORS.error.border, STATUS_COLORS.error.text)
+                  : cn(STATUS_COLORS.warning.bg, STATUS_COLORS.warning.border, STATUS_COLORS.warning.text)
+              )}
             >
               {isAtTeacherLimit ? (
                 <>
@@ -388,7 +395,14 @@ export default function OnboardingPage() {
               className={`flex items-center space-x-2 ${step === "coaching-setup" ? "text-primary" : "text-muted-foreground"}`}
             >
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${step === "coaching-setup" ? "bg-primary text-white" : step === "complete" ? "bg-green-500 text-white" : "bg-muted"}`}
+                className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center",
+                  step === "coaching-setup" 
+                    ? "bg-primary text-primary-foreground" 
+                    : step === "complete" 
+                    ? STATUS_COLORS.success.solid
+                    : "bg-muted text-muted-foreground"
+                )}
               >
                 {step === "complete" ? (
                   <CheckCircle className="h-4 w-4" />
@@ -416,24 +430,24 @@ export default function OnboardingPage() {
               <CardContent className="space-y-4">
                 <div className="grid gap-3">
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className={cn(ICONS.semantic.inline, STATUS_COLORS.success.text)} />
                     <span>Conduct classroom walkthroughs</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className={cn(ICONS.semantic.inline, STATUS_COLORS.success.text)} />
                     <span>Generate AI-powered feedback</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className={cn(ICONS.semantic.inline, STATUS_COLORS.success.text)} />
                     <span>Manage your teacher team</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className={cn(ICONS.semantic.inline, STATUS_COLORS.success.text)} />
                     <span>Access analytics and insights</span>
                   </div>
                 </div>
-                <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                <div className={cn(STATUS_COLORS.info.bg, STATUS_COLORS.info.border, "p-4 rounded-lg border")}>
+                  <p className={cn("text-sm", STATUS_COLORS.info.text)}>
                     <strong>Coach Free Plan</strong> - Start with 1 teacher and
                     3 walkthroughs per month. Upgrade to Coach Starter
                     ($7/month) for 5 teachers and 15 walkthroughs, or Coach Pro
@@ -493,7 +507,7 @@ export default function OnboardingPage() {
             <Card className="mx-auto max-w-2xl">
               <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2">
-                  <CheckCircle className="h-6 w-6 text-green-500" />
+                  <CheckCircle className={cn(ICONS.semantic.button, STATUS_COLORS.success.text)} />
                   Welcome to EdCoachAi!
                 </CardTitle>
                 <CardDescription>
@@ -506,13 +520,13 @@ export default function OnboardingPage() {
                 <div className="text-center space-y-4">
                   <div className="grid gap-3">
                     <div className="flex items-center gap-3 justify-center">
-                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      <CheckCircle className={cn(ICONS.semantic.inline, STATUS_COLORS.success.text)} />
                       <span>Account setup complete</span>
                     </div>
                     {convexUser.role === "coach" && (
                       <>
                         <div className="flex items-center gap-3 justify-center">
-                          <CheckCircle className="h-5 w-5 text-green-500" />
+                          <CheckCircle className={cn(ICONS.semantic.inline, STATUS_COLORS.success.text)} />
                           <span>Free Coach Starter plan activated</span>
                         </div>
                       </>

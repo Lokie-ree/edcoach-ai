@@ -4,6 +4,8 @@ import { Award, Target } from "lucide-react";
 import { motion } from "framer-motion";
 import React from "react";
 import { Walkthrough } from "@/types/walkthrough";
+import { STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface FeedbackSectionProps {
   walkthrough: Walkthrough;
@@ -31,7 +33,7 @@ export default function FeedbackSection({
       transition={{ duration: 0.5, delay: 0.2 }}
     >
       {/* Reinforcement */}
-      <Card className="border-green-200 dark:border-green-800 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+      <Card className={cn("relative overflow-hidden group hover:shadow-lg transition-all duration-300", STATUS_COLORS.success.border)}>
         <BorderBeam
           duration={6}
           size={200}
@@ -39,7 +41,7 @@ export default function FeedbackSection({
           colorTo="#059669"
         />
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300">
+          <CardTitle className={cn("flex items-center gap-2", STATUS_COLORS.success.text)}>
             <Award className="h-5 w-5" />
             Reinforcement
           </CardTitle>
@@ -59,7 +61,7 @@ export default function FeedbackSection({
                 <p className="text-sm font-medium text-muted-foreground">
                   Feedback
                 </p>
-                <div className="mt-2 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                <div className={cn("mt-2 p-3 rounded-lg", STATUS_COLORS.success.bg)}>
                   <p className="text-sm whitespace-pre-wrap">
                     {reinforcementFeedback}
                   </p>
@@ -70,7 +72,7 @@ export default function FeedbackSection({
         </CardContent>
       </Card>
       {/* Refinement */}
-      <Card className="border-blue-200 dark:border-blue-800 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+      <Card className={cn("relative overflow-hidden group hover:shadow-lg transition-all duration-300", STATUS_COLORS.info.border)}>
         <BorderBeam
           duration={6}
           size={200}
@@ -78,7 +80,7 @@ export default function FeedbackSection({
           colorTo="#1D4ED8"
         />
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+          <CardTitle className={cn("flex items-center gap-2", STATUS_COLORS.info.text)}>
             <Target className="h-5 w-5" />
             Refinement
           </CardTitle>
@@ -98,7 +100,7 @@ export default function FeedbackSection({
                 <p className="text-sm font-medium text-muted-foreground">
                   Feedback
                 </p>
-                <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                <div className={cn("mt-2 p-3 rounded-lg", STATUS_COLORS.info.bg)}>
                   <p className="text-sm whitespace-pre-wrap">
                     {refinementFeedback}
                   </p>

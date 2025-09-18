@@ -21,7 +21,7 @@ export default function Footer() {
   return (
     <footer 
       id="footer"
-      className="relative py-12 md:py-16 before:absolute before:top-0 before:left-0 before:right-0 before:h-[1px] before:bg-gradient-to-r before:from-blue-500/50 before:via-purple-500/50 before:to-pink-500/50"
+      className="relative py-12 md:py-16 before:absolute before:top-0 before:left-0 before:right-0 before:h-[1px] before:bg-gradient-to-r before:from-primary/50 before:via-secondary/50 before:to-accent/50"
     >
       <Container size="xl" padding="normal">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">

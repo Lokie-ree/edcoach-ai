@@ -33,7 +33,7 @@ export function PageHeader({
       <div>
         <h1 className="text-3xl font-bold tracking-tight">
           {gradient ? (
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">
+            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               {title}
             </span>
           ) : (

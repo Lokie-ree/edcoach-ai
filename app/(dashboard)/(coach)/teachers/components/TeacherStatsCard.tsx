@@ -33,7 +33,7 @@ export default function TeacherStatsCard({ total, active, needsDetails, pending 
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10">
+            <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", STATUS_COLORS.success.bg)}>
               <GraduationCap className={cn(ICONS.semantic.header, STATUS_COLORS.success.text)} />
             </div>
             <div>
@@ -42,7 +42,7 @@ export default function TeacherStatsCard({ total, active, needsDetails, pending 
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10">
+            <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", STATUS_COLORS.warning.bg)}>
               <Pencil className={cn(ICONS.semantic.header, STATUS_COLORS.warning.text)} />
             </div>
             <div>

@@ -62,31 +62,31 @@ export function RefinementFocusCard({
         </div>
 
         {aiInsights && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+          <div className={cn("bg-gradient-to-r p-4 rounded-lg border", STATUS_COLORS.info.bg, STATUS_COLORS.info.border)}>
             <div className="space-y-3">
               {/* Trend Analysis */}
               <div>
-                <h4 className="font-medium text-sm text-blue-900 mb-1 flex items-center gap-1">
+                <h4 className="font-medium text-sm text-info mb-1 flex items-center gap-1">
                   <TrendingUp className={ICONS.sizes.xs} />
                   Trend Analysis
                 </h4>
-                <p className="text-sm text-blue-800">{aiInsights.trendAnalysis}</p>
+                <p className={cn("text-sm", STATUS_COLORS.info.text)}>{aiInsights.trendAnalysis}</p>
               </div>
 
               {/* Progress Prediction */}
               <div>
-                <h4 className="font-medium text-sm text-blue-900 mb-1">Progress Outlook</h4>
-                <p className="text-sm text-blue-800">{aiInsights.progressPrediction}</p>
+                <h4 className="font-medium text-sm text-info mb-1">Progress Outlook</h4>
+                <p className={cn("text-sm", STATUS_COLORS.info.text)}>{aiInsights.progressPrediction}</p>
               </div>
 
               {/* Strategic Recommendations */}
               {aiInsights.strategicRecommendations.length > 0 && (
                 <div>
-                  <h4 className="font-medium text-sm text-blue-900 mb-2">AI Recommendations</h4>
+                  <h4 className="font-medium text-sm text-info mb-2">AI Recommendations</h4>
                   <ul className="space-y-1">
                     {aiInsights.strategicRecommendations.map((recommendation, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm text-blue-800">
-                        <Sparkles className={cn(ICONS.sizes.xs, "text-blue-500 mt-0.5 flex-shrink-0")} />
+                      <li key={index} className={cn("flex items-start gap-2 text-sm", STATUS_COLORS.info.text)}>
+                        <Sparkles className={cn(ICONS.sizes.xs, "text-accent mt-0.5 flex-shrink-0")} />
                         <span>{recommendation}</span>
                       </li>
                     ))}

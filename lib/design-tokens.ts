@@ -161,48 +161,55 @@ export const ICONS = {
 // ============================================================================
 
 export const STATUS_COLORS = {
-  // Professional Growth Palette Integration
+  // Professional Growth Palette Integration - Updated for OKLCH theme
   success: {
-    bg: "bg-green-50 dark:bg-green-950/20",
-    text: "text-green-700 dark:text-green-300",
-    border: "border-green-200 dark:border-green-800",
+    bg: "bg-success/10 dark:bg-success/10",
+    text: "text-success dark:text-success",
+    border: "border-success/20 dark:border-success/20",
+    solid: "bg-success text-success-foreground",
     semantic: "Growth and achievement states"
   },
   warning: {
-    bg: "bg-amber-50 dark:bg-amber-950/20", 
-    text: "text-amber-700 dark:text-amber-300",
-    border: "border-amber-200 dark:border-amber-800",
+    bg: "bg-warning/10 dark:bg-warning/10", 
+    text: "text-warning dark:text-warning",
+    border: "border-warning/20 dark:border-warning/20",
+    solid: "bg-warning text-warning-foreground",
     semantic: "Attention and encouraging states"
   },
   error: {
-    bg: "bg-red-50 dark:bg-red-950/20",
-    text: "text-red-700 dark:text-red-300", 
-    border: "border-red-200 dark:border-red-800",
+    bg: "bg-destructive/10 dark:bg-destructive/10",
+    text: "text-destructive dark:text-destructive", 
+    border: "border-destructive/20 dark:border-destructive/20",
+    solid: "bg-destructive text-destructive-foreground",
     semantic: "Error and destructive actions"
   },
   info: {
-    bg: "bg-blue-50 dark:bg-blue-950/20",
-    text: "text-blue-700 dark:text-blue-300",
-    border: "border-blue-200 dark:border-blue-800",
+    bg: "bg-info/10 dark:bg-info/10",
+    text: "text-info dark:text-info",
+    border: "border-info/20 dark:border-info/20",
+    solid: "bg-info text-info-foreground",
     semantic: "Professional information and guidance"
   },
   neutral: {
-    bg: "bg-gray-50 dark:bg-gray-950/20",
-    text: "text-gray-700 dark:text-gray-300",
-    border: "border-gray-200 dark:border-gray-800",
+    bg: "bg-muted dark:bg-muted",
+    text: "text-muted-foreground dark:text-muted-foreground",
+    border: "border-border dark:border-border",
+    solid: "bg-muted text-muted-foreground",
     semantic: "Neutral states and disabled elements"
   },
   // EdCoach AI specific brand colors
   coach: {
-    bg: "bg-primary/10",
-    text: "text-primary",
-    border: "border-primary/20",
+    bg: "bg-primary/10 dark:bg-primary/10",
+    text: "text-primary dark:text-primary",
+    border: "border-primary/20 dark:border-primary/20",
+    solid: "bg-primary text-primary-foreground",
     semantic: "Coach actions and primary interactions"
   },
   teacher: {
-    bg: "bg-secondary/10", 
-    text: "text-secondary",
-    border: "border-secondary/20",
+    bg: "bg-secondary/10 dark:bg-secondary/10", 
+    text: "text-secondary dark:text-secondary",
+    border: "border-secondary/20 dark:border-secondary/20",
+    solid: "bg-secondary text-secondary-foreground",
     semantic: "Teacher growth and progress states"
   }
 } as const;
@@ -232,8 +239,8 @@ export const FORM_PATTERNS = {
   
   // Input states
   validation: {
-    error: "border-red-500 focus:border-red-500 focus:ring-red-500/20",
-    success: "border-green-500 focus:border-green-500 focus:ring-green-500/20",
+    error: "border-destructive focus:border-destructive focus:ring-destructive/20",
+    success: "border-success focus:border-success focus:ring-success/20",
     default: "border-input focus:border-primary focus:ring-primary/20"
   }
 } as const;
