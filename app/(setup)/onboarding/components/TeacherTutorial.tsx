@@ -46,7 +46,7 @@ export default function TeacherTutorial({
         <div className="space-y-6">
           {/* Keep icon centered for visual impact */}
           <div className="text-center">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mb-4">
               <BookOpen className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
           </div>
@@ -86,7 +86,7 @@ export default function TeacherTutorial({
       content: (
         <div className="space-y-6">
           <div className="text-center">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mb-4">
               <Goal className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function TeacherTutorial({
       content: (
         <div className="space-y-6">
           <div className="text-center">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-success to-primary rounded-full flex items-center justify-center mb-4">
               <Users className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
           </div>
@@ -195,7 +195,7 @@ export default function TeacherTutorial({
       content: (
         <div className="space-y-6">
           <div className="text-center">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-secondary to-accent rounded-full flex items-center justify-center mb-4">
               <Award className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
           </div>
@@ -210,26 +210,26 @@ export default function TeacherTutorial({
             </p>
 
             <div className="grid gap-3">
-              <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
+              <div className={cn("rounded-lg p-3 border", STATUS_COLORS.success.bg, STATUS_COLORS.success.border)}>
                 <div className="flex items-center gap-2 mb-1">
                   <Award className={cn(ICONS.semantic.inline, STATUS_COLORS.success.text, "flex-shrink-0")} />
-                  <span className="font-medium text-green-800 dark:text-green-200">
+                  <span className={cn("font-medium", STATUS_COLORS.success.text)}>
                     Reinforcement
                   </span>
                 </div>
-                <p className="text-sm text-green-700 dark:text-green-300">
+                <p className={cn("text-sm", STATUS_COLORS.success.text)}>
                   Celebrate what you&apos;re doing well - specific strengths to
                   continue building on.
                 </p>
               </div>
-              <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+              <div className={cn("rounded-lg p-3 border", STATUS_COLORS.info.bg, STATUS_COLORS.info.border)}>
                 <div className="flex items-center gap-2 mb-1">
                   <Target className={cn(ICONS.semantic.inline, STATUS_COLORS.info.text, "flex-shrink-0")} />
-                  <span className="font-medium text-blue-800 dark:text-blue-200">
+                  <span className={cn("font-medium", STATUS_COLORS.info.text)}>
                     Refinement
                   </span>
                 </div>
-                <p className="text-sm text-blue-700 dark:text-blue-300">
+                <p className={cn("text-sm", STATUS_COLORS.info.text)}>
                   Growth opportunities with practical strategies to enhance your
                   practice.
                 </p>
@@ -246,7 +246,7 @@ export default function TeacherTutorial({
       content: (
         <div className="space-y-6">
           <div className="text-center">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-warning to-destructive rounded-full flex items-center justify-center mb-4">
               <MessageSquare className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
           </div>
@@ -299,7 +299,7 @@ export default function TeacherTutorial({
       content: (
         <div className="space-y-6">
           <div className="text-center">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-teal-500 to-green-600 rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-info to-success rounded-full flex items-center justify-center mb-4">
               <TrendingUp className={cn(ICONS.sizes.lg, "text-white")} />
             </div>
           </div>

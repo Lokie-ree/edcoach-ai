@@ -6,6 +6,7 @@ import { Zap, Crown, AlertTriangle, ArrowRight, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePlanDetection } from "@/hooks/usePlanDetection";
+import { STATUS_COLORS } from "@/lib/design-tokens";
 
 export interface AIUsage {
   walkthroughsUsed: number;
@@ -98,9 +99,9 @@ export function TeacherUsageBadge({
       }
       className={cn(
         "transition-colors",
-        hasProPlan && "bg-gradient-to-r from-purple-500 to-blue-500 text-white",
-        isNearLimit && !hasProPlan && "bg-orange-500 text-white",
-        isOverLimit && "bg-red-500 text-white",
+        hasProPlan && "bg-gradient-to-r from-primary to-secondary text-white",
+        isNearLimit && !hasProPlan && STATUS_COLORS.warning.solid,
+        isOverLimit && STATUS_COLORS.error.solid,
         className,
       )}
     >
@@ -174,9 +175,9 @@ export function AIUsageBadge({
       }
       className={cn(
         "transition-colors",
-        hasProPlan && "bg-gradient-to-r from-purple-500 to-blue-500 text-white",
-        isNearLimit && !hasProPlan && "bg-orange-500 text-white",
-        isOverLimit && "bg-red-500 text-white",
+        hasProPlan && "bg-gradient-to-r from-primary to-secondary text-white",
+        isNearLimit && !hasProPlan && STATUS_COLORS.warning.solid,
+        isOverLimit && STATUS_COLORS.error.solid,
         className,
       )}
     >
@@ -242,15 +243,15 @@ function CombinedUsageWarning() {
       className={cn(
         "mb-4 flex items-center justify-between p-3 rounded-lg border",
         isOverLimit
-          ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20"
-          : "border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950/20",
+          ? cn(STATUS_COLORS.error.bg, STATUS_COLORS.error.border)
+          : cn(STATUS_COLORS.warning.bg, STATUS_COLORS.warning.border),
       )}
     >
       <div className="flex items-center gap-3">
         <AlertTriangle
           className={cn(
             "h-4 w-4 flex-shrink-0",
-            isOverLimit ? "text-red-600" : "text-orange-600",
+            isOverLimit ? STATUS_COLORS.error.text : STATUS_COLORS.warning.text,
           )}
         />
         <div className="text-sm">

@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Crown, Lock } from "lucide-react";
 import Link from "next/link";
 import { usePlanDetection } from "@/hooks/usePlanDetection";
+import { STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface FeatureProtectProps {
   children: React.ReactNode;
@@ -59,19 +61,19 @@ function FeatureUpgradePrompt({ feature }: { feature: string }) {
   };
 
   return (
-    <Card className="border-orange-200 bg-orange-50 dark:bg-orange-950/20">
+    <Card className={cn(STATUS_COLORS.warning.bg, STATUS_COLORS.warning.border, "border")}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-orange-800 dark:text-orange-200">
+        <CardTitle className={cn("flex items-center gap-2", STATUS_COLORS.warning.text)}>
           <Lock className="h-5 w-5" />
           {featureNames[feature] || "Premium Feature"}
         </CardTitle>
-        <CardDescription className="text-orange-700 dark:text-orange-300">
+        <CardDescription className={STATUS_COLORS.warning.text}>
           This feature requires Coach Pro subscription
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Link href="/settings/billing">
-          <Button className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
+          <Button className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90">
             <Crown className="h-4 w-4 mr-2" />
             Upgrade to Coach Pro
           </Button>
@@ -88,13 +90,13 @@ function PlanUpgradePrompt({ plan }: { plan: string }) {
   };
 
   return (
-    <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
+    <Card className={cn("border", STATUS_COLORS.info.bg, STATUS_COLORS.info.border)}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-blue-800 dark:text-blue-200">
+        <CardTitle className={cn("flex items-center gap-2", STATUS_COLORS.info.text)}>
           <Lock className="h-5 w-5" />
           {planNames[plan] || "Premium"} Required
         </CardTitle>
-        <CardDescription className="text-blue-700 dark:text-blue-300">
+        <CardDescription className={cn(STATUS_COLORS.info.text)}>
           This content requires a {planNames[plan] || "premium"} subscription
         </CardDescription>
       </CardHeader>
@@ -102,7 +104,7 @@ function PlanUpgradePrompt({ plan }: { plan: string }) {
         <Link href="/settings/billing">
           <Button
             variant="outline"
-            className="border-blue-500 text-blue-700 hover:bg-blue-100"
+            className={cn("border-primary text-primary hover:bg-primary/10")}
           >
             View Plans
           </Button>

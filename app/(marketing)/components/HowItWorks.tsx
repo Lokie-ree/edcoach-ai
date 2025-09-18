@@ -6,7 +6,8 @@ import { BorderBeam } from "@/components/magicui/border-beam"
 import landingContent from "@/data/landing-content.json"
 import { motion } from "framer-motion"
 import { ClipboardList, Sparkles, TrendingUp, MessageSquareShare } from "lucide-react"
-import { ICONS } from "@/lib/design-tokens";
+import { STATUS_COLORS, ICONS } from "@/lib/design-tokens"
+import { cn } from "@/lib/utils"
 
 // Map icon strings to components
 const iconMap = {
@@ -49,7 +50,7 @@ export default function HowItWorksSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl xl:text-4xl mb-6">
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">
+            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               {how_it_works.headline}
             </span>
           </h2>
@@ -67,14 +68,14 @@ export default function HowItWorksSection() {
                 className="relative"
               >
                 {/* Step number bubble */}
-                <div className="absolute -top-4 -left-4 z-10 bg-gradient-to-r from-indigo-600 to-purple-600 text-white h-10 w-10 rounded-full flex items-center justify-center font-bold shadow-md">
+                <div className="absolute -top-4 -left-4 z-10 bg-gradient-to-r from-primary to-secondary text-white h-10 w-10 rounded-full flex items-center justify-center font-bold shadow-md">
                   {step.id}
                 </div>
                 
                 {/* Step content card */}
                 <Card className="p-6 rounded-xl shadow-sm h-full relative overflow-hidden">
                   <div className="flex flex-col gap-4 h-full">
-                    <div className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 w-14 h-14 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                    <div className={cn("rounded-full w-14 h-14 flex items-center justify-center", STATUS_COLORS.coach.bg, STATUS_COLORS.coach.text)}>
                       {getIconComponent(step.icon)}
                     </div>
                     

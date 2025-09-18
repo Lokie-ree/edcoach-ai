@@ -126,7 +126,7 @@ export function AIFeedbackStep({ isLast }: AIFeedbackStepProps) {
           </div>
           <div className="mt-4">
             <h4 className="font-medium mb-2">Evidence Summary</h4>
-            <p className="text-sm text-muted-foreground border-l-2 border-slate-300 pl-3 break-words">
+            <p className="text-sm text-muted-foreground border-l-2 border-muted pl-3 break-words">
               {formData.evidenceSummary.substring(0, 200)}
               {formData.evidenceSummary.length > 200 && "..."}
             </p>

@@ -57,9 +57,9 @@ function ActivityItem({
       case "scheduled":
         return cn(STATUS_COLORS.info.bg, STATUS_COLORS.info.text);
       case "generated":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"; // Keep for now
+        return `${STATUS_COLORS.teacher.bg} ${STATUS_COLORS.teacher.text}`;
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
+        return `${STATUS_COLORS.neutral.bg} ${STATUS_COLORS.neutral.text}`;
     }
   };
 

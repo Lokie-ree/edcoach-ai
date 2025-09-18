@@ -343,7 +343,7 @@ export default function CoachDashboardPage() {
         className="space-y-2"
       >
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-          <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">
+          <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Welcome back
           </span>
         </h1>

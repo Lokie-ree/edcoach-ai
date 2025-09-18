@@ -25,6 +25,8 @@ import { useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { useState } from "react";
+import { STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 import { UserPlus, Mail, Loader2 } from "lucide-react";
 import { useCanInviteTeacher } from "@/hooks/usageEnforcer";
 import { useAuth } from "@clerk/nextjs";
@@ -169,7 +171,7 @@ export function TeacherInvitationForm({
 
         {/* Show current usage and warning if at limit */}
         {teacherUsage && (
-          <div className="mb-4 p-3 rounded bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-950/20 dark:text-blue-200 dark:border-blue-800">
+          <div className={cn("mb-4 p-3 rounded border", STATUS_COLORS.info.bg, STATUS_COLORS.info.text, STATUS_COLORS.info.border)}>
             <div className="text-sm">
               <strong>Teacher Usage:</strong> {teacherUsage.teacherCount} of{" "}
               {teacherUsage.teacherLimit} used
@@ -185,7 +187,7 @@ export function TeacherInvitationForm({
 
         {/* Show warning if at teacher limit */}
         {!canInviteTeacher && (
-          <div className="mb-4 p-3 rounded bg-orange-50 text-orange-800 border border-orange-200 dark:bg-orange-950/20 dark:text-orange-200 dark:border-orange-800">
+          <div className={cn("mb-4 p-3 rounded border", STATUS_COLORS.warning.bg, STATUS_COLORS.warning.text, STATUS_COLORS.warning.border)}>
             {inviteBlockReason ||
               "You have reached your teacher limit. Upgrade to Coach Pro for more."}
           </div>
@@ -393,7 +395,7 @@ export function TeacherInvitationFormContent({
     <div className="space-y-6">
       {/* Show current usage and warning if at limit */}
       {teacherUsage && (
-        <div className="p-3 rounded bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-950/20 dark:text-blue-200 dark:border-blue-800">
+        <div className={cn("p-3 rounded border", STATUS_COLORS.info.bg, STATUS_COLORS.info.text, STATUS_COLORS.info.border)}>
           <div className="text-sm">
             <strong>Teacher Usage:</strong> {teacherUsage.teacherCount} of{" "}
             {teacherUsage.teacherLimit} used
@@ -409,7 +411,7 @@ export function TeacherInvitationFormContent({
 
       {/* Show warning if at teacher limit */}
       {!canInviteTeacher && (
-        <div className="p-3 rounded bg-orange-50 text-orange-800 border border-orange-200 dark:bg-orange-950/20 dark:text-orange-200 dark:border-orange-800">
+        <div className={cn("p-3 rounded border", STATUS_COLORS.warning.bg, STATUS_COLORS.warning.text, STATUS_COLORS.warning.border)}>
           {inviteBlockReason ||
             "You have reached your teacher limit. Upgrade to Coach Pro for more."}
         </div>

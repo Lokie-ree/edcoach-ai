@@ -21,10 +21,10 @@ import {
   Mail,
   Loader2,
 } from "lucide-react";
+import { STATUS_COLORS, ICONS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useUser, SignInButton } from "@clerk/nextjs";
-import { ICONS } from "@/lib/design-tokens";
-import { cn } from "@/lib/utils";
 
 export default function InvitePageContent() {
   const searchParams = useSearchParams();
@@ -66,7 +66,7 @@ export default function InvitePageContent() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <UserCheck className={cn(ICONS.sizes.xl, "text-blue-500 mx-auto mb-4")} />
+            <UserCheck className={cn(ICONS.sizes.xl, "text-primary mx-auto mb-4")} />
             <CardTitle>Sign In Required</CardTitle>
             <CardDescription>
               To accept this teaching invitation from{" "}
@@ -146,7 +146,7 @@ export default function InvitePageContent() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <XCircle className={cn(ICONS.sizes.xl, "text-red-500 mx-auto mb-4")} />
+            <XCircle className={cn(ICONS.sizes.xl, "text-destructive mx-auto mb-4")} />
             <CardTitle>Invitation Not Found</CardTitle>
             <CardDescription>
               This invitation link is invalid or has been removed.
@@ -167,7 +167,7 @@ export default function InvitePageContent() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <Clock className={cn(ICONS.sizes.xl, "text-yellow-500 mx-auto mb-4")} />
+            <Clock className={cn(ICONS.sizes.xl, "text-warning mx-auto mb-4")} />
             <CardTitle>Invitation Expired</CardTitle>
             <CardDescription>
               This invitation from {invitation.coachName} has expired. Please
@@ -195,7 +195,7 @@ export default function InvitePageContent() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CheckCircle className={cn(ICONS.sizes.xl, "text-green-500 mx-auto mb-4")} />
+            <CheckCircle className={cn(ICONS.sizes.xl, "text-success mx-auto mb-4")} />
             <CardTitle>Already Accepted</CardTitle>
             <CardDescription>
               This invitation has already been accepted. You can access your
@@ -216,7 +216,7 @@ export default function InvitePageContent() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <UserCheck className={cn(ICONS.sizes.xl, "text-blue-500 mx-auto mb-4")} />
+          <UserCheck className={cn(ICONS.sizes.xl, "text-primary mx-auto mb-4")} />
           <CardTitle>Teacher Invitation</CardTitle>
           <CardDescription>
             You&apos;ve been invited to join {invitation.coachName}&apos;s
@@ -243,11 +243,11 @@ export default function InvitePageContent() {
               </div>
             </div>
 
-            <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
-              <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+            <div className={cn("p-4 border rounded-lg", STATUS_COLORS.info.bg, STATUS_COLORS.info.border)}>
+              <h4 className={cn("font-medium mb-2", STATUS_COLORS.info.text)}>
                 What happens next?
               </h4>
-              <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+              <ul className={cn("text-sm space-y-1", STATUS_COLORS.info.text)}>
                 <li>
                   • You&apos;ll join {invitation.coachName}&apos;s coaching team
                 </li>

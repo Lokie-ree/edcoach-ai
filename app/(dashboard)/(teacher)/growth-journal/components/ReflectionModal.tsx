@@ -179,7 +179,7 @@ export function ReflectionModal({
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Share your thoughts on the feedback you received. How will you apply these insights to improve your teaching practice?"
                 className={cn(
-                  "min-h-[200px] resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                  "min-h-[200px] resize-none focus:ring-2 focus:ring-primary focus:border-primary",
                   ANIMATIONS.classes.normal
                 )}
                 disabled={isSubmitting}

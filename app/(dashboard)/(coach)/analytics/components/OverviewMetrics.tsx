@@ -16,11 +16,11 @@ export const OverviewMetrics = ({
         {[...Array(4)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader className="pb-2">
-              <div className="h-4 bg-gray-200 rounded w-24"></div>
+              <div className="h-4 bg-muted rounded w-24"></div>
             </CardHeader>
             <CardContent>
-              <div className="h-8 bg-gray-200 rounded w-16 mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-20"></div>
+              <div className="h-8 bg-muted rounded w-16 mb-2"></div>
+              <div className="h-3 bg-muted rounded w-20"></div>
             </CardContent>
           </Card>
         ))}
@@ -55,7 +55,7 @@ export const OverviewMetrics = ({
       value: `${analytics.teachersWithRecentActivity}/${analytics.totalTeachers}`,
       subtitle: "Teachers active (30 days)",
       icon: MessageSquare,
-      color: "text-purple-600", // Keep custom purple for variety
+      color: "text-accent", // Use accent color for variety
     },
   ];
 

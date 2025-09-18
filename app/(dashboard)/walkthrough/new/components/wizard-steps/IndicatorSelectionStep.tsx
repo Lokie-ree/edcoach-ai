@@ -20,6 +20,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { WalkthroughFormData } from "@/app/(dashboard)/walkthrough/new/validation";
+import { STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface IndicatorSelectionStepProps {
   isLast: boolean;
@@ -109,7 +111,7 @@ export function IndicatorSelectionStep({}: IndicatorSelectionStepProps) {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2 flex-wrap">
-              <Badge variant="default" className="bg-green-100 text-green-800">
+              <Badge variant="default" className={cn(STATUS_COLORS.success.bg, STATUS_COLORS.success.text)}>
                 Reinforcement
               </Badge>
               <span className="break-words">What went well?</span>
@@ -154,7 +156,7 @@ export function IndicatorSelectionStep({}: IndicatorSelectionStepProps) {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2 flex-wrap">
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+              <Badge variant="secondary" className={cn(STATUS_COLORS.info.bg, STATUS_COLORS.info.text)}>
                 Refinement
               </Badge>
               <span className="break-words">Area for growth?</span>

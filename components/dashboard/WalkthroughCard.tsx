@@ -4,6 +4,8 @@ import { Calendar, CheckCircle, Clock, Award, Target, User } from "lucide-react"
 import Link from "next/link";
 import React from "react";
 import { Walkthrough } from "@/types/walkthrough";
+import { STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface WalkthroughCardProps {
   walkthrough: Walkthrough;
@@ -50,11 +52,11 @@ export default function WalkthroughCard({ walkthrough, isCoach, getIndicatorName
             </p>
             {walkthrough.status === "completed" && (
               <div className="flex flex-wrap gap-2 mt-3">
-                <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-300 rounded-full border border-green-200 dark:border-green-800">
+                <span className={cn("inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border", STATUS_COLORS.success.bg, STATUS_COLORS.success.text, STATUS_COLORS.success.border)}>
                   <Award className="h-3 w-3" />
                   {getIndicatorName(walkthrough.reinforcementIndicator)}
                 </span>
-                <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-300 rounded-full border border-blue-200 dark:border-blue-800">
+                <span className={cn("inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border", STATUS_COLORS.info.bg, STATUS_COLORS.info.text, STATUS_COLORS.info.border)}>
                   <Target className="h-3 w-3" />
                   {getIndicatorName(walkthrough.refinementIndicator)}
                 </span>

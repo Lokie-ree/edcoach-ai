@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import landingContent from "@/data/landing-content.json";
 import { motion } from "framer-motion";
+import { STATUS_COLORS } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 import { 
   BotMessageSquare, 
   FileCog, 
@@ -64,7 +66,7 @@ export default function FeaturesSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl xl:text-4xl mb-6">
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-purple-400">
+            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               {features.headline}
             </span>
           </h2>
@@ -82,13 +84,13 @@ export default function FeaturesSection() {
               >
                 <Card className="p-6 rounded-xl shadow-sm h-full relative overflow-hidden">
                   <div className="flex flex-col gap-4 h-full">
-                    <div className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 w-14 h-14 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                    <div className={cn("rounded-full w-14 h-14 flex items-center justify-center", STATUS_COLORS.coach.bg, STATUS_COLORS.coach.text)}>
                       {getIconComponent(feature.icon)}
                     </div>
 
                     <h3 className="text-xl font-semibold">{feature.title}</h3>
 
-                    <p className="text-gray-600 dark:text-gray-300 flex-grow">
+                    <p className="text-muted-foreground flex-grow">
                       {feature.description}
                     </p>
                   </div>

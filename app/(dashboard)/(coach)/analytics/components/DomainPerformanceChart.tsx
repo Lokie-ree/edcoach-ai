@@ -16,10 +16,10 @@ export const DomainPerformanceChart = ({
         {[...Array(2)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader>
-              <div className="h-6 bg-gray-200 rounded w-32"></div>
+              <div className="h-6 bg-muted rounded w-32"></div>
             </CardHeader>
             <CardContent>
-              <div className="h-48 bg-gray-200 rounded"></div>
+              <div className="h-48 bg-muted rounded"></div>
             </CardContent>
           </Card>
         ))}
@@ -147,7 +147,7 @@ export const DomainPerformanceChart = ({
                         {item.indicatorName}
                       </span>
                       <div className="flex items-center gap-2">
-                        <div className="w-12 bg-gray-200 rounded-full h-2">
+                        <div className="w-12 bg-muted rounded-full h-2">
                           <div
                             className={cn("h-2 rounded-full", STATUS_COLORS.success.bg, ANIMATIONS.classes.normal)}
                             style={{
@@ -185,7 +185,7 @@ export const DomainPerformanceChart = ({
                         {item.indicatorName}
                       </span>
                       <div className="flex items-center gap-2">
-                        <div className="w-12 bg-gray-200 rounded-full h-2">
+                        <div className="w-12 bg-muted rounded-full h-2">
                           <div
                             className={cn("h-2 rounded-full", STATUS_COLORS.warning.bg, ANIMATIONS.classes.normal)}
                             style={{
