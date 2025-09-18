@@ -53,7 +53,7 @@ export default function TeacherTutorial({
 
           {/* Left-align the content for better readability */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Welcome to EdCoach AI!</h3>
+            <h3 className="text-lg font-semibold">Welcome to EdCoachAi!</h3>
             <p className="text-muted-foreground">
               Your coach has added you to their team. This is your personal
               growth journal to track professional development and receive

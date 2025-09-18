@@ -6,7 +6,7 @@ import { getCurrentUser } from "./auth";
 export const PLAN_CONFIG = {
   free: {
     name: "Coach Free",
-    description: "Get started with EdCoach AI for free",
+    description: "Get started with EdCoachAi for free",
     features: {
       maxAIGenerations: 10, // 5 walkthroughs total
       maxTeachers: 1,

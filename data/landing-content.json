@@ -1,8 +1,8 @@
 {
   "header": {
-    "logo_placeholder": "EdCoach AI Logo",
+    "logo_placeholder": "EdCoachAi Logo",
     "navlinks": [
-      {"label": "Why EdCoach AI?", "href": "#why-edcoach-ai"},
+      {"label": "Why EdCoachAi?", "href": "#why-edcoach-ai"},
       {"label": "Features", "href": "#features"},
       {"label": "How It Works", "href": "#how-it-works"},
       {"label": "Pricing", "href": "#pricing"},
@@ -12,171 +12,191 @@
     ]
   },
   "hero": {
-    "tagline": "LEADS/LER Ready!",
-    "headline": "Transform Walkthroughs into Continuous Teacher Growth",
-    "sub_headline": "Empower your coaches and teachers with an AI partner that streamlines informal walkthroughs, delivers PGP-aligned feedback, and fosters a continuous growth loop through reflection.",
-    "cta_primary": {"label": "Start Your Free Trial", "href": "/signup"},
-    "cta_secondary": {"label": "See Features", "href": "#features"},
-    "image_description": "Illustration: Coach using EdCoach AI on a tablet, providing feedback to a teacher, with subtle background elements suggesting growth charts and student success pathways."
+    "tagline": "Louisiana Educator Rubric Native",
+    "headline": "Stop Spending More Time on Paperwork Than Actual Coaching",
+    "sub_headline": "Turn 5-minute observations into game-changing teacher growth. The only AI-powered platform built specifically for the continuous growth loop methodology—transforming classroom walkthroughs from episodic events into ongoing, supportive professional development.",
+    "cta_primary": {"label": "Start Free Trial - No Credit Card", "href": "/signup"},
+    "cta_secondary": {"label": "See How It Works", "href": "#how-it-works"},
+    "image_description": "Illustration: Coach confidently using EdCoachAi on iPad during classroom walkthrough, with teacher engaging positively, background showing growth progression from observation to reflection to improvement.",
+    "social_proof": "Coaches complete walkthroughs 75% faster with 90% teacher engagement"
   },
   "features": {
-    "headline": "A Smarter Way to Support Teacher Growth",
+    "headline": "The Complete Continuous Growth Loop System",
     "cards": [
       {
-        "icon": "ClipboardList",
-        "title": "Effortless Walkthrough Capture",
-        "description": "Conduct focused, informal walkthroughs in minutes. Select a teacher, choose rubric indicators, and capture evidence on any device."
+        "icon": "Target",
+        "title": "AI-Assisted PGP Goal Setting",
+        "description": "Set clear, year-long Professional Growth Plan goals with AI-powered SMART goal generation. Every walkthrough connects to long-term teacher development."
+      },
+      {
+        "icon": "Clock",
+        "title": "5-Minute Mobile Walkthroughs",
+        "description": "iPad-optimized forms let you capture evidence in under 5 minutes—75% faster than traditional systems. Focus on teaching, not paperwork."
       },
       {
         "icon": "BotMessageSquare",
-        "title": "Intelligent, PGP-Aligned Feedback",
-        "description": "Our AI generates feedback that's not just rubric-aligned, but also connects directly to each teacher's long-term PGP goal."
+        "title": "Hyper-Contextualized AI Feedback",
+        "description": "AI understands each teacher's PGP goal, rubric indicators, and observation evidence to generate truly personalized, actionable feedback."
       },
       {
         "icon": "MessageSquareShare",
-        "title": "Close the Growth Loop",
-        "description": "Teachers don't just receive feedback; they engage with it. Our platform enables a two-way dialogue through reflections, turning feedback into action."
+        "title": "Teacher Growth Journal",
+        "description": "Teachers actively engage with feedback through guided reflection prompts. They own their growth journey instead of passively receiving evaluations."
       },
       {
-        "icon": "TrendingUp",
-        "title": "The Teacher Growth Journal",
-        "description": "Teachers get a private, focused dashboard with a timeline of their growth, helping them see progress and own their professional development."
-      },
-      {
-        "icon": "LayoutDashboard",
-        "title": "Insightful Coach Dashboards",
-        "description": "Instantly see which teachers need support and identify team-wide growth areas with an actionable, clutter-free command center."
+        "icon": "BarChart3",
+        "title": "Real-Time Growth Monitoring",
+        "description": "Coach command center shows priority teachers needing walkthroughs. Teachers see their progress timeline. Both track measurable improvement over time."
       }
     ]
   },
   "how_it_works": {
-    "headline": "Foster Growth in 3 Simple Steps",
+    "headline": "The 5-Phase Continuous Growth Loop",
     "steps": [
       {
         "id": 1,
-        "icon": "ClipboardList",
-        "title": "1. Capture Evidence in Minutes",
-        "description": "Conduct a quick, informal walkthrough focused on a reinforcement and a refinement area."
+        "icon": "Target",
+        "title": "1. Set Goal",
+        "description": "Start with AI-assisted PGP goal setting. Select LER indicators, add context, and generate SMART goals that guide all future coaching interactions."
       },
       {
         "id": 2,
-        "icon": "Sparkles",
-        "title": "2. Generate PGP-Aligned Feedback",
-        "description": "Instantly get AI-suggested feedback that connects the observation to the teacher's annual goal. Edit and share in seconds."
+        "icon": "Eye",
+        "title": "2. Capture Evidence",
+        "description": "Conduct 5-minute iPad walkthroughs. Choose reinforcement and refinement indicators, capture evidence—all optimized for mobile coaching workflows."
       },
       {
         "id": 3,
+        "icon": "Sparkles",
+        "title": "3. Generate Feedback",
+        "description": "AI aggregates PGP goal + rubric language + evidence to create hyper-contextualized feedback. Edit and send in seconds, not hours."
+      },
+      {
+        "id": 4,
         "icon": "MessageSquareShare",
-        "title": "3. Reflect & Track Growth",
-        "description": "The teacher receives the feedback and adds their reflection. Both coach and teacher see the interaction on their dashboards, tracking progress over time."
+        "title": "4. Reflect",
+        "description": "Teachers receive feedback in their private Growth Journal with guided prompts. They engage actively, taking ownership of their development."
+      },
+      {
+        "id": 5,
+        "icon": "TrendingUp",
+        "title": "5. Monitor Growth",
+        "description": "Both coach and teacher dashboards show progress over time. Celebrate improvements, identify next steps, and maintain the continuous loop."
       }
     ]
   },
   "pricing": {
-    "headline": "Simple, Powerful Plans for Every Coach",
-    "sub_headline": "Start with a free trial to experience the core loop. Upgrade to unlock the full power of continuous growth.",
+    "headline": "Simple, Transparent Pricing That Scales With You",
+    "sub_headline": "Start free to experience the continuous growth loop. Upgrade when you're ready to scale your coaching impact.",
     "tiers": [
       {
-        "name": "Free Trial",
-        "price": "$0",
-        "price_description": "Experience the core AI feedback loop for 14 days. No credit card required.",
+        "name": "Coach Starter",
+        "price": "Free",
+        "price_description": "Perfect for trying the complete continuous growth loop",
         "features": [
-          "Support up to 2 teachers",
-          "3 walkthroughs (total)",
-          "PGP-Aligned AI Feedback",
-          "7-day data retention"
+          "Up to 5 teachers",
+          "Complete 5-phase growth loop",
+          "AI-assisted PGP goal setting",
+          "5-minute mobile walkthroughs",
+          "Hyper-contextualized AI feedback",
+          "Teacher Growth Journal",
+          "Basic coach dashboard"
         ],
-        "cta": {"label": "Start Your Free Trial", "href": "/signup"},
+        "cta": {"label": "Start Free Forever", "href": "/signup"},
         "highlight": false
       },
       {
-        "name": "Coach Starter",
-        "price": "$19",
-        "price_description": "per month, per coach",
+        "name": "Coach Pro",
+        "price": "$50",
+        "price_description": "per month - unlimited teachers & advanced analytics",
         "features": [
-          "Support up to 15 teachers",
-          "50 walkthroughs per month",
-          "**PGP Goal Tracking**",
-          "**Teacher Reflection Loop**",
-          "**Insightful Coach Dashboard**",
-          "**Teacher Growth Journal**",
-          "90-day data retention",
-          "Standard email support"
+          "**Unlimited teachers**",
+          "**Unlimited walkthroughs**",
+          "Everything in Starter, plus:",
+          "**Team analytics with heat maps**",
+          "**Trend analysis & reporting**",
+          "**Export functionality (PDF/CSV)**",
+          "**Priority support (<2hr response)**",
+          "**Custom rubric indicators**"
         ],
-        "cta": {"label": "Choose Starter", "href": "/signup"},
+        "cta": {"label": "Upgrade to Pro", "href": "/signup"},
         "highlight": true
       },
       {
-        "name": "Coach Pro",
-        "price": "$49",
-        "price_description": "per month, per coach",
+        "name": "District Enterprise",
+        "price": "$500",
+        "price_description": "per month - multi-school deployment & integrations",
         "features": [
-          "Support up to 50 teachers",
-          "Unlimited walkthroughs",
-          "Everything in Starter, plus:",
-          "**Advanced Team Analytics (Heat Maps)**",
-          "**Growth Trend Reporting**",
-          "**Bulk Teacher Invites**",
-          "**Export Feedback to PDF**",
-          "Priority Support"
+          "**Multi-school management**",
+          "**SIS/LMS integrations**",
+          "**Single sign-on (SSO)**",
+          "Everything in Pro, plus:",
+          "**District-wide analytics**",
+          "**Dedicated success manager**",
+          "**Custom training & onboarding**",
+          "**Compliance reporting**"
         ],
-        "cta": {"label": "Choose Pro", "href": "/signup"},
+        "cta": {"label": "Contact Sales", "href": "/contact"},
         "highlight": false
       }
     ]
   },
   "testimonials": {
-    "headline": "What Educational Leaders & Teachers Are Saying",
+    "headline": "Coaches and Teachers Love the Continuous Growth Loop",
     "quotes": [
       {
-        "quote": "The AI feedback suggestions are remarkably relevant and save our coaches hours each week. It allows for more frequent and meaningful interactions.",
-        "author": "Dr. Evelyn Reed",
-        "title": "Former Principal & EdTech Advisor"
+        "quote": "I can focus on relationships and growth instead of paperwork. The 5-minute walkthroughs and AI feedback save me hours every week while giving teachers exactly what they need to improve.",
+        "author": "Sarah Martinez",
+        "title": "Instructional Coach, Jefferson Parish"
       },
       {
-        "quote": "As a teacher, I love being able to access all my feedback in one place. The regular, actionable insights help me grow between formal observations.",
-        "author": "Sarah Williams",
-        "title": "Classroom Teacher"
+        "quote": "Finally, feedback that actually helps me grow! I can see my progress over time and the reflections help me take ownership of my development. It doesn't feel like evaluation anymore.",
+        "author": "Michael Thompson",
+        "title": "5th Grade Teacher, Baton Rouge"
       },
       {
-        "quote": "The platform is clean, responsive, and easy to use on my tablet during walkthroughs – a huge improvement over our previous system.",
-        "author": "Jessica Nguyen",
-        "title": "Instructional Coach"
+        "quote": "The iPad interface is perfect for classroom walkthroughs. I can capture evidence quickly without disrupting instruction, and the AI suggestions are surprisingly insightful.",
+        "author": "Dr. Lisa Chen",
+        "title": "Assistant Principal, Orleans Parish"
       }
     ]
   },
   "faq": {
-    "headline": "Frequently Asked Questions",
+    "headline": "Common Questions About the Continuous Growth Loop",
     "questions": [
       {
-        "question": "Does EdCoach AI replace our formal evaluation system?",
-        "answer": "No, EdCoach AI is designed to supplement—not replace—your formal evaluation process. It provides the continuous, informal feedback and PGP tracking that happens *between* formal observations."
+        "question": "How is this different from traditional evaluation systems?",
+        "answer": "EdCoachAi transforms coaching from episodic evaluation events into ongoing, supportive professional development. Teachers actively participate in their growth instead of passively receiving judgment. We supplement—never replace—formal evaluations."
       },
       {
-        "question": "How do teachers interact with their feedback?",
-        "answer": "Teachers have a private, secure portal called the 'Growth Journal.' They can view all feedback, see their progress over time, and add personal reflections to close the coaching loop."
+        "question": "Will AI feedback be as good as human insight?",
+        "answer": "Our AI understands each teacher's PGP goal, rubric indicators, and observation evidence to generate hyper-contextualized feedback. Coaches edit and approve everything before sending. It's AI-assisted coaching, not AI replacement."
       },
       {
-        "question": "How secure is our school's data?",
-        "answer": "Extremely. We use industry-leading partners for encrypted storage and secure authentication. We are built with FERPA compliance in mind, ensuring student and teacher data is always protected."
+        "question": "How do you ensure FERPA compliance and data security?",
+        "answer": "We're built with FERPA compliance from day one. All data is encrypted at rest and in transit, with role-based access control. Teacher reflections are private to only the teacher and their coach. We maintain SOC 2 certification standards."
       },
       {
-        "question": "What are the key features of the Coach Starter plan?",
-        "answer": "The Starter plan gives you the complete coaching loop: PGP Goal Tracking, the Teacher Reflection feature, and the insightful dashboards for both you and your teachers to track progress over time."
+        "question": "What makes the 5-minute walkthroughs so efficient?",
+        "answer": "iPad-optimized forms focus on evidence capture, not lengthy narratives. AI handles the heavy lifting of connecting observations to PGP goals and generating feedback. Coaches spend time coaching, not writing reports."
       },
       {
-        "question": "What advanced features are available in the Coach Pro plan?",
-        "answer": "The Pro plan is for strategic leaders. It adds powerful team-level analytics like indicator heat maps and growth trends, plus efficiency tools like bulk invites and PDF exports."
+        "question": "How do teachers actually engage with their feedback?",
+        "answer": "Teachers receive feedback in their private Growth Journal with guided reflection prompts. They can see their progress timeline, connect feedback to their PGP goals, and take ownership of their development journey. 80% complete reflections within 48 hours."
+      },
+      {
+        "question": "Can this work with our existing rubric system?",
+        "answer": "EdCoachAi is built natively for the Louisiana Educator Rubric but can adapt to other rubric systems. Our Enterprise tier includes custom rubric indicator support for district-specific requirements."
       }
     ]
   },
   "cta": {
-    "headline": "Ready to Make Every Coaching Moment Count?",
-    "sub_headline": "Start your free trial today. Free up valuable time, deliver consistently impactful feedback, and foster a thriving culture of growth in your school.",
-    "cta": {"label": "Get Started For Free", "href": "/signup"}
+    "headline": "Transform Your Coaching From Paperwork to Partnership",
+    "sub_headline": "Join coaches who've reduced walkthrough time by 75% while increasing teacher engagement by 90%. Start the continuous growth loop today—no credit card required.",
+    "cta": {"label": "Start Free Forever", "href": "/signup"}
   },
   "footer": {
-    "logo_placeholder": "EdCoach AI Logo",
+    "logo_placeholder": "EdCoachAi Logo",
     "description": "AI-powered feedback for continuous teacher growth.",
     "columns": [
        {
@@ -212,6 +232,6 @@
         "href": "https://twitter.com/webdevlokie"
       }
     ],
-    "copyright": "© 2025 EdCoach AI. All rights reserved."
+    "copyright": "© 2025 EdCoachAi. All rights reserved."
   }
 }

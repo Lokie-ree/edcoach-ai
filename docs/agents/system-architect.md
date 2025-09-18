@@ -1,4 +1,4 @@
-# System Architect Agent - EdCoach AI
+# System Architect Agent - EdCoachAi
 
 **Last Updated:** September 17, 2025  
 **Role:** Technical architecture, system design, and technology decisions

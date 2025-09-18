@@ -1,10 +1,10 @@
-# EdCoach AI - Convex Backend Architecture
+# EdCoachAi - Convex Backend Architecture
 
-This directory contains the complete Convex backend for EdCoach AI, an educational coaching platform that helps instructional coaches provide AI-powered feedback to teachers based on classroom walkthroughs and the Louisiana Educator Rubric.
+This directory contains the complete Convex backend for EdCoachAi, an educational coaching platform that helps instructional coaches provide AI-powered feedback to teachers based on classroom walkthroughs and the Louisiana Educator Rubric.
 
 ## 🏗️ Architecture Overview
 
-EdCoach AI follows a **coach-teacher relationship model** with a **6-step coaching methodology**:
+EdCoachAi follows a **coach-teacher relationship model** with a **6-step coaching methodology**:
 - **Coaches** create accounts and invite teachers to their coaching teams
 - **Teachers** accept invitations and receive feedback on their classroom practices
 - **AI-powered feedback** is generated based on Louisiana Educator Rubric indicators

@@ -1,4 +1,4 @@
-# UX/UI Designer Agent - EdCoach AI
+# UX/UI Designer Agent - EdCoachAi
 
 **Last Updated:** September 17, 2025  
 **Role:** User experience design, design system, and accessibility
@@ -40,7 +40,7 @@ Create intuitive, beautiful, and frictionless experiences that translate product
 4. **Mobile Workflows**: Tablet-optimized coaching with touch-friendly interactions
 
 #### Component System Design
-- **Foundation**: shadcn/ui base with custom EdCoach AI extensions
+- **Foundation**: shadcn/ui base with custom EdCoachAi extensions
 - **Design Tokens**: Centralized system in `lib/design-tokens.ts`
 - **Responsive Patterns**: Mobile-first with progressive enhancement
 - **Accessibility**: WCAG 2.1 AA compliance, keyboard navigation, screen readers

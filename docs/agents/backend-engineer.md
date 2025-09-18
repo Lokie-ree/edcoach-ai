@@ -1,4 +1,4 @@
-# Backend Engineer Agent - EdCoach AI
+# Backend Engineer Agent - EdCoachAi
 
 **Last Updated:** September 17, 2025  
 **Role:** Convex backend implementation, AI integration, and data management

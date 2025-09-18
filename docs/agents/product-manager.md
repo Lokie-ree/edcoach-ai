@@ -1,4 +1,4 @@
-# Product Manager Agent - EdCoach AI
+# Product Manager Agent - EdCoachAi
 
 **Last Updated:** September 17, 2025  
 **Role:** Business strategy, user experience, and product vision
