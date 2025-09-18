@@ -1,10 +1,10 @@
-# EdCoach AI - Complete Business Context
+# EdCoachAi - Complete Business Context
 
 **Last Updated:** September 4, 2025  
 **Document Owner:** Product Manager  
 **Reviewers:** UX/UI Designer, System Architect
 
-*This document combines the vision, personas, and user journeys into a comprehensive business context for EdCoach AI.*
+*This document combines the vision, personas, and user journeys into a comprehensive business context for EdCoachAi.*
 
 ---
 
@@ -28,7 +28,7 @@
 
 ### Core Philosophy: The Continuous Growth Loop
 
-EdCoach AI is built around a five-phase continuous growth methodology:
+EdCoachAi is built around a five-phase continuous growth methodology:
 
 #### Phase 1: Set Goal → PGP Goal-Setting System
 - **Purpose:** Establish clear, year-long Professional Growth Plan goals

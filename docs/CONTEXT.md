@@ -1,8 +1,8 @@
-# EdCoach AI - Master Context
+# EdCoachAi - Master Context
 
 **Last Updated:** September 17, 2025  
 **Maintainers:** Product Manager (lead), System Architect, UX Designer, Senior Engineers  
-**Purpose:** Single source of truth for all EdCoach AI project context
+**Purpose:** Single source of truth for all EdCoachAi project context
 
 ---
 
@@ -12,7 +12,7 @@
 **Transform classroom walkthroughs into a continuous, supportive, and data-informed growth loop for educators.**
 
 ### Core Philosophy: The Continuous Growth Loop
-EdCoach AI is built around a five-phase continuous growth methodology that transforms traditional coaching from episodic events into an ongoing, supportive process:
+EdCoachAi is built around a five-phase continuous growth methodology that transforms traditional coaching from episodic events into an ongoing, supportive process:
 
 1. **Set Goal** → PGP Goal-Setting System with AI assistance
 2. **Capture Evidence** → 5-minute mobile walkthroughs with rubric indicators  
@@ -508,7 +508,7 @@ export const DESIGN_TOKENS = {
 
 **Unique Value Propositions vs Competitors:**
 
-| **EdCoach AI Advantage** | **Traditional Competitors** | **Our Differentiation** |
+| **EdCoachAi Advantage** | **Traditional Competitors** | **Our Differentiation** |
 |--------------------------|----------------------------|-------------------------|
 | **PGP-Aligned AI Feedback** | Generic observation templates | AI understands long-term teacher goals |
 | **5-Minute Walkthroughs** | 15-20 minute formal observations | Mobile-first, efficiency-focused design |
@@ -652,7 +652,8 @@ export const DESIGN_TOKENS = {
 ### Integration Points
 - **Agent Instructions**: All agents reference this context, no duplication
 - **Development Rules**: .cursorrules points to this file for detailed context
-- **Documentation**: Other docs reference specific sections as needed
+- **Brand System**: brand-guidelines.md provides visual identity and logo implementation
+- **Documentation**: Archive docs available for historical reference
 
 ---
 

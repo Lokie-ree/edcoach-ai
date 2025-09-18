@@ -25,7 +25,7 @@ export function SidebarNav({ userRole }: SidebarNavProps) {
   // Sample data for team switcher - in a real app this would come from the user's context
   const teams = [
     {
-      name: "EdCoach AI",
+      name: "EdCoachAi",
       logo: GraduationCap,
       plan: userRole === "coach" ? "Pro" : "Free",
     },

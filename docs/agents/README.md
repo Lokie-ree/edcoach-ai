@@ -1,8 +1,8 @@
-# EdCoach AI - Agent Coordination System
+# EdCoachAi - Agent Coordination System
 
 ## Overview
 
-The EdCoach AI development team consists of **5 specialized AI agents** working in coordinated sequence to deliver high-quality educational technology solutions. Each agent focuses on their core expertise while referencing the **[Master Context](../CONTEXT.md)** for all project information.
+The EdCoachAi development team consists of **5 specialized AI agents** working in coordinated sequence to deliver high-quality educational technology solutions. Each agent focuses on their core expertise while referencing the **[Master Context](../CONTEXT.md)** for all project information.
 
 ## 🎯 Agent Workflow
 

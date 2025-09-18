@@ -1,4 +1,4 @@
-# EdCoach AI - Complete Design System
+# EdCoachAi - Complete Design System
 
 **Last Updated:** September 4, 2025
 **Document Owner:** UX/UI Designer
@@ -19,7 +19,7 @@
 
 ## Overview
 
-This document provides comprehensive specifications for the EdCoach AI design system, including visual design language, interaction patterns, and reusable UI components. The goal is to create a professional, appealing, and consistent user experience that feels trustworthy and premium while ensuring consistency, accelerating development, and maintaining high-quality user experience.
+This document provides comprehensive specifications for the EdCoachAi design system, including visual design language, interaction patterns, and reusable UI components. The goal is to create a professional, appealing, and consistent user experience that feels trustworthy and premium while ensuring consistency, accelerating development, and maintaining high-quality user experience.
 
 ---
 

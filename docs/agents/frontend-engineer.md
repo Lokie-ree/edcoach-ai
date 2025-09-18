@@ -1,4 +1,4 @@
-# Frontend Engineer Agent - EdCoach AI
+# Frontend Engineer Agent - EdCoachAi
 
 **Last Updated:** September 17, 2025  
 **Role:** Next.js/React implementation, user interface development, and performance

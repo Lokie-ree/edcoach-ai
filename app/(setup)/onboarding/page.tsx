@@ -107,7 +107,7 @@ export default function OnboardingPage() {
     if (isRedirecting) return; // Prevent multiple redirects
     setIsRedirecting(true);
     console.log("Redirecting to dashboard...");
-    toast.success("Welcome to EdCoach AI!");
+    toast.success("Welcome to EdCoachAi!");
     setTimeout(() => {
       router.replace("/dashboard");
     }, 1000);
@@ -309,8 +309,8 @@ export default function OnboardingPage() {
         <PageHeader
           title={
             convexUser?.role === "teacher"
-              ? "Welcome to EdCoach AI"
-              : "Welcome to EdCoach AI"
+              ? "Welcome to EdCoachAi"
+              : "Welcome to EdCoachAi"
           }
           description={
             convexUser?.role === "teacher"
@@ -494,7 +494,7 @@ export default function OnboardingPage() {
               <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2">
                   <CheckCircle className="h-6 w-6 text-green-500" />
-                  Welcome to EdCoach AI!
+                  Welcome to EdCoachAi!
                 </CardTitle>
                 <CardDescription>
                   {convexUser.role === "teacher"

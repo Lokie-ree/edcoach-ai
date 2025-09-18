@@ -1,8 +1,8 @@
-## EdCoach AI: Official Marketing Guide
-This document serves as the single source of truth for all marketing activities related to EdCoach AI. It is designed to ensure consistency in messaging, targeting, and strategy across all channels.
+## EdCoachAi: Official Marketing Guide
+This document serves as the single source of truth for all marketing activities related to EdCoachAi. It is designed to ensure consistency in messaging, targeting, and strategy across all channels.
 
 ### 1. Core Marketing Principles
-To effectively market EdCoach AI, all efforts must be grounded in these foundational principles:
+To effectively market EdCoachAi, all efforts must be grounded in these foundational principles:
 
 * **Sell the Transformation, Not Features**: Our core message must focus on the "new version" of our users that our app helps them become. People don't buy software; they buy a better professional life.
 * **Target by Awareness Level**: Recognize that potential users have varying levels of awareness about their problems. Our messaging must be tailored to meet them where they are in their journey, not where we want them to be. Beginners should focus on targeting "problem aware" and "solution aware" prospects.
@@ -10,7 +10,7 @@ To effectively market EdCoach AI, all efforts must be grounded in these foundati
 * **Specificity Sells**: Vague claims will be ignored. We must use specific, concrete details, numbers, and tangible outcomes to build credibility and make our claims feel like facts. Instead of "better feedback," we say, "PGP-aligned, AI-generated feedback in under 5 minutes."
 * **Proof is Greater than the Promise**: In a market full of claims, believability is a primary conversion driver. We must build trust by demonstrating value through tangible proof points like specificity, credible sources, and testable claims.
 
-### 2. The EdCoach AI Transformation
+### 2. The EdCoachAi Transformation
 Our marketing must clearly articulate the transformation we provide for each user segment.
 
 * **For Instructional Coaches:** From being bogged down by **time-consuming, inconsistent feedback processes** to becoming **efficient, data-driven coaching leaders** with measurable impact.

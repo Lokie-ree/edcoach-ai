@@ -1,4 +1,4 @@
-# EdCoach AI - Complete Technical Context
+# EdCoachAi - Complete Technical Context
 
 **Last Updated:** September 5, 2025
 **Document Owner:** System Architect
@@ -126,7 +126,7 @@ By creating these comprehensive documentation files, you will establish clear pa
 
 ### Overview
 
-This document outlines the system architecture for EdCoach AI. The application is a modern web application designed to be scalable, maintainable, and secure, leveraging a serverless backend and a reactive frontend to provide a seamless user experience for instructional coaches and teachers.
+This document outlines the system architecture for EdCoachAi. The application is a modern web application designed to be scalable, maintainable, and secure, leveraging a serverless backend and a reactive frontend to provide a seamless user experience for instructional coaches and teachers.
 
 ### Technology Stack
 
@@ -259,7 +259,7 @@ To support the P1 priority of "Integration Readiness" for external systems like 
 
 ### Overview
 
-This document establishes the guidelines for code structure, file organization, and naming conventions within the EdCoach AI codebase. Adhering to these standards is crucial for maintainability, collaboration, and ensuring that AI development assistants can work effectively within the project.
+This document establishes the guidelines for code structure, file organization, and naming conventions within the EdCoachAi codebase. Adhering to these standards is crucial for maintainability, collaboration, and ensuring that AI development assistants can work effectively within the project.
 
 ### Directory Structure
 

@@ -196,7 +196,7 @@ export default function HeroSection() {
                         <Logo />
                       </div>
                       <div>
-                        <h3 className="font-semibold">EdCoach AI</h3>
+                        <h3 className="font-semibold">EdCoachAi</h3>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                           Observation Dashboard
                         </p>
