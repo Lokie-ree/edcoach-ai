@@ -1,64 +1,46 @@
-# EdCoach AI - Cursor Rules
+# EdCoach AI - Development Patterns
 
-## Project Context
-AI-powered instructional coaching platform for K-12 schools using Next.js 15, Convex, TypeScript, and Tailwind CSS.
+## Master Context
+📖 **All project context**: @docs/CONTEXT.md  
+🤖 **Agent coordination**: @docs/agents/README.md
 
-## Key Patterns
+## Mission
+Transform classroom walkthroughs into a **continuous, supportive, and data-informed growth loop** for educators.
+
+## Essential Development Patterns
 
 ### Design System Integration
-- ALWAYS use design tokens from `lib/design-tokens.ts` instead of hardcoded values
-- Use `cn()` utility for conditional classes
-- Follow established component patterns in `components/ui/`
+- **Design tokens**: ALWAYS use `lib/design-tokens.ts` (never hardcode values)
+- **Components**: Build on shadcn/ui base, follow `components/ui/` patterns
+- **Accessibility**: WCAG AA compliance throughout
+- **Responsive**: Mobile-first design for tablet coaching workflows
 
 ### TypeScript Standards
-- Prefer TypeScript over JavaScript for all code
-- Use proper type annotations and Convex generated types
-- Follow strict TypeScript configuration
-
-### Component Structure
-```typescript
-interface ComponentProps {
-  className?: string;
-  children?: React.ReactNode;
-  // Feature-specific props
-}
-
-export function Component({ className, children, ...props }: ComponentProps) {
-  return (
-    <div className={cn("base-styles", className)} {...props}>
-      {children}
-    </div>
-  );
-}
-```
+- **Strict mode**: Use proper type annotations and Convex generated types
+- **Component structure**: Follow established patterns with proper interfaces
+- **Error handling**: Comprehensive error boundaries and user feedback
 
 ### Convex Backend Patterns
-- Use proper function types: `query`, `mutation`, `action`, `internalMutation`
-- Implement comprehensive validators for all functions
-- Follow Convex best practices for performance and real-time features
+- **Function types**: Use `query`, `mutation`, `action`, `internalMutation` appropriately
+- **Validators**: Implement comprehensive validation for all functions
+- **Performance**: Optimize for <3 second load times and real-time features
+- **AI Integration**: Handle OpenAI API failures with fallback mechanisms
 
 ### Next.js App Router
-- Use proper route groups: `(dashboard)`, `(marketing)`, `(setup)`
-- Implement loading.tsx and error.tsx for better UX
-- Use Suspense boundaries for optimal loading experiences
+- **Route groups**: Use `(dashboard)`, `(marketing)`, `(setup)` organization
+- **Loading states**: Implement loading.tsx and error.tsx for better UX
+- **Performance**: Use Suspense boundaries and optimize for mobile
 
-## Agent Instructions
-For detailed role-specific guidance, reference:
-- @agents/product-manager-system-instructions.md - Product management and user experience
-- @agents/system-architect-instructions.md - Technical architecture and system design
-- @agents/senior-backend-engineer-instructions.md - Convex backend and AI integration
-- @agents/senior-frontend-engineer-system-instructions.md - React/Next.js frontend development
-- @agents/ux-ui-designer-system-instructions.md - Design system and UI implementation
+## Quick Reference
+- **Continuous Growth Loop**: Set Goal → Capture → Generate → Reflect → Monitor
+- **Performance target**: <3 seconds load time, <10 seconds AI generation
+- **Primary users**: Coaches (tablet/iPad) and Teachers (smartphone)
+- **Success metrics**: <5min walkthroughs, 90%+ completion rates
 
-## Documentation Structure
-For comprehensive project context, reference:
-- @docs/business/ - Vision, personas, user journeys
-- @docs/technical/ - Architecture, code structure, error handling
-- @docs/design/ - Component library, design guidelines
+## Agent Workflow
+1. **Product Manager** → defines requirements (uses @docs/CONTEXT.md User Context)
+2. **System Architect** → creates specs (uses @docs/CONTEXT.md Technical Context)  
+3. **UX Designer + Backend Engineer** → parallel work (use respective contexts)
+4. **Frontend Engineer** → integration (uses all contexts from @docs/CONTEXT.md)
 
-## Common Patterns
-- Use `useQuery` and `useMutation` for Convex data operations
-- Implement proper error boundaries and loading states
-- Follow accessibility standards (WCAG AA)
-- Use design tokens for consistent styling
-- Implement proper form validation with React Hook Form and Zod
+For detailed guidance, see @docs/agents/[role].md
