@@ -33,7 +33,7 @@
 - Any context requiring professional credibility and trust
 
 **Specifications:**
-- **Full Logo**: "EdCoach AI" with circular gradient symbol
+- **Full Logo**: "EdCoachAi" with circular gradient symbol
 - **Compact Logo**: Symbol + "EdCoach" (for constrained spaces)
 - **Icon Mark**: Symbol only (favicons, app icons, loading states)
 - **Minimum Size**: 32px height for mobile readability
@@ -50,7 +50,7 @@
 - Conference presentations and thought leadership
 
 **Specifications:**
-- **Full Logo**: "EdCoach AI" with 5-phase icon circle
+- **Full Logo**: "EdCoachAi" with 5-phase icon circle
 - **Icon Meanings**: Target (Goal) → Eye (Capture) → Sparkles (Generate) → Message (Reflect) → Chart (Monitor)
 - **Colors**: Multi-color system representing different phases
 - **Message**: "This is HOW we're different from competitors"
@@ -66,7 +66,7 @@
 - Innovation-focused communications
 
 **Specifications:**
-- **Full Logo**: "EdCoach AI" with interlocking growth pattern
+- **Full Logo**: "EdCoachAi" with interlocking growth pattern
 - **Symbolism**: Connected pathways representing networked growth
 - **Colors**: Sophisticated multi-tone progression
 - **Message**: "We're the cutting-edge leader in coaching technology"

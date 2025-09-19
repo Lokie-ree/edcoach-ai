@@ -148,6 +148,7 @@ export function AIFeedbackStep({ isLast }: AIFeedbackStepProps) {
             <Button
               onClick={handleGenerateFeedback}
               disabled={isGenerating}
+              aria-describedby={isGenerating ? "feedback-status" : undefined}
             >
               {isGenerating ? (
                 <>
@@ -161,6 +162,11 @@ export function AIFeedbackStep({ isLast }: AIFeedbackStepProps) {
                 </>
               )}
             </Button>
+            {isGenerating && (
+              <div id="feedback-status" className="sr-only" aria-live="polite">
+                Generating AI feedback, please wait...
+              </div>
+            )}
           </CardContent>
         </Card>
       ) : (

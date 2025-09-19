@@ -82,7 +82,8 @@ export function EvidenceCaptureStep({}: EvidenceCaptureStepProps) {
               <Textarea
                 {...field}
                 placeholder="Describe what you observed during the walkthrough. Be specific and objective in your notes..."
-                className="min-h-[200px] text-base break-words"
+                className="min-h-[200px] text-base break-words touch-manipulation"
+                rows={8}
                 maxLength={2000}
               />
             </FormControl>

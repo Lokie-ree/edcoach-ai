@@ -219,14 +219,15 @@ export function WalkthroughWizard({ preselectedTeacherId }: WalkthroughWizardPro
                 canProceed={canProceed()}
               />
 
-              {/* Navigation */}
+              {/* Navigation - Optimized for iPad touch */}
               <div className="flex justify-between pt-6 border-t">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handlePrevious}
                   disabled={isFirstStep}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 min-h-[48px] touch-manipulation"
+                  size="lg"
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Previous
@@ -236,7 +237,8 @@ export function WalkthroughWizard({ preselectedTeacherId }: WalkthroughWizardPro
                   <Button
                     type="submit"
                     disabled={!canProceed() || isSubmitting}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 min-h-[48px] touch-manipulation"
+                    size="lg"
                   >
                     {isSubmitting ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -250,7 +252,8 @@ export function WalkthroughWizard({ preselectedTeacherId }: WalkthroughWizardPro
                     type="button"
                     onClick={handleNext}
                     disabled={!canProceed()}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 min-h-[48px] touch-manipulation"
+                    size="lg"
                   >
                     Next
                     <ChevronRight className="h-4 w-4" />

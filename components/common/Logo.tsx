@@ -3,13 +3,14 @@ import Image from "next/image";
 
 export const Logo = ({ className }: { className?: string }) => {
   return (
-    <div className={cn("rounded-full", className)}>
+    <div className={cn("flex items-center", className)}>
       <Image
-        src="/logo.png"
-        alt="Site Logo"
+        src="/brand/logos/primary-logo.png"
+        alt="EdCoachAi - AI-powered instructional coaching platform"
         className="object-contain hover:scale-105 transition-transform"
-        width={28}
-        height={28}
+        width={32}
+        height={32}
+        priority
       />
     </div>
   );
