@@ -94,4 +94,57 @@ export function handleFormError(error: unknown): Record<string, { message: strin
       message: "An error occurred while submitting the form. Please try again.",
     },
   };
-} 
+}
+
+// Success handling for consistency
+export enum SuccessCategory {
+  CREATED = "created",
+  UPDATED = "updated",
+  DELETED = "deleted",
+  SAVED = "saved",
+  SENT = "sent",
+  COMPLETED = "completed",
+  GENERATED = "generated",
+}
+
+const successMessages: Record<SuccessCategory, string> = {
+  [SuccessCategory.CREATED]: "Successfully created!",
+  [SuccessCategory.UPDATED]: "Successfully updated!",
+  [SuccessCategory.DELETED]: "Successfully deleted!",
+  [SuccessCategory.SAVED]: "Successfully saved!",
+  [SuccessCategory.SENT]: "Successfully sent!",
+  [SuccessCategory.COMPLETED]: "Successfully completed!",
+  [SuccessCategory.GENERATED]: "Successfully generated!",
+};
+
+// Centralized success handling
+export function handleSuccess(
+  category: SuccessCategory, 
+  customMessage?: string,
+  description?: string
+): void {
+  const message = customMessage || successMessages[category];
+  
+  sonnerToast.success(message, {
+    description: description,
+    duration: 3000,
+  });
+}
+
+// Quick success handlers for common actions
+export const successHandlers = {
+  created: (item: string, description?: string) => 
+    handleSuccess(SuccessCategory.CREATED, `${item} created successfully!`, description),
+  
+  updated: (item: string, description?: string) => 
+    handleSuccess(SuccessCategory.UPDATED, `${item} updated successfully!`, description),
+  
+  saved: (item: string, description?: string) => 
+    handleSuccess(SuccessCategory.SAVED, `${item} saved successfully!`, description),
+  
+  sent: (item: string, description?: string) => 
+    handleSuccess(SuccessCategory.SENT, `${item} sent successfully!`, description),
+  
+  generated: (item: string, description?: string) => 
+    handleSuccess(SuccessCategory.GENERATED, `${item} generated successfully!`, description),
+}; 

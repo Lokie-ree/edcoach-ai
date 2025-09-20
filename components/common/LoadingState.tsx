@@ -16,6 +16,8 @@ interface LoadingStateProps {
   spinnerText?: string;
   spinnerSize?: "sm" | "md" | "lg" | "xl";
   className?: string;
+  error?: string | null;
+  onRetry?: () => void;
 }
 
 export function LoadingState({
@@ -27,8 +29,28 @@ export function LoadingState({
   spinner = false,
   spinnerText,
   spinnerSize = "md",
-  className
+  className,
+  error,
+  onRetry
 }: LoadingStateProps) {
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <div className={cn("flex flex-col items-center justify-center p-6 text-center", className)}>
+        <div className="text-destructive mb-2">⚠️</div>
+        <p className="text-sm text-muted-foreground mb-4">{error}</p>
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+          >
+            Try Again
+          </button>
+        )}
+      </div>
+    );
+  }
+
   if (!isLoading) {
     return <>{children}</>;
   }
@@ -89,5 +111,10 @@ export const LoadingStateVariants = {
   // Inline spinner loading
   InlineSpinner: (props: Omit<LoadingStateProps, 'spinner' | 'spinnerSize'>) => (
     <LoadingState {...props} spinner spinnerSize="sm" />
+  ),
+  
+  // Error state with retry
+  Error: (props: Omit<LoadingStateProps, 'isLoading' | 'skeleton' | 'spinner'>) => (
+    <LoadingState {...props} isLoading={false} />
   )
 } as const;

@@ -8,12 +8,12 @@ import { STATUS_COLORS } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
 
 
-// Generate gradient colors based on index
+// Generate gradient colors using our brand tokens
 const getGradientColors = (index: number) => {
   const gradients = [
-    { from: "#6366F1", to: "#8B5CF6" }, // indigo to purple
-    { from: "#8B5CF6", to: "#EC4899" }, // purple to pink
-    { from: "#3B82F6", to: "#6366F1" }, // blue to indigo
+    { from: "#3b82f6", to: "#10b981" }, // primary to secondary
+    { from: "#10b981", to: "#f59e0b" }, // secondary to accent  
+    { from: "#3b82f6", to: "#f59e0b" }, // primary to accent
   ];
 
   return gradients[index % gradients.length];
@@ -42,7 +42,7 @@ export default function Pricing() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl xl:text-4xl mb-6">
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent dark:from-primary dark:to-accent">
+            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               {pricing.headline}
             </span>
           </h2>
@@ -68,7 +68,7 @@ export default function Pricing() {
                   )}
                 >
                   {tier.highlight && (
-                    <span className="absolute top-3 right-3 bg-gradient-to-r from-primary to-accent text-white px-4 py-1.5 rounded-full text-sm font-medium shadow-lg z-10">
+                    <span className="absolute top-3 right-3 bg-gradient-to-r from-primary to-secondary text-white px-4 py-1.5 rounded-full text-sm font-medium shadow-lg z-10">
                       Most Popular
                     </span>
                   )}

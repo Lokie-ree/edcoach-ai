@@ -42,12 +42,12 @@ export default function FeaturesSection() {
     return IconComponent ? <IconComponent className={ICONS.sizes.lg} /> : null;
   };
 
-  // Generate gradient colors based on index
+  // Generate gradient colors using our brand tokens
   const getGradientColors = (index: number) => {
     const gradients = [
-      { from: "#6366F1", to: "#8B5CF6" }, // indigo to purple
-      { from: "#8B5CF6", to: "#EC4899" }, // purple to pink
-      { from: "#3B82F6", to: "#6366F1" }, // blue to indigo
+      { from: "#3b82f6", to: "#10b981" }, // primary to secondary
+      { from: "#10b981", to: "#f59e0b" }, // secondary to accent  
+      { from: "#3b82f6", to: "#f59e0b" }, // primary to accent
     ];
 
     return gradients[index % gradients.length];

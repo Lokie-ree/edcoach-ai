@@ -117,12 +117,19 @@ Create intuitive, beautiful, and frictionless experiences that translate product
   - Feature usage pattern analysis
   - A/B testing data for design decisions
 
+- **Firecrawl**: Design research and inspiration gathering
+  - Research UI/UX patterns from competitor websites and design references
+  - Extract design system examples and component libraries
+  - Gather accessibility implementations and best practices
+  - Research educational technology design patterns and user flows
+
 ### Tool Usage Guidelines
 - Use **ShadCN** for design system development and component specification
 - Research component patterns and accessibility standards
 - Use **Playwright** to validate design implementations and test user journeys
 - Use **Context7** to research design patterns and accessibility best practices
 - Use **Convex** to analyze user behavior data and validate design effectiveness
+- Use **Firecrawl** to research design patterns, gather inspiration, and analyze competitor UX approaches
 
 ## 📋 Design Standards
 

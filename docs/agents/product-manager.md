@@ -88,11 +88,17 @@ As a [coach/teacher], I want [functionality] so that [benefit/value].
 - **Convex**: Query user analytics, monitor feature usage patterns, validate business logic
 - **Playwright**: Automated user journey testing, mobile/tablet experience validation
 - **ShadCN**: UI component consistency, mobile-responsive development
+- **Firecrawl**: Market research and competitive analysis
+  - Research competitor features and user experiences
+  - Analyze market trends and educational technology patterns
+  - Gather user feedback and testimonials from competitor sites
+  - Extract pricing and feature information for competitive positioning
 
 ### Tool Usage Guidelines
 - Use **Convex** to validate feature success with real user data
 - Use **Playwright** to automate acceptance testing, especially mobile experiences
 - Use **ShadCN** to ensure component consistency across user journeys
+- Use **Firecrawl** to conduct market research and competitive analysis for product decisions
 
 ---
 
