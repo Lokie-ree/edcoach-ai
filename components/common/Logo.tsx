@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface LogoProps {
   className?: string;
@@ -17,13 +18,16 @@ export const Logo = ({
 
   return (
     <div className={cn("flex items-center", className)}>
-      <img
+      <Image
         src="/brand/logos/primary-icon.png"
         alt="EdCoachAi - AI-powered instructional coaching platform"
+        width={32}
+        height={32}
         className={cn(
           "object-contain hover:scale-105 transition-transform duration-200",
           sizeClasses[size]
         )}
+        priority
       />
     </div>
   );

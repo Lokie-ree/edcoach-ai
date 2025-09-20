@@ -13,12 +13,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import landingContent from "@/data/landing-content.json";
 import { Logo } from "@/components/common/Logo";
 import { Container } from "@/components/ui/container";
 import { SignInButton } from "@clerk/nextjs";
-import { ICONS, STATUS_COLORS } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
+import landingContent from "@/data/landing-content.json";
 
 export default function HeroSection() {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -80,7 +79,7 @@ export default function HeroSection() {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen flex items-center overflow-hidden"
+      className="relative min-h-screen flex items-center overflow-hidden py-16 md:py-24"
       id="hero"
     >
       {/* Background with subtle gradient */}
@@ -94,9 +93,9 @@ export default function HeroSection() {
       />
 
       <Container size="lg" padding="normal" className="relative z-10">
-        <div className="grid gap-16 lg:grid-cols-2 items-center min-h-[80vh]">
+        <div className="grid gap-16 lg:gap-20 lg:grid-cols-2 items-start lg:items-center min-h-[75vh] py-8">
           {/* Left content - Precursor-inspired clean layout */}
-          <div className="flex flex-col space-y-8">
+          <div className="flex flex-col space-y-10 lg:space-y-12">
             {/* Animated badge - Precursor style */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -107,10 +106,8 @@ export default function HeroSection() {
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/80 px-3 py-1.5 text-sm backdrop-blur-sm shadow-sm">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle className="h-4 w-4 text-success" />
-                  <span className="font-medium text-foreground">Free to start</span>
+                  <span className="font-medium text-foreground">{hero.tagline}</span>
                 </div>
-                <div className="h-1 w-1 rounded-full bg-muted-foreground/50" />
-                <span className="text-muted-foreground">No credit card required</span>
               </div>
             </motion.div>
 
@@ -119,18 +116,14 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="space-y-4"
+              className="space-y-6"
             >
-              <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-6xl lg:text-7xl">
-                <span className="block">Start with</span>
-                <span className="block bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                  Structure
-                </span>
-                <span className="block text-foreground/80">End Vibe Coding Chaos</span>
+              <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl">
+                {hero.headline}
               </h1>
               
               <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
-                EdCoach AI helps educators plan, observe, and iterate on classroom walkthroughs with intelligent guidance, designed to work with your existing coaching workflow.
+                {hero.sub_headline}
               </p>
             </motion.div>
 
@@ -146,7 +139,7 @@ export default function HeroSection() {
                   size="lg"
                   className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 group"
                 >
-                  <span>Join the Waitlist</span>
+                  <span>{hero.cta_primary.label}</span>
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </SignInButton>
@@ -155,9 +148,10 @@ export default function HeroSection() {
                 variant="outline"
                 size="lg"
                 className="border-primary/20 hover:bg-primary/5 transition-all duration-300"
+                onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <Play className="mr-2 h-4 w-4" />
-                Learn More
+                {hero.cta_secondary.label}
               </Button>
             </motion.div>
 
@@ -166,19 +160,11 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex items-center gap-6 text-sm text-muted-foreground"
+              className="text-sm text-muted-foreground"
             >
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-primary">5x</span>
-                <span>Faster Planning</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-primary">250+</span>
-                <span>Educators Waiting</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-primary">100%</span>
-                <span>AI-Powered</span>
+                <CheckCircle className="h-4 w-4 text-success" />
+                <span>{hero.social_proof}</span>
               </div>
             </motion.div>
           </div>
@@ -195,9 +181,9 @@ export default function HeroSection() {
               {/* Card header */}
               <div className="flex items-center justify-between p-6 border-b border-border/50">
                 <div className="flex items-center gap-3">
-                  <Logo variant="storytelling" size="sm" showText={false} />
+                  <Logo size="sm" />
                   <div>
-                    <h3 className="font-semibold text-foreground">EdCoach AI</h3>
+                    <h3 className="font-semibold text-foreground">EdCoachAi</h3>
                     <p className="text-sm text-muted-foreground">Continuous Growth Loop</p>
                   </div>
                 </div>

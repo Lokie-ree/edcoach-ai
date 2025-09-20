@@ -17,7 +17,7 @@ export default function CTASection() {
           borderRadius={24}
           neonColors={{
             firstColor: "hsl(var(--primary))",
-            secondColor: "hsl(var(--accent))",
+            secondColor: "hsl(var(--secondary))",
           }}
           className="overflow-hidden relative"
         >
@@ -27,7 +27,7 @@ export default function CTASection() {
               {sub_headline}
             </p>
             <SignInButton mode="modal">
-              <Button className={cn("bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 px-8 py-3 text-md font-medium shadow hover:shadow-lg", ANIMATIONS.classes.normal)}>
+              <Button className={cn("bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 px-8 py-3 text-md font-medium shadow hover:shadow-lg", ANIMATIONS.classes.normal)}>
                 {cta.label}
               </Button>
             </SignInButton>
@@ -36,7 +36,7 @@ export default function CTASection() {
             size={200}
             duration={10}
             colorFrom="hsl(var(--primary))"
-            colorTo="hsl(var(--accent))"
+            colorTo="hsl(var(--secondary))"
           />
         </NeonGradientCard>
       </Container>
