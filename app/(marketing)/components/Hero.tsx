@@ -2,10 +2,14 @@
 import React, { useEffect, useRef } from "react";
 import {
   ArrowRight,
-  ClipboardList,
-  MessageSquareText,
-  LineChart,
+  Target,
+  Eye,
+  Sparkles,
+  MessageSquare,
+  TrendingUp,
   ChevronDown,
+  Play,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -20,24 +24,23 @@ export default function HeroSection() {
   const heroRef = useRef<HTMLDivElement>(null);
   const { hero } = landingContent;
 
-  // Particle animation effect
+  // Precursor-inspired particle animation
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const particles = Array.from({ length: 20 }, (_, i) => ({
-        id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        size: Math.random() * 5 + 2,
-        speed: Math.random() * 0.5 + 0.1,
-      }));
-
-      const canvas = document.getElementById(
-        "particle-canvas",
-      ) as HTMLCanvasElement;
+      const canvas = document.getElementById("particle-canvas") as HTMLCanvasElement;
       if (!canvas) return;
 
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
+
+      const particles = Array.from({ length: 30 }, (_, i) => ({
+        id: i,
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 2 + 1,
+        speed: Math.random() * 0.5 + 0.1,
+        opacity: Math.random() * 0.3 + 0.1,
+      }));
 
       const resizeCanvas = () => {
         if (heroRef.current) {
@@ -54,17 +57,12 @@ export default function HeroSection() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         particles.forEach((particle) => {
-          // Update position
           particle.y += particle.speed;
-          if (particle.y > 100) particle.y = 0;
-
-          // Draw particle
-          const x = (particle.x / 100) * canvas.width;
-          const y = (particle.y / 100) * canvas.height;
+          if (particle.y > canvas.height) particle.y = 0;
 
           ctx.beginPath();
-          ctx.arc(x, y, particle.size / 3, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(99, 102, 241, 0.1)";
+          ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(59, 130, 246, ${particle.opacity})`;
           ctx.fill();
         });
 
@@ -81,249 +79,221 @@ export default function HeroSection() {
 
   return (
     <section
-      className=""
+      ref={heroRef}
+      className="relative min-h-screen flex items-center overflow-hidden"
       id="hero"
     >
-
+      {/* Background with subtle gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
       
+      {/* Particle canvas */}
+      <canvas
+        id="particle-canvas"
+        className="absolute inset-0 pointer-events-none"
+        style={{ zIndex: 1 }}
+      />
 
-        <Container size="lg" padding="normal">
-          <div className="grid gap-12 lg:grid-cols-2 items-center">
-            <div className="flex flex-col space-y-8">
-              {/* Animated badge */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="w-fit"
-              >
-                <div className="rounded-full flex w-fit items-center gap-2 border border-primary/20 bg-background/80 p-1 pr-3 shadow-sm backdrop-blur-sm dark:border-primary/20 dark:bg-card/80">
-                  <span className={cn(STATUS_COLORS.success.bg, STATUS_COLORS.success.text, "rounded-full px-2 py-1 text-xs font-medium")}>
-                    Free
-                  </span>
-                  <span className="text-xs">
-                    Start free today - no credit card required
-                  </span>
-                  <span className="block h-4 w-px bg-border dark:bg-border"></span>
-                  <ArrowRight className={cn(ICONS.semantic.inline, "text-primary dark:text-primary")} />
-                </div>
-              </motion.div>
-
-              {/* Headline with gradient text */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="space-y-6"
-              >
-                <h1 className="text-4xl font-bold tracking-tight md:text-5xl xl:text-5xl xl:[line-height:1.125]">
-                  <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent dark:from-primary dark:to-accent">
-                    {hero.headline}
-                  </span>{" "}
-                  <br className="hidden md:block" />
-                </h1>
-                <h2 className="text-xl font-semibold text-primary dark:text-primary">
-                  {hero.tagline}
-                </h2>
-                <p className="text-lg text-muted-foreground dark:text-muted-foreground max-w-xl">
-                  {hero.sub_headline}
-                </p>
-              </motion.div>
-
-              {/* CTA buttons */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex flex-col sm:flex-row gap-4"
-              >
-                <SignInButton mode="modal">
-                  <Button
-                    size="lg"
-                    className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 transition-all duration-300 shadow-md hover:shadow-lg group"
-                  >
-                    <span>{hero.cta_primary.label}</span>
-                    <ArrowRight className={cn(ICONS.semantic.inline, "ml-2 transition-transform group-hover:translate-x-1")} />
-                  </Button>
-                </SignInButton>
-              </motion.div>
-
-              {/* Social proof */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="flex items-center gap-3 text-sm text-muted-foreground"
-              >
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="inline-block h-8 w-8 rounded-full bg-gradient-to-br from-primary/60 to-secondary/60 p-0.5"
-                    >
-                      <div className="h-full w-full rounded-full bg-background flex items-center justify-center text-xs font-medium">
-                        {String.fromCharCode(64 + i)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <span>
-                  Trusted by{" "}
-                  <span className="font-medium text-primary">
-                    100+
-                  </span>{" "}
-                  school leaders
-                </span>
-              </motion.div>
-            </div>
-
-            {/* 3D-like floating illustration */}
+      <Container size="lg" padding="normal" className="relative z-10">
+        <div className="grid gap-16 lg:grid-cols-2 items-center min-h-[80vh]">
+          {/* Left content - Precursor-inspired clean layout */}
+          <div className="flex flex-col space-y-8">
+            {/* Animated badge - Precursor style */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="relative mx-auto max-w-md"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="w-fit"
             >
-              <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-primary/20 to-secondary/20 rounded-2xl blur-xl opacity-70 dark:from-primary/30 dark:to-secondary/30 transform -rotate-2"></div>
-
-              <div className="relative bg-card rounded-2xl border border-primary/20 shadow-xl overflow-hidden p-1 transform rotate-1 hover:rotate-0 transition-transform duration-500">
-                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary to-secondary"></div>
-
-                <div className="p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <div className="flex items-center gap-2">
-                      <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
-                        <Logo />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">EdCoachAi</h3>
-                        <p className="text-xs text-muted-foreground">
-                          Observation Dashboard
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <div className="h-3 w-3 rounded-full bg-destructive"></div>
-                      <div className="h-3 w-3 rounded-full bg-warning"></div>
-                      <div className="h-3 w-3 rounded-full bg-success"></div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className={cn("flex items-center gap-3 p-3 rounded-lg border", STATUS_COLORS.coach.bg, STATUS_COLORS.coach.border)}>
-                      <ClipboardList className={cn(ICONS.sizes.lg, STATUS_COLORS.coach.text)} />
-                      <div>
-                        <h4 className="font-medium">Observe & Align</h4>
-                        <p className="text-xs text-muted-foreground">
-                          Capture evidence and tag to rubric indicators
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className={cn("flex items-center gap-3 p-3 rounded-lg border", STATUS_COLORS.teacher.bg, STATUS_COLORS.teacher.border)}>
-                      <MessageSquareText className={cn(ICONS.sizes.lg, STATUS_COLORS.teacher.text)} />
-                      <div>
-                        <h4 className="font-medium">
-                          Generate & Refine Feedback
-                        </h4>
-                        <p className="text-xs text-muted-foreground">
-                          AI-powered suggestions based on your notes
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className={cn("flex items-center gap-3 p-3 rounded-lg border", STATUS_COLORS.info.bg, STATUS_COLORS.info.border)}>
-                      <LineChart className={cn(ICONS.sizes.lg, STATUS_COLORS.info.text)} />
-                      <div>
-                        <h4 className="font-medium">Track & Support Growth</h4>
-                        <p className="text-xs text-muted-foreground">
-                          Visualize performance trends in real-time
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 pt-4 border-t border-border">
-                    <div className="flex justify-between items-center">
-                      <div className="text-sm">
-                        <span className="text-muted-foreground">
-                          Time saved:
-                        </span>
-                        <span className="ml-2 font-medium text-primary">
-                          4.5 hours/week
-                        </span>
-                      </div>
-                      <div className={cn("text-white text-xs font-medium px-2.5 py-1 rounded-full", STATUS_COLORS.success.solid)}>
-                        +30% Teacher Growth
-                      </div>
-                    </div>
-                  </div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/80 px-3 py-1.5 text-sm backdrop-blur-sm shadow-sm">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle className="h-4 w-4 text-success" />
+                  <span className="font-medium text-foreground">Free to start</span>
                 </div>
+                <div className="h-1 w-1 rounded-full bg-muted-foreground/50" />
+                <span className="text-muted-foreground">No credit card required</span>
               </div>
+            </motion.div>
 
-              {/* Floating elements */}
-              <motion.div
-                animate={{
-                  y: [0, -10, 0],
-                }}
-                transition={{
-                  repeat: Number.POSITIVE_INFINITY,
-                  duration: 3,
-                  ease: "easeInOut",
-                }}
-                className="absolute -top-6 -right-4 bg-card rounded-lg shadow-lg p-2 border border-primary/20"
-              >
-                <div className="flex items-center gap-2">
-                  <div className={cn("h-8 w-8 rounded-full flex items-center justify-center", STATUS_COLORS.success.bg)}>
-                    <ArrowRight className={cn(ICONS.semantic.inline, STATUS_COLORS.success.text)} />
-                  </div>
-                  <span className="text-sm font-medium">AI-Generated</span>
-                </div>
-              </motion.div>
+            {/* Main headline - Precursor typography style */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="space-y-4"
+            >
+              <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-6xl lg:text-7xl">
+                <span className="block">Start with</span>
+                <span className="block bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                  Structure
+                </span>
+                <span className="block text-foreground/80">End Vibe Coding Chaos</span>
+              </h1>
+              
+              <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
+                EdCoach AI helps educators plan, observe, and iterate on classroom walkthroughs with intelligent guidance, designed to work with your existing coaching workflow.
+              </p>
+            </motion.div>
 
-              <motion.div
-                animate={{
-                  y: [0, 10, 0],
-                }}
-                transition={{
-                  repeat: Number.POSITIVE_INFINITY,
-                  duration: 4,
-                  ease: "easeInOut",
-                  delay: 0.5,
-                }}
-                className="absolute -bottom-4 -left-6 bg-card rounded-lg shadow-lg p-2 border border-primary/20"
+            {/* CTA buttons - Precursor style */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="flex flex-col sm:flex-row gap-4"
+            >
+              <SignInButton mode="modal">
+                <Button
+                  size="lg"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 group"
+                >
+                  <span>Join the Waitlist</span>
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </SignInButton>
+              
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-primary/20 hover:bg-primary/5 transition-all duration-300"
               >
-                <div className="flex items-center gap-2">
-                  <div className={cn("h-8 w-8 rounded-full flex items-center justify-center", STATUS_COLORS.teacher.bg)}>
-                    <span className={cn("text-sm font-bold", STATUS_COLORS.teacher.text)}>
-                      5x
-                    </span>
-                  </div>
-                  <span className="text-sm font-medium">Faster Feedback</span>
-                </div>
-              </motion.div>
+                <Play className="mr-2 h-4 w-4" />
+                Learn More
+              </Button>
+            </motion.div>
+
+            {/* Social proof - Precursor style */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex items-center gap-6 text-sm text-muted-foreground"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-primary">5x</span>
+                <span>Faster Planning</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-primary">250+</span>
+                <span>Educators Waiting</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-primary">100%</span>
+                <span>AI-Powered</span>
+              </div>
             </motion.div>
           </div>
 
-          {/* Scroll indicator */}
+          {/* Right content - Precursor-inspired interactive demo */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 0.5 }}
-            className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="relative"
           >
-            <span className="text-sm text-muted-foreground mb-2">
-              Scroll to explore
-            </span>
+            {/* Main demo card */}
+            <div className="relative bg-card rounded-2xl border border-border/50 shadow-2xl overflow-hidden">
+              {/* Card header */}
+              <div className="flex items-center justify-between p-6 border-b border-border/50">
+                <div className="flex items-center gap-3">
+                  <Logo variant="storytelling" size="sm" showText={false} />
+                  <div>
+                    <h3 className="font-semibold text-foreground">EdCoach AI</h3>
+                    <p className="text-sm text-muted-foreground">Continuous Growth Loop</p>
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  <div className="h-3 w-3 rounded-full bg-destructive" />
+                  <div className="h-3 w-3 rounded-full bg-warning" />
+                  <div className="h-3 w-3 rounded-full bg-success" />
+                </div>
+              </div>
+
+              {/* Demo content */}
+              <div className="p-6 space-y-4">
+                {/* 5-phase continuous growth loop */}
+                <div className="grid grid-cols-5 gap-3">
+                  {[
+                    { icon: Target, label: "Goal", color: "bg-primary/10 text-primary border-primary/20" },
+                    { icon: Eye, label: "Capture", color: "bg-secondary/10 text-secondary border-secondary/20" },
+                    { icon: Sparkles, label: "Generate", color: "bg-accent/10 text-accent border-accent/20" },
+                    { icon: MessageSquare, label: "Reflect", color: "bg-primary/10 text-primary border-primary/20" },
+                    { icon: TrendingUp, label: "Monitor", color: "bg-secondary/10 text-secondary border-secondary/20" },
+                  ].map((phase, index) => (
+                    <motion.div
+                      key={phase.label}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
+                      className={cn(
+                        "flex flex-col items-center gap-2 p-3 rounded-lg border transition-all duration-300 hover:scale-105",
+                        phase.color
+                      )}
+                    >
+                      <phase.icon className="h-6 w-6" />
+                      <span className="text-xs font-medium">{phase.label}</span>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/50">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">90%</div>
+                    <div className="text-sm text-muted-foreground">Time Saved on Planning</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-secondary">5x</div>
+                    <div className="text-sm text-muted-foreground">Faster Documentation</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Floating elements */}
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+              className="absolute -top-4 -right-4 bg-card rounded-lg shadow-lg p-3 border border-border/50"
+            >
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-success/10 flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-success" />
+                </div>
+                <span className="text-sm font-medium">AI-Generated</span>
+              </div>
+            </motion.div>
+
             <motion.div
               animate={{ y: [0, 8, 0] }}
-              transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
+              transition={{ repeat: Infinity, duration: 4, ease: "easeInOut", delay: 0.5 }}
+              className="absolute -bottom-4 -left-4 bg-card rounded-lg shadow-lg p-3 border border-border/50"
             >
-              <ChevronDown className={cn(ICONS.sizes.md, "text-primary")} />
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-sm font-bold text-primary">5x</span>
+                </div>
+                <span className="text-sm font-medium">Faster Feedback</span>
+              </div>
             </motion.div>
           </motion.div>
-        </Container>
-      
+        </div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5, duration: 0.5 }}
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
+        >
+          <span className="text-sm text-muted-foreground mb-2">Scroll to explore</span>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+          >
+            <ChevronDown className="h-5 w-5 text-primary" />
+          </motion.div>
+        </motion.div>
+      </Container>
     </section>
   );
 }

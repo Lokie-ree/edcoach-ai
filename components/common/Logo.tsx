@@ -1,16 +1,29 @@
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 
-export const Logo = ({ className }: { className?: string }) => {
+interface LogoProps {
+  className?: string;
+  size?: "sm" | "md" | "lg";
+}
+
+export const Logo = ({ 
+  className, 
+  size = "md"
+}: LogoProps) => {
+  const sizeClasses = {
+    sm: "h-8",
+    md: "h-10", 
+    lg: "h-12"
+  };
+
   return (
     <div className={cn("flex items-center", className)}>
-      <Image
-        src="/brand/logos/primary-logo.png"
+      <img
+        src="/brand/logos/primary-icon.png"
         alt="EdCoachAi - AI-powered instructional coaching platform"
-        className="object-contain hover:scale-105 transition-transform"
-        width={32}
-        height={32}
-        priority
+        className={cn(
+          "object-contain hover:scale-105 transition-transform duration-200",
+          sizeClasses[size]
+        )}
       />
     </div>
   );

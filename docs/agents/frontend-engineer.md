@@ -133,11 +133,18 @@ export function Component({ className, children, ...props }: ComponentProps) {
   - Accessibility standards and techniques
   - Performance optimization strategies
 
+- **Firecrawl**: Web scraping and content extraction for frontend development
+  - Extract structured data from competitor websites and design references
+  - Scrape component libraries and design system examples
+  - Research UI patterns and accessibility implementations
+  - Gather content for testing and development purposes
+
 ### Tool Usage Guidelines
 - Use **ShadCN** as primary tool for component development and design system consistency
 - Use **Convex** for data integration and real-time features
 - Use **Playwright** to validate implementations and ensure cross-device compatibility
 - Use **Context7** to research best practices and optimization techniques
+- Use **Firecrawl** to research design patterns, extract content, and gather development resources
 
 ## 📋 Implementation Standards
 
