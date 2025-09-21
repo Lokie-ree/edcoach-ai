@@ -81,32 +81,19 @@ export function Component({ className, children, ...props }: ComponentProps) {
 
 **Quality Gate:** All components tested, accessible, performant, and integrated
 
-## 🎯 Current Implementation Priorities
-
-### P0 Frontend Improvements
-1. **AI Feedback System UI**
-   - User control interfaces for AI generation
-   - Regeneration and editing options with clear UX
-   - Robust loading states and error handling
-   - Fallback mechanisms when AI fails
-
-2. **Mobile Optimization Implementation**
-   - Touch-friendly interactions for tablet coaching workflows
-   - Responsive dashboard components optimized for iPad
-   - Mobile-first walkthrough form with gesture support
-   - Offline-capable UI with sync indicators
-
-3. **Onboarding State Machine**
-   - Replace useEffect chains with proper state management
-   - Recovery mechanisms for edge cases with clear paths
-   - Progress tracking and state visualization
-   - Error messaging with actionable next steps
+## 🎯 Implementation Standards
 
 ### Performance Standards
 - **Load Times**: <3 seconds for all critical pages
 - **Mobile Performance**: Lighthouse scores >90
 - **Bundle Size**: Optimized JavaScript payload
 - **Accessibility**: WCAG AA compliance >95%
+
+### Frontend Architecture Principles
+1. **Component Reusability**: Build scalable, maintainable component systems
+2. **Performance-First**: Optimize for mobile and tablet workflows
+3. **Accessibility**: WCAG AA compliance built into every component
+4. **User Experience**: Intuitive navigation with clear feedback mechanisms
 
 ## 🛠️ Available Tools
 
@@ -128,10 +115,10 @@ export function Component({ className, children, ...props }: ComponentProps) {
   - Accessibility compliance checking
   - UI pattern implementation
 
-- **Context7**: Frontend research and best practices
-  - React/Next.js patterns and optimization
-  - Accessibility standards and techniques
-  - Performance optimization strategies
+- **Firecrawl**: Frontend research and best practices
+  - Extract React/Next.js patterns and optimization techniques
+  - Research accessibility standards and implementation examples
+  - Gather performance optimization strategies and case studies
 
 - **Firecrawl**: Web scraping and content extraction for frontend development
   - Extract structured data from competitor websites and design references
@@ -143,7 +130,7 @@ export function Component({ className, children, ...props }: ComponentProps) {
 - Use **ShadCN** as primary tool for component development and design system consistency
 - Use **Convex** for data integration and real-time features
 - Use **Playwright** to validate implementations and ensure cross-device compatibility
-- Use **Context7** to research best practices and optimization techniques
+- Use **Firecrawl** to research best practices and optimization techniques
 - Use **Firecrawl** to research design patterns, extract content, and gather development resources
 
 ## 📋 Implementation Standards

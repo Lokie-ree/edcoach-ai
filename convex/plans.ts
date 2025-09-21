@@ -3,12 +3,13 @@ import { query } from "./_generated/server";
 import { getCurrentUser } from "./auth";
 
 // Plan configuration - centralized and type-safe
+// Option A: Conservative Pricing Strategy
 export const PLAN_CONFIG = {
   free: {
     name: "Coach Free",
     description: "Get started with EdCoachAi for free",
     features: {
-      maxAIGenerations: 10, // 5 walkthroughs total
+      maxAIGenerations: 6, // 3 walkthroughs per month (2 AI generations each)
       maxTeachers: 1,
       analyticsDepth: 14, // days
       exportEnabled: false,
@@ -41,6 +42,22 @@ export const PLAN_CONFIG = {
       bulkInvitationsEnabled: true,
       prioritySupport: true,
       advancedAnalytics: true, // Enable advanced analytics for Pro
+    },
+  },
+  district_enterprise: {
+    name: "District Enterprise",
+    description: "For district-wide deployment and integration",
+    features: {
+      maxAIGenerations: 999999, // Effectively unlimited (using large number instead of -1)
+      maxTeachers: 999999, // Effectively unlimited
+      analyticsDepth: 365, // days
+      exportEnabled: true,
+      bulkInvitationsEnabled: true,
+      prioritySupport: true,
+      advancedAnalytics: true,
+      multiSchoolSupport: true,
+      sislmsIntegration: true,
+      dedicatedSuccessManager: true,
     },
   },
 } as const;
@@ -88,7 +105,7 @@ export const getAIUsageThisMonth = query({
     // Get walkthrough usage from the user's monthlyUsage field (old system)
     const usage = user.monthlyUsage || { walkthroughs: 0, teachersActive: 0 };
 
-    // Reset usage if it's a new month
+    // Reset usage if it's a new month (for all plans except free which is lifetime)
     const now = new Date();
     const resetDate = (usage as any).resetDate
       ? new Date((usage as any).resetDate)
@@ -97,26 +114,31 @@ export const getAIUsageThisMonth = query({
       now.getMonth() !== resetDate.getMonth() ||
       now.getFullYear() !== resetDate.getFullYear();
 
-    let walkthroughsUsed = isNewMonth ? 0 : usage.walkthroughs;
+    // For free plan: lifetime usage (no monthly reset)
+    // For paid plans: monthly usage with reset
+    let walkthroughsUsed = plan === "free" ? usage.walkthroughs : (isNewMonth ? 0 : usage.walkthroughs);
 
-    // TEMPORARY FIX: Double-check usage by counting actual completed walkthroughs this month
+    // TEMPORARY FIX: Double-check usage by counting actual completed walkthroughs
     // This handles cases where drafts were previously counted incorrectly
     const thisMonth = now.getMonth();
     const thisYear = now.getFullYear();
-    const actualCompletedWalkthroughsThisMonth = await ctx.db
+    const actualCompletedWalkthroughs = await ctx.db
       .query("walkthroughs")
       .withIndex("by_observer", (q) => q.eq("observerId", user._id))
       .filter((q) => q.eq(q.field("status"), "completed"))
       .collect();
     
-    const completedThisMonth = actualCompletedWalkthroughsThisMonth.filter((w) => {
-      const walkDate = new Date(w.walkthroughDate);
-      return walkDate.getMonth() === thisMonth && walkDate.getFullYear() === thisYear;
-    }).length;
+    // For free plan: count all time, for paid plans: count this month only
+    const completedWalkthroughs = plan === "free" 
+      ? actualCompletedWalkthroughs.length
+      : actualCompletedWalkthroughs.filter((w) => {
+          const walkDate = new Date(w.walkthroughDate);
+          return walkDate.getMonth() === thisMonth && walkDate.getFullYear() === thisYear;
+        }).length;
     
     // Use the actual count if it's different from stored usage (indicating data inconsistency)
-    if (!isNewMonth && Math.abs(walkthroughsUsed - completedThisMonth) > 0) {
-      walkthroughsUsed = completedThisMonth;
+    if (Math.abs(walkthroughsUsed - completedWalkthroughs) > 0) {
+      walkthroughsUsed = completedWalkthroughs;
       // Note: Data inconsistency detected but will self-correct over time through usage tracking
     }
     const walkthroughsRemaining = Math.max(
@@ -169,6 +191,17 @@ export const getTeacherUsage = query({
         ? "coach_starter"
         : "free";
     const limit = PLAN_CONFIG[plan].features.maxTeachers;
+    
+    // Handle unlimited plans (district enterprise - using 999999 to represent unlimited)
+    if (limit >= 999999) {
+      return {
+        teacherCount: 0, // Will be calculated from actual teachers
+        teacherLimit: 999999, // Effectively unlimited
+        teachersRemaining: 999999, // Effectively unlimited
+        isOverLimit: false, // Never over limit for unlimited plans
+        plan,
+      };
+    }
 
     // Get current teacher count - only count teachers who have accepted invitations
     // "pending" teachers are just placeholders and shouldn't count toward limits
@@ -228,6 +261,9 @@ export const getPlanFeatures = query({
       prioritySupport: features.prioritySupport,
       advancedAnalytics: features.advancedAnalytics,
       analyticsDepth: features.analyticsDepth,
+      multiSchoolSupport: (features as any).multiSchoolSupport || false,
+      sislmsIntegration: (features as any).sislmsIntegration || false,
+      dedicatedSuccessManager: (features as any).dedicatedSuccessManager || false,
     };
   },
 });

@@ -61,33 +61,26 @@ As a [coach/teacher], I want [functionality] so that [benefit/value].
 - **Engineering**: Translate user needs into technical requirements
 - **Stakeholders**: Present prioritization with clear rationale
 
-## 🎯 Current Focus Areas
+## 🎯 Success Metrics Framework
 
-### P0 Critical Issues
-1. **AI Feedback System Improvements**
-   - Problem: Users get stuck when AI generation fails
-   - Requirements: User control, regeneration options, fallback mechanisms
-
-2. **Mobile Optimization**
-   - Problem: Coaches use tablets but experience isn't optimized
-   - Requirements: Touch-friendly interactions, responsive components
-
-3. **Onboarding State Machine**
-   - Problem: Implementation pending, users experiencing issues
-   - Requirements: Recovery mechanisms, clear error paths
-
-### Success Metrics to Track
+### Key Performance Indicators
 - **Onboarding Completion**: >85% target
 - **Walkthrough Efficiency**: <5 minutes average
 - **Teacher Engagement**: >80% reflection completion
 - **Coach Satisfaction**: >4.0/5 AI feedback quality
+- **Feature Adoption**: Track usage patterns and user value realization
+
+### Problem Identification Process
+1. **Data Analysis**: Use Convex analytics to identify user friction points
+2. **User Feedback**: Collect and analyze qualitative feedback
+3. **Competitive Analysis**: Use Firecrawl to benchmark against market solutions
+4. **Validation Testing**: Use Playwright to test user journey improvements
 
 ## 🛠️ Available Tools
 
 ### Analytics & Validation Tools
 - **Convex**: Query user analytics, monitor feature usage patterns, validate business logic
 - **Playwright**: Automated user journey testing, mobile/tablet experience validation
-- **ShadCN**: UI component consistency, mobile-responsive development
 - **Firecrawl**: Market research and competitive analysis
   - Research competitor features and user experiences
   - Analyze market trends and educational technology patterns
@@ -97,7 +90,6 @@ As a [coach/teacher], I want [functionality] so that [benefit/value].
 ### Tool Usage Guidelines
 - Use **Convex** to validate feature success with real user data
 - Use **Playwright** to automate acceptance testing, especially mobile experiences
-- Use **ShadCN** to ensure component consistency across user journeys
 - Use **Firecrawl** to conduct market research and competitive analysis for product decisions
 
 ---

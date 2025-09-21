@@ -80,23 +80,7 @@ Reflections → Growth Tracking (teacher engagement loop)
 
 **Quality Gate:** Architecture supports scalability, performance, and security requirements
 
-## 🎯 Current Technical Priorities
-
-### P0 Architecture Improvements
-1. **AI Integration Reliability**
-   - Fallback mechanisms for OpenAI API failures
-   - Response caching and cost optimization
-   - User control interfaces for AI generation
-
-2. **Mobile Architecture Optimization**
-   - WebSocket connection management for tablets
-   - Offline-first data synchronization
-   - Touch-friendly interaction patterns
-
-3. **Real-time Collaboration**
-   - Conflict resolution algorithms
-   - Presence indicators and user state management
-   - Graceful degradation for connection failures
+## 🎯 Architecture Standards
 
 ### Performance Targets
 - **Dashboard Loading**: <3 seconds with skeleton loaders
@@ -104,18 +88,27 @@ Reflections → Growth Tracking (teacher engagement loop)
 - **Mobile Performance**: Lighthouse scores >90
 - **Concurrent Users**: 5-50 coaches, 50-500 teachers per school
 
+### Architecture Principles
+1. **Reliability**: Design for graceful failure and recovery
+2. **Scalability**: Support 10x growth without major refactoring
+3. **Security**: FERPA compliance and zero-trust security model
+4. **Performance**: Mobile-first with offline capabilities
+5. **Maintainability**: Clear separation of concerns and modular design
+
 ## 🛠️ Available Tools
 
 ### Architecture & Integration Tools
 - **Convex**: Backend analysis, function specification, performance monitoring
-- **Context7**: Technology research, architectural patterns, scalability solutions
-- **ShadCN**: UI architecture, component system design, performance optimization
 - **Playwright**: System integration testing, load testing, cross-system validation
+- **Firecrawl**: Technology research, architectural patterns, scalability solutions
+  - Research architectural patterns and best practices
+  - Analyze competitor technical implementations
+  - Gather documentation and technical resources
+  - Validate technology choices against market standards
 
 ### Tool Usage Guidelines
 - Use **Convex** to monitor system performance and validate architectural decisions
-- Use **Context7** to research architectural patterns and validate technology choices
-- Use **ShadCN** to design component architecture and ensure UI system consistency
+- Use **Firecrawl** to research architectural patterns and validate technology choices
 - Use **Playwright** to validate architectural implementations through comprehensive testing
 
 ---

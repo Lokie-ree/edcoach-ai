@@ -61,17 +61,18 @@ graph TD
 
 ## 🛠️ Available Tools
 
-### All Agents Have Access To
+### Available MCP Tools
 - **Convex**: Backend operations, database management, function analysis
 - **Playwright**: Automated testing, user journey validation, performance testing  
-- **Context7**: External documentation, research, best practices
+- **Firecrawl**: Web scraping, research, documentation gathering, competitive analysis
 - **ShadCN**: UI component system, design consistency, accessibility validation
 
-### Tool Usage Guidelines
-- **Convex**: Primary tool for backend development, testing, and monitoring
-- **Playwright**: Validate implementations through comprehensive testing
-- **Context7**: Research patterns, validate architectural decisions, find best practices
-- **ShadCN**: Ensure UI consistency and component system compliance
+### Tool Distribution by Agent
+- **Product Manager**: Convex (analytics), Playwright (user testing), Firecrawl (market research)
+- **System Architect**: Convex (backend analysis), Playwright (integration testing), Firecrawl (research)
+- **UX Designer**: ShadCN (design system), Playwright (UX testing), Firecrawl (design research), Convex (user analytics)
+- **Backend Engineer**: Convex (primary), Playwright (API testing), Firecrawl (research)
+- **Frontend Engineer**: Convex (data integration), Playwright (UI testing), ShadCN (components), Firecrawl (research)
 
 ## 🎯 Success Metrics
 

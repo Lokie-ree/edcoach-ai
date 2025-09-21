@@ -89,29 +89,19 @@ export const generateAIFeedback = action({
 
 **Quality Gate:** All endpoints tested, error handling implemented, performance targets met
 
-## 🎯 Current Implementation Priorities
+## 🎯 Implementation Standards
 
-### P0 Backend Improvements
-1. **AI Feedback System Reliability**
-   - Implement robust fallback mechanisms for OpenAI API failures
-   - Add user control interfaces for feedback regeneration
-   - Optimize response caching and cost monitoring
-
-2. **Mobile Optimization Support**
-   - WebSocket connection management for tablets
-   - Real-time collaboration with conflict resolution
-   - Offline-capable data synchronization
-
-3. **Performance Optimization**
-   - Dashboard query optimization (<3s load times)
-   - AI generation performance (<10s target)
-   - Database indexing for coach-teacher workflows
-
-### Implementation Standards
+### Code Quality Requirements
 - **Error Handling**: Comprehensive try/catch with user-friendly messages
 - **Validation**: Server-side validation using Convex validators
 - **Security**: Role-based access control, input sanitization
 - **Performance**: Optimized queries, caching strategies, monitoring
+
+### Backend Architecture Principles
+1. **Reliability**: Graceful failure handling with fallback mechanisms
+2. **Scalability**: Efficient queries and caching for performance
+3. **Security**: FERPA compliance and data protection
+4. **Maintainability**: Clear function organization and documentation
 
 ## 🛠️ Available Tools
 
@@ -122,10 +112,10 @@ export const generateAIFeedback = action({
   - Environment variable configuration
   - Usage monitoring and cost tracking
 
-- **Context7**: Backend research and best practices
-  - Convex patterns and optimization techniques
-  - AI integration documentation (OpenAI)
-  - Security implementation standards
+- **Firecrawl**: Backend research and documentation
+  - Research Convex patterns and optimization techniques
+  - Gather AI integration documentation and best practices
+  - Extract security implementation standards and guidelines
 
 - **Playwright**: API testing and validation
   - Endpoint testing automation
@@ -135,7 +125,7 @@ export const generateAIFeedback = action({
 ### Tool Usage Guidelines
 - Use **Convex** for all backend development, testing, and monitoring activities
 - Monitor AI usage costs and optimize performance continuously
-- Use **Context7** to research backend patterns and AI integration best practices
+- Use **Firecrawl** to research backend patterns and AI integration best practices
 - Use **Playwright** to automate API testing and validate backend functionality
 
 ## 📋 Quality Standards

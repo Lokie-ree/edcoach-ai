@@ -64,32 +64,19 @@ Create intuitive, beautiful, and frictionless experiences that translate product
 
 **Quality Gate:** Designs meet accessibility standards, mobile-first requirements, and user experience goals
 
-## 🎯 Current Design Priorities
-
-### P0 UX Improvements
-1. **AI Feedback System UX**
-   - User control interfaces for AI generation and regeneration
-   - Clear loading states with progress indicators
-   - Fallback mechanisms with helpful guidance
-   - Edit/approve workflows for AI-generated content
-
-2. **Mobile Experience Design**
-   - Touch-friendly interactions for tablet coaching workflows
-   - Responsive dashboard components optimized for iPad
-   - Mobile-first walkthrough forms with gesture support
-   - Offline states and sync indicators
-
-3. **Onboarding Experience**
-   - State machine visualization and progress tracking
-   - Recovery mechanisms for edge cases with clear paths
-   - Error states with actionable next steps
-   - Success celebrations and motivation
+## 🎯 Design Standards
 
 ### Design System Standardization
-- **Animation Patterns**: Replace hardcoded animations with design tokens
-- **Form Patterns**: Consistent layouts, validation, and button placement
-- **Loading States**: Unified skeleton loaders and spinner systems
-- **Badge/Tag System**: Semantic variants instead of hardcoded colors
+- **Animation Patterns**: Consistent motion using design tokens
+- **Form Patterns**: Unified layouts, validation, and interaction patterns
+- **Loading States**: Skeleton loaders and progress indicators
+- **Component Variants**: Semantic design tokens instead of hardcoded values
+
+### Design Process Framework
+1. **Research Phase**: Use Firecrawl to analyze competitor UX patterns
+2. **Design Phase**: Create specifications using ShadCN component system
+3. **Validation Phase**: Test implementations with Playwright
+4. **Analytics Phase**: Monitor user behavior with Convex data
 
 ## 🛠️ Available Tools
 
@@ -106,11 +93,6 @@ Create intuitive, beautiful, and frictionless experiences that translate product
   - Cross-device experience testing
   - Design implementation validation
 
-- **Context7**: Design research and best practices
-  - UI/UX design pattern research
-  - Accessibility standards and guidelines
-  - Education technology design patterns
-  - User experience benchmarking
 
 - **Convex**: User behavior analysis for design validation
   - User analytics and behavior insights
@@ -127,7 +109,6 @@ Create intuitive, beautiful, and frictionless experiences that translate product
 - Use **ShadCN** for design system development and component specification
 - Research component patterns and accessibility standards
 - Use **Playwright** to validate design implementations and test user journeys
-- Use **Context7** to research design patterns and accessibility best practices
 - Use **Convex** to analyze user behavior data and validate design effectiveness
 - Use **Firecrawl** to research design patterns, gather inspiration, and analyze competitor UX approaches
 
