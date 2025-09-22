@@ -22,7 +22,7 @@
     "test:e2e": "tsx testing/scripts/run-tests.ts --category e2e",
     "test:performance": "tsx testing/scripts/run-tests.ts --category performance",
     "test:verbose": "tsx testing/scripts/run-tests.ts --verbose",
-    "test:ci": "tsx testing/scripts/run-tests.ts --category all --coverage --verbose",
+    "test:ci": "tsx testing/scripts/ci-tests.ts --category all --verbose",
     "test:local": "tsx testing/scripts/run-tests.ts --category all --watch",
     "test:quick": "tsx testing/scripts/run-tests.ts --category unit --no-coverage",
     "test:full": "tsx testing/scripts/run-tests.ts --category all --coverage --verbose --debug",
