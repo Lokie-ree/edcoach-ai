@@ -10,22 +10,24 @@ export const Logo = ({
   className, 
   size = "md"
 }: LogoProps) => {
-  const sizeClasses = {
-    sm: "h-8",
-    md: "h-10", 
-    lg: "h-12"
+  const sizeConfig = {
+    sm: { width: 32, height: 32, className: "h-8 w-8" },
+    md: { width: 40, height: 40, className: "h-10 w-10" },
+    lg: { width: 48, height: 48, className: "h-12 w-12" }
   };
+
+  const config = sizeConfig[size];
 
   return (
     <div className={cn("flex items-center", className)}>
       <Image
         src="/brand/logos/primary-icon.png"
         alt="EdCoachAi - AI-powered instructional coaching platform"
-        width={32}
-        height={32}
+        width={config.width}
+        height={config.height}
         className={cn(
           "object-contain hover:scale-105 transition-transform duration-200",
-          sizeClasses[size]
+          config.className
         )}
         priority
       />

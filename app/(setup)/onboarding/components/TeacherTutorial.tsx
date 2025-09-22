@@ -367,12 +367,12 @@ export default function TeacherTutorial({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="max-w-2xl w-full"
+        className="max-w-2xl w-full max-h-[95vh] overflow-y-auto"
       >
         <Card>
           <CardHeader className="relative">
@@ -406,7 +406,7 @@ export default function TeacherTutorial({
           </CardHeader>
 
           <CardContent className="space-y-6">
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait" key={currentStep}>
               <motion.div
                 key={currentStep}
                 initial={{ opacity: 0, x: 20 }}
@@ -418,20 +418,21 @@ export default function TeacherTutorial({
               </motion.div>
             </AnimatePresence>
 
-            <div className="flex items-center justify-between pt-4 border-t">
+            <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t gap-3 sm:gap-2">
               <Button
                 variant="outline"
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
+                className="w-full sm:w-auto min-h-[44px]"
               >
                 Previous
               </Button>
 
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" onClick={onSkip}>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <Button variant="ghost" onClick={onSkip} className="flex-1 sm:flex-none min-h-[44px]">
                   Skip Tutorial
                 </Button>
-                <Button onClick={handleNext}>
+                <Button onClick={handleNext} className="flex-1 sm:flex-none min-h-[44px]">
                   {currentStep === steps.length - 1 ? (
                     <>
                       Start Learning

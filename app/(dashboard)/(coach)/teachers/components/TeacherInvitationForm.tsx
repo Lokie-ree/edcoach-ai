@@ -204,6 +204,7 @@ export function TeacherInvitationForm({
                   <FormControl>
                     <Input
                       placeholder="e.g., Sarah Johnson"
+                      autoComplete="name"
                       {...field}
                       disabled={isLoading}
                     />
@@ -223,6 +224,7 @@ export function TeacherInvitationForm({
                     <Input
                       type="email"
                       placeholder="teacher@school.edu"
+                      autoComplete="email"
                       {...field}
                       disabled={isLoading}
                     />
@@ -428,6 +430,7 @@ export function TeacherInvitationFormContent({
                 <FormControl>
                   <Input
                     placeholder="e.g., Sarah Johnson"
+                    autoComplete="name"
                     {...field}
                     disabled={isLoading}
                   />
@@ -446,6 +449,7 @@ export function TeacherInvitationFormContent({
                   <Input
                     type="email"
                     placeholder="teacher@school.edu"
+                    autoComplete="email"
                     {...field}
                     disabled={isLoading}
                   />
