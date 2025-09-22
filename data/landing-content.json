@@ -90,34 +90,52 @@
     "sub_headline": "Start free to experience the continuous growth loop. Upgrade when you're ready to scale your coaching impact.",
     "tiers": [
       {
-        "name": "Coach Starter",
+        "name": "Coach Free",
         "price": "Free",
         "price_description": "Perfect for trying the complete continuous growth loop",
         "features": [
-          "Up to 5 teachers",
+          "1 teacher",
+          "3 walkthroughs per month",
           "Complete 5-phase growth loop",
           "AI-assisted PGP goal setting",
           "5-minute mobile walkthroughs",
-          "Hyper-contextualized AI feedback",
+          "Basic AI feedback",
           "Teacher Growth Journal",
-          "Basic coach dashboard"
+          "Email support"
         ],
         "cta": {"label": "Start Free Forever", "href": "/signup"},
         "highlight": false
       },
       {
-        "name": "Coach Pro",
-        "price": "$50",
-        "price_description": "per month - unlimited teachers & advanced analytics",
+        "name": "Coach Starter",
+        "price": "$19",
+        "price_description": "per month - scale your coaching impact",
         "features": [
-          "**Unlimited teachers**",
-          "**Unlimited walkthroughs**",
+          "5 teachers",
+          "15 walkthroughs per month",
+          "Everything in Free, plus:",
+          "Enhanced AI feedback",
+          "Bulk teacher invitations",
+          "90-day analytics",
+          "Basic team management",
+          "Improved support"
+        ],
+        "cta": {"label": "Upgrade to Starter", "href": "/signup"},
+        "highlight": false
+      },
+      {
+        "name": "Coach Pro",
+        "price": "$49",
+        "price_description": "per month - advanced analytics & unlimited scale",
+        "features": [
+          "15 teachers",
+          "50 walkthroughs per month",
           "Everything in Starter, plus:",
-          "**Team analytics with heat maps**",
-          "**Trend analysis & reporting**",
-          "**Export functionality (PDF/CSV)**",
-          "**Priority support (<2hr response)**",
-          "**Custom rubric indicators**"
+          "Team analytics with heat maps",
+          "Trend analysis & reporting",
+          "Export functionality (PDF/CSV)",
+          "Priority support (<2hr response)",
+          "Custom rubric indicators"
         ],
         "cta": {"label": "Upgrade to Pro", "href": "/signup"},
         "highlight": true
@@ -127,14 +145,16 @@
         "price": "$500",
         "price_description": "per month - multi-school deployment & integrations",
         "features": [
-          "**Multi-school management**",
-          "**SIS/LMS integrations**",
-          "**Single sign-on (SSO)**",
+          "Unlimited teachers",
+          "Unlimited walkthroughs",
+          "Multi-school management",
+          "SIS/LMS integrations",
+          "Single sign-on (SSO)",
           "Everything in Pro, plus:",
-          "**District-wide analytics**",
-          "**Dedicated success manager**",
-          "**Custom training & onboarding**",
-          "**Compliance reporting**"
+          "District-wide analytics",
+          "Dedicated success manager",
+          "Custom training & onboarding",
+          "Compliance reporting"
         ],
         "cta": {"label": "Contact Sales", "href": "/contact"},
         "highlight": false

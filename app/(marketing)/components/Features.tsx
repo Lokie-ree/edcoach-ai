@@ -2,7 +2,6 @@
 import React from "react";
 import { Container } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
-import { BorderBeam } from "@/components/magicui/border-beam";
 import landingContent from "@/data/landing-content.json";
 import { motion } from "framer-motion";
 import { STATUS_COLORS } from "@/lib/design-tokens";
@@ -16,7 +15,12 @@ import {
   Send,
   MessageSquareShare,
   TrendingUp,
-  LayoutDashboard
+  LayoutDashboard,
+  Target,
+  Clock,
+  BarChart3,
+  Eye,
+  Sparkles
 } from "lucide-react";
 import { ICONS } from "@/lib/design-tokens";
 
@@ -31,6 +35,11 @@ const iconMap = {
   MessageSquareShare: MessageSquareShare,
   TrendingUp: TrendingUp,
   LayoutDashboard: LayoutDashboard,
+  Target: Target,
+  Clock: Clock,
+  BarChart3: BarChart3,
+  Eye: Eye,
+  Sparkles: Sparkles,
 };
 
 export default function FeaturesSection() {
@@ -42,16 +51,6 @@ export default function FeaturesSection() {
     return IconComponent ? <IconComponent className={ICONS.sizes.lg} /> : null;
   };
 
-  // Generate gradient colors using our brand tokens
-  const getGradientColors = (index: number) => {
-    const gradients = [
-      { from: "#3b82f6", to: "#10b981" }, // primary to secondary
-      { from: "#10b981", to: "#f59e0b" }, // secondary to accent  
-      { from: "#3b82f6", to: "#f59e0b" }, // primary to accent
-    ];
-
-    return gradients[index % gradients.length];
-  };
 
   return (
     <section
@@ -74,7 +73,6 @@ export default function FeaturesSection() {
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {features.cards.map((feature, index) => {
-            const { from, to } = getGradientColors(index);
             return (
               <motion.div
                 key={index}
@@ -82,10 +80,12 @@ export default function FeaturesSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <Card className="p-6 rounded-xl shadow-sm h-full relative overflow-hidden">
+                <Card className="p-6 rounded-xl shadow-sm h-full relative overflow-hidden bg-card">
                   <div className="flex flex-col gap-4 h-full">
-                    <div className={cn("rounded-full w-14 h-14 flex items-center justify-center", STATUS_COLORS.coach.bg, STATUS_COLORS.coach.text)}>
-                      {getIconComponent(feature.icon)}
+                    <div className={cn("rounded-full w-14 h-14 flex items-center justify-center", STATUS_COLORS.coach.bg)}>
+                      <div className="text-primary">
+                        {getIconComponent(feature.icon)}
+                      </div>
                     </div>
 
                     <h3 className="text-xl font-semibold">{feature.title}</h3>
@@ -94,19 +94,6 @@ export default function FeaturesSection() {
                       {feature.description}
                     </p>
                   </div>
-                  <BorderBeam
-                    duration={6}
-                    size={300}
-                    colorFrom={from}
-                    colorTo={to}
-                  />
-                  <BorderBeam
-                    duration={6}
-                    delay={3}
-                    size={300}
-                    colorFrom={to}
-                    colorTo={from}
-                  />
                 </Card>
               </motion.div>
             );

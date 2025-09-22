@@ -9,7 +9,7 @@ import { ModeToggle } from "@/components/common/ModeToggle";
 
 const Header = () => {
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-background/95 supports-[backdrop-filter]:bg-background/60 before:absolute before:bottom-0 before:left-0 before:right-0 before:h-[1px] before:bg-gradient-to-r before:from-primary/50 before:via-secondary/50 before:to-accent/50">
+    <header className="sticky top-0 z-50 backdrop-blur-md bg-background/95 supports-[backdrop-filter]:bg-background/60 before:absolute before:bottom-0 before:left-0 before:right-0 before:h-[1px] before:bg-gradient-to-r before:from-primary/50 before:to-secondary/50">
       <Container size="full" padding="compact">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
@@ -25,7 +25,9 @@ const Header = () => {
 
             <SignedOut>
               <SignInButton mode="modal">
-                <Button>Login</Button>
+                <Button className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                  Login
+                </Button>
               </SignInButton>
             </SignedOut>
           </div>

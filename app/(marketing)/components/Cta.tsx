@@ -22,7 +22,11 @@ export default function CTASection() {
           className="overflow-hidden relative"
         >
           <div className="py-8 px-6 text-center">
-            <h2 className="text-3xl font-bold mb-6">{headline}</h2>
+            <h2 className="text-3xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                {headline}
+              </span>
+            </h2>
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
               {sub_headline}
             </p>
@@ -34,9 +38,16 @@ export default function CTASection() {
           </div>
           <BorderBeam
             size={200}
-            duration={10}
-            colorFrom="hsl(var(--primary))"
-            colorTo="hsl(var(--secondary))"
+            duration={12}
+            colorFrom="#3b82f6"
+            colorTo="#10b981"
+          />
+          <BorderBeam
+            size={200}
+            duration={12}
+            delay={6}
+            colorFrom="#10b981"
+            colorTo="#3b82f6"
           />
         </NeonGradientCard>
       </Container>

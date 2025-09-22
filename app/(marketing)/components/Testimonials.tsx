@@ -2,23 +2,12 @@
 import React from "react"
 import { Container } from "@/components/ui/container"
 import { Card } from "@/components/ui/card"
-import { BorderBeam } from "@/components/magicui/border-beam"
 import landingContent from "@/data/landing-content.json"
 import { motion } from "framer-motion"
 import { Quote } from "lucide-react"
 import { ICONS } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
 
-// Generate gradient colors using our brand tokens
-const getGradientColors = (index: number) => {
-  const gradients = [
-    { from: "#3b82f6", to: "#10b981" }, // primary to secondary
-    { from: "#10b981", to: "#f59e0b" }, // secondary to accent  
-    { from: "#3b82f6", to: "#f59e0b" }, // primary to accent
-  ]
-  
-  return gradients[index % gradients.length]
-}
 
 export default function TestimonialsSection() {
   const { testimonials } = landingContent;
@@ -51,7 +40,6 @@ export default function TestimonialsSection() {
         
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {testimonials.quotes.slice(0, 6).map((testimonial, index) => {
-            const { from, to } = getGradientColors(index)
             return (
               <motion.div
                 key={index}
@@ -59,10 +47,10 @@ export default function TestimonialsSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <Card className="group p-6 rounded-xl shadow-sm h-full relative overflow-hidden transition-all duration-300 hover:shadow-lg">
+                <Card className="group p-6 rounded-xl shadow-sm h-full relative overflow-hidden transition-all duration-300 hover:shadow-lg bg-card">
                   <div className="flex flex-col h-full">
                     <div className="mb-6">
-                      <Quote className={cn(ICONS.sizes.lg, "text-primary dark:text-primary mb-4")} />
+                      <Quote className={cn(ICONS.sizes.lg, "text-primary mb-4")} />
                       <p className="text-muted-foreground italic">
                         {testimonial.quote}
                       </p>
@@ -77,20 +65,6 @@ export default function TestimonialsSection() {
                       </div>
                     </div>
                   </div>
-
-                  <BorderBeam
-                    duration={6}
-                    size={300}
-                    colorFrom={from}
-                    colorTo={to}
-                  />
-                  <BorderBeam
-                    duration={6}
-                    delay={3}
-                    size={300}
-                    colorFrom={to}
-                    colorTo={from}
-                  />
                 </Card>
               </motion.div>
             )
