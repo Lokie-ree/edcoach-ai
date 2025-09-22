@@ -18,6 +18,7 @@ import { Container } from "@/components/ui/container";
 import { SignInButton } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import landingContent from "@/data/landing-content.json";
+import { BorderBeam } from "@/components/magicui/border-beam";
 
 export default function HeroSection() {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -79,7 +80,7 @@ export default function HeroSection() {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen flex items-center overflow-hidden py-16 md:py-24"
+      className="relative min-h-screen flex items-center overflow-hidden py-8 md:py-12"
       id="hero"
     >
       {/* Background with subtle gradient */}
@@ -93,7 +94,7 @@ export default function HeroSection() {
       />
 
       <Container size="lg" padding="normal" className="relative z-10">
-        <div className="grid gap-16 lg:gap-20 lg:grid-cols-2 items-start lg:items-center min-h-[75vh] py-8">
+        <div className="grid gap-12 lg:gap-16 lg:grid-cols-2 items-start lg:items-center min-h-[75vh] py-4">
           {/* Left content - Precursor-inspired clean layout */}
           <div className="flex flex-col space-y-10 lg:space-y-12">
             {/* Animated badge - Precursor style */}
@@ -103,11 +104,24 @@ export default function HeroSection() {
               transition={{ duration: 0.6 }}
               className="w-fit"
             >
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/80 px-3 py-1.5 text-sm backdrop-blur-sm shadow-sm">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/80 px-3 py-1.5 text-sm backdrop-blur-sm shadow-sm relative overflow-hidden">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle className="h-4 w-4 text-success" />
                   <span className="font-medium text-foreground">{hero.tagline}</span>
                 </div>
+                <BorderBeam
+                  duration={12}
+                  size={200}
+                  colorFrom="#3b82f6"
+                  colorTo="#10b981"
+                />
+                <BorderBeam
+                  duration={12}
+                  delay={6}
+                  size={200}
+                  colorFrom="#10b981"
+                  colorTo="#3b82f6"
+                />
               </div>
             </motion.div>
 
@@ -118,11 +132,13 @@ export default function HeroSection() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="space-y-6"
             >
-              <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl">
-                {hero.headline}
+              <h1 className="text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
+                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  {hero.headline}
+                </span>
               </h1>
               
-              <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
+              <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
                 {hero.sub_headline}
               </p>
             </motion.div>
@@ -137,7 +153,7 @@ export default function HeroSection() {
               <SignInButton mode="modal">
                 <Button
                   size="lg"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 group"
+                  className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
                 >
                   <span>{hero.cta_primary.label}</span>
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -147,7 +163,7 @@ export default function HeroSection() {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-primary/20 hover:bg-primary/5 transition-all duration-300"
+                className="border-primary/20 hover:bg-primary/5 hover:text-foreground transition-all duration-300"
                 onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <Play className="mr-2 h-4 w-4" />
@@ -178,6 +194,19 @@ export default function HeroSection() {
           >
             {/* Main demo card */}
             <div className="relative bg-card rounded-2xl border border-border/50 shadow-2xl overflow-hidden">
+              <BorderBeam
+                duration={12}
+                size={300}
+                colorFrom="#3b82f6"
+                colorTo="#10b981"
+              />
+              <BorderBeam
+                duration={12}
+                delay={6}
+                size={300}
+                colorFrom="#10b981"
+                colorTo="#3b82f6"
+              />
               {/* Card header */}
               <div className="flex items-center justify-between p-6 border-b border-border/50">
                 <div className="flex items-center gap-3">
@@ -222,45 +251,18 @@ export default function HeroSection() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/50">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">90%</div>
-                    <div className="text-sm text-muted-foreground">Time Saved on Planning</div>
+                <div className="grid grid-cols-2 gap-8 pt-6 border-t border-border/50">
+                  <div className="text-center space-y-2">
+                    <div className="text-3xl font-bold text-primary">90%</div>
+                    <div className="text-sm text-muted-foreground leading-relaxed">Time Saved on Planning</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-secondary">5x</div>
-                    <div className="text-sm text-muted-foreground">Faster Documentation</div>
+                  <div className="text-center space-y-2">
+                    <div className="text-3xl font-bold text-secondary">5x</div>
+                    <div className="text-sm text-muted-foreground leading-relaxed">Faster Documentation</div>
                   </div>
                 </div>
               </div>
             </div>
-
-            {/* Floating elements */}
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-              className="absolute -top-4 -right-4 bg-card rounded-lg shadow-lg p-3 border border-border/50"
-            >
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-success/10 flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-success" />
-                </div>
-                <span className="text-sm font-medium">AI-Generated</span>
-              </div>
-            </motion.div>
-
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ repeat: Infinity, duration: 4, ease: "easeInOut", delay: 0.5 }}
-              className="absolute -bottom-4 -left-4 bg-card rounded-lg shadow-lg p-3 border border-border/50"
-            >
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-sm font-bold text-primary">5x</span>
-                </div>
-                <span className="text-sm font-medium">Faster Feedback</span>
-              </div>
-            </motion.div>
           </motion.div>
         </div>
 
@@ -269,9 +271,8 @@ export default function HeroSection() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5, duration: 0.5 }}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
+          className="absolute bottom-4 left-1/2 transform -translate-x-1/2"
         >
-          <span className="text-sm text-muted-foreground mb-2">Scroll to explore</span>
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ repeat: Infinity, duration: 1.5 }}

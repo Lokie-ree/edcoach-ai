@@ -8,16 +8,6 @@ import { STATUS_COLORS } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
 
 
-// Generate gradient colors using our brand tokens
-const getGradientColors = (index: number) => {
-  const gradients = [
-    { from: "#3b82f6", to: "#10b981" }, // primary to secondary
-    { from: "#10b981", to: "#f59e0b" }, // secondary to accent  
-    { from: "#3b82f6", to: "#f59e0b" }, // primary to accent
-  ];
-
-  return gradients[index % gradients.length];
-};
 
 export default function Pricing() {
   const { pricing } = landingContent;
@@ -53,20 +43,18 @@ export default function Pricing() {
 
         <div className="grid gap-8 md:grid-cols-3">
           {pricing.tiers.map((tier, index) => {
-            const { from, to } = getGradientColors(index);
             return (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
+                className=""
               >
-                <Card
-                  className={cn(
-                    "group p-6 rounded-xl shadow-sm h-full relative overflow-hidden transition-all duration-300 hover:shadow-lg",
-                    tier.highlight ? "border-2 border-primary" : ""
-                  )}
-                >
+                <Card className={cn(
+                  "group p-6 rounded-xl shadow-sm h-full relative overflow-hidden transition-all duration-300 hover:shadow-lg bg-card",
+                  tier.highlight ? "border-2 border-transparent" : ""
+                )}>
                   {tier.highlight && (
                     <span className="absolute top-3 right-3 bg-gradient-to-r from-primary to-secondary text-white px-4 py-1.5 rounded-full text-sm font-medium shadow-lg z-10">
                       Most Popular
@@ -103,20 +91,23 @@ export default function Pricing() {
                       </ul>
                     </div>
                   </div>
-
-                  <BorderBeam
-                    duration={6}
-                    size={300}
-                    colorFrom={from}
-                    colorTo={to}
-                  />
-                  <BorderBeam
-                    duration={6}
-                    delay={3}
-                    size={300}
-                    colorFrom={to}
-                    colorTo={from}
-                  />
+                  {tier.highlight && (
+                    <>
+                      <BorderBeam
+                        duration={12}
+                        size={300}
+                        colorFrom="#3b82f6"
+                        colorTo="#10b981"
+                      />
+                      <BorderBeam
+                        duration={12}
+                        delay={6}
+                        size={300}
+                        colorFrom="#10b981"
+                        colorTo="#3b82f6"
+                      />
+                    </>
+                  )}
                 </Card>
               </motion.div>
             );
