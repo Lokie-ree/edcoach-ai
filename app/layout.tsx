@@ -15,6 +15,7 @@ const oswald = Oswald({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://edcoachai.org'),
   // Core SEO metadata
   title: {
     default: "EdCoachAi - AI-Powered Instructional Coaching Platform",
@@ -134,19 +135,6 @@ export const metadata: Metadata = {
   // Manifest for PWA capabilities
   manifest: "/manifest.json",
   
-  // Theme color for mobile browsers
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
-  ],
-  
-  // Viewport configuration
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
   
   // Additional metadata for better SEO
   category: "education",
@@ -177,6 +165,17 @@ export const metadata: Metadata = {
     "msapplication-TileColor": "#000000",
     "msapplication-config": "/browserconfig.xml",
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
 };
 
 export default function RootLayout({

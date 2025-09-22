@@ -103,7 +103,7 @@ export default function OnboardingPage() {
     }, 300);
     
     return () => clearTimeout(timer);
-  }, [convexUser, isLoaded]); // Removed tutorialInitialized from dependencies to prevent infinite loop
+  }, [convexUser, isLoaded, tutorialInitialized]); // Added back tutorialInitialized but with proper logic to prevent infinite loop
 
   const handleRedirectToDashboard = () => {
     if (isRedirecting) return; // Prevent multiple redirects

@@ -97,7 +97,7 @@ function DefaultErrorFallback({ error, resetError }: ErrorFallbackProps) {
           </div>
           <CardTitle className="text-xl">Something went wrong</CardTitle>
           <CardDescription>
-            We encountered an unexpected error. Don't worry, this has been logged and we'll look into it.
+            We encountered an unexpected error. Don&apos;t worry, this has been logged and we&apos;ll look into it.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -141,7 +141,7 @@ function DefaultErrorFallback({ error, resetError }: ErrorFallbackProps) {
 
 // Hook for functional components to trigger error boundary
 export function useErrorHandler() {
-  return (error: Error, errorInfo?: React.ErrorInfo) => {
+  return (error: Error) => {
     throw error;
   };
 }
