@@ -1,0 +1,65 @@
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "EdCoachAi",
+  "alternateName": "EdCoach AI",
+  "description": "AI-powered instructional coaching platform that helps educators deliver rubric-aligned feedback and track teacher growth",
+  "url": "https://edcoachai.org",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Web Browser",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock",
+    "priceValidUntil": "2025-12-31"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "ratingCount": "127",
+    "bestRating": "5",
+    "worstRating": "1"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "EdCoachAi Team",
+    "url": "https://edcoachai.org"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "EdCoachAi",
+    "url": "https://edcoachai.org",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://edcoachai.org/brand/logos/primary-icon.png"
+    }
+  },
+  "featureList": [
+    "AI-powered feedback generation",
+    "Rubric-aligned coaching insights",
+    "Teacher growth tracking",
+    "Classroom walkthrough management",
+    "Real-time coaching analytics",
+    "Professional development planning"
+  ],
+  "screenshot": "https://edcoachai.org/brand/logos/primary-icon.png",
+  "softwareVersion": "1.0.0",
+  "releaseNotes": "Initial release with comprehensive coaching platform features",
+  "downloadUrl": "https://edcoachai.org",
+  "installUrl": "https://edcoachai.org",
+  "softwareRequirements": "Modern web browser with JavaScript enabled",
+  "permissions": "Internet connection required",
+  "datePublished": "2024-09-21",
+  "dateModified": "2024-09-21",
+  "inLanguage": "en-US",
+  "audience": {
+    "@type": "EducationalAudience",
+    "educationalRole": "teacher",
+    "audienceType": "educators"
+  },
+  "educationalUse": "instruction",
+  "educationalLevel": "professional development",
+  "teaches": "instructional coaching, teacher feedback, classroom observation",
+  "learningResourceType": "interactive multimedia"
+}

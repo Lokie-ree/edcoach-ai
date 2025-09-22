@@ -81,8 +81,8 @@ export default function OnboardingPage() {
 
   // Determine initial step based on user state
   useEffect(() => {
-    if (!convexUser || !isLoaded || completingOnboarding || tutorialInitialized) return;
-    if (convexUser.onboardingComplete) return;
+    if (!convexUser || !isLoaded || convexUser.onboardingComplete) return;
+    if (tutorialInitialized) return;
     
     console.log("Initializing tutorial for user:", convexUser.role);
     
@@ -103,7 +103,7 @@ export default function OnboardingPage() {
     }, 300);
     
     return () => clearTimeout(timer);
-  }, [convexUser, isLoaded, completingOnboarding, tutorialInitialized]);
+  }, [convexUser, isLoaded, tutorialInitialized]); // Added back tutorialInitialized but with proper logic to prevent infinite loop
 
   const handleRedirectToDashboard = () => {
     if (isRedirecting) return; // Prevent multiple redirects

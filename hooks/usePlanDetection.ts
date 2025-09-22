@@ -1,6 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 
+// Only log in development environment
+const isDevelopment = process.env.NODE_ENV === 'development';
+const log = (...args: any[]) => {
+  if (isDevelopment) {
+    console.log(...args);
+  }
+};
+
 interface PlanDetectionResult {
   isProPlan: boolean;
   isStarterPlan: boolean;
@@ -40,7 +48,7 @@ export function usePlanDetection(): PlanDetectionResult {
 
   const detectPlan = useCallback(() => {
     const checkUserMetadata = () => {
-      console.log("👤 Checking user metadata for personal billing...");
+      log("👤 Checking user metadata for personal billing...");
       if (!user) {
         return {
           success: false,
@@ -72,7 +80,7 @@ export function usePlanDetection(): PlanDetectionResult {
         );
       }
       const validSubscriptions = subscriptionSources.filter(Boolean);
-      console.log("📋 Found subscription data:", validSubscriptions);
+      log("📋 Found subscription data:", validSubscriptions);
 
       const isProPlan = validSubscriptions.some(
         (sub) =>
@@ -101,7 +109,7 @@ export function usePlanDetection(): PlanDetectionResult {
     };
 
     const checkClerkHas = () => {
-      console.log("🔐 Checking Clerk has() for personal billing...");
+      log("🔐 Checking Clerk has() for personal billing...");
       if (!has) {
         return {
           success: false,
@@ -134,7 +142,7 @@ export function usePlanDetection(): PlanDetectionResult {
           checks[`permission:${planName}`] = permissionCheck;
           checks[`role:${planName}`] = roleCheck;
           if (planCheck || permissionCheck || roleCheck) {
-            console.log(`✅ Found subscription via has(): ${planName}`);
+            log(`✅ Found subscription via has(): ${planName}`);
             if (planName.toLowerCase().includes("pro")) {
               foundProPlan = true;
             } else if (planName.toLowerCase().includes("starter")) {
@@ -142,7 +150,9 @@ export function usePlanDetection(): PlanDetectionResult {
             }
           }
         } catch (error) {
-          console.warn(`has() check failed for ${planName}:`, error);
+          if (isDevelopment) {
+            console.warn(`has() check failed for ${planName}:`, error);
+          }
         }
       }
       const hasAnyPlan = Object.values(checks).some(Boolean);
@@ -155,7 +165,7 @@ export function usePlanDetection(): PlanDetectionResult {
     };
 
     try {
-      console.log("🔍 SIMPLIFIED Plan Detection: Personal billing only...");
+      log("🔍 SIMPLIFIED Plan Detection: Personal billing only...");
       // METHOD 1: Check user metadata (most reliable for personal billing)
       const userMetadataResult = checkUserMetadata();
       // METHOD 2: Try Clerk has() calls (may work for personal billing)
@@ -163,7 +173,7 @@ export function usePlanDetection(): PlanDetectionResult {
       // Determine final result (prioritize user metadata)
       let finalResult: PlanDetectionResult;
       if (userMetadataResult.success) {
-        console.log("✅ Using user metadata for plan detection");
+        log("✅ Using user metadata for plan detection");
         finalResult = {
           isProPlan: userMetadataResult.isProPlan,
           isStarterPlan: userMetadataResult.isStarterPlan,
@@ -179,7 +189,7 @@ export function usePlanDetection(): PlanDetectionResult {
           },
         };
       } else if (clerkHasResult.success) {
-        console.log("✅ Using Clerk has() for plan detection");
+        log("✅ Using Clerk has() for plan detection");
         finalResult = {
           isProPlan: clerkHasResult.isProPlan,
           isStarterPlan: clerkHasResult.isStarterPlan,
@@ -195,7 +205,7 @@ export function usePlanDetection(): PlanDetectionResult {
           },
         };
       } else {
-        console.log("⚠️ No plan detected, defaulting to Free plan");
+        log("⚠️ No plan detected, defaulting to Free plan");
         finalResult = {
           isProPlan: false,
           isStarterPlan: false,
@@ -210,7 +220,7 @@ export function usePlanDetection(): PlanDetectionResult {
           },
         };
       }
-      console.log("🎯 SIMPLIFIED Plan Detection Result:", {
+      log("🎯 SIMPLIFIED Plan Detection Result:", {
         isProPlan: finalResult.isProPlan,
         method: finalResult.planDetectionMethod,
         userMetadata: userMetadataResult.metadata,
@@ -218,7 +228,9 @@ export function usePlanDetection(): PlanDetectionResult {
       });
       setResult(finalResult);
     } catch (error) {
-      console.error("❌ Plan Detection Error:", error);
+      if (isDevelopment) {
+        console.error("❌ Plan Detection Error:", error);
+      }
       setResult((prev) => ({
         ...prev,
         isLoading: false,
