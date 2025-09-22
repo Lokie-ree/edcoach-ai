@@ -1,0 +1,209 @@
+name: EdCoach AI Test Suite
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  # Unit and Integration Tests
+  unit-integration-tests:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+        
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        
+    - name: Install dependencies
+      run: pnpm install
+      
+    - name: Run TypeScript check
+      run: npx tsc --noEmit
+      
+    - name: Run ESLint
+      run: pnpm lint
+      
+    - name: Run Unit Tests
+      run: pnpm test:unit
+      
+    - name: Run Integration Tests
+      run: pnpm test:integration
+      
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./testing/reports/coverage/lcov.info
+        flags: unit-integration
+        name: unit-integration-coverage
+
+  # End-to-End Tests
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+        
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        
+    - name: Install dependencies
+      run: pnpm install
+      
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps
+      
+    - name: Build application
+      run: pnpm build
+      
+    - name: Run E2E Tests
+      run: pnpm test:e2e
+      
+    - name: Upload E2E test results
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: playwright-report
+        path: testing/reports/test-results/
+        retention-days: 30
+
+  # Performance Tests
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+        
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        
+    - name: Install dependencies
+      run: pnpm install
+      
+    - name: Run Performance Tests
+      run: pnpm test:performance
+      
+    - name: Upload performance reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-reports
+        path: testing/reports/performance/
+        retention-days: 30
+
+  # User Story Validation
+  user-story-tests:
+    name: User Story Validation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        user-story: [US-001, US-002, US-003, US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-011, US-012, US-013, US-014, US-015, US-016, US-017, US-018, US-019, US-020]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+        
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        
+    - name: Install dependencies
+      run: pnpm install
+      
+    - name: Run User Story Test
+      run: pnpm test:${{ matrix.user-story }}
+
+  # Phase-based Testing
+  phase-tests:
+    name: Phase-based Testing
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        phase: ['Set Goal', 'Capture Evidence', 'Generate Feedback', 'Reflect', 'Monitor Growth', 'Cross-Phase Integration', 'Platform Foundation']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+        
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        
+    - name: Install dependencies
+      run: pnpm install
+      
+    - name: Run Phase Tests
+      run: pnpm test:phase-${{ matrix.phase }}
+
+  # Test Summary
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [unit-integration-tests, e2e-tests, performance-tests, user-story-tests, phase-tests]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Generate Test Summary
+      run: |
+        echo "## 🧪 EdCoach AI Test Suite Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Test Categories:" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Unit & Integration Tests: ${{ needs.unit-integration-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ E2E Tests: ${{ needs.e2e-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Performance Tests: ${{ needs.performance-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ User Story Tests: ${{ needs.user-story-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Phase Tests: ${{ needs.phase-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Coverage Reports:" >> $GITHUB_STEP_SUMMARY
+        echo "- Unit & Integration: Available in artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "- E2E: Available in artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "- Performance: Available in artifacts" >> $GITHUB_STEP_SUMMARY
