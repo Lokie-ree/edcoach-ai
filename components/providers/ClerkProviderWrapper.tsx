@@ -3,19 +3,20 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { ReactNode } from "react";
-import { hasValidClerkKeys, isBuildTime } from "@/lib/build-time";
+import { hasValidClerkKeys } from "@/lib/build-time";
 
 interface ClerkProviderWrapperProps {
   children: ReactNode;
 }
 
 export default function ClerkProviderWrapper({ children }: ClerkProviderWrapperProps) {
-  // If we're in build time without valid keys, skip Clerk entirely
-  if (isBuildTime()) {
-    return <>{children}</>;
-  }
+  // Always provide ClerkProvider, using placeholder key during build if needed
+  // This ensures useUser hooks have the required context during static generation
+  const publishableKey = hasValidClerkKeys() 
+    ? process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!
+    : 'pk_test_Y2xlcmsuY2xlcmsuZGV2JA'; // Base64 placeholder that won't work but satisfies format
 
-  // Runtime error for missing keys
+  // Runtime error for missing keys (only show in browser, not during build)
   if (!hasValidClerkKeys() && typeof window !== 'undefined') {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -29,10 +30,10 @@ export default function ClerkProviderWrapper({ children }: ClerkProviderWrapperP
     );
   }
 
-  // Normal operation with valid keys
+  // Always render ClerkProvider to maintain context for hooks
   return (
     <ClerkProvider
-      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}
+      publishableKey={publishableKey}
       appearance={{
         cssLayerName: 'clerk',
         baseTheme: dark,
