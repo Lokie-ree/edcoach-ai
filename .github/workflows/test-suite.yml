@@ -22,8 +22,10 @@ jobs:
       with:
         node-version: '18'
         
-    - name: Install pnpm
-      run: npm install -g pnpm@8
+    - name: Install pnpm and tsx
+      run: |
+        npm install -g pnpm@8
+        npm install -g tsx@4.16.2
       
     - name: Setup pnpm cache
       run: pnpm config set store-dir ~/.pnpm-store
@@ -41,8 +43,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
           
-    - name: Verify pnpm installation
-      run: pnpm --version
+    - name: Verify installations
+      run: |
+        pnpm --version
+        tsx --version
       
     - name: Install dependencies
       run: pnpm install
@@ -55,6 +59,9 @@ jobs:
       
     - name: Build application
       run: pnpm build
+      env:
+        CONVEX_DEPLOYMENT: test
+        CONVEX_URL: https://test.convex.cloud
       
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -77,8 +84,10 @@ jobs:
       with:
         node-version: '18'
         
-    - name: Install pnpm
-      run: npm install -g pnpm@8
+    - name: Install pnpm and tsx
+      run: |
+        npm install -g pnpm@8
+        npm install -g tsx@4.16.2
       
     - name: Setup pnpm cache
       run: pnpm config set store-dir ~/.pnpm-store
@@ -96,8 +105,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
           
-    - name: Verify pnpm installation
-      run: pnpm --version
+    - name: Verify installations
+      run: |
+        pnpm --version
+        tsx --version
       
     - name: Install dependencies
       run: pnpm install
@@ -106,6 +117,8 @@ jobs:
       run: pnpm test:ci --category unit
       env:
         NODE_ENV: test
+        CONVEX_DEPLOYMENT: test
+        CONVEX_URL: https://test.convex.cloud
       
     - name: Upload test results
       uses: actions/upload-artifact@v4
@@ -129,8 +142,10 @@ jobs:
       with:
         node-version: '18'
         
-    - name: Install pnpm
-      run: npm install -g pnpm@8
+    - name: Install pnpm and tsx
+      run: |
+        npm install -g pnpm@8
+        npm install -g tsx@4.16.2
       
     - name: Setup pnpm cache
       run: pnpm config set store-dir ~/.pnpm-store
@@ -148,8 +163,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
           
-    - name: Verify pnpm installation
-      run: pnpm --version
+    - name: Verify installations
+      run: |
+        pnpm --version
+        tsx --version
       
     - name: Install dependencies
       run: pnpm install
@@ -159,11 +176,16 @@ jobs:
       
     - name: Build application
       run: pnpm build
+      env:
+        CONVEX_DEPLOYMENT: test
+        CONVEX_URL: https://test.convex.cloud
       
     - name: Run E2E Tests
       run: pnpm test:ci --category e2e
       env:
         NODE_ENV: test
+        CONVEX_DEPLOYMENT: test
+        CONVEX_URL: https://test.convex.cloud
       
     - name: Upload E2E test results
       uses: actions/upload-artifact@v4

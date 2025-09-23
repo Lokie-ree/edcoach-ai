@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import { Oswald } from "next/font/google";
 import "./globals.css";
 import ConvexClientProvider from "@/components/providers/ConvexClientProvider";
-import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/common/theme-provider";
 import { Toaster } from "sonner";
-import { dark } from "@clerk/themes";
 import { AppLayout } from "@/components/layout/AppLayout";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
+import ClerkProviderWrapper from "@/components/providers/ClerkProviderWrapper";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -184,12 +183,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider
-      appearance={{
-        cssLayerName: 'clerk',
-        baseTheme: dark,
-      }}
-    >
+    <ClerkProviderWrapper>
       <html lang="en" suppressHydrationWarning>
         <head>
           {/* Structured Data for SEO */}
@@ -279,6 +273,6 @@ export default function RootLayout({
           </ErrorBoundary>
         </body>
       </html>
-    </ClerkProvider>
+    </ClerkProviderWrapper>
   );
 }
