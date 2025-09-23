@@ -3,40 +3,36 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { ReactNode } from "react";
+import { hasValidClerkKeys, isBuildTime } from "@/lib/build-time";
 
 interface ClerkProviderWrapperProps {
   children: ReactNode;
 }
 
 export default function ClerkProviderWrapper({ children }: ClerkProviderWrapperProps) {
-  // Check if we're in a build environment or if Clerk keys are missing
-  const isBuildTime = typeof window === 'undefined' && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  const hasValidKeys = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && 
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
-
-  // If we're building or don't have valid keys, render children without Clerk
-  // This allows static generation to work properly in CI environments
-  if (isBuildTime || (!hasValidKeys && typeof window === 'undefined')) {
+  // If we're in build time without valid keys, skip Clerk entirely
+  if (isBuildTime()) {
     return <>{children}</>;
   }
 
-  // If we don't have valid keys at runtime, show an error
-  if (!hasValidKeys && typeof window !== 'undefined') {
+  // Runtime error for missing keys
+  if (!hasValidClerkKeys() && typeof window !== 'undefined') {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h2 className="text-xl font-semibold mb-2">Configuration Error</h2>
           <p className="text-muted-foreground">
-            Missing or invalid Clerk configuration
+            Missing or invalid Clerk configuration. Please check your environment variables.
           </p>
         </div>
       </div>
     );
   }
 
-  // Otherwise, render with Clerk provider
+  // Normal operation with valid keys
   return (
     <ClerkProvider
+      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}
       appearance={{
         cssLayerName: 'clerk',
         baseTheme: dark,
