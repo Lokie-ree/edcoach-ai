@@ -1,5 +1,8 @@
 "use client";
 
+// Force dynamic rendering to avoid prerendering issues with Clerk hooks
+export const dynamic = 'force-dynamic';
+
 import { WalkthroughWizard } from "@/app/(dashboard)/walkthrough/new/components/WalkthroughWizard";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";

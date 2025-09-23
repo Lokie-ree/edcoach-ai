@@ -1,5 +1,8 @@
 "use client";
 
+// Force dynamic rendering to avoid prerendering issues with Clerk hooks
+export const dynamic = 'force-dynamic';
+
 import {
   Users,
   BookOpen,
