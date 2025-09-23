@@ -10,13 +10,28 @@ interface ClerkProviderWrapperProps {
 
 export default function ClerkProviderWrapper({ children }: ClerkProviderWrapperProps) {
   // Check if we're in a build environment or if Clerk keys are missing
-  const isBuildTime = process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const isBuildTime = typeof window === 'undefined' && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   const hasValidKeys = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && 
     process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.startsWith('pk_');
 
   // If we're building or don't have valid keys, render children without Clerk
-  if (isBuildTime || !hasValidKeys) {
+  // This allows static generation to work properly in CI environments
+  if (isBuildTime || (!hasValidKeys && typeof window === 'undefined')) {
     return <>{children}</>;
+  }
+
+  // If we don't have valid keys at runtime, show an error
+  if (!hasValidKeys && typeof window !== 'undefined') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Configuration Error</h2>
+          <p className="text-muted-foreground">
+            Missing or invalid Clerk configuration
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Otherwise, render with Clerk provider

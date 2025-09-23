@@ -1,33 +1,30 @@
 "use client";
 
-// Force dynamic rendering to avoid prerendering issues with Clerk
-export const dynamic = 'force-dynamic';
-
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { PricingTable } from "@clerk/nextjs";
 
-export default function CoachLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function BillingContent() {
   const { user, isLoaded } = useUser();
   const currentUser = useQuery(api.users.current);
   const router = useRouter();
 
   useEffect(() => {
     if (isLoaded && user && currentUser) {
-      // Check if user is a coach
+      // Only coaches can access billing
       if (currentUser.role !== "coach") {
-        // Redirect to appropriate page based on role
-        if (currentUser.role === "teacher") {
-          router.push("/growth-journal");
-        } else {
-          router.push("/dashboard");
-        }
+        router.push("/dashboard");
       }
     }
   }, [isLoaded, user, currentUser, router]);
@@ -50,5 +47,28 @@ export default function CoachLayout({
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {/* Clerk Pricing Table */}
+      <div className="flex">
+        <div className="w-full max-w-4xl">
+          <PricingTable />
+        </div>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Need Help?</CardTitle>
+          <CardDescription>Questions about plans or billing</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Have questions about which plan is right for you? We&apos;re here
+            to help you choose the best option for your coaching needs.
+          </p>
+          <Button variant="outline">Contact Support</Button>
+        </CardContent>
+      </Card>
+    </>
+  );
 }
