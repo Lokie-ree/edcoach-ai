@@ -39,5 +39,12 @@ export default defineConfig({
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    env: {
+      // Provide environment variables for E2E test server
+      CI: 'true',
+      NODE_ENV: 'test',
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'pk_test_Y2ktdGVzdC1lbnZpcm9ubWVudC5jbGVyay5hY2NvdW50cy5kZXYk',
+      NEXT_PUBLIC_CONVEX_URL: 'https://placeholder-for-e2e.convex.cloud',
+    },
   },
 });

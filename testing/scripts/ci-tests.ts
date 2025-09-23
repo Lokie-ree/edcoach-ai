@@ -132,6 +132,10 @@ class CITestRunner {
         env: { 
           ...process.env, 
           NODE_ENV: 'test',
+          CI: 'true',
+          // Provide placeholder environment variables for testing
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'pk_test_Y2ktdGVzdC1lbnZpcm9ubWVudC5jbGVyay5hY2NvdW50cy5kZXYk',
+          NEXT_PUBLIC_CONVEX_URL: 'https://placeholder-for-ci.convex.cloud',
           // Mock Convex environment variables
           CONVEX_DEPLOYMENT: 'test',
           CONVEX_URL: 'https://test.convex.cloud',

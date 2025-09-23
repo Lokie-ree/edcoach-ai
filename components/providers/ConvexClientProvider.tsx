@@ -18,8 +18,13 @@ children,
 }: {
   children: ReactNode;
 }) {
-  // Runtime check for missing environment variable
-  if (typeof window !== 'undefined' && !convexUrl) {
+  // Check if we're in a testing environment
+  const isTestEnvironment = process.env.NODE_ENV === 'test' || 
+                            process.env.CI === 'true' ||
+                            convexUrl?.includes('placeholder');
+
+  // Runtime check for missing environment variable (but not during testing)
+  if (typeof window !== 'undefined' && !convexUrl && !isTestEnvironment) {
     console.error("Missing NEXT_PUBLIC_CONVEX_URL in your .env file");
     return (
       <div className="flex items-center justify-center min-h-screen">
