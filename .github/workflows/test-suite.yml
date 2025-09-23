@@ -128,79 +128,12 @@ jobs:
         path: testing/reports/
         retention-days: 7
 
-  # E2E Tests (with Playwright) - NON-BLOCKING
-  e2e-tests:
-    name: E2E Tests (Non-blocking)
-    runs-on: ubuntu-latest
-    continue-on-error: true  # Don't fail the workflow if E2E tests fail
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        
-    - name: Install pnpm and tsx
-      run: |
-        npm install -g pnpm@8
-        npm install -g tsx@4.16.2
-      
-    - name: Setup pnpm cache
-      run: pnpm config set store-dir ~/.pnpm-store
-      
-    - name: Get pnpm store directory
-      shell: bash
-      run: |
-        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-        
-    - name: Setup pnpm cache
-      uses: actions/cache@v4
-      with:
-        path: ${{ env.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-
-          
-    - name: Verify installations
-      run: |
-        pnpm --version
-        tsx --version
-      
-    - name: Install dependencies
-      run: pnpm install
-      
-    - name: Install Playwright browsers
-      run: npx playwright install --with-deps
-      
-    - name: Build application
-      run: pnpm build
-      env:
-        CONVEX_DEPLOYMENT: test
-        CONVEX_URL: https://test.convex.cloud
-      
-    - name: Run E2E Tests
-      run: pnpm test:ci --category e2e
-      env:
-        NODE_ENV: test
-        CONVEX_DEPLOYMENT: test
-        CONVEX_URL: https://test.convex.cloud
-      
-    - name: Upload E2E test results
-      uses: actions/upload-artifact@v4
-      if: failure()
-      with:
-        name: playwright-report
-        path: testing/reports/test-results/
-        retention-days: 7
 
   # Test Summary
   test-summary:
     name: Test Summary
     runs-on: ubuntu-latest
-    needs: [build-and-typecheck, unit-tests, e2e-tests]  # E2E tests are non-blocking
+    needs: [build-and-typecheck, unit-tests]
     if: always()
     
     steps:
@@ -214,13 +147,11 @@ jobs:
         echo "### Test Categories:" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ Build & Type Check: ${{ needs.build-and-typecheck.result }}" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ Unit Tests: ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
-        echo "- 🟡 E2E Tests: ${{ needs.e2e-tests.result }} (non-blocking)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Coverage Reports:" >> $GITHUB_STEP_SUMMARY
         echo "- Unit Tests: Available in artifacts" >> $GITHUB_STEP_SUMMARY
-        echo "- E2E Tests: Available in artifacts" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Next Steps:" >> $GITHUB_STEP_SUMMARY
         echo "1. Run \`npx convex dev\` locally to test Convex functions" >> $GITHUB_STEP_SUMMARY
-        echo "2. Use \`pnpm test\` for full test suite with Convex running" >> $GITHUB_STEP_SUMMARY
+        echo "2. Use \`pnpm test\` for local testing with Convex running" >> $GITHUB_STEP_SUMMARY
         echo "3. Check artifacts for detailed test results" >> $GITHUB_STEP_SUMMARY

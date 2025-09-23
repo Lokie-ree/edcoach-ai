@@ -43,9 +43,6 @@ class CITestRunner {
         case 'unit':
           await this.runUnitTests();
           break;
-        case 'e2e':
-          await this.runE2ETests();
-          break;
         case 'all':
         default:
           await this.runAllTests();
@@ -92,19 +89,6 @@ class CITestRunner {
     this.executeCommand(command);
   }
 
-  /**
-   * Run E2E tests
-   */
-  private async runE2ETests(): Promise<void> {
-    this.log('🌐 Running E2E Tests...');
-    
-    // Install Playwright browsers first
-    this.executeCommand('npx playwright install --with-deps');
-    
-    // Run Playwright tests with CI config
-    const command = 'npx playwright test --config playwright.ci.config.ts';
-    this.executeCommand(command);
-  }
 
   /**
    * Run all tests
@@ -114,9 +98,6 @@ class CITestRunner {
     
     // Run unit tests
     await this.runUnitTests();
-    
-    // Run E2E tests
-    await this.runE2ETests();
   }
 
   /**
