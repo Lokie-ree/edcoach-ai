@@ -44,7 +44,9 @@ export default defineConfig({
       CI: 'true',
       NODE_ENV: 'test',
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'pk_test_Y2ktdGVzdC1lbnZpcm9ubWVudC5jbGVyay5hY2NvdW50cy5kZXYk',
+      CLERK_SECRET_KEY: 'sk_test_placeholder_for_e2e_testing_environment_only',
       NEXT_PUBLIC_CONVEX_URL: 'https://placeholder-for-e2e.convex.cloud',
+      CONVEX_DEPLOYMENT: 'placeholder-e2e-deployment',
     },
   },
 });

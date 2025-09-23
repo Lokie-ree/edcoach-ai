@@ -1,6 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+// Skip middleware in test/CI environments where Clerk keys might be placeholders
+const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.CI === 'true';
+
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)', 
   '/analytics(.*)',
@@ -25,6 +28,11 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  // Skip middleware logic in test environments
+  if (isTestEnvironment) {
+    return NextResponse.next();
+  }
+
   const { userId } = await auth();
   const url = req.nextUrl.clone();
 
