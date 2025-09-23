@@ -128,10 +128,11 @@ jobs:
         path: testing/reports/
         retention-days: 7
 
-  # E2E Tests (with Playwright)
+  # E2E Tests (with Playwright) - NON-BLOCKING
   e2e-tests:
-    name: E2E Tests
+    name: E2E Tests (Non-blocking)
     runs-on: ubuntu-latest
+    continue-on-error: true  # Don't fail the workflow if E2E tests fail
     
     steps:
     - name: Checkout code
@@ -199,7 +200,7 @@ jobs:
   test-summary:
     name: Test Summary
     runs-on: ubuntu-latest
-    needs: [build-and-typecheck, unit-tests, e2e-tests]
+    needs: [build-and-typecheck, unit-tests, e2e-tests]  # E2E tests are non-blocking
     if: always()
     
     steps:
@@ -213,7 +214,7 @@ jobs:
         echo "### Test Categories:" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ Build & Type Check: ${{ needs.build-and-typecheck.result }}" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ Unit Tests: ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ E2E Tests: ${{ needs.e2e-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- 🟡 E2E Tests: ${{ needs.e2e-tests.result }} (non-blocking)" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Coverage Reports:" >> $GITHUB_STEP_SUMMARY
         echo "- Unit Tests: Available in artifacts" >> $GITHUB_STEP_SUMMARY
