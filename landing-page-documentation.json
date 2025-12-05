@@ -1,0 +1,531 @@
+{
+  "landing_page_overview": {
+    "title": "EdCoachAi Landing Page Documentation",
+    "description": "Complete documentation of all landing page components and content from the marketing section",
+    "generated_at": "2025-10-06",
+    "version": "1.0.0"
+  },
+  "page_structure": {
+    "layout_file": "app/(marketing)/layout.tsx",
+    "main_page": "app/page.tsx",
+    "content_data": "data/landing-content.json",
+    "components_directory": "app/(marketing)/components/",
+    "component_count": 8,
+    "sections": [
+      "Hero",
+      "Features", 
+      "How It Works",
+      "Pricing",
+      "Testimonials",
+      "FAQ",
+      "CTA",
+      "Footer"
+    ]
+  },
+  "metadata": {
+    "title": "EdCoachAi - AI-Powered Instructional Coaching Platform",
+    "description": "Transform instructional coaching with EdCoachAi's AI-powered platform. Deliver rubric-aligned feedback, track teacher growth, and improve classroom effectiveness with real-time coaching insights. Join thousands of educators improving teaching quality.",
+    "url": "https://edcoachai.org",
+    "keywords": [
+      "instructional coaching software",
+      "AI coaching platform", 
+      "teacher feedback system",
+      "classroom observation tools",
+      "education technology",
+      "teaching improvement platform",
+      "rubric-aligned feedback",
+      "coaching management system",
+      "teacher professional development",
+      "educational assessment tools",
+      "instructional leadership platform",
+      "school improvement technology",
+      "coaching platform for educators",
+      "teacher evaluation software",
+      "classroom walkthrough tools"
+    ],
+    "open_graph": {
+      "type": "website",
+      "locale": "en_US",
+      "title": "EdCoachAi - Transform Your Instructional Coaching",
+      "description": "Stop spending more time on paperwork than actual coaching. Deliver better feedback faster with AI-powered insights tailored to your teaching standards.",
+      "site_name": "EdCoachAi",
+      "image": {
+        "url": "/brand/logos/primary-icon.png",
+        "width": 1200,
+        "height": 630,
+        "alt": "EdCoachAi - AI-Powered Instructional Coaching Platform"
+      }
+    },
+    "twitter": {
+      "card": "summary_large_image",
+      "site": "@edcoachai",
+      "creator": "@edcoachai",
+      "title": "EdCoachAi - AI-Powered Instructional Coaching",
+      "description": "Transform your coaching with AI-powered insights. Deliver better feedback faster and improve teacher effectiveness.",
+      "image": "/brand/logos/primary-icon.png"
+    }
+  },
+  "components": {
+    "hero": {
+      "file": "app/(marketing)/components/Hero.tsx",
+      "type": "React Functional Component",
+      "client_side": true,
+      "dependencies": [
+        "framer-motion",
+        "@clerk/nextjs",
+        "lucide-react",
+        "@/components/ui/button",
+        "@/components/ui/container",
+        "@/components/common/Logo",
+        "@/components/magicui/border-beam",
+        "@/data/landing-content.json"
+      ],
+      "features": [
+        "Animated particle background canvas",
+        "Gradient text effects",
+        "Interactive demo card with 5-phase growth loop",
+        "Smooth scroll animations",
+        "Responsive design",
+        "Border beam animations",
+        "Social proof indicators"
+      ],
+      "content": {
+        "tagline": "Louisiana Educator Rubric Native",
+        "headline": "Stop Spending More Time on Paperwork Than Actual Coaching",
+        "sub_headline": "Turn 5-minute observations into game-changing teacher growth. The only AI-powered platform built specifically for the continuous growth loop methodology—transforming classroom walkthroughs from episodic events into ongoing, supportive professional development.",
+        "cta_primary": {
+          "label": "Start Free Trial - No Credit Card",
+          "href": "/signup"
+        },
+        "cta_secondary": {
+          "label": "See How It Works", 
+          "href": "#how-it-works"
+        },
+        "social_proof": "Coaches complete walkthroughs 75% faster with 90% teacher engagement"
+      },
+      "interactive_elements": {
+        "particle_animation": "30 floating particles with blue gradient",
+        "growth_loop_demo": "5-phase visual representation (Goal, Capture, Generate, Reflect, Monitor)",
+        "stats_display": "90% time saved, 5x faster documentation",
+        "scroll_indicator": "Animated chevron down icon"
+      }
+    },
+    "features": {
+      "file": "app/(marketing)/components/Features.tsx",
+      "type": "React Functional Component", 
+      "client_side": true,
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "@/components/ui/card",
+        "@/components/ui/container",
+        "@/lib/design-tokens",
+        "@/data/landing-content.json"
+      ],
+      "features": [
+        "Grid layout with responsive design",
+        "Icon mapping system",
+        "Staggered animations",
+        "Gradient text headings",
+        "Status color theming"
+      ],
+      "content": {
+        "headline": "The Complete Continuous Growth Loop System",
+        "cards": [
+          {
+            "icon": "Target",
+            "title": "AI-Assisted PGP Goal Setting",
+            "description": "Set clear, year-long Professional Growth Plan goals with AI-powered SMART goal generation. Every walkthrough connects to long-term teacher development."
+          },
+          {
+            "icon": "Clock", 
+            "title": "5-Minute Mobile Walkthroughs",
+            "description": "iPad-optimized forms let you capture evidence in under 5 minutes—75% faster than traditional systems. Focus on teaching, not paperwork."
+          },
+          {
+            "icon": "BotMessageSquare",
+            "title": "Hyper-Contextualized AI Feedback", 
+            "description": "AI understands each teacher's PGP goal, rubric indicators, and observation evidence to generate truly personalized, actionable feedback."
+          },
+          {
+            "icon": "MessageSquareShare",
+            "title": "Teacher Growth Journal",
+            "description": "Teachers actively engage with feedback through guided reflection prompts. They own their growth journey instead of passively receiving evaluations."
+          },
+          {
+            "icon": "BarChart3",
+            "title": "Real-Time Growth Monitoring",
+            "description": "Coach command center shows priority teachers needing walkthroughs. Teachers see their progress timeline. Both track measurable improvement over time."
+          }
+        ]
+      }
+    },
+    "how_it_works": {
+      "file": "app/(marketing)/components/HowItWorks.tsx",
+      "type": "React Functional Component",
+      "client_side": true,
+      "dependencies": [
+        "framer-motion",
+        "lucide-react", 
+        "@/components/ui/card",
+        "@/components/ui/container",
+        "@/lib/design-tokens",
+        "@/data/landing-content.json"
+      ],
+      "features": [
+        "3-column responsive grid",
+        "Icon mapping system",
+        "Staggered entrance animations",
+        "Status color theming",
+        "Gradient text headings"
+      ],
+      "content": {
+        "headline": "The 5-Phase Continuous Growth Loop",
+        "steps": [
+          {
+            "id": 1,
+            "icon": "Target",
+            "title": "1. Set Goal",
+            "description": "Start with AI-assisted PGP goal setting. Select LER indicators, add context, and generate SMART goals that guide all future coaching interactions."
+          },
+          {
+            "id": 2,
+            "icon": "Eye", 
+            "title": "2. Capture Evidence",
+            "description": "Conduct 5-minute iPad walkthroughs. Choose reinforcement and refinement indicators, capture evidence—all optimized for mobile coaching workflows."
+          },
+          {
+            "id": 3,
+            "icon": "Sparkles",
+            "title": "3. Generate Feedback", 
+            "description": "AI aggregates PGP goal + rubric language + evidence to create hyper-contextualized feedback. Edit and send in seconds, not hours."
+          },
+          {
+            "id": 4,
+            "icon": "MessageSquareShare",
+            "title": "4. Reflect",
+            "description": "Teachers receive feedback in their private Growth Journal with guided prompts. They engage actively, taking ownership of their development."
+          },
+          {
+            "id": 5,
+            "icon": "TrendingUp",
+            "title": "5. Monitor Growth",
+            "description": "Both coach and teacher dashboards show progress over time. Celebrate improvements, identify next steps, and maintain the continuous loop."
+          }
+        ]
+      }
+    },
+    "pricing": {
+      "file": "app/(marketing)/components/pricing.tsx",
+      "type": "React Functional Component",
+      "client_side": false,
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "@/components/ui/card",
+        "@/components/ui/container", 
+        "@/components/magicui/border-beam",
+        "@/lib/design-tokens",
+        "@/data/landing-content.json"
+      ],
+      "features": [
+        "4-tier pricing grid",
+        "Highlighted popular plan",
+        "Border beam animations for featured plan",
+        "Decorative background elements",
+        "Gradient text headings",
+        "Feature comparison lists"
+      ],
+      "content": {
+        "headline": "Simple, Transparent Pricing That Scales With You",
+        "sub_headline": "Start free to experience the continuous growth loop. Upgrade when you're ready to scale your coaching impact.",
+        "tiers": [
+          {
+            "name": "Coach Free",
+            "price": "Free",
+            "price_description": "Perfect for trying the complete continuous growth loop",
+            "features": [
+              "1 teacher",
+              "3 walkthroughs per month", 
+              "Complete 5-phase growth loop",
+              "AI-assisted PGP goal setting",
+              "5-minute mobile walkthroughs",
+              "Basic AI feedback",
+              "Teacher Growth Journal",
+              "Email support"
+            ],
+            "cta": {"label": "Start Free Forever", "href": "/signup"},
+            "highlight": false
+          },
+          {
+            "name": "Coach Starter",
+            "price": "$19",
+            "price_description": "per month - scale your coaching impact",
+            "features": [
+              "5 teachers",
+              "15 walkthroughs per month",
+              "Everything in Free, plus:",
+              "Enhanced AI feedback",
+              "Bulk teacher invitations", 
+              "90-day analytics",
+              "Basic team management",
+              "Improved support"
+            ],
+            "cta": {"label": "Upgrade to Starter", "href": "/signup"},
+            "highlight": false
+          },
+          {
+            "name": "Coach Pro",
+            "price": "$49",
+            "price_description": "per month - advanced analytics & unlimited scale",
+            "features": [
+              "15 teachers",
+              "50 walkthroughs per month",
+              "Everything in Starter, plus:",
+              "Team analytics with heat maps",
+              "Trend analysis & reporting",
+              "Export functionality (PDF/CSV)",
+              "Priority support (<2hr response)",
+              "Custom rubric indicators"
+            ],
+            "cta": {"label": "Upgrade to Pro", "href": "/signup"},
+            "highlight": true
+          },
+          {
+            "name": "District Enterprise",
+            "price": "$500",
+            "price_description": "per month - multi-school deployment & integrations",
+            "features": [
+              "Unlimited teachers",
+              "Unlimited walkthroughs",
+              "Multi-school management",
+              "SIS/LMS integrations",
+              "Single sign-on (SSO)",
+              "Everything in Pro, plus:",
+              "District-wide analytics",
+              "Dedicated success manager",
+              "Custom training & onboarding",
+              "Compliance reporting"
+            ],
+            "cta": {"label": "Contact Sales", "href": "/contact"},
+            "highlight": false
+          }
+        ]
+      }
+    },
+    "testimonials": {
+      "file": "app/(marketing)/components/Testimonials.tsx",
+      "type": "React Functional Component",
+      "client_side": true,
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "@/components/ui/card",
+        "@/components/ui/container",
+        "@/lib/design-tokens",
+        "@/data/landing-content.json"
+      ],
+      "features": [
+        "3-column responsive grid",
+        "Quote icon styling",
+        "Staggered animations",
+        "Decorative background elements",
+        "Gradient text headings"
+      ],
+      "content": {
+        "headline": "Coaches and Teachers Love the Continuous Growth Loop",
+        "quotes": [
+          {
+            "quote": "I can focus on relationships and growth instead of paperwork. The 5-minute walkthroughs and AI feedback save me hours every week while giving teachers exactly what they need to improve.",
+            "author": "Sarah Martinez",
+            "title": "Instructional Coach, Jefferson Parish"
+          },
+          {
+            "quote": "Finally, feedback that actually helps me grow! I can see my progress over time and the reflections help me take ownership of my development. It doesn't feel like evaluation anymore.",
+            "author": "Michael Thompson", 
+            "title": "5th Grade Teacher, Baton Rouge"
+          },
+          {
+            "quote": "The iPad interface is perfect for classroom walkthroughs. I can capture evidence quickly without disrupting instruction, and the AI suggestions are surprisingly insightful.",
+            "author": "Dr. Lisa Chen",
+            "title": "Assistant Principal, Orleans Parish"
+          }
+        ]
+      }
+    },
+    "faq": {
+      "file": "app/(marketing)/components/Faq.tsx",
+      "type": "React Functional Component",
+      "client_side": true,
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "@/components/ui/container",
+        "@/lib/design-tokens",
+        "@/data/landing-content.json"
+      ],
+      "features": [
+        "Accordion-style expandable questions",
+        "Smooth height animations",
+        "Chevron rotation on expand",
+        "Decorative background elements",
+        "Gradient text headings"
+      ],
+      "content": {
+        "headline": "Common Questions About the Continuous Growth Loop",
+        "questions": [
+          {
+            "question": "How is this different from traditional evaluation systems?",
+            "answer": "EdCoachAi transforms coaching from episodic evaluation events into ongoing, supportive professional development. Teachers actively participate in their growth instead of passively receiving judgment. We supplement—never replace—formal evaluations."
+          },
+          {
+            "question": "Will AI feedback be as good as human insight?",
+            "answer": "Our AI understands each teacher's PGP goal, rubric indicators, and observation evidence to generate hyper-contextualized feedback. Coaches edit and approve everything before sending. It's AI-assisted coaching, not AI replacement."
+          },
+          {
+            "question": "How do you ensure FERPA compliance and data security?",
+            "answer": "We're built with FERPA compliance from day one. All data is encrypted at rest and in transit, with role-based access control. Teacher reflections are private to only the teacher and their coach. We maintain SOC 2 certification standards."
+          },
+          {
+            "question": "What makes the 5-minute walkthroughs so efficient?",
+            "answer": "iPad-optimized forms focus on evidence capture, not lengthy narratives. AI handles the heavy lifting of connecting observations to PGP goals and generating feedback. Coaches spend time coaching, not writing reports."
+          },
+          {
+            "question": "How do teachers actually engage with their feedback?",
+            "answer": "Teachers receive feedback in their private Growth Journal with guided reflection prompts. They can see their progress timeline, connect feedback to their PGP goals, and take ownership of their development journey. 80% complete reflections within 48 hours."
+          },
+          {
+            "question": "Can this work with our existing rubric system?",
+            "answer": "EdCoachAi is built natively for the Louisiana Educator Rubric but can adapt to other rubric systems. Our Enterprise tier includes custom rubric indicator support for district-specific requirements."
+          }
+        ]
+      }
+    },
+    "cta": {
+      "file": "app/(marketing)/components/Cta.tsx",
+      "type": "React Functional Component",
+      "client_side": false,
+      "dependencies": [
+        "@clerk/nextjs",
+        "@/components/ui/button",
+        "@/components/ui/container",
+        "@/components/magicui/neon-gradient-card",
+        "@/components/magicui/border-beam",
+        "@/lib/design-tokens",
+        "@/data/landing-content.json"
+      ],
+      "features": [
+        "Neon gradient card background",
+        "Dual border beam animations",
+        "Gradient text headings",
+        "Clerk authentication integration"
+      ],
+      "content": {
+        "headline": "Transform Your Coaching From Paperwork to Partnership",
+        "sub_headline": "Join coaches who've reduced walkthrough time by 75% while increasing teacher engagement by 90%. Start the continuous growth loop today—no credit card required.",
+        "cta": {"label": "Start Free Forever", "href": "/signup"}
+      }
+    },
+    "footer": {
+      "file": "app/(marketing)/components/Footer.tsx",
+      "type": "React Functional Component",
+      "client_side": true,
+      "dependencies": [
+        "next/link",
+        "@/components/ui/container",
+        "@/data/landing-content.json"
+      ],
+      "features": [
+        "3-column responsive layout",
+        "Gradient text headings",
+        "Hover effects on links",
+        "Dynamic copyright year",
+        "Decorative top border"
+      ],
+      "content": {
+        "columns": [
+          {
+            "title": "Product",
+            "links": [
+              {"label": "Features", "href": "#features"},
+              {"label": "Pricing", "href": "#pricing"},
+              {"label": "Security", "href": "/security"}
+            ]
+          },
+          {
+            "title": "Resources", 
+            "links": [
+              {"label": "Support / FAQ", "href": "#faq"},
+              {"label": "Contact Us", "href": "/contact"}
+            ]
+          },
+          {
+            "title": "Legal",
+            "links": [
+              {"label": "Privacy Policy", "href": "/privacy"},
+              {"label": "Terms of Service", "href": "/terms"}
+            ]
+          }
+        ],
+        "copyright": "© 2025 EdCoachAi. All rights reserved.",
+        "tagline": "Made with love by an educator for educators"
+      }
+    }
+  },
+  "design_system": {
+    "color_scheme": {
+      "primary": "Blue gradient (#3b82f6)",
+      "secondary": "Green gradient (#10b981)", 
+      "background": "Dynamic (light/dark mode)",
+      "text": "Foreground/muted-foreground",
+      "borders": "Border with opacity variations"
+    },
+    "typography": {
+      "headings": "Gradient text with primary-to-secondary",
+      "body": "Muted foreground for descriptions",
+      "cta": "Bold with gradient backgrounds"
+    },
+    "animations": {
+      "entrance": "Framer Motion with staggered delays",
+      "interactions": "Hover effects and transforms",
+      "special": "Border beam and particle animations"
+    },
+    "layout": {
+      "container": "Responsive with size variants",
+      "grid": "CSS Grid with responsive breakpoints",
+      "spacing": "Consistent padding and margins"
+    }
+  },
+  "technical_implementation": {
+    "framework": "Next.js 14 with App Router",
+    "styling": "Tailwind CSS with custom design tokens",
+    "animations": "Framer Motion",
+    "authentication": "Clerk",
+    "database": "Convex",
+    "deployment": "Vercel (inferred)",
+    "responsive_breakpoints": ["sm", "md", "lg", "xl"],
+    "accessibility": "WCAG AA compliance",
+    "performance": "Optimized for <3 second load times"
+  },
+  "content_strategy": {
+    "target_audience": "Instructional coaches and teachers in Louisiana",
+    "value_proposition": "Transform coaching from paperwork to partnership",
+    "key_benefits": [
+      "75% faster walkthroughs",
+      "90% teacher engagement",
+      "5-minute mobile forms",
+      "AI-powered feedback",
+      "Continuous growth loop methodology"
+    ],
+    "call_to_actions": [
+      "Start Free Trial - No Credit Card",
+      "See How It Works",
+      "Start Free Forever"
+    ],
+    "social_proof": [
+      "Louisiana Educator Rubric Native",
+      "Coaches complete walkthroughs 75% faster",
+      "90% teacher engagement rate"
+    ]
+  }
+}
